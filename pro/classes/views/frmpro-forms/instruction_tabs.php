@@ -1,0 +1,1 @@
+<li class="hide-if-no-js"><a href="#frm-dynamic-values" id="frm_dynamic_values_tab" class="frm_help" title="<?php esc_attr_e( 'Click directly into the input field or open the Field Options and click on the Dynamic Default Value option to enable this tab', 'formidable' ) ?>"><?php _e( 'Default Values', 'formidable' ) ?></a></li>
