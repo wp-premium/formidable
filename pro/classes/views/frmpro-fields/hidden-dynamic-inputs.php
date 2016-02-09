@@ -1,0 +1,1 @@
+<input type="hidden" name="<?php echo esc_attr( $field_name ) ?><?php echo ( $field['data_type'] == 'checkbox' ) ? '[]' : '' ?>" id="<?php echo esc_attr( $html_id ) ?>" value="<?php echo esc_attr( $value ) ?>" <?php do_action('frm_field_input_html', $field) ?> />
