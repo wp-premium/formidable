@@ -278,19 +278,9 @@ class FrmProFormsHelper{
     public static function repeat_buttons($args, $end = false) {
         $args['end_format'] = 'icon';
 
-        if ( ! $end ) {
-            global $wpdb;
-
-            // get end field
-			$query = array( 'fi.form_id' => $args['parent_field']['form_id'], 'type' => 'end_divider', 'field_order >' => $args['parent_field']['field_order'] + 1 );
-            $end = (array) FrmField::getAll($query, 'field_order', 1);
-
-			foreach ( array( 'format', 'add_label' ,'remove_label', 'classes' ) as $o ) {
-                if ( isset($end['field_options'][$o]) ) {
-                    $end[$o] = $end['field_options'][$o];
-                }
-            }
-        }
+		if ( ! $end ) {
+			$end = self::get_end_repeat_field( $args );
+		}
 
         if ( $end ) {
             $args['add_label'] = $end['add_label'];
@@ -305,6 +295,22 @@ class FrmProFormsHelper{
 
         return apply_filters('frm_repeat_triggers', $triggers, $end, $args['parent_field'], $args['field_class']);
     }
+
+	private static function get_end_repeat_field( $args ) {
+		$query = array( 'fi.form_id' => $args['parent_field']['form_id'], 'type' => 'end_divider', 'field_order >' => $args['parent_field']['field_order'] + 1 );
+		$end_field = FrmField::getAll( $query, 'field_order', 1 );
+		$field_array = FrmProFieldsHelper::initialize_array_field( $end_field );
+
+		foreach ( array( 'format', 'add_label' ,'remove_label', 'classes' ) as $o ) {
+			if ( isset( $end_field->field_options[ $o ] ) ) {
+				$field_array[ $o ] = $end_field->field_options[ $o ];
+			}
+		}
+
+		$prepared_field = apply_filters( 'frm_setup_new_fields_vars', $field_array, $end_field );
+
+		return $prepared_field;
+	}
 
     public static function repeat_button_html($args, $end) {
         $defaults = array(
@@ -796,8 +802,6 @@ $(document.getElementById('<?php echo $datepicker ?>')).change(function(){frmFro
     }
 
     public static function has_field($type, $form_id, $single = true) {
-        global $wpdb;
-
         if ( $single ) {
             $included = FrmDb::get_var( 'frm_fields', array( 'form_id' => $form_id, 'type' => $type) );
             if ( $included ) {

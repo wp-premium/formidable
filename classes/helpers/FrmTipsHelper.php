@@ -7,7 +7,9 @@ class FrmTipsHelper {
 			return;
 		}
 
-		$tip = self::$callback();
+		$tips = self::$callback();
+		$tip = self::get_random_tip( $tips );
+
 		if ( $html == 'p' ) {
 			echo '<p>';
 		}
@@ -47,16 +49,22 @@ class FrmTipsHelper {
 				'tip'  => __( 'Cut down on back-and-forth with clients.', 'formidable' ),
 				'call' => __( 'Allow file uploads in your form.', 'formidable' ),
 			),
+			array(
+				'link' => 'https://formidablepro.com/calculations-total-tip',
+				'tip'  => __( 'Need to calculate a total?', 'formidable' ),
+				'call' => __( 'Upgrade to Pro.', 'formidable' ),
+			),
 		);
+		$tips = array_merge( $tips, self::get_form_settings_tip(), self::get_form_action_tip(), self::get_entries_tip() );
 
-		return self::get_random_tip( $tips );
+		return $tips;
 	}
 
 	public static function get_form_settings_tip() {
 		$tips = array(
 			array(
 				'link' => 'https://formidablepro.com/front-end-editing-tip',
-				'tip'  => __( 'A site with dynamic, maintainable, user-generated content is within reach.', 'formidable' ),
+				'tip'  => __( 'A site with dynamic, user-generated content is within reach.', 'formidable' ),
 				'call' => __( 'Add front-end editing.', 'formidable' ),
 			),
 			array(
@@ -65,7 +73,7 @@ class FrmTipsHelper {
 				'call' => __( 'Let logged-in users save a draft and return later.', 'formidable' ),
 			),
 		);
-		return self::get_random_tip( $tips );
+		return $tips;
 	}
 
 	public static function get_form_action_tip() {
@@ -77,32 +85,37 @@ class FrmTipsHelper {
 			),
 			array(
 				'link' => 'https://formidablepro.com/create-posts-tip',
-				'tip'  => __( 'Allow anyone to create a blog post using your form.', 'formidable' ),
+				'tip'  => __( 'Create blog posts or pages from the front-end.', 'formidable' ),
 				'call' => __( 'Upgrade to Pro.', 'formidable' ),
 			),
 			array(
-				'link' => 'https://formidablepro.com/downloads/mailchimp/',
+				'link' => 'https://formidablepro.com/front-end-posting-tip',
+				'tip'  => __( 'Make front-end posting easy.', 'formidable' ),
+				'call' => __( 'Upgrade to Pro.', 'formidable' ),
+			),
+			array(
+				'link' => 'https://formidablepro.com/mailchimp-tip',
 				'tip'  => __( 'Grow your business with automated email follow-up.', 'formidable' ),
 				'call' => __( 'Send leads straight to MailChimp.', 'formidable' ),
 			),
 			array(
-				'link' => 'https://formidablepro.com/downloads/paypal-standard/',
+				'link' => 'https://formidablepro.com/paypal-tip',
 				'tip'  => __( 'Save hours and increase revenue by collecting payments with every submission.', 'formidable' ),
 				'call' => __( 'Use PayPal with this form.', 'formidable' ),
 			),
 			array(
-				'link' => 'https://formidablepro.com/downloads/registration-lite/',
+				'link' => 'https://formidablepro.com/registration-tip',
 				'tip'  => __( 'Start building up your site membership.', 'formidable' ),
 				'call' => __( 'Automatically create user accounts.', 'formidable' ),
 			),
 			array(
-				'link' => 'https://formidablepro.com/downloads/twilio/',
+				'link' => 'https://formidablepro.com/twilio-tip',
 				'tip'  => __( 'Want a text when this form is submitted or when a payment is received?', 'formidable' ),
 				'call' => __( 'Use Twilio with this form.', 'formidable' ),
 			),
 		);
 
-		return self::get_random_tip( $tips );
+		return $tips;
 	}
 
 	public static function get_styling_tip() {
@@ -113,7 +126,7 @@ class FrmTipsHelper {
 				'call' => __( 'Use multiple stylesheets.', 'formidable' ),
 			),
 		);
-		return $tips[0];
+		return $tips;
 	}
 
 	public static function get_entries_tip() {
@@ -129,7 +142,8 @@ class FrmTipsHelper {
 				'call' => __( 'Upgrade to Pro.', 'formidable' ),
 			),
 		);
-		return self::get_random_tip( $tips );
+		$tips = array_merge( $tips, self::get_import_tip() );
+		return $tips;
 	}
 
 	public static function get_import_tip() {
@@ -140,7 +154,31 @@ class FrmTipsHelper {
 				'call' => __( 'Upgrade to Pro.', 'formidable' ),
 			),
 		);
-		return $tips[0];
+		return $tips;
+	}
+
+	public static function get_banner_tip() {
+		$tips = array(
+			array(
+				'link' => 'https://formidablepro.com/',
+				'tip'  => __( 'Looking for more options to get professional results?', 'formidable' ),
+				'call' => __( 'Take your forms to the next level.', 'formidable' ),
+			),
+			array(
+				'link' => 'https://formidablepro.com/',
+				'tip'  => __( 'Increase conversions in your long forms.', 'formidable' ),
+				'call' => __( 'Add conditional logic, page breaks, and section headings.', 'formidable' ),
+			),
+			array(
+				'link' => 'https://formidablepro.com/',
+				'tip'  => __( 'Automate your business and increase revenue.', 'formidable' ),
+				'call' => __( 'Collect instant payments, and send leads to MailChimp.', 'formidable' ),
+			),
+		);
+		$random = rand( 0, count( $tips ) - 1 );
+		$tip = $tips[ $random ];
+		$tip['num'] = $random;
+		return $tip;
 	}
 
 	public static function get_random_tip( $tips ) {

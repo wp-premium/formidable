@@ -209,6 +209,7 @@ class FrmFormsController {
 	 * @since 2.0
 	 */
 	public static function _create_from_template() {
+		FrmAppHelper::permission_check('frm_edit_forms');
 		check_ajax_referer( 'frm_ajax', 'nonce' );
 
 		$current_form = FrmAppHelper::get_param( 'this_form', '', 'get', 'absint' );
@@ -441,6 +442,7 @@ class FrmFormsController {
     }
 
     public static function get_shortcode_opts() {
+		FrmAppHelper::permission_check('frm_view_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
 		$shortcode = FrmAppHelper::get_post_param( 'shortcode', '', 'sanitize_text_field' );
@@ -581,7 +583,7 @@ class FrmFormsController {
         }
 
         if ( $form->parent_form_id ) {
-            wp_die( sprintf(__( 'You are trying to edit a child form. Please edit from %1$shere%2$s', 'formidable' ), '<a href="'. esc_url(admin_url('admin.php') .'?page=formidable&frm_action=edit&id='. $form->parent_form_id) .'">', '</a>' ));
+			wp_die( sprintf( __( 'You are trying to edit a child form. Please edit from %1$shere%2$s', 'formidable' ), '<a href="'. esc_url( admin_url( 'admin.php?page=formidable&frm_action=edit&id='. $form->parent_form_id ) ) . '">', '</a>' ));
         }
 
 		$frm_field_selection = FrmField::field_selection();
@@ -729,6 +731,7 @@ class FrmFormsController {
     }
 
     public static function get_email_html() {
+		FrmAppHelper::permission_check('frm_view_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 		echo FrmEntryFormat::show_entry( array(
 			'form_id'       => FrmAppHelper::get_post_param( 'form_id', '', 'absint' ),

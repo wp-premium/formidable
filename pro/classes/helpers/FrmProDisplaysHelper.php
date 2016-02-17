@@ -77,7 +77,7 @@ class FrmProDisplaysHelper{
     * Check if a View has been duplicated. If it has, get the View object to be duplicated. If it has not been duplicated, just get the new post object.
     *
     * @param object $post
-    * @return the View to be copied or the View that is being created (if it is not being duplicated)
+    * @return object - the View to be copied or the View that is being created (if it is not being duplicated)
     */
     public static function get_current_view( $post ) {
         if ( $post->post_type == FrmProDisplaysController::$post_type && isset($_GET['copy_id']) ) {
@@ -96,6 +96,7 @@ class FrmProDisplaysHelper{
         $tagregexp = array(
             'deletelink', 'detaillink',
             'evenodd', 'get', 'entry_count', 'event_date',
+			'is[-|_]draft',
         );
 
         $form_id = (int) $form_id;

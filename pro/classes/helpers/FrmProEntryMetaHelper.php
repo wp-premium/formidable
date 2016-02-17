@@ -375,27 +375,47 @@ class FrmProEntryMetaHelper{
         return FrmDb::get_var( $table, $query, $db_field );
     }
 
-    public static function &get_max($field) {
-        global $wpdb;
+	public static function &get_max( $field ) {
+		if ( ! is_object( $field ) ) {
+			$field = FrmField::getOne( $field );
+		}
 
-        if ( ! is_object($field) ) {
-            $field = FrmField::getOne($field);
-        }
+		if ( ! $field ) {
+			return;
+		}
 
-        if ( ! $field ) {
-            return;
-        }
+		$max = FrmDb::get_var( 'frm_item_metas', array( 'field_id' => $field->id ), 'meta_value', array( 'order_by' => 'item_id DESC' ) );
+		$max = self::get_increment_from_value( $max, $field );
 
-        $max = FrmDb::get_var( 'frm_item_metas', array( 'field_id' => $field->id), 'meta_value +0 as odr', array( 'order_by' => 'odr DESC') );
+		if ( isset( $field->field_options['post_field'] ) && $field->field_options['post_field'] == 'post_custom' ) {
+			global $wpdb;
+			$post_max = FrmDb::get_var( $wpdb->postmeta, array( 'meta_key' => $field->field_options['custom_field'] ), 'meta_value', array( 'order_by' => 'post_ID DESC' ) );
 
-        if ( isset($field->field_options['post_field']) && $field->field_options['post_field'] == 'post_custom' ) {
-            $post_max = FrmDb::get_var( $wpdb->postmeta, array( 'meta_key' => $field->field_options['custom_field']), 'meta_value +0 as odr', array( 'order_by' => 'odr DESC') );
-            if ( $post_max && (float) $post_max > (float) $max ) {
-                $max = $post_max;
-            }
-        }
+			if ( $post_max ) {
+				$post_max = self::get_increment_from_value( $post_max, $field );
+				if ( (float) $post_max > (float) $max ) {
+					$max = $post_max;
+				}
+			}
+		}
 
-        return $max;
-    }
+		return $max;
+	}
 
+	/**
+	 * If an auto_id field includes a prefix or suffix, strip them from the last value
+	 */
+	private static function get_increment_from_value( $max, $field ) {
+		$default_value = $field->default_value;
+		if ( strpos( $default_value, '[auto_id') !== false ) {
+			list( $prefix, $shortcode ) = explode( '[auto_id', $default_value );
+			list( $shortcode, $suffix ) = explode( ']', $shortcode );
+		}
+
+		$max = str_replace( $prefix, '', $max );
+		$max = str_replace( $suffix, '', $max );
+		$max = filter_var( $max, FILTER_SANITIZE_NUMBER_INT );
+
+		return $max;
+	}
 }

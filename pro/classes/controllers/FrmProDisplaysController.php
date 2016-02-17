@@ -384,6 +384,7 @@ class FrmProDisplaysController{
     }
 
 	public static function get_tags_box() {
+		FrmAppHelper::permission_check('frm_view_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
         FrmFormsController::mb_tags_box( (int) $_POST['form_id'], 'frm_doing_ajax' );
         wp_die();
@@ -471,8 +472,9 @@ class FrmProDisplaysController{
     }
 
 	public static function get_order_row() {
+		FrmAppHelper::permission_check('frm_edit_displays');
         check_ajax_referer( 'frm_ajax', 'nonce' );
-        self::add_order_row($_POST['order_key'], $_POST['form_id']);
+		self::add_order_row( absint( $_POST['order_key'] ), absint( $_POST['form_id'] ) );
         wp_die();
     }
 
@@ -482,8 +484,9 @@ class FrmProDisplaysController{
     }
 
 	public static function get_where_row() {
+		FrmAppHelper::permission_check('frm_edit_displays');
         check_ajax_referer( 'frm_ajax', 'nonce' );
-        self::add_where_row($_POST['where_key'], $_POST['form_id']);
+        self::add_where_row( absint( $_POST['where_key'] ), absint( $_POST['form_id'] ) );
         wp_die();
     }
 
@@ -493,8 +496,9 @@ class FrmProDisplaysController{
     }
 
 	public static function get_where_options() {
+		FrmAppHelper::permission_check('frm_edit_displays');
         check_ajax_referer( 'frm_ajax', 'nonce' );
-        self::add_where_options( $_POST['field_id'], $_POST['where_key'] );
+		self::add_where_options( absint( $_POST['field_id'] ), absint( $_POST['where_key'] ) );
         wp_die();
     }
 
@@ -784,6 +788,7 @@ class FrmProDisplaysController{
     }
 
 	public static function get_date_field_select() {
+		FrmAppHelper::permission_check('frm_edit_displays');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
 		if ( is_numeric($_POST['form_id']) ) {
@@ -978,6 +983,7 @@ class FrmProDisplaysController{
         }
 
 		$empty_msg = ( isset($display->frm_empty_msg) && ! empty($display->frm_empty_msg) ) ? '<div class="frm_no_entries">' . FrmProFieldsHelper::get_default_value($display->frm_empty_msg, false) . '</div>' : '';
+		$empty_msg = apply_filters( 'frm_no_entries_message', $empty_msg, array( 'display' => $display ) );
 
         if ( isset( $message ) ) {
             // if an entry was deleted above, show a message
@@ -1408,9 +1414,10 @@ class FrmProDisplaysController{
     }
 
     public static function get_post_content() {
+		FrmAppHelper::permission_check('frm_edit_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
-        $id = (int) $_POST['id'];
+		$id = absint( $_POST['id'] );
 
         $display = FrmProDisplay::getOne( $id, false, true );
         if ( 'one' == $display->frm_show_count ) {

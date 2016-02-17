@@ -48,6 +48,7 @@ class FrmProFormActionsController{
     }
 
     public static function _logic_row(){
+		FrmAppHelper::permission_check('frm_edit_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
 		$meta_name = FrmAppHelper::get_param( 'meta_name', '', 'get', 'sanitize_title' );
@@ -103,6 +104,7 @@ class FrmProFormActionsController{
     }
 
     public static function _postmeta_row(){
+		FrmAppHelper::permission_check('frm_edit_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
         global $wpdb;
@@ -135,6 +137,7 @@ class FrmProFormActionsController{
     }
 
     public static function _posttax_row(){
+		FrmAppHelper::permission_check('frm_edit_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
         if ( isset($_POST['field_id']) ) {
@@ -171,6 +174,7 @@ class FrmProFormActionsController{
     }
 
     public static function _replace_posttax_options(){
+		FrmAppHelper::permission_check('frm_edit_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
         // Get the post type, and all taxonomies for that post type

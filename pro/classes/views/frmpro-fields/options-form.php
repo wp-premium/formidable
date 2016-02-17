@@ -142,11 +142,15 @@ if ( $display['type'] == 'select' || $field['type'] == 'data' ) { ?>
 </tr>
 <?php } else if ( $field['type'] == 'file' ) { ?>
     <tr><td><label><?php _e( 'Multiple files', 'formidable' ) ?></label></td>
-        <td><label for="multiple_<?php echo $field['id'] ?>"><input type="checkbox" name="field_options[multiple_<?php echo $field['id'] ?>]" id="multiple_<?php echo $field['id'] ?>" value="1" <?php echo ( isset( $field['multiple'] ) && $field['multiple'] ) ? 'checked="checked"' : ''; ?> />
+        <td><label for="multiple_<?php echo esc_attr( $field['id'] ) ?>"><input type="checkbox" name="field_options[multiple_<?php echo esc_attr( $field['id'] ) ?>]" id="multiple_<?php echo esc_attr( $field['id'] ) ?>" value="1" <?php echo ( isset( $field['multiple'] ) && $field['multiple'] ) ? 'checked="checked"' : ''; ?> />
         <?php _e( 'allow multiple files to be uploaded to this field', 'formidable' ) ?></label></td>
     </tr>
+    <tr><td><label><?php _e( 'Delete files', 'formidable' ) ?></label></td>
+        <td><label for="delete_<?php echo esc_attr( $field['id'] ) ?>"><input type="checkbox" name="field_options[delete_<?php echo esc_attr( $field['id'] ) ?>]" id="delete_<?php echo esc_attr( $field['id'] ) ?>" value="1" <?php echo ( isset( $field['delete'] ) && $field['delete'] ) ? 'checked="checked"' : ''; ?> />
+        <?php _e( 'permanently delete old files when replaced or when the entry is deleted', 'formidable' ) ?></label></td>
+    </tr>
     <tr><td><label><?php _e( 'Email Attachment', 'formidable' ) ?></label></td>
-        <td><label for="attach_<?php echo $field['id'] ?>"><input type="checkbox" id="attach_<?php echo $field['id'] ?>" name="field_options[attach_<?php echo $field['id'] ?>]" value="1" <?php echo ( isset( $field['attach'] ) && $field['attach'] ) ? 'checked="checked"' : ''; ?> /> <?php _e( 'attach this file to the email notification', 'formidable' ) ?></label></td>
+        <td><label for="attach_<?php echo esc_attr( $field['id'] ) ?>"><input type="checkbox" id="attach_<?php echo esc_attr( $field['id'] ) ?>" name="field_options[attach_<?php echo esc_attr( $field['id'] ) ?>]" value="1" <?php echo ( isset( $field['attach'] ) && $field['attach'] ) ? 'checked="checked"' : ''; ?> /> <?php _e( 'attach this file to the email notification', 'formidable' ) ?></label></td>
     </tr>
     <?php if ( $mimes ) { ?>
     <tr><td><label><?php _e( 'Allowed file types', 'formidable' ) ?></label></td>

@@ -1,6 +1,5 @@
 <div id="form_reports_page" class="wrap frm_charts">
-    <div class="frmicon icon32"><br/></div>
-    <h2><?php _e( 'Reports', 'formidable' ) ?></h2>
+	<h1><?php _e( 'Reports', 'formidable' ) ?></h1>
 
 	<div id="poststuff">
         <div id="post-body" class="metabox-holder columns-2">

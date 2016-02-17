@@ -91,6 +91,8 @@ class FrmAppController {
     }
 
     public static function pro_get_started_headline() {
+		self::maybe_show_upgrade_bar();
+
         // Don't display this error as we're upgrading the thing, or if the user shouldn't see the message
         if ( 'upgrade-plugin' == FrmAppHelper::simple_get( 'action', 'sanitize_title' ) || ! current_user_can( 'update_plugins' ) ) {
             return;
@@ -115,6 +117,27 @@ class FrmAppController {
 <?php
         }
     }
+
+	private static function maybe_show_upgrade_bar() {
+		$page = FrmAppHelper::simple_get( 'page', 'sanitize_title' );
+		if ( strpos( $page, 'formidable' ) !== 0 ) {
+			return;
+		}
+
+		if ( FrmAppHelper::pro_is_installed() ) {
+			return;
+		}
+
+		$affiliate = FrmAppHelper::get_affiliate();
+		if ( ! empty( $affiliate ) ) {
+			$tip = FrmTipsHelper::get_banner_tip();
+?>
+<div class="update-nag frm-update-to-pro">
+	<?php echo FrmAppHelper::kses( $tip['tip'] ) ?> <span><?php echo FrmAppHelper::kses( $tip['call'] ) ?></span> <a href="<?php echo esc_url( FrmAppHelper::make_affiliate_url('https://formidablepro.com?banner=1&tip='. absint( $tip['num'] ) ) ) ?>" class="button">Upgrade to Pro</a>
+</div>
+<?php
+		}
+	}
 
 	/**
 	 * If there are CURL problems on this server, wp_remote_post won't work for installing
@@ -358,19 +381,16 @@ class FrmAppController {
     }
 
     public static function uninstall() {
+		FrmAppHelper::permission_check('administrator');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
-        if ( current_user_can( 'administrator' ) ) {
-            $frmdb = new FrmDb();
-            $frmdb->uninstall();
+		$frmdb = new FrmDb();
+		$frmdb->uninstall();
 
-			//disable the plugin and redirect after uninstall so the tables don't get added right back
-			deactivate_plugins( FrmAppHelper::plugin_folder() . '/formidable.php', false, false );
-			echo esc_url_raw( admin_url( 'plugins.php?deactivate=true' ) );
-        } else {
-            $frm_settings = FrmAppHelper::get_settings();
-            wp_die( $frm_settings->admin_permission );
-        }
+		//disable the plugin and redirect after uninstall so the tables don't get added right back
+		deactivate_plugins( FrmAppHelper::plugin_folder() . '/formidable.php', false, false );
+		echo esc_url_raw( admin_url( 'plugins.php?deactivate=true' ) );
+
         wp_die();
     }
 
@@ -396,6 +416,7 @@ class FrmAppController {
     }
 
     public static function deauthorize() {
+		FrmAppHelper::permission_check('frm_change_settings');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
         delete_option( 'frmpro-credentials' );

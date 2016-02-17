@@ -591,6 +591,22 @@ class FrmProFormsController{
 		);
 	}
 
+	/**
+	 * Add Pro field helpers to Customization Panel
+	 *
+	 * @since 2.0.22
+	 * @param array $entry_shortcodes
+	 * @param bool $settings_tab
+	 * @return array
+	 */
+	public static function add_pro_field_helpers( $entry_shortcodes, $settings_tab ){
+		if ( ! $settings_tab ) {
+			$entry_shortcodes['is_draft'] = __( 'Draft status', 'formidable' );
+		}
+
+		return $entry_shortcodes;
+	}
+
 	/* Trigger model actions */
 	public static function update_options($options, $values){
         return FrmProForm::update_options($options, $values);
