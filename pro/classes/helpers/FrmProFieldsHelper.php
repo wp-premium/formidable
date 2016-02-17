@@ -105,8 +105,6 @@ class FrmProFieldsHelper{
 	 * @since 2.0.8
 	 */
 	private static function replace_shortcode_in_string( &$value, $args  ) {
-		$new_value = '';
-
 		$shortcode_functions = self::get_shortcode_to_functions();
 
 		if ( isset( $shortcode_functions[ $args['shortcode'] ] ) ) {
@@ -144,6 +142,7 @@ class FrmProFieldsHelper{
 			$args['allow_array'] = $atts['return_array'];
 		}
 		$args['shortcode_atts'] = $atts;
+		$new_value = '';
 
 		switch ( $args['shortcode'] ) {
 			case 'user_meta':
@@ -476,6 +475,33 @@ class FrmProFieldsHelper{
         return $values;
     }
 
+	/**
+	* Initialize the field array when a field is loaded independent of the rest of the form
+	*
+	* @param object $field_object
+	* @return array $args
+	*/
+	public static function initialize_array_field( $field_object, $args = array() ) {
+		$field_values = array( 'id', 'required', 'name', 'description', 'form_id', 'options', 'field_key', 'type' );
+		$field = array( 'value' => '' );
+		foreach ( $field_values as $field_value ) {
+			$field[ $field_value ] = $field_object->{$field_value};
+		}
+
+		$field['original_type'] = $field['type'];
+		$field['type'] = apply_filters( 'frm_field_type', $field['type'], $field_object, '' );
+		$field['size'] = ( isset( $field_object->field_options['size'] ) && $field_object->field_options['size'] != '' ) ? $field_object->field_options['size'] : '';
+		$field['blank'] = $field_object->field_options['blank'];
+		$field['default_value'] = isset( $args['default_value'] ) ? $args['default_value'] : '';
+
+		if ( isset( $args['field_id'] ) ) {
+			// this might not be needed. Is field_id ever different from $field['id']?
+			$field['id'] = $args['field_id'];
+		}
+
+		return $field;
+	}
+
     public static function setup_edit_vars( $values, $field, $entry_id = false ) {
         $values['use_key'] = false;
 
@@ -570,7 +596,6 @@ class FrmProFieldsHelper{
 	}
 
     public static function tags_to_list(&$values, $entry_id) {
-        global $wpdb;
         $post_id = FrmDb::get_var( 'frm_items', array( 'id' => $entry_id), 'post_id' );
         if ( ! $post_id ) {
             return;
@@ -601,7 +626,7 @@ class FrmProFieldsHelper{
                 case 'number':
                     $minnum = 0;
                     $maxnum = 9999;
-                    $step = '.01';
+                    $step = 'any';
                 break;
                 case 'scale':
 					if ( $field ) {
@@ -634,6 +659,7 @@ class FrmProFieldsHelper{
             'post_field' => '', 'custom_field' => '', 'taxonomy' => 'category', 'exclude_cat' => 0, 'ftypes' => array(),
             'data_type' => 'select', 'restrict' => 0, 'start_year' => 2000, 'end_year' => 2020, 'read_only' => 0,
             'admin_only' => '', 'locale' => '', 'attach' => false, 'minnum' => $minnum, 'maxnum' => $maxnum,
+			'delete' => false,
             'step' => $step, 'clock' => 12, 'start_time' => '00:00', 'end_time' => '23:'.$end_minute,
 			'unique' => 0, 'use_calc' => 0, 'calc' => '', 'calc_dec' => '',
             'dyn_default_value' => '', 'multiple' => 0, 'unique_msg' => $frm_settings->unique_msg, 'autocom' => 0,
@@ -1620,6 +1646,9 @@ class FrmProFieldsHelper{
 	private static function set_ajax_field_globals( $f ) {
 		global $frm_vars;
 		$ajax_now = ! FrmAppHelper::doing_ajax();
+		if ( ! $ajax_now && isset( $frm_vars['inplace_edit'] ) && $frm_vars['inplace_edit'] ) {
+			$ajax_now = true;
+		}
 
 		switch ( $f->type ) {
 			case 'date':
@@ -2092,7 +2121,7 @@ DEFAULT_HTML;
                 }
                 $val = implode(', ', $field_value);
             }
-        }
+		}
 
         return $val;
     }
@@ -2147,7 +2176,7 @@ DEFAULT_HTML;
             } else if ( FrmAppHelper::is_admin() ) {
 				$url = '<a href="' . esc_url( $url ) . '">' . $label . '</a>';
 				if ( strpos( FrmAppHelper::simple_get( 'page', 'sanitize_title' ), 'formidable' ) === 0 ) {
-					$url .= '<br/><a href="' . esc_url( admin_url( 'media.php') . '?action=edit&attachment_id=' . $media_id ) . '">' . __( 'Edit Uploaded File', 'formidable' ) . '</a>';
+					$url .= '<br/><a href="' . esc_url( admin_url( 'media.php?action=edit&attachment_id=' . $media_id ) ) . '">' . __( 'Edit Uploaded File', 'formidable' ) . '</a>';
                 }
             } else if ( !empty($value) ) {
                 $value .= "<br/>\r\n";
@@ -2170,7 +2199,6 @@ DEFAULT_HTML;
             $field = FrmField::getOne($field);
         }
 
-        $orig_val = $value;
 		$linked_field_id = self::get_linked_field_id( $atts, $field );
 
 		// If value is an entry ID and the Dynamic field is not mapped to a taxonomy
@@ -2355,7 +2383,7 @@ DEFAULT_HTML;
         }
 
         if ( $args['link'] ) {
-			$info = '<a href="' .  esc_url( admin_url('user-edit.php') . '?user_id=' . $user_id ) . '">' . $info . '</a>';
+			$info = '<a href="' .  esc_url( admin_url('user-edit.php?user_id=' . $user_id ) ) . '">' . $info . '</a>';
         }
 
         return $info;
@@ -2923,6 +2951,7 @@ DEFAULT_HTML;
             $switch_tags = array(
                 'post-id', 'created-at', 'updated-at',
                 'created-by', 'updated-by', 'parent-id',
+                'is-draft',
             );
             if ( in_array($tag, $switch_tags) ) {
                 $tag = str_replace('-', '_', $tag);
@@ -2933,7 +2962,7 @@ DEFAULT_HTML;
         $tags = array(
             'event_date', 'entry_count', 'detaillink', 'editlink', 'deletelink',
             'created_at', 'updated_at', 'created_by', 'updated_by',
-            'evenodd', 'post_id', 'parent_id', 'id',
+            'evenodd', 'post_id', 'parent_id', 'id', 'is_draft',
         );
 
         if ( in_array($tag, $tags) ) {
@@ -3147,6 +3176,26 @@ DEFAULT_HTML;
     public static function do_shortcode_updated_by(&$content, $atts, $shortcodes, $short_key, $args) {
         self::do_shortcode_created_by($content, $atts, $shortcodes, $short_key, $args);
     }
+
+
+	/**
+ 	* Process the is_draft shortcode
+ 	*
+ 	* @since 2.0.22
+	* @param string $content
+	* @param array $atts
+	* @param array $shortcodes
+	* @param string $short_key
+	* @param array $args
+	*/
+	public static function do_shortcode_is_draft( &$content, $atts, $shortcodes, $short_key, $args ) {
+		if ( $args['conditional'] ) {
+			$atts['short_key'] = $shortcodes[0][ $short_key ];
+			self::check_conditional_shortcode( $content, $args['entry']->is_draft, $atts, 'is_draft' );
+		} else {
+			$content = str_replace( $shortcodes[0][ $short_key ], $args['entry']->is_draft, $content );
+		}
+	}
 
 	public static function get_file_from_atts( $atts, $field, &$replace_with ) {
 		_deprecated_function( __FUNCTION__, '2.0.19', 'FrmProFieldsHelper::get_file_html_from_atts' );
@@ -3503,6 +3552,10 @@ DEFAULT_HTML;
 		$img_html = array();
 		foreach ( (array) $ids as $id ) {
 			if ( ! is_numeric( $id ) ) {
+				if ( ! empty( $id ) ) {
+					// If a custom value was set with a hook, don't remove it
+					$img_html[] = $id;
+				}
 				continue;
 			}
 
@@ -3626,7 +3679,7 @@ DEFAULT_HTML;
 
 		// If add_link=1 is set
 		if ( $atts['add_link'] ) {
-			$img_html = '<a href="' . $image_url . '">' . $img_html . '</a>';
+			$img_html = '<a href="' . esc_url( $image_url ) . '">' . $img_html . '</a>';
 		}
 
 		return $img_html;

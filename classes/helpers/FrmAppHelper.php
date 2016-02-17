@@ -10,7 +10,7 @@ class FrmAppHelper {
 	/**
 	 * @since 2.0
 	 */
-	public static $plug_version = '2.0.21';
+	public static $plug_version = '2.0.22';
 
     /**
      * @since 1.07.02
@@ -551,7 +551,7 @@ class FrmAppHelper {
 	public static function post_edit_link( $post_id ) {
         $post = get_post($post_id);
         if ( $post ) {
-            return '<a href="'. esc_url(admin_url('post.php') .'?post='. $post_id .'&action=edit') .'">'. self::truncate($post->post_title, 50) .'</a>';
+			return '<a href="'. esc_url( admin_url('post.php?post='. $post_id .'&action=edit') ) .'">'. self::truncate( $post->post_title, 50 ) .'</a>';
         }
         return '';
     }
@@ -876,8 +876,7 @@ class FrmAppHelper {
         }
 
 		if ( $user_id == 'current' ) {
-            $user_ID = get_current_user_id();
-            $user_id = $user_ID;
+			$user_id = get_current_user_id();
 		} else {
             if ( is_email($user_id) ) {
                 $user = get_user_by('email', $user_id);
@@ -910,10 +909,10 @@ class FrmAppHelper {
     /**
      * @param string $table_name
      * @param string $column
+	 * @param int $id
+	 * @param int $num_chars
      */
-    public static function get_unique_key( $name = '', $table_name, $column, $id = 0, $num_chars = 6 ) {
-        global $wpdb;
-
+    public static function get_unique_key( $name = '', $table_name, $column, $id = 0, $num_chars = 5 ) {
         $key = '';
 
         if ( ! empty( $name ) ) {
@@ -953,8 +952,6 @@ class FrmAppHelper {
         if ( ! $record ) {
             return false;
         }
-
-        global $frm_vars;
 
         if ( empty($post_values) ) {
             $post_values = stripslashes_deep($_POST);
@@ -1296,7 +1293,7 @@ class FrmAppHelper {
 			'd' => array( __( 'day', 'formidable' ), __( 'days', 'formidable' ) ),
 			'h' => array( __( 'hour', 'formidable' ), __( 'hours', 'formidable' ) ),
 			'i' => array( __( 'minute', 'formidable' ), __( 'minutes', 'formidable' ) ),
-			's' => array( __( 'second', 'formidable' ), __( 'seconds', 'formidable' ) )
+			's' => array( __( 'second', 'formidable' ), __( 'seconds', 'formidable' ) ),
 		);
 	}
 
@@ -1773,10 +1770,10 @@ class FrmAppHelper {
 	}
 
     /**
+	 * echo the message on the plugins listing page
      * @since 1.07.10
      *
      * @param float $min_version The version the add-on requires
-     * @return echo The message on the plugins listing page
      */
 	public static function min_version_notice( $min_version ) {
         $frm_version = self::plugin_version();

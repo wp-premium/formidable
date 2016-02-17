@@ -207,7 +207,7 @@ class FrmProAppHelper{
 	public static function get_edit_link( $id ) {
         $output = '';
     	if ( current_user_can('administrator') ) {
-			$output = '<a href="' . esc_url( admin_url() .'?page=formidable-entries&frm_action=edit&id=' . $id ) . '">' . __( 'Edit', 'formidable' ) . '</a>';
+			$output = '<a href="' . esc_url( admin_url( 'admin.php?page=formidable-entries&frm_action=edit&id=' . $id ) ) . '">' . __( 'Edit', 'formidable' ) . '</a>';
         }
 
     	return $output;
@@ -299,8 +299,6 @@ class FrmProAppHelper{
     }
 
 	public static function filter_where( $entry_ids, $args ) {
-        global $wpdb;
-
         $defaults = array(
             'where_opt' => false, 'where_is' => '=', 'where_val' => '',
             'form_id' => false, 'form_posts' => array(), 'after_where' => false,
@@ -392,10 +390,12 @@ class FrmProAppHelper{
 		}
 
 		// Only proceed if we have a non-category dynamic field with a non-numeric/non-array where_val
-		$is_not_a_string_value = ( ! $args['where_val'] || is_numeric( $args['where_val'] ) || is_array( $args['where_val'] ) );
+		$is_a_string_value = ( $args['where_val'] && ! is_numeric( $args['where_val'] ) && ! is_array( $args['where_val'] ) );
 		$is_a_post_field = ( isset( $where_field->field_options['post_field'] ) && $where_field->field_options['post_field'] == 'post_category' );
+		$continue = ( $is_a_string_value && ! $is_a_post_field );
+		$continue = apply_filters( 'frm_search_for_dynamic_text', $continue, $where_field, $args );
 
-		if ( $is_not_a_string_value || $is_a_post_field ) {
+		if ( ! $continue ) {
 			return;
 		}
 

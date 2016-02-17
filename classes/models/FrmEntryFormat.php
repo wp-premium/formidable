@@ -79,11 +79,6 @@ class FrmEntryFormat {
 			return;
 		}
 
-		//Remove signature from default-message shortcode
-		if ( $f->type == 'signature' ) {
-			return;
-		}
-
 		if ( $atts['entry'] && ! isset( $atts['entry']->metas[ $f->id ] ) ) {
 			// In case include_blank is set
 			$atts['entry']->metas[ $f->id ] = '';
@@ -118,8 +113,13 @@ class FrmEntryFormat {
 			$val = implode( ', ', $val );
 		}
 
+		self::maybe_strip_html( $atts['plain_text'], $val );
+
 		if ( $atts['format'] != 'text' ) {
 			$values[ $f->field_key ] = $val;
+			if ( isset( $prev_val ) && $prev_val != $val && $f->type != 'textarea' ) {
+				$values[ $f->field_key .'-value' ] = $prev_val;
+			}
 		} else {
 			$values[ $f->id ] = array( 'label' => $f->name, 'val' => $val );
 		}
@@ -142,6 +142,22 @@ class FrmEntryFormat {
 	public static function textarea_display_value( $type, $plain_text, &$value ) {
 		if ( $type == 'textarea' && ! $plain_text ) {
 			$value = str_replace( array( "\r\n", "\r", "\n" ), ' <br/>', $value );
+		}
+	}
+
+	/**
+	 * Strip HTML if from email value if plain text is selected
+	 *
+	 * @since 2.0.21
+	 * @param boolean $plain_text
+	 * @param mixed $val
+	 */
+	private static function maybe_strip_html( $plain_text, &$val ) {
+		if ( $plain_text && ! is_array( $val ) ) {
+			if ( strpos( $val, '<img' ) !== false ) {
+				$val = str_replace( array( '<img', 'src=', '/>', '"' ), '', $val );
+			}
+			$val = strip_tags( $val );
 		}
 	}
 

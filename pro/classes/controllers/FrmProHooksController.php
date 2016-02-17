@@ -75,6 +75,7 @@ class FrmProHooksController{
         add_filter('frm_add_entry_meta', 'FrmProEntryMeta::before_save');
         add_filter('frm_update_entry_meta', 'FrmProEntryMeta::before_save');
         add_filter('frm_validate_field_entry', 'FrmProEntryMeta::validate', 10, 4);
+		add_action( 'frm_before_destroy_entry', 'FrmProEntryMeta::delete_files_with_entry', 10, 2 );
 
         // Fields Controller
         add_filter('frm_show_normal_field_type', 'FrmProFieldsController::show_normal_field', 10, 2);
@@ -104,6 +105,7 @@ class FrmProHooksController{
         add_filter('frm_replace_content_shortcodes', 'FrmProFormsController::replace_content_shortcodes', 10, 3);
         add_filter('frm_conditional_shortcodes', 'FrmProFormsController::conditional_options');
         add_filter('frm_user_shortcodes', 'FrmProFormsController::user_options');
+        add_filter( 'frm_helper_shortcodes', 'FrmProFormsController::add_pro_field_helpers', 10, 2 );
 
 		add_filter( 'frm_validate_entry', 'FrmProFormsHelper::can_submit_form_now', 15, 2 );
 
