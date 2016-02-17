@@ -479,6 +479,7 @@ class FrmProFieldsController{
     }
 
     public static function get_field_selection(){
+		FrmAppHelper::permission_check('frm_view_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
         $ajax = true;
@@ -503,6 +504,7 @@ class FrmProFieldsController{
     }
 
     public static function get_field_values(){
+		FrmAppHelper::permission_check('frm_view_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
         $current_field_id = (int) $_POST['current_field'];
@@ -758,21 +760,7 @@ class FrmProFieldsController{
 	* @return array $field
 	*/
 	private static function initialize_dependent_dynamic_field( $args ) {
-
-		$field = array(
-			'id' => $args['field_id'],
-			'required' => $args['field_data']->required,
-			'name' => $args['field_data']->name,
-			'blank' => $args['field_data']->field_options['blank'],
-			'value' => '',
-			'default_value' => $args['default_value'],
-			'form_id' => $args['field_data']->form_id,
-			'type' => apply_filters('frm_field_type', $args['field_data']->type, $args['field_data'], ''),
-			'options' => $args['field_data']->options,
-			'size' => (isset($args['field_data']->field_options['size']) && $args['field_data']->field_options['size'] != '') ? $args['field_data']->field_options['size'] : '',
-			'field_key' => $args['field_data']->field_key
-		);
-
+		$field = FrmProFieldsHelper::initialize_array_field( $args['field_data'], $args );
 		return $field;
 	}
 
@@ -949,7 +937,6 @@ class FrmProFieldsController{
 
 	public static function _logic_row(){
         check_ajax_referer( 'frm_ajax', 'nonce' );
-
 	    FrmAppHelper::permission_check('frm_edit_forms', 'show');
 
 		$meta_name = FrmAppHelper::get_post_param( 'meta_name', '', 'absint' );
@@ -972,6 +959,7 @@ class FrmProFieldsController{
 
 	public static function populate_calc_dropdown(){
         check_ajax_referer( 'frm_ajax', 'nonce' );
+		FrmAppHelper::permission_check('frm_edit_forms');
 
 	    if ( isset($_POST['form_id']) && isset($_POST['field_id']) ) {
 			echo FrmProFieldsHelper::get_shortcode_select( sanitize_text_field( $_POST['form_id'] ), 'frm_calc_' . sanitize_text_field( $_POST['field_id'] ), 'calc' );
@@ -996,6 +984,7 @@ class FrmProFieldsController{
 	 */
 	public static function toggle_repeat() {
         check_ajax_referer( 'frm_ajax', 'nonce' );
+		FrmAppHelper::permission_check('frm_edit_forms');
 
 		$form_id = absint( $_POST['form_id'] ); // $form_id should be empty for non-repeating sections
 		$parent_form_id = absint( $_POST['parent_form_id'] );
@@ -1026,6 +1015,7 @@ class FrmProFieldsController{
     }
 
 	public static function duplicate_section($section_field, $form_id) {
+		FrmAppHelper::permission_check('frm_edit_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
 	    global $wpdb;

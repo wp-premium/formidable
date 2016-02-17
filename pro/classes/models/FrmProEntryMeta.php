@@ -457,7 +457,7 @@ class FrmProEntryMeta{
      * Make sure the [auto_id] is still unique
      */
     public static function validate_auto_id($field, &$value) {
-        if ( empty($field->default_value) || is_array($field->default_value) || empty($value) || ! is_numeric($value) || strpos($field->default_value, '[auto_id') === false ) {
+		if ( empty( $field->default_value ) || is_array( $field->default_value ) || empty( $value ) || strpos( $field->default_value, '[auto_id' ) === false ) {
             return;
         }
 
@@ -594,8 +594,11 @@ class FrmProEntryMeta{
 	* @return array|string $meta_value
 	*/
 	private static function prepare_file_upload_meta( $prev_value, $field, $entry_id ) {
+		$last_saved_value = self::get_previous_file_ids( $field, $entry_id );
+
         // If there are no files to be uploaded, exit now
         if ( ! isset( $_FILES ) ) {
+			self::delete_removed_files( $last_saved_value, $prev_value, $field );
 			return $prev_value;
         }
 
@@ -607,6 +610,7 @@ class FrmProEntryMeta{
 
         // If there isn't a file uploaded in this field, exit now
         if ( ! isset( $_FILES[$file_name]) || empty($_FILES[$file_name]['name']) || (int) $_FILES[$file_name]['size'] == 0 ) {
+			self::delete_removed_files( $last_saved_value, $prev_value, $field );
 			return $prev_value;
         }
 
@@ -629,8 +633,79 @@ class FrmProEntryMeta{
 	        }
         }
 
+		self::delete_removed_files( $last_saved_value, $new_value, $field );
 		return $new_value;
     }
+
+	/**
+	 * Automatically delete files when an entry is deleted.
+	 * If the "Delete all entries" button is used, entries will not be deleted
+	 * @since 2.0.22
+	 */
+	public static function delete_files_with_entry( $entry_id, $entry = false ) {
+		if ( empty( $entry ) ) {
+			return;
+		}
+
+		$upload_fields = FrmField::getAll( array( 'fi.type' => 'file', 'fi.form_id' => $entry->form_id ) );
+		foreach ( $upload_fields as $field ) {
+			self::delete_files_from_field( $field, $entry );
+			unset( $field );
+		}
+	}
+
+	/**
+	 * @since 2.0.22
+	 */
+	public static function delete_files_from_field( $field, $entry ) {
+		if ( self::should_delete_files( $field ) ) {
+			$media_ids = self::get_previous_file_ids( $field, $entry );
+			self::delete_files_now( $media_ids );
+		}
+	}
+
+	private static function should_delete_files( $field ) {
+		$auto_delete = FrmField::get_option_in_object( $field, 'delete' );
+		return empty( $auto_delete ) ? false : true;
+	}
+
+	/**
+	 * @since 2.0.22
+	 */
+	private static function get_previous_file_ids( $field, $entry_id ) {
+		return FrmProEntryMetaHelper::get_post_or_meta_value( $entry_id, $field );
+	}
+
+	private static function delete_removed_files( $old_value, $new_value, $field ) {
+		if ( self::should_delete_files( $field ) ) {
+			$media_ids = self::get_removed_file_ids( $old_value, $new_value );
+			self::delete_files_now( $media_ids );
+		}
+	}
+
+	/**
+	 * @since 2.0.22
+	 */
+	private static function get_removed_file_ids( $old_value, $new_value ) {
+		$media_ids = array_diff( (array) $old_value, (array) $new_value );
+		return $media_ids;
+	}
+
+	/**
+	 * @since 2.0.22
+	 */
+	private static function delete_files_now( $media_ids ) {
+		if ( empty( $media_ids ) ) {
+			return;
+		}
+
+		$media_ids = maybe_unserialize( $media_ids );
+		foreach ( (array) $media_ids as $m ) {
+			if ( is_numeric( $m ) ) {
+				wp_delete_attachment( $m, true );
+			}
+		}
+	}
 
     /**
     *

@@ -3,6 +3,7 @@
 class FrmProStatisticsController{
 
     public static function show() {
+		add_filter( 'frm_form_stop_action_reports', '__return_true' );
 		FrmAppHelper::permission_check( 'frm_view_reports' );
 
         global $wpdb;

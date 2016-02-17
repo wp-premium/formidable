@@ -6,7 +6,7 @@ class FrmAddonsController {
 		add_submenu_page( 'formidable', 'Formidable | '. __( 'AddOns', 'formidable' ), __( 'AddOns', 'formidable' ), 'frm_view_forms', 'formidable-addons', 'FrmAddonsController::list_addons' );
 
 		$affiliate = FrmAppHelper::get_affiliate();
-		if ( ! empty( $affiliate ) ) {
+		if ( ! empty( $affiliate ) && ! FrmAppHelper::pro_is_installed() ) {
 			add_submenu_page( 'formidable', 'Formidable | '. __( 'Upgrade to Pro', 'formidable' ), __( 'Upgrade to Pro', 'formidable' ), 'frm_view_forms', 'formidable-pro-upgrade', 'FrmAddonsController::upgrade_to_pro' );
 		}
 	}
@@ -45,6 +45,7 @@ class FrmAddonsController {
 		$plugin_order = array(
 			'formidable-pro', 'mailchimp', 'registration-lite',
 			'paypal-standard', 'bootstrap-modal', 'math-captcha',
+			'zapier',
 		);
 		$ordered_addons = array();
 		foreach ( $plugin_order as $plugin ) {
@@ -85,12 +86,16 @@ class FrmAddonsController {
 	}
 
 	public static function get_licenses() {
+		FrmAppHelper::permission_check('frm_change_settings');
+		check_ajax_referer( 'frm_ajax', 'nonce' );
+
 		$license = get_option('frmpro-credentials');
 		if ( $license && is_array( $license ) && isset( $license['license'] ) ) {
 			$url = 'http://formidablepro.com/frm-edd-api/licenses?l='. urlencode( base64_encode( $license['license'] ) );
 			$licenses = self::send_api_request( $url, array( 'name' => 'frm_api_licence', 'expires' => 60 * 60 * 5 ) );
 			echo json_encode( $licenses );
 		}
+
 		wp_die();
 	}
 
