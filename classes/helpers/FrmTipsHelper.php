@@ -54,6 +54,11 @@ class FrmTipsHelper {
 				'tip'  => __( 'Need to calculate a total?', 'formidable' ),
 				'call' => __( 'Upgrade to Pro.', 'formidable' ),
 			),
+			array(
+				'link' => 'https://formidablepro.com/prefill-fields',
+				'tip'  => __( 'Save time.', 'formidable' ),
+				'call' => __( 'Prefill fields with user info.', 'formidable' ),
+			),
 		);
 		$tips = array_merge( $tips, self::get_form_settings_tip(), self::get_form_action_tip(), self::get_entries_tip() );
 
@@ -64,6 +69,11 @@ class FrmTipsHelper {
 		$tips = array(
 			array(
 				'link' => 'https://formidablepro.com/front-end-editing-tip',
+				'tip'  => __( 'A site with dynamic, user-generated content is within reach.', 'formidable' ),
+				'call' => __( 'Add front-end editing.', 'formidable' ),
+			),
+			array(
+				'link' => 'https://formidablepro.com/front-end-editing-b-tip',
 				'tip'  => __( 'A site with dynamic, user-generated content is within reach.', 'formidable' ),
 				'call' => __( 'Add front-end editing.', 'formidable' ),
 			),
@@ -104,14 +114,34 @@ class FrmTipsHelper {
 				'call' => __( 'Use PayPal with this form.', 'formidable' ),
 			),
 			array(
+				'link' => 'https://formidablepro.com/paypal-increase-revenue-tip',
+				'tip'  => __( 'Increase revenue.', 'formidable' ),
+				'call' => __( 'Use PayPal with this form.', 'formidable' ),
+			),
+			array(
+				'link' => 'https://formidablepro.com/paypal-save-time-tip',
+				'tip'  => __( 'Get paid more quickly.', 'formidable' ),
+				'call' => __( 'Use Paypal with this form.', 'formidable' ),
+			),
+			array(
 				'link' => 'https://formidablepro.com/registration-tip',
-				'tip'  => __( 'Start building up your site membership.', 'formidable' ),
+				'tip'  => __( 'Boost your site membership.', 'formidable' ),
 				'call' => __( 'Automatically create user accounts.', 'formidable' ),
+			),
+			array(
+				'link' => 'https://formidablepro.com/registration-profile-editing-tip',
+				'tip'  => __( 'Make front-end profile editing possible.', 'formidable' ),
+				'call' => __( 'Add user registration.', 'formidable' ),
 			),
 			array(
 				'link' => 'https://formidablepro.com/twilio-tip',
 				'tip'  => __( 'Want a text when this form is submitted or when a payment is received?', 'formidable' ),
 				'call' => __( 'Use Twilio with this form.', 'formidable' ),
+			),
+			array(
+				'link' => 'https://formidablepro.com/twilio-send-tip',
+				'tip'  => __( 'Send a text when this form is submitted.', 'formidable' ),
+				'call' => __( 'Get Twilio.', 'formidable' ),
 			),
 		);
 
@@ -122,8 +152,8 @@ class FrmTipsHelper {
 		$tips = array(
 			array(
 				'link' => 'https://formidablepro.com/visual-styling-tip',
-				'tip'  => __( 'Want your sidebar or footer form to look different from the rest?', 'formidable' ),
-				'call' => __( 'Use multiple stylesheets.', 'formidable' ),
+				'tip'  => __( 'Make your sidebar or footer form stand out.', 'formidable' ),
+				'call' => __( 'Use multiple style templates.', 'formidable' ),
 			),
 		);
 		return $tips;
@@ -133,7 +163,7 @@ class FrmTipsHelper {
 		$tips = array(
 			array(
 				'link' => 'https://formidablepro.com/manage-entries-tip',
-				'tip'  => __( 'Do you want to edit or delete form submissions?', 'formidable' ),
+				'tip'  => __( 'Want to edit or delete form submissions?', 'formidable' ),
 				'call' => __( 'Add entry management.', 'formidable' ),
 			),
 			array(

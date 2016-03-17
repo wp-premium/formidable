@@ -410,7 +410,6 @@ class FrmProAppHelper{
 			}
 
 			$filter_args = array();
-			self::add_group_by( $filter_args, $args, 'item_key' );
 
 			$linked_id = FrmDb::get_col( 'frm_items', array(
 				'form_id' => $linked_field->form_id,
@@ -446,12 +445,11 @@ class FrmProAppHelper{
         $where_statement = apply_filters('frm_where_filter', $where_statement, $args);
 
 		$filter_args = array( 'is_draft' => $args['drafts'] );
-		self::add_group_by( $filter_args, $args );
 
 		// If the field is from a repeating section (or embedded form?) get the parent ID
 		$filter_args['return_parent_id'] = ( $where_field->form_id != $args['form_id'] );
 
-		// Add entry IDs to $where_statement. Meant for use when showing one entry.
+		// Add entry IDs to $where_statement
 		if ( $args['use_ids'] ) {
 			if ( is_array( $where_statement ) ) {
 				if ( $filter_args['return_parent_id'] ) {
@@ -517,8 +515,6 @@ class FrmProAppHelper{
 			$query = array( 'tt.taxonomy' => $where_field->field_options['taxonomy'] );
 			$query[] = $t_where;
 
-			self::add_group_by( $filter_args, $args, 'tr.object_id' );
-
 			$add_posts = FrmDb::get_col(
 				$wpdb->terms .' AS t INNER JOIN '. $wpdb->term_taxonomy .' AS tt ON tt.term_id = t.term_id INNER JOIN '. $wpdb->term_relationships .' AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id',
 				$query,
@@ -548,8 +544,6 @@ class FrmProAppHelper{
 				$get_table = $wpdb->posts;
 				$query_key = sanitize_title( $where_field->field_options['post_field'] );
             }
-
-			self::add_group_by( $filter_args, $args, $query_key );
 
 			$query_key .= ( in_array( $where_field->type, array( 'number', 'scale' ) ) ? ' +0 ' : ' ' ) . FrmDb::append_where_is( $args['where_is'] );
 			$query[ $query_key ] = $args['where_val'];
@@ -582,12 +576,6 @@ class FrmProAppHelper{
             $new_ids = array();
         }
     }
-
-	private static function add_group_by( &$filter_args, $args, $group_by = 'meta_value' ) {
-		if ( $args['display'] && in_array( $args['where_opt'], $args['display']->frm_group_by ) ) {
-			$filter_args['group_by'] = $group_by;
-		}
-	}
 
     /**
      * Let WordPress process the uploads

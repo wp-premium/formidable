@@ -131,6 +131,12 @@ class FrmProFormsController{
         }
     }
 
+	public static function add_form_classes( $form ) {
+		if ( isset( $form->options['js_validate'] ) && $form->options['js_validate'] ) {
+			echo ' frm_js_validate ';
+		}
+	}
+
     public static function form_fields_class($class){
         global $frm_page_num;
         if ( $frm_page_num ) {

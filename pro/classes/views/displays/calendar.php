@@ -40,7 +40,7 @@ unset($day_class);
                 } else {
                     // switch [event_date] to [calendar_date] so it can be replaced on each individual date instead of each entry
                     $new_content = str_replace( array( '[event_date]', '[event_date '), array( '[calendar_date]', '[calendar_date '), $new_content);
-                    $this_content = apply_filters('frm_display_entry_content', $new_content, $entry, $shortcodes, $display, $show, '', array( 'event_date' => $current_entry_date));
+                    $this_content = apply_filters('frm_display_entry_content', $new_content, $entry, $shortcodes, $view, 'all', '', array( 'event_date' => $current_entry_date));
 
                     $used_entries[$entry->id] = $this_content;
                     $this_content = FrmProFieldsHelper::replace_calendar_date_shortcode($this_content, $current_entry_date);
