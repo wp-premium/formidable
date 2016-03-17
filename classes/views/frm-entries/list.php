@@ -4,7 +4,7 @@
         <?php do_action('frm_entry_inside_h2', $form); ?>
 	</h1>
 
-    <?php require(FrmAppHelper::plugin_path() .'/classes/views/shared/errors.php'); ?>
+	<?php require( FrmAppHelper::plugin_path() . '/classes/views/shared/errors.php' ); ?>
 
     <form id="posts-filter" method="get">
         <div id="poststuff">
@@ -21,7 +21,7 @@
             <div class="clear"></div>
             </div>
             <?php if ( $form ) { ?>
-            <div id="titlediv">
+            <div id="titlediv" class="frm-on-bottom">
 				<input id="title" type="text" value="<?php echo esc_attr( $form->name == '' ? __( '(no title)' ) : $form->name ) ?>" readonly="readonly" disabled="disabled" />
             </div>
             <?php } ?>

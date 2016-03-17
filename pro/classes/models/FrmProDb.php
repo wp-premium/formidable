@@ -3,7 +3,6 @@
 class FrmProDb{
 
 	public static function upgrade() {
-        global $wpdb;
         $db_version = FrmAppHelper::$pro_db_version; // this is the version of the database we're moving to
         $old_db_version = get_option('frmpro_db_version');
 
@@ -12,7 +11,7 @@ class FrmProDb{
         }
 
         if ( $old_db_version ) {
-			$migrations = array( 16, 17, 25, 27, 28, 29, 30, 31 );
+			$migrations = array( 16, 17, 25, 27, 28, 29, 30, 31, 32 );
 			foreach ( $migrations as $migration ) {
 				if ( $db_version >= $migration && $old_db_version < $migration ) {
 					call_user_func( array( __CLASS__, 'migrate_to_' . $migration ) );
@@ -51,6 +50,67 @@ class FrmProDb{
 		delete_site_option( 'frm_autoupdate' );
 		delete_site_option( 'frmpro-wpmu-sitewide' );
     }
+
+	/**
+	 * Add an "Entry ID is equal to [get param=entry old_filter=1]" filter on single entry Views
+	 * As of 2.0.23, single entry Views will no longer be filtered automatically by an "entry" parameter
+	 *
+	 * @since 2.0.23
+	 */
+	private static function migrate_to_32() {
+		global $wpdb;
+
+		// Get all single entry View IDs
+		$raw_query = '
+			SELECT
+				post_id
+			FROM
+				' . $wpdb->prefix . 'postmeta
+			WHERE
+				meta_key=%s AND
+				meta_value=%s';
+		$query = $wpdb->prepare( $raw_query, 'frm_show_count', 'one' );
+		$single_entry_view_ids = $wpdb->get_col( $query );
+
+		foreach ( $single_entry_view_ids as $view_id ) {
+
+			$view_options = get_post_meta( $view_id, 'frm_options', true );
+
+			if ( ! $view_options ) {
+				$view_options = array();
+			} else {
+				$view_options = maybe_unserialize( $view_options );
+			}
+
+			self::add_entry_id_is_equal_to_get_param_filter( $view_options );
+
+			update_post_meta( $view_id, 'frm_options', $view_options );
+		}
+	}
+
+	/**
+	 * Add "Entry ID is equal to [get param=entry old_filter=1]" filter to a View's options
+	 *
+	 * @since 2.0.23
+	 * @param array $view_options
+	 */
+	private static function add_entry_id_is_equal_to_get_param_filter( &$view_options ) {
+		if ( ! isset( $view_options[ 'where' ] ) ) {
+			$view_options[ 'where' ] = array();
+		}
+
+		if ( ! isset( $view_options[ 'where_is' ] ) ) {
+			$view_options[ 'where_is' ] = array();
+		}
+
+		if ( ! isset( $view_options[ 'where_val' ] ) ) {
+			$view_options[ 'where_val' ] = array();
+		}
+
+		$view_options[ 'where' ][] = 'id';
+		$view_options[ 'where_is' ][] = '=';
+		$view_options[ 'where_val' ][] = '[get param=entry old_filter=1]';
+	}
 
 	/**
 	 * Save the view shortcode to the page if it's inserted automatically

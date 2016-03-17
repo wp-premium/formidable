@@ -17,7 +17,7 @@ class FrmProHooksController{
         add_filter('the_content', 'FrmProDisplaysController::get_content', 8);
 
         // Display Shortcodes
-        add_shortcode('display-frm-data', 'FrmProDisplaysController::get_shortcode', 1);
+        add_shortcode('display-frm-data', 'FrmProDisplaysController::get_shortcode');
 
         // Entries Controller
         if ( ! FrmAppHelper::is_admin() ) {
@@ -47,9 +47,20 @@ class FrmProHooksController{
         add_action('frm_after_create_entry', 'FrmProEntriesController::maybe_set_cookie', 20, 2);
         add_filter('frm_setup_edit_entry_vars', 'FrmProEntriesController::setup_edit_vars');
 
+		// Address
+		add_filter( 'frm_validate_address_field_entry', 'FrmProAddress::validate', 10, 4 );
+		add_filter( 'frm_default_address_field_opts', 'FrmProAddressesController::add_default_options' );
+		add_filter( 'frm_display_address_value_custom', 'FrmProAddressesController::display_value' );
+
+		// Credit card
+		add_filter( 'frm_validate_credit_card_field_entry', 'FrmProCreditCard::validate', 10, 4 );
+		add_filter( 'frm_default_credit_card_field_opts', 'FrmProCreditCardsController::add_default_options' );
+		add_filter( 'frm_display_credit_card_value_custom', 'FrmProCreditCardsController::display_value' );
+
         // Entry and Meta Helpers
         add_filter('frm_show_new_entry_page', 'FrmProEntriesHelper::allow_form_edit', 10, 2);
         add_filter('frm_email_value', 'FrmProEntryMetaHelper::email_value', 10, 3);
+        add_filter( 'frm_field_shortcodes_for_default_html_email', 'FrmProEntryMetaHelper::get_pro_field_shortcodes_for_default_email', 10, 2 );
 
         // Entry Shortcodes
         add_shortcode('formresults', 'FrmProEntriesController::get_form_results');
@@ -97,6 +108,7 @@ class FrmProHooksController{
         // Form Actions Controller
         add_action('frm_registered_form_actions', 'FrmProFormActionsController::register_actions');
         add_filter('frm_email_control_settings', 'FrmProFormActionsController::email_action_control');
+		add_filter( 'frm_trigger_create_action', 'FrmProFormActionsController::maybe_trigger_draft_actions', 10, 2 );
         add_action('frm_after_update_entry', 'FrmProFormActionsController::trigger_update_actions', 10, 2);
         add_action('frm_before_destroy_entry', 'FrmProFormActionsController::trigger_delete_actions', 20, 2);
 
@@ -176,6 +188,16 @@ class FrmProHooksController{
         add_action('frm_entry_action_route', 'FrmProEntriesController::route');
         add_filter('frm_entries_list_class', 'FrmProEntriesController::list_class');
         add_filter('frm_row_actions', 'FrmProEntriesController::row_actions', 10, 2 );
+
+		// Address Fields
+		add_action( 'frm_display_added_address_field', 'FrmProAddressesController::show_in_form_builder' );
+		add_action( 'frm_address_field_options_form', 'FrmProAddressesController::form_builder_options', 10, 3 );
+		add_filter( 'frm_csv_field_columns', 'FrmProAddressesController::add_csv_columns', 10, 2 );
+
+		// Credit Card Fields
+		add_action( 'frm_display_added_credit_card_field', 'FrmProCreditCardsController::show_in_form_builder' );
+		add_action( 'frm_credit_card_field_options_form', 'FrmProCreditCardsController::form_builder_options', 10, 3 );
+		add_filter( 'frm_csv_field_columns', 'FrmProCreditCardsController::add_csv_columns', 10, 2 );
 
         // Fields Controller
         add_action('frm_after_field_created', 'FrmProFieldsController::create_multiple_fields', 10, 2);
@@ -325,12 +347,19 @@ class FrmProHooksController{
         add_action('frm_enqueue_form_scripts', 'FrmProEntriesController::after_footer_loaded');
         add_filter('frm_continue_to_new', 'FrmProEntriesController::maybe_editing', 10, 3);
 
+		// Address
+		add_action( 'frm_form_field_address', 'FrmProAddressesController::show_in_form', 10, 3 );
+
+		// Credit Cards
+		add_action( 'frm_form_field_credit_card', 'FrmProCreditCardsController::show_in_form', 10, 3 );
+
         // Fields Controller
         add_action('frm_form_fields', 'FrmProFieldsController::form_fields', 10, 3);
         add_action('frm_show_other_field_type', 'FrmProFieldsController::show_other', 10, 3);
         add_action('frm_get_field_scripts', 'FrmProFieldsController::show_field', 10, 3);
         add_filter('frm_html_label_position', 'FrmProFieldsController::label_position', 10, 3);
         add_action('frm_date_field_js', 'FrmProFieldsController::date_field_js', 10, 2);
+		add_filter( 'frm_is_field_required', 'FrmProFieldsController::maybe_make_field_optional', 10, 2 );
 
         // Fields Helper
         add_filter('frm_get_default_value', 'FrmProFieldsHelper::get_default_value', 10, 4);
@@ -345,6 +374,7 @@ class FrmProHooksController{
         add_filter('frm_replace_shortcodes', 'FrmProFieldsHelper::replace_html_shortcodes', 10, 3);
 
         // Forms Controller
+		add_filter( 'frm_form_classes', 'FrmProFormsController::add_form_classes' );
         add_filter('frm_form_fields_class', 'FrmProFormsController::form_fields_class');
         add_action('frm_entry_form', 'FrmProFormsController::form_hidden_fields', 10, 2);
         add_filter('frm_submit_button', 'FrmProFormsController::submit_button_label', 5, 2);
@@ -354,6 +384,14 @@ class FrmProHooksController{
     public static function load_view_hooks() {
         // Fields Helper
         add_filter('frm_display_entry_content', 'FrmProFieldsHelper::replace_shortcodes', 10, 7);
+
+		// address
+		add_filter( 'frm_get_address_display_value', 'FrmProAddressesController::display_value' );
+		add_filter( 'frm_keep_address_value_array', '__return_true' );
+
+		// credit card
+		add_filter( 'frm_keep_credit_card_value_array', '__return_true' );
+		add_filter( 'frm_get_credit_card_display_value', 'FrmProCreditCardsController::display_value' );
     }
 
     public static function load_multisite_hooks() {

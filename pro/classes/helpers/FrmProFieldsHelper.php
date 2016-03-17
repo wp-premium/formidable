@@ -621,34 +621,35 @@ class FrmProFieldsHelper{
         $step = 1;
         $align = 'block';
         $show_hide = 'show';
-		if ( $values ) {
-			switch ( $values['type'] ) {
-                case 'number':
-                    $minnum = 0;
-                    $maxnum = 9999;
-                    $step = 'any';
-                break;
-                case 'scale':
-					if ( $field ) {
-                        $range = maybe_unserialize($field->options);
-                        $minnum = $range[0];
-                        $maxnum = end($range);
-                    }
-                break;
-                case 'time':
-                    $step = 30;
-                break;
-                case 'radio':
-                    $align = FrmStylesController::get_style_val('radio_align', ($field ? $field->form_id : 'default'));
-                break;
-                case 'checkbox':
-                    $align = FrmStylesController::get_style_val('check_align', ($field ? $field->form_id : 'default'));
-                break;
-                case 'break':
-                    $show_hide = 'hide';
-                break;
-            }
-        }
+
+		$field_type = ( $values ) ? $values['type'] : $field->type;
+		switch ( $field_type ) {
+			case 'number':
+				$minnum = 0;
+				$maxnum = 9999;
+				$step = 'any';
+			break;
+			case 'scale':
+				if ( $field ) {
+					$range = maybe_unserialize( $field->options );
+					$minnum = $range[0];
+					$maxnum = end( $range );
+				}
+			break;
+			case 'time':
+				$step = 30;
+			break;
+			case 'radio':
+				$align = FrmStylesController::get_style_val( 'radio_align', ( $field ? $field->form_id : 'default' ) );
+			break;
+			case 'checkbox':
+				$align = FrmStylesController::get_style_val( 'check_align', ( $field ? $field->form_id : 'default' ) );
+			break;
+			case 'break':
+				$show_hide = 'hide';
+			break;
+		}
+
         $end_minute = 60 - (int) $step;
 
         $frm_settings = FrmAppHelper::get_settings();
@@ -669,6 +670,8 @@ class FrmProFieldsHelper{
         );
 
         $opts = apply_filters('frm_default_field_opts', $opts, $values, $field);
+		$opts = apply_filters( 'frm_default_'. $field_type .'_field_opts', $opts, $values, $field );
+
 		unset( $values, $field );
 
         return $opts;
@@ -698,10 +701,14 @@ class FrmProFieldsHelper{
 			return;
 		}
 
+		return self::setup_input_mask( $field['format'] );
+    }
+
+	public static function setup_input_mask( $format ) {
 		global $frm_input_masks;
 		$frm_input_masks[] = true;
-		return ' data-frmmask="'. esc_attr( preg_replace('/\d/', '9', $field['format']) ) .'"';
-    }
+		return ' data-frmmask="'. esc_attr( preg_replace( '/\d/', '9', $format ) ) .'"';
+	}
 
 	/**
 	 * Triggered when the repeat option is toggled on the form builder page
@@ -3000,6 +3007,9 @@ DEFAULT_HTML;
         $atts['entry_id'] = $entry->id;
         $atts['entry_key'] = $entry->item_key;
         $atts['post_id'] = $entry->post_id;
+
+		self::maybe_get_show_from_array( $replace_with, $atts );
+
         $replace_with = apply_filters('frmpro_fields_replace_shortcodes', $replace_with, $tag, $atts, $field);
 
 		if ( $field->type == 'file' ) {
@@ -3009,8 +3019,13 @@ DEFAULT_HTML;
 		if ( isset( $atts['show'] ) && $atts['show'] == 'count' ) {
 			$replace_with = is_array( $replace_with ) ? count( $replace_with ) : ! empty( $replace_with );
 		} else if ( is_array( $replace_with ) && ! $foreach ) {
-			$replace_with = FrmAppHelper::array_flatten( $replace_with );
-			$replace_with = implode( $sep, $replace_with );
+			$keep_array = apply_filters( 'frm_keep_value_array', false, compact( 'field', 'replace_with' ) );
+			$keep_array = apply_filters( 'frm_keep_' . $field->type . '_value_array', $keep_array, compact( 'field', 'replace_with' ) );
+
+			if ( ! $keep_array ) {
+				$replace_with = FrmAppHelper::array_flatten( $replace_with );
+				$replace_with = implode( $sep, $replace_with );
+			}
 		}
 
         if ( $foreach ) {
@@ -3273,6 +3288,21 @@ DEFAULT_HTML;
 			$new_atts['add_link'] = true;
 		}
 
+	}
+
+	/**
+	 * @since 2.0.23
+	 * when a value is saved as an array, allow show=something to
+	 * return a specified value from the array
+	 */
+	private static function maybe_get_show_from_array( &$replace_with, $atts ) {
+		if ( is_array( $replace_with ) && isset( $atts['show'] ) ) {
+			if ( isset( $replace_with[ $atts['show'] ] ) ) {
+				$replace_with = $replace_with[ $atts['show'] ];
+			} else if ( isset( $atts['blank'] ) && $atts['blank'] ) {
+				$replace_with = '';
+			}
+		}
 	}
 
     public static function check_conditional_shortcode(&$content, $replace_with, $atts, $tag, $condition = 'if', $args = array() ) {
@@ -4362,6 +4392,12 @@ DEFAULT_HTML;
 				'data'      => __( 'List', 'formidable' ),
 			),
 		);
+
+		// only show the credit card field when an add-on says so
+		$show_credit_card = apply_filters( 'frm_include_credit_card', false );
+		if ( ! $show_credit_card ) {
+			unset( $field_types['credit_card'] );
+		}
 
 		return $field_types;
 	}

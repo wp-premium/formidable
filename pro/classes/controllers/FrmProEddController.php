@@ -28,7 +28,7 @@ class FrmProEddController extends FrmAddon {
 	}
 
 	public function set_license( $license ) {
-        update_option( $this->pro_cred_store, array( 'license' => $license ) );
+		update_option( $this->pro_cred_store, array( 'license' => $license ) );
 	}
 
 	public function get_license() {
@@ -71,6 +71,13 @@ class FrmProEddController extends FrmAddon {
         } else {
             update_option( $this->pro_auth_store, $is_active );
         }
+	}
+
+	private function get_pro_cred_form_vals() {
+		$license = isset( $_POST['license'] ) ? sanitize_text_field( $_POST['license'] ) : $this->get_license();
+		$wpmu = isset( $_POST['wpmu'] ) ? absint( $_POST['wpmu'] ) : $this->pro_wpmu;
+
+		return compact('license', 'wpmu');
 	}
 
 	public function show_license_message( $file, $plugin ) {
@@ -130,10 +137,12 @@ class FrmProEddController extends FrmAddon {
 <?php
     }
 
+	/**
+	 * this is the view for the license form
+	 */
     function display_form(){
         global $frm_vars;
 
-        // this is the view for the license form
         ?>
 <div id="pro_cred_form">
 
@@ -155,28 +164,4 @@ class FrmProEddController extends FrmAddon {
 </div>
 <?php
     }
-
-    function get_pro_cred_form_vals(){
-		$license = isset( $_POST['proplug-license'] ) ? sanitize_text_field( $_POST['proplug-license'] ) : $this->get_license();
-        $wpmu = isset( $_POST['proplug-wpmu'] ) ? true : $this->pro_wpmu;
-
-        return compact('license', 'wpmu');
-    }
-
-    private function _update_auth( $creds, $authorized = true ) {
-        if ( is_multisite() ) {
-            update_site_option( $this->pro_wpmu_store, $creds['wpmu'] );
-		}
-
-        if ( $creds['wpmu'] ) {
-            update_site_option( $this->pro_cred_store, $creds );
-            update_site_option( $this->pro_auth_store, $authorized );
-        } else {
-            update_option( $this->pro_cred_store, $creds );
-            update_option( $this->pro_auth_store, $authorized );
-        }
-
-        $this->license = ( isset( $creds['license'] ) && ! empty( $creds['license'] ) ) ? $creds['license'] : '';
-    }
-
 }

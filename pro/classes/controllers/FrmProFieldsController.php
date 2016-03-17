@@ -370,7 +370,7 @@ class FrmProFieldsController{
                 if ( ! is_numeric($field['maxnum']) ) {
                     $field['maxnum'] = 9999999;
                 }
-                if ( ! is_numeric($field['step']) ) {
+                if ( ! is_numeric( $field['step'] ) && $field['step'] != 'any' ) {
                     $field['step'] = 1;
                 }
                 $add_html .= ' min="' . esc_attr( $field['minnum'] ) . '" max="' . esc_attr( $field['maxnum'] ) . '" step="' . esc_attr( $field['step'] ) . '"';
@@ -631,6 +631,23 @@ class FrmProFieldsController{
 
         //echo ',beforeShowDay: $.datepicker.noWeekends';
     }
+
+	/**
+	 * @since 2.0.23
+	 */
+	public static function maybe_make_field_optional( $required, $field ) {
+		if ( $required && ! FrmAppHelper::is_admin_page('formidable' ) ) {
+			global $frm_vars;
+			$is_editing = isset( $frm_vars['editing_entry'] ) && $frm_vars['editing_entry'] && is_numeric( $frm_vars['editing_entry'] );
+			if ( $is_editing ) {
+				$optional_on_edit = apply_filters( 'frm_optional_fields_on_edit', array( 'password', 'credit_card' ) );
+				if ( in_array( $field['type'], (array) $optional_on_edit ) ) {
+					$required = false;
+				}
+			}
+		}
+		return $required;
+	}
 
     public static function ajax_get_data(){
         //check_ajax_referer( 'frm_ajax', 'nonce' );

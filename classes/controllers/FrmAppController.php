@@ -8,8 +8,8 @@ class FrmAppController {
             return;
         }
 
-        $frm_settings = FrmAppHelper::get_settings();
-        add_menu_page( 'Formidable', $frm_settings->menu, 'frm_view_forms', 'formidable', 'FrmFormsController::route', FrmAppHelper::plugin_url() . '/images/form_16.png', self::get_menu_position() );
+		$menu_name = FrmAppHelper::get_menu_name();
+		add_menu_page( 'Formidable', $menu_name, 'frm_view_forms', 'formidable', 'FrmFormsController::route', FrmAppHelper::plugin_url() . '/images/form_16.png', self::get_menu_position() );
     }
 
 	private static function get_menu_position() {
@@ -133,7 +133,9 @@ class FrmAppController {
 			$tip = FrmTipsHelper::get_banner_tip();
 ?>
 <div class="update-nag frm-update-to-pro">
-	<?php echo FrmAppHelper::kses( $tip['tip'] ) ?> <span><?php echo FrmAppHelper::kses( $tip['call'] ) ?></span> <a href="<?php echo esc_url( FrmAppHelper::make_affiliate_url('https://formidablepro.com?banner=1&tip='. absint( $tip['num'] ) ) ) ?>" class="button">Upgrade to Pro</a>
+	<?php echo FrmAppHelper::kses( $tip['tip'] ) ?>
+	<span><?php echo FrmAppHelper::kses( $tip['call'] ) ?></span>
+	<a href="<?php echo esc_url( FrmAppHelper::make_affiliate_url('https://formidablepro.com?banner=1&tip=' . absint( $tip['num'] ) ) ) ?>" class="button">Upgrade to Pro</a>
 </div>
 <?php
 		}
@@ -228,6 +230,7 @@ class FrmAppController {
 		), $version, true );
 		wp_register_style( 'formidable-admin', FrmAppHelper::plugin_url() . '/css/frm_admin.css', array(), $version );
         wp_register_script( 'bootstrap_tooltip', FrmAppHelper::plugin_url() . '/js/bootstrap.min.js', array( 'jquery' ), '3.3.4' );
+		wp_register_style( 'formidable-grids', FrmAppHelper::plugin_url() . '/css/frm_grids.css', array(), $version );
 
 		// load multselect js
 		wp_register_script( 'bootstrap-multiselect', FrmAppHelper::plugin_url() . '/js/bootstrap-multiselect.js', array( 'jquery', 'bootstrap_tooltip' ), '0.9.8', true );
@@ -245,6 +248,7 @@ class FrmAppController {
 			FrmAppHelper::localize_script( 'admin' );
 
             wp_enqueue_style( 'formidable-admin' );
+			wp_enqueue_style( 'formidable-grids' );
             add_thickbox();
 
             wp_register_script( 'formidable-editinplace', FrmAppHelper::plugin_url() . '/js/jquery/jquery.editinplace.packed.js', array( 'jquery' ), '2.3.0' );

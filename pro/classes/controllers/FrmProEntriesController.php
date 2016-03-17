@@ -414,7 +414,7 @@ class FrmProEntriesController{
                 }
 
                 if ( $form_id && is_array($items) ) {
-					echo '<script type="text/javascript">window.onload=function(){location.href="' . esc_url_raw( admin_url( 'admin-ajax.php' ) . '?form=' . $form_id . '&action=frm_entries_csv&item_id=' . implode( ',', $items ) ) . '";}</script>';
+					echo '<script type="text/javascript">window.onload=function(){location.href="' . esc_url_raw( admin_url( 'admin-ajax.php?form=' . $form_id . '&action=frm_entries_csv&item_id=' . implode( ',', $items ) ) ) . '";}</script>';
                 }
             }
         }
@@ -469,6 +469,7 @@ class FrmProEntriesController{
         //remove hooks if saving as draft
         remove_action('frm_after_create_entry', 'FrmProEntriesController::set_cookie', 20);
         remove_action('frm_after_create_entry', 'FrmFormActionsController::trigger_create_actions', 20);
+		add_action( 'frm_after_create_entry', 'FrmProFormActionsController::trigger_draft_actions', 10, 2 );
     }
 
     //add the create hooks since the entry is switching draft status
@@ -2195,7 +2196,7 @@ class FrmProEntriesController{
             }
         }
 
-        $delete_link = wp_nonce_url(admin_url('admin-ajax.php') . '?action=frm_entries_destroy&entry='. $entry_id .'&redirect='. $atts['page_id'], 'frm_ajax', 'nonce');
+		$delete_link = wp_nonce_url( admin_url( 'admin-ajax.php?action=frm_entries_destroy&entry='. $entry_id .'&redirect='. $atts['page_id'] ), 'frm_ajax', 'nonce' );
         if ( empty($atts['label']) ) {
             $link .= $delete_link;
         } else {
@@ -2257,6 +2258,10 @@ class FrmProEntriesController{
 			$value = FrmEntriesHelper::display_value( $value, $field, $atts);
 		}
 
+		if ( $value == '' ) {
+			$value = $atts['default'];
+		}
+
 		return $value;
     }
 
@@ -2283,7 +2288,7 @@ class FrmProEntriesController{
 			}
 
 			if ( empty( $atts['entry'] ) ) {
-				return;
+				return false;
 			}
 
 			if ( is_numeric( $atts['entry'] ) ) {
