@@ -41,7 +41,7 @@ class FrmStylesController {
     }
 
     public static function menu() {
-        add_submenu_page('formidable', 'Formidable | '. __( 'Styles', 'formidable' ), __( 'Styles', 'formidable' ), 'frm_change_settings', 'formidable-styles', 'FrmStylesController::route');
+		add_submenu_page('formidable', 'Formidable | ' . __( 'Styles', 'formidable' ), __( 'Styles', 'formidable' ), 'frm_change_settings', 'formidable-styles', 'FrmStylesController::route' );
     }
 
     public static function admin_init() {
@@ -59,13 +59,15 @@ class FrmStylesController {
 
         $style = apply_filters('frm_style_head', false);
         if ( $style ) {
-			wp_enqueue_style( 'frm-single-custom-theme', admin_url( 'admin-ajax.php?action=frmpro_load_css&flat=1' ) .'&'. http_build_query( $style->post_content ) );
+			wp_enqueue_style( 'frm-single-custom-theme', admin_url( 'admin-ajax.php?action=frmpro_load_css&flat=1' ) . '&' . http_build_query( $style->post_content ) );
         }
     }
 
 	public static function enqueue_css( $register = 'enqueue' ) {
 		global $frm_vars;
+
 		$register_css = ( $register == 'register' );
+
 		if ( ( $frm_vars['load_css'] || $register_css ) && ! FrmAppHelper::is_admin() ) {
 			$frm_settings = FrmAppHelper::get_settings();
 			if ( $frm_settings->load_style == 'none' ) {
@@ -78,7 +80,7 @@ class FrmStylesController {
 				$version = FrmAppHelper::plugin_version();
 
 				foreach ( (array) $css as $css_key => $file ) {
-					if ( $register == 'register' ) {
+					if ( $register_css ) {
 						$this_version = self::get_css_version( $css_key, $version );
 						wp_register_style( $css_key, $file, array(), $this_version );
 					}
@@ -201,7 +203,7 @@ class FrmStylesController {
 
         self::add_meta_boxes();
 
-        include(FrmAppHelper::plugin_path() .'/classes/views/styles/show.php');
+		include( FrmAppHelper::plugin_path() . '/classes/views/styles/show.php' );
     }
 
 	/**
@@ -217,7 +219,7 @@ class FrmStylesController {
             $forms = FrmForm::get_published_forms();
         }
 
-        include(FrmAppHelper::plugin_path() .'/classes/views/styles/manage.php');
+		include( FrmAppHelper::plugin_path() . '/classes/views/styles/manage.php' );
     }
 
     private static function manage_styles() {
@@ -254,7 +256,7 @@ class FrmStylesController {
             $style = $frm_style->get_default_style();
         }
 
-        include(FrmAppHelper::plugin_path() .'/classes/views/styles/custom_css.php');
+		include( FrmAppHelper::plugin_path() . '/classes/views/styles/custom_css.php' );
     }
 
     public static function save_css() {
@@ -321,7 +323,7 @@ class FrmStylesController {
         }
 
         echo '<style type="text/css">';
-        include(FrmAppHelper::plugin_path() .'/css/_single_theme.css.php');
+		include( FrmAppHelper::plugin_path() . '/css/_single_theme.css.php' );
         echo '</style>';
         wp_die();
     }
@@ -345,7 +347,7 @@ class FrmStylesController {
         );
 
         foreach ( $meta_boxes as $nicename => $name ) {
-            add_meta_box( $nicename .'-style', $name, 'FrmStylesController::include_style_section', self::$screen, 'side', 'default', $nicename );
+			add_meta_box( $nicename . '-style', $name, 'FrmStylesController::include_style_section', self::$screen, 'side', 'default', $nicename );
             unset($nicename, $name);
         }
     }
@@ -353,7 +355,7 @@ class FrmStylesController {
 	public static function include_style_section( $atts, $sec ) {
         extract($atts);
 		$current_tab = FrmAppHelper::simple_get( 'page-tab', 'sanitize_title', 'default' );
-        include(FrmAppHelper::plugin_path() .'/classes/views/styles/_'. $sec['args'] .'.php');
+		include( FrmAppHelper::plugin_path() . '/classes/views/styles/_' . $sec['args'] . '.php' );
     }
 
     public static function load_css() {
@@ -362,7 +364,7 @@ class FrmStylesController {
         $frm_style = new FrmStyle();
         $defaults = $frm_style->get_defaults();
 
-        include(FrmAppHelper::plugin_path() .'/css/_single_theme.css.php');
+		include( FrmAppHelper::plugin_path() . '/css/_single_theme.css.php' );
         wp_die();
     }
 
@@ -425,7 +427,7 @@ class FrmStylesController {
         $style = $frm_style->get_one();
 
         if ( $style ) {
-            $class .= ' frm_style_'. $style->post_name;
+			$class .= ' frm_style_' . $style->post_name;
         }
 
         return $class;

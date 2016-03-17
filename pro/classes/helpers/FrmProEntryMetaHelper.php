@@ -313,7 +313,6 @@ class FrmProEntryMetaHelper{
         }
         $query[] = $sub_query;
 
-        $user_id = '';
         if ( $this_field && isset($this_field->field_options['restrict']) && $this_field->field_options['restrict'] ) {
             $query['e.user_id'] = get_current_user_id();
         }
@@ -335,7 +334,6 @@ class FrmProEntryMetaHelper{
     }
 
     public static function &value_exists($field_id, $value, $entry_id = false) {
-        global $wpdb;
         if ( is_object($field_id) ) {
             $field_id = $field_id->id;
         }
@@ -417,5 +415,24 @@ class FrmProEntryMetaHelper{
 		$max = filter_var( $max, FILTER_SANITIZE_NUMBER_INT );
 
 		return $max;
+	}
+
+	/**
+	 * Set the Dynamic List field shortcodes for the default HTML email
+	 *
+	 * @since 2.0.23
+	 * @param array $field_shortcodes
+	 * @param object $f
+	 * @return array
+	 */
+	public static function get_pro_field_shortcodes_for_default_email( $field_shortcodes, $f ) {
+		if ( $f->type == 'data' && $f->field_options['data_type'] == 'data' ) {
+			if ( ! empty( $f->field_options['hide_field'] ) && ! empty( $f->field_options['form_select'] ) ) {
+				$field_id_string = reset( $f->field_options[ 'hide_field' ] ) . ' show=' . $f->field_options[ 'form_select' ];
+				$field_shortcodes['val'] = '[' . $field_id_string . ']';
+			}
+		}
+
+		return $field_shortcodes;
 	}
 }

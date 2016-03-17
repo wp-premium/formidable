@@ -199,6 +199,10 @@ div.frm_msg_padding{
     z-index:99999;
 }
 
+.frm-on-bottom{
+	z-index:-1;
+}
+
 .post-new-php.post-type-frm_display #poststuff {padding-top:10px;}
 .frm_forms.with_frm_style{max-width:100%;}
 label.frm_primary_label,
@@ -246,7 +250,7 @@ form label.frm_primary_label input{font-size:12px;}
 .with_frm_style form .frm_blank_field input,
 .with_frm_style form .frm_blank_field textarea,
 .with_frm_style form .frm_blank_field select,
-.with_frm_style form .frm_blank_field .g-recaptcha iframe{
+.with_frm_style form .frm_blank_field .frm-g-recaptcha iframe{
 	border-color:#B94A48;
 }
 .with_frm_style form .frm_blank_field label{color:#B94A48;}
@@ -358,11 +362,6 @@ form label.frm_primary_label input{font-size:12px;}
 	height:50px;
 }
 
-.frm_pro_tip{
-	font-size:12px;
-	color:#666;
-}
-
 .frm_pro_tip a,
 .frm_pro_tip span,
 .frm_pro_tip .frm_check1_icon{
@@ -374,16 +373,19 @@ form label.frm_primary_label input{font-size:12px;}
 }
 
 .frm_pro_tip{
+	font-size:12px;
+	color:#666;
 	border:1px solid #EF7E59;
 	display:block;
-	padding:2px 5px 0;
+	padding:5px;
 	background:#FBF0EC;
 	border-radius:4px;
 	text-align:center;
 }
 
 .frm_field_list .frm_pro_tip{
-	margin-top:-14px;
+	margin-top:-10px;
+	margin-bottom:10px;
 }
 
 .nav-tab-wrapper .frm_pro_tip{
@@ -425,6 +427,9 @@ form label.frm_primary_label input{font-size:12px;}
 	-webkit-box-shadow:0 6px 12px rgba(0, 0, 0, 0.175);
 	box-shadow:0 6px 12px rgba(0, 0, 0, 0.175);
 	background-clip:padding-box;
+}
+#frm_bs_dropdown .frm-dropdown-menu{
+	width:400px;
 }
 .field_type_list .frm-dropdown-menu,
 .preview .frm-dropdown-menu{
@@ -529,6 +534,7 @@ form label.frm_primary_label input{font-size:12px;}
 	border:solid 1px #dfdfdf;
 	line-height:normal;
 }
+.frm_multi_fields_container,
 .frm_form_fields:not(.frm_sample_form) input[type="text"]{
 	width:400px;
     height:auto;
@@ -1454,7 +1460,8 @@ span.howto{display:inline;}
 
 .frm_prepop li a{
     background:#F5F5F5;
-    border:1px solid #EEEEEE;
+	border-width:1px;
+	border-style:solid;
     border-color:#EEEEEE #DEDEDE #DEDEDE #EEEEEE;
     display: block;
     font-weight: bold;

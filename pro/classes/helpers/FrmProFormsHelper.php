@@ -589,7 +589,7 @@ $(document.getElementById('<?php echo $datepicker ?>')).change(function(){frmFro
             'copy' => 0, 'single_entry' => 0, 'single_entry_type' => 'user',
             'success_page_id' => '', 'success_url' => '', 'ajax_submit' => 0,
             'cookie_expiration' => 8000, 'prev_value' => __( 'Previous', 'formidable' ),
-            'submit_align' => '',
+			'submit_align' => '', 'js_validate' => 0,
         );
     }
 

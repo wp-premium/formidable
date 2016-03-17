@@ -7,6 +7,7 @@
         <option value="item_key" <?php selected($where_field, 'item_key') ?>><?php _e( 'Entry key', 'formidable' ) ?></option>
 		<option value="post_id" <?php selected($where_field, 'post_id') ?>><?php _e( 'Post ID', 'formidable' ) ?></option>
         <option value="parent_item_id" <?php selected($where_field, 'parent_item_id') ?>><?php _e( 'Parent entry ID', 'formidable' ) ?></option>
+        <option value="is_draft" <?php selected($where_field, 'is_draft') ?>><?php _e( 'Draft status', 'formidable' ) ?></option>
         <?php
         if ( is_numeric($form_id) ) {
 			FrmProFieldsHelper::get_field_options( $form_id, $where_field, 'not', array( 'break', 'end_divider', 'divider', 'file', 'captcha', 'form' ), array( 'inc_sub' => 'include' ) );
