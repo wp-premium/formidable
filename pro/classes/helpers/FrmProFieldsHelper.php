@@ -19,32 +19,46 @@ class FrmProFieldsHelper{
             }
         }
 
-		$matches = self::get_shortcodes_from_string( $value );
-
-        if ( ! isset($matches[0]) ) {
-            return do_shortcode($value);
-        }
-
-		$args = array(
-			'matches'     => $matches,
+		$pass_args = array(
 			'allow_array' => $allow_array,
 			'field'       => $field,
 			'prev_val'    => $prev_val,
 		);
 
-		foreach ( $matches[1] as $match_key => $shortcode ) {
-			$args['shortcode'] = $shortcode;
-			$args['match_key'] = $match_key;
-			self::replace_shortcode_in_string( $value, $args  );
-		}
-
-		unset( $matches );
-
+		self::replace_non_standard_formidable_shortcodes( $pass_args, $value );
 		self::replace_field_id_shortcodes( $value, $allow_array );
 		self::do_shortcode( $value, $allow_array );
 		self::maybe_force_array( $value, $field, $allow_array );
 
 		return $value;
+	}
+
+	/**
+	 * Replace Formidable shortcodes (that are not added with add_shortcode) in a string
+	 *
+	 * @since 2.0.24
+	 * @param array $args
+	 * @param string $value
+	 */
+	public static function replace_non_standard_formidable_shortcodes( $args, &$value ) {
+		$default_args = array(
+			'allow_array' => false,
+			'field' => false,
+			'prev_val' => '',
+		);
+		$args = wp_parse_args( $args, $default_args );
+
+		$matches = self::get_shortcodes_from_string( $value );
+
+		if ( isset( $matches[0] ) ) {
+			$args['matches'] = $matches;
+
+			foreach ( $matches[1] as $match_key => $shortcode ) {
+				$args['shortcode'] = $shortcode;
+				$args['match_key'] = $match_key;
+				self::replace_shortcode_in_string( $value, $args  );
+			}
+		}
 	}
 
 	/**
@@ -667,6 +681,7 @@ class FrmProFieldsHelper{
             'format' => '', 'repeat' => 0, 'add_label' => __( 'Add', 'formidable' ), 'remove_label' => __( 'Remove', 'formidable' ),
             'conf_field' => '', 'conf_input' => '', 'conf_desc' => '',
             'conf_msg' => __( 'The entered values do not match', 'formidable' ), 'other' => 0,
+			'in_section' => 0,
         );
 
         $opts = apply_filters('frm_default_field_opts', $opts, $values, $field);
@@ -1411,7 +1426,7 @@ class FrmProFieldsHelper{
         }
         $format = ($values['clock'] == 24) ? 'H:i' : 'h:i A';
 
-        $options = array( '');
+        $options = array( '' );
 		while ( $time <= $end_time ) {
             $options[] = date($format, $time);
             $time += $step;
@@ -2874,7 +2889,8 @@ DEFAULT_HTML;
                     <option class="frm_subopt" value="<?php echo esc_attr( $field->field_key ) ?> size=medium"><?php _e( 'Medium', 'formidable' ) ?></option>
                     <option class="frm_subopt" value="<?php echo esc_attr( $field->field_key ) ?> size=large"><?php _e( 'Large', 'formidable' ) ?></option>
                     <option class="frm_subopt" value="<?php echo esc_attr( $field->field_key ) ?> size=full"><?php _e( 'Full Size', 'formidable' ) ?></option>
-                <?php } else if ( $field->type == 'data' ) { //get all fields from linked form
+                <?php } else if ( $field->type == 'data' && $type != 'calc' ) {
+					//get all fields from linked form
                     if ( isset($field->field_options['form_select']) && is_numeric($field->field_options['form_select']) ) {
 
                         $linked_form = FrmDb::get_var( 'frm_fields', array( 'id' => $field->field_options['form_select']), 'form_id' );

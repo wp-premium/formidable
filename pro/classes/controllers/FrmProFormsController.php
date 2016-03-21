@@ -410,14 +410,6 @@ class FrmProFormsController{
 <?php
         $opts = array(
             'filter' => array( 'val' => 1, 'label' => __( 'Filter shortcodes within the view content', 'formidable' )),
-            'drafts'    => array(
-                'val'   => 0, 'label' => __( 'Entry type(s)', 'formidable' ), 'type'  => 'select',
-                'opts' => array(
-                   '0'  => __( 'Published', 'formidable' ),
-                   '1'  => __( 'Drafts', 'formidable' ),
-                   'both' => __( 'Published and drafts', 'formidable' ),
-                )
-            ),
             'limit' => array( 'val' => '', 'label' => __( 'Limit', 'formidable' ), 'type' => 'text'),
             'page_size' => array( 'val' => '', 'label' => __( 'Page size', 'formidable' ), 'type' => 'text'),
 			'order'  => array(

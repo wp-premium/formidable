@@ -584,6 +584,25 @@ class FrmProEntryMeta{
         }
     }
 
+	public static function skip_required_validation( $field ) {
+		$going_backwards = FrmProFormsHelper::going_to_prev( $field->form_id );
+		if ( $going_backwards ) {
+			return true;
+		}
+
+		$saving_draft = FrmProFormsHelper::saving_draft();
+		if ( $saving_draft ) {
+			return true;
+		}
+
+		$is_conditionally_hidden = FrmProFieldsHelper::is_field_hidden( $field, stripslashes_deep( $_POST ) );
+		if ( $is_conditionally_hidden ) {
+			return true;
+		}
+
+		return false;
+	}
+
 	/**
 	* Get media ID(s) to be saved to database and set global media ID values
 	*
