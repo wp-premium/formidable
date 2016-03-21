@@ -446,9 +446,11 @@ class FrmProFieldsController{
             } else if ( isset($field['form_select']) ) {
                 $selected_field = $field['form_select'];
             }
+
+	        include(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/options-form-before.php');
         }
 
-        include(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/options-form-before.php');
+	    include(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/form-builder/options-before.php');
     }
 
     public static function options_form_top($field, $display, $values) {
@@ -860,6 +862,9 @@ class FrmProFieldsController{
 		if ( count($field['options']) == 1 && reset($field['options']) == '' ) {
 			wp_die();
 		}
+
+		// Sort the options
+		$field['options'] = apply_filters( 'frm_data_sort', $field['options'], array() );
 	}
 
 	/**
@@ -1030,6 +1035,44 @@ class FrmProFieldsController{
 
         wp_die();
     }
+
+	/**
+	 * Update a field after dragging and dropping it on the form builder page
+	 *
+	 * @since 2.0.24
+	 */
+	public static function update_field_after_move() {
+		FrmAppHelper::permission_check('frm_edit_forms');
+		check_ajax_referer( 'frm_ajax', 'nonce' );
+
+		$field_id = FrmAppHelper::get_post_param( 'field', 0, 'absint' );
+		$form_id = FrmAppHelper::get_post_param( 'form_id', 0, 'absint' );
+		$section_id = FrmAppHelper::get_post_param( 'section_id', 0, 'absint' );
+
+		if ( ! $field_id ) {
+			wp_die();
+		}
+
+		$update_values = array();
+
+		$field_options = FrmDb::get_var( 'frm_fields', array( 'id' => $field_id ), 'field_options' );
+		$field_options = unserialize( $field_options );
+
+		// Update the in_section value
+		if ( $field_options['in_section'] != $section_id ) {
+			$field_options['in_section'] = $section_id;
+			$update_values['field_options'] = $field_options;
+		}
+
+		// Update the form_id value
+		if ( $form_id ) {
+			$update_values['form_id'] = $form_id;
+		}
+
+		FrmField::update( $field_id, $update_values );
+
+		wp_die();
+	}
 
 	public static function duplicate_section($section_field, $form_id) {
 		FrmAppHelper::permission_check('frm_edit_forms');

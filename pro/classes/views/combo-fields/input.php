@@ -14,11 +14,14 @@
 			<?php } ?>
 		</select>
 	<?php } else { ?>
-	<input type="<?php echo esc_attr( $sub_field['type'] ) ?>" id="<?php echo esc_attr( $html_id .'_'. $key ) ?>" name="<?php echo esc_attr( $field_name ) ?>[<?php echo esc_attr( $key ) ?>]" value="<?php echo esc_attr( $field['value'][ $key ] ) ?>" <?php
+	<input type="<?php echo esc_attr( $sub_field['type'] ) ?>" id="<?php echo esc_attr( $html_id . '_' . $key ) ?>" value="<?php echo esc_attr( $field['value'][ $key ] ) ?>" <?php
+	if ( ! isset( $remove_names ) || ! $remove_names ) {
+		echo ' name="' . esc_attr( $field_name ) . '[' . esc_attr( $key ) . ']" ';
+	}
 	FrmProCreditCardsController::add_atts_to_input( compact( 'field', 'sub_field', 'key' ) );
 	?> />
-	<?php } ?>
-	<?php
+	<?php }
+
 	if ( $sub_field['label'] ) {
 		FrmProAddressesController::include_sub_label( array(
 			'field' => $field, 'option_name' => $key . '_desc'

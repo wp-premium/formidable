@@ -321,6 +321,7 @@ class FrmProHooksController{
         add_action('wp_ajax_frm_add_logic_row', 'FrmProFieldsController::_logic_row');
         add_action('wp_ajax_frm_populate_calc_dropdown', 'FrmProFieldsController::populate_calc_dropdown');
         add_action('wp_ajax_frm_toggle_repeat', 'FrmProFieldsController::toggle_repeat');
+        add_action( 'wp_ajax_frm_update_field_after_move', 'FrmProFieldsController::update_field_after_move' );
 
         // Form Actions Controller
         add_action('wp_ajax_frm_add_form_logic_row', 'FrmProFormActionsController::_logic_row');

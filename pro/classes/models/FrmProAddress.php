@@ -10,7 +10,8 @@ class FrmProAddress {
 	}
 
 	public static function validate_required_fields( &$errors, $field, $values ) {
-		if ( $field->required && ! FrmProFormsHelper::saving_draft() ) {
+		$skip_required = FrmProEntryMeta::skip_required_validation( $field );
+		if ( $field->required && ! $skip_required ) {
 			foreach ( $values as $key => $value ) {
 				if ( empty( $value ) && $key != 'line2' ) {
 					$errors[ 'field' . $field->temp_id . '-' . $key ] = '';

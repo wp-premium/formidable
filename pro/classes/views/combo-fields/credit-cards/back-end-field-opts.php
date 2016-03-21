@@ -8,6 +8,7 @@
 			<option value="4" <?php selected( $field['save_cc'], '4' ) ?>><?php esc_html_e( 'Save only the last 4 digits', 'formidable' ) ?></option>
 			<option value="0" <?php selected( $field['save_cc'], '0' ) ?>><?php esc_html_e( 'Do not store the card number', 'formidable' ) ?></option>
 			<option value="16" <?php selected( $field['save_cc'], '16' ) ?>><?php esc_html_e( 'Store the whole card number (not recommended)', 'formidable' ) ?></option>
+			<option value="-1" <?php selected( $field['save_cc'], '-1' ) ?>><?php esc_html_e( 'Do not store and remove the input names', 'formidable' ) ?></option>
 		</select>
 		<input type="hidden" name="field_options[clear_on_focus_<?php echo esc_attr( $field['id'] ) ?>]" value="1" />
 	</td>
