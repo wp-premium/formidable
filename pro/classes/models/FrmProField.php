@@ -7,6 +7,8 @@ class FrmProField {
             $field_data['field_options']['label'] = '';
         }
 
+		self::switch_in_section_field_option( $field_data );
+
         $defaults = array(
             'number' => array( 'maxnum'    => 9999999 ),
             'date'  => array( 'max'   => '10' ),
@@ -46,6 +48,24 @@ class FrmProField {
         }
         return $field_data;
     }
+
+	/**
+	 * Change the default in_section value to the ID of the section where a new field was dragged and dropped
+	 *
+	 * @since 2.0.24
+	 * @param array $field_data
+	 */
+	private static function switch_in_section_field_option( &$field_data ){
+		if ( in_array( $field_data['type'], array( 'divider', 'end_divider', 'form' ) ) ) {
+			return;
+		}
+
+		$ajax_action = FrmAppHelper::get_post_param( 'action', '', 'sanitize_title' );
+		if ( 'frm_insert_field' == $ajax_action ) {
+			$section_id = FrmAppHelper::get_post_param( 'section_id', 0, 'absint' );
+			$field_data['field_options']['in_section'] = $section_id;
+		}
+	}
 
 	public static function update( $field_options, $field, $values ) {
 		$defaults = FrmProFieldsHelper::get_default_field_opts( false, $field );

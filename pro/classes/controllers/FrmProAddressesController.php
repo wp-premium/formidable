@@ -25,10 +25,8 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 	}
 
 	public static function show_in_form_builder( $field, $name = '', $null = null ) {
-		if ( ! is_array( $field['default_value'] ) ) {
-			$defaults = self::empty_value_array();
-			self::fill_values( $field['default_value'], $defaults );
-		}
+		$defaults = self::empty_value_array();
+		self::fill_values( $field['default_value'], $defaults );
 
 		$field['value'] = $field['default_value'];
 		$sub_fields = self::get_sub_fields( $field );

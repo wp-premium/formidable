@@ -3,6 +3,7 @@
 class FrmProCreditCard {
 
 	public static function validate( $errors, $field, $values, $args ) {
+		self::validate_required_fields( $errors, $field, $values );
 		self::validate_cc_number( $errors, $field, $values );
 		self::validate_cc_expiration( $errors, $field, $values );
 		self::validate_cvc( $errors, $field, $values );
@@ -12,6 +13,22 @@ class FrmProCreditCard {
 		add_action( 'frm_after_entry_processed', 'FrmProCreditCard::secure_after_save', 100 );
 
 		return $errors;
+	}
+
+	public static function validate_required_fields( &$errors, $field, $values ) {
+		$skip_required = FrmProEntryMeta::skip_required_validation( $field );
+		if ( $skip_required ) {
+			return;
+		}
+
+		$is_editing = ( $_POST && isset( $_POST['id'] ) && is_numeric( $_POST['id'] ) );
+		if ( $field->required && ! $is_editing ) {
+			foreach ( $values as $key => $value ) {
+				if ( empty( $value ) ) {
+					$errors[ 'field' . $field->temp_id . '-' . $key ] = '';
+				}
+			}
+		}
 	}
 
 	public static function validate_cc_number( &$errors, $field, $values ) {

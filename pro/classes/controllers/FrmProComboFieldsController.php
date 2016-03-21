@@ -27,7 +27,7 @@ class FrmProComboFieldsController {
 
 	public static function include_placeholder( $default_value, $sub_field ) {
 		if ( isset( $default_value[ $sub_field ] ) && ! empty( $sub_field ) ) {
-			echo ' placeholder="'. esc_attr( $default_value[ $sub_field ] ) . '" ';
+			echo ' placeholder="' . esc_attr( $default_value[ $sub_field ] ) . '" ';
 		}
 	}
 

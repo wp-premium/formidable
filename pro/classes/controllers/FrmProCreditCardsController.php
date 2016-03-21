@@ -20,6 +20,7 @@ class FrmProCreditCardsController extends FrmProComboFieldsController {
 		}
 
 		$sub_fields = self::get_sub_fields( $field );
+		$remove_names = ( $field['save_cc'] == -1 );
 
 		include( FrmAppHelper::plugin_path() .'/pro/classes/views/combo-fields/input.php' );
 	}
@@ -28,6 +29,8 @@ class FrmProCreditCardsController extends FrmProComboFieldsController {
 		if ( ! is_array( $field['default_value'] ) ) {
 			$field['default_value'] = self::default_labels();
 		}
+		$defaults = self::empty_value_array();
+		self::fill_values( $field['default_value'], $defaults );
 
 		$field['value'] = $field['default_value'];
 		$sub_fields = self::get_sub_fields( $field );
@@ -41,25 +44,27 @@ class FrmProCreditCardsController extends FrmProComboFieldsController {
 
 		$fields = array(
 			'cc'    => array(
-				'type' => $html5_type, 'classes' => 'frm_full', 'label' => 0,
+				'type' => $html5_type, 'classes' => 'frm_full frm_cc_number', 'label' => 0,
 				'atts' => array(
 					'x-autocompletetype' => 'cc-number', 'autocompletetype' => 'cc-number', 'autocorrect' => 'off',
 					'spellcheck' => 'off', 'autocapitalize' => 'off',
+					'data-name' => $field['id'] . '-cc',
 				),
 			),
 			'month' => array(
-				'type' => 'select', 'classes' => 'frm_first frm_fourth',
+				'type' => 'select', 'classes' => 'frm_first frm_fourth frm_cc_exp_month',
 				'label' => 0, 'options' => range( 1, 12 ),
 			),
 			'year'  => array(
-				'type' => 'select', 'classes' => 'frm_fourth',
+				'type' => 'select', 'classes' => 'frm_fourth frm_cc_exp_year',
 				'label' => 0, 'options' => range( date('Y'), date('Y') + 10 ),
 			),
 			'cvc'  => array(
-				'type' => $html5_type, 'classes' => 'frm_half', 'label' => 0,
+				'type' => $html5_type, 'classes' => 'frm_half frm_cc_cvc', 'label' => 0,
 				'atts' => array(
 					'spellcheck' => 'off', 'autocapitalize' => 'off',
 					'maxlength' => 4, 'autocorrect' => 'off', 'autocomplete' => 'off',
+					'data-name' => $field['id'] . '-cvc',
 				),
 			),
 		);

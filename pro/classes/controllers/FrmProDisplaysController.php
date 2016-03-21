@@ -902,15 +902,19 @@ class FrmProDisplaysController {
 		$atts = self::get_atts_for_view( $atts, $view );
 
 		if ( self::is_listing_page_displayed( $view, $atts ) ) {
-			$new_content = self::get_listing_page_content( $view, $atts );
+			$view_content = self::get_listing_page_content( $view, $atts );
 		} else {
-			$new_content = self::get_detail_page_content( $view, $atts );
+			$view_content = self::get_detail_page_content( $view, $atts );
 		}
+
+		self::do_all_shortcodes_except_formidable( $view_content );
+
+		self::maybe_apply_the_content_filter( $atts, $view_content );
 
 		// load the styling for css classes and pagination
 		FrmStylesController::enqueue_style();
 
-		return $new_content;
+		return $view_content;
 	}
 
 	/**
@@ -1037,12 +1041,11 @@ class FrmProDisplaysController {
 			return self::get_no_entries_message_with_pagination( $view, $args, $atts );
 		}
 
-		$before_and_after_content = self::get_before_and_after_content_for_listing_page( $view, $args );
+		$before_content = self::get_before_content_for_listing_page( $view, $args );
 		$inner_content = self::get_inner_content_for_listing_page( $view, $args );
+		$after_content = self::get_after_content_for_listing_page( $view, $args );
 
-		$view_content = $before_and_after_content[0] . $inner_content . $before_and_after_content[1];
-
-		self::maybe_apply_the_content_filter( $atts, $view_content );
+		$view_content = $before_content . $inner_content . $after_content;
 
 		return $view_content;
 	}
@@ -1074,8 +1077,6 @@ class FrmProDisplaysController {
 		$after_content = self::get_after_content_for_detail_page( $view );
 
 		$view_content = $before_content . $inner_content . $after_content;
-
-		self::maybe_apply_the_content_filter( $atts, $view_content );
 
 		return $view_content;
 	}
@@ -1336,6 +1337,11 @@ class FrmProDisplaysController {
 		if ( ! empty( $view->frm_where ) ) {
 			$frm_items_where_clause = array();
 			foreach ( $view->frm_where as $i => $where_field ) {
+
+				// If no value is saved for where field, move on
+				if ( $where_field === '' ) {
+					continue;
+				}
 
 				// If no entry IDs, don't keep checking filters
 				if ( empty( $entry_ids ) ) {
@@ -2148,26 +2154,6 @@ class FrmProDisplaysController {
 	}
 
 	/**
-	 * Get a listing View's Before and After Content
-	 *
-	 * @since 2.0.23
-	 * @param object $view
-	 * @param array $args
-	 * @return array
-	 */
-	private static function get_before_and_after_content_for_listing_page( $view, $args ) {
-		$before_content = self::get_before_content_for_listing_page( $view, $args );
-		$after_content = self::get_after_content_for_listing_page( $view, $args );
-
-		$before_and_after_content = $before_content . 'frm_inner_content_placeholder' . $after_content;
-		$before_and_after_content = FrmProFieldsHelper::get_default_value( $before_and_after_content, false, true, false );
-
-		$before_and_after_pieces = explode( 'frm_inner_content_placeholder', $before_and_after_content );
-
-		return $before_and_after_pieces;
-	}
-
-	/**
 	 * Get the Before Content for a View's Listing Page
 	 *
 	 * @since 2.0.23
@@ -2183,6 +2169,8 @@ class FrmProDisplaysController {
 		self::replace_entry_count_shortcode( $args, $before_content );
 
 		$before_content = apply_filters( 'frm_before_display_content', $before_content, $view, 'all', $args );
+
+		FrmProFieldsHelper::replace_non_standard_formidable_shortcodes( array(), $before_content );
 
 		return $before_content;
 	}
@@ -2207,7 +2195,7 @@ class FrmProDisplaysController {
 
 		if ( $filtered_content != $unfiltered_content ) {
 			$inner_content = $filtered_content;
-			$inner_content = FrmProFieldsHelper::get_default_value( $inner_content, false, true, false );
+			FrmProFieldsHelper::replace_non_standard_formidable_shortcodes( array(), $inner_content );
 		} else {
 			$odd = 'odd';
 			$count = 0;
@@ -2219,7 +2207,7 @@ class FrmProDisplaysController {
 					$args['count'] = $count;
 
 					$new_content = apply_filters( 'frm_display_entry_content', $unfiltered_content, $entry, $shortcodes, $view, 'all', $odd, $args );
-					$new_content = FrmProFieldsHelper::get_default_value( $new_content, false, true, false );
+					FrmProFieldsHelper::replace_non_standard_formidable_shortcodes( array(), $new_content );
 					$inner_content .= $new_content;
 
 					$odd = ( $odd == 'odd' ) ? 'even' : 'odd';
@@ -2263,6 +2251,8 @@ class FrmProDisplaysController {
 
 		$after_content = apply_filters( 'frm_after_display_content', $after_content, $view, 'all', $args );
 
+		FrmProFieldsHelper::replace_non_standard_formidable_shortcodes( array(), $after_content );
+
 		return $after_content;
 	}
 
@@ -2300,7 +2290,7 @@ class FrmProDisplaysController {
 
 		$detail_content = apply_filters( 'frm_display_entry_content', $new_content, $entry, $shortcodes, $view, 'one', 'odd', array() );
 
-		$detail_content = FrmProFieldsHelper::get_default_value( $detail_content, false, true, false );
+		FrmProFieldsHelper::replace_non_standard_formidable_shortcodes( array(), $detail_content );
 
 		return $detail_content;
 	}
@@ -2403,6 +2393,20 @@ class FrmProDisplaysController {
 		$content .= apply_filters( 'frm_after_display_content', $pagination, $view, 'all', $args );
 
 		return $content;
+	}
+
+	/**
+	 * Do all shortcode except [formidable id=x]
+	 * This helps prevent double-filtering of forms
+	 * Also, it probably needs to be kept around for reverse compatibility
+	 *
+	 * @param $view_content
+	 */
+	private static function do_all_shortcodes_except_formidable( &$view_content ) {
+		global $frm_vars;
+		$frm_vars['skip_shortcode'] = true;
+		$view_content = do_shortcode( $view_content );
+		$frm_vars['skip_shortcode'] = false;
 	}
 
 	/**
