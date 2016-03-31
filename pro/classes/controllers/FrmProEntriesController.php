@@ -1261,7 +1261,7 @@ class FrmProEntriesController{
         $form_id = FrmForm::get_current_form_id();
 
 		$cb_item = array( 'cb' => '<input type="checkbox" />');
-		$columns = $cb_item + $columns;
+		$columns = $cb_item + (array) $columns;
         $columns[$form_id .'_post_id'] = __( 'Post', 'formidable' );
         $columns[$form_id .'_is_draft'] = __( 'Draft', 'formidable' );
 

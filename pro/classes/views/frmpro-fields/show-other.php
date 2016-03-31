@@ -3,7 +3,7 @@
 if ( $field['type'] == 'hidden' ) {
 	if ( FrmAppHelper::is_admin() && ( ! isset( $args['action'] ) || $args['action'] != 'create' ) && FrmProFieldsHelper::field_on_current_page( $field['id'] ) ) { ?>
 <div id="frm_field_<?php $field['id'] ?>_container" class="frm_form_field form-field frm_top_container">
-<label class="frm_primary_label"><?php echo $field['name'] ?>:</label> <?php echo $field['value']; ?>
+<label class="frm_primary_label"><?php echo wp_kses_post( $field['name'] ) ?>:</label> <?php echo wp_kses_post( $field['value'] ); ?>
 </div>
 <?php
 	}
