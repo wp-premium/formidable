@@ -1378,7 +1378,7 @@ class FrmProFieldsHelper{
             unset($meta);
         }
 
-        $options = apply_filters('frm_data_sort', $options, array( 'metas' => $metas, 'field' => $selected_field));
+        $options = apply_filters('frm_data_sort', $options, array( 'metas' => $metas, 'field' => $selected_field, 'dynamic_field' => $values ));
         unset($metas);
 
         if ( self::include_blank_option($options, $field) ) {
@@ -1998,77 +1998,114 @@ DEFAULT_HTML;
             $html = apply_filters('frm_get_default_value', $html, (object) $field, false);
             $html = do_shortcode($html);
 		} else if ( FrmField::is_option_true( $field, 'conf_field' ) ) {
-			//Add confirmation field
-            //Get confirmation field ready for replace_shortcodes function
-            $conf_html = $field['custom_html'];
-            $conf_field = $field;
-            $conf_field['id'] = 'conf_' . $field['id'];
-            $conf_field['name'] = __( 'Confirm', 'formidable' ) . ' ' . $field['name'];
-            $conf_field['description'] = $field['conf_desc'];
-            $conf_field['field_key'] = 'conf_' . $field['field_key'];
-
-            if ( $conf_field['classes'] ) {
-                $conf_field['classes'] = str_replace( 'first_', '', $conf_field['classes'] );
-            } else if ( $conf_field['conf_field'] == 'inline' ) {
-                $conf_field['classes'] = ' frm_half';
-            }
-
-            //Prevent loop
-            $conf_field['conf_field'] = 'stop';
-
-            //If inside of repeating section
-            $args = array();
-            if ( isset( $atts['section_id'] ) ) {
-                $args['field_name'] = preg_replace('/\[' . $field['id'] . '\]$/', '', $atts['field_name']);
-                $args['field_name'] = $args['field_name'] . '[conf_' . $field['id'] . ']';
-                $args['field_id'] = 'conf_' . $atts['field_id'];
-                $args['field_plus_id'] = $atts['field_plus_id'];
-                $args['section_id'] = $atts['section_id'];
-            }
-
-            // Filter default value/placeholder text
-            $field['conf_input'] = apply_filters('frm_get_default_value', $field['conf_input'], (object) $field, false);
-
-            //If clear on focus, set default value. Otherwise, set value.
-            if ( $conf_field['clear_on_focus'] == 1 ) {
-                $conf_field['default_value'] = $field['conf_input'];
-                $conf_field['value'] = '';
-            } else {
-                $conf_field['value'] = $field['conf_input'];
-            }
-
-            //If going back and forth between pages, keep value in confirmation field
-            if ( isset( $_POST['item_meta'] ) ) {
-                $temp_args = array();
-                if ( isset( $atts['section_id'] ) ) {
-                    $temp_args = array( 'parent_field_id' => $atts['section_id'], 'key_pointer' => str_replace( '-', '', $atts['field_plus_id'] ) );
-                }
-                FrmEntriesHelper::get_posted_value( $conf_field['id'], $conf_field['value'], $temp_args );
-            }
-
-            //Replace shortcodes
-            $conf_html = FrmFieldsHelper::replace_shortcodes($conf_html, $conf_field, '', '', $args);
-
-            //Add a couple of classes
-            $conf_html = str_replace('frm_primary_label', 'frm_primary_label frm_conf_label', $conf_html);
-            $conf_html = str_replace('frm_form_field', 'frm_form_field frm_conf_field', $conf_html);
-
-            //Remove label if stacked. Hide if inline.
-            if ( $field['conf_field'] == 'inline' ) {
-                $conf_html = str_replace('frm_form_field', 'frm_form_field frm_hidden_container', $conf_html);
-            } else {
-               $conf_html = str_replace('frm_form_field', 'frm_form_field frm_none_container', $conf_html);
-            }
-
-            $html .= $conf_html;
-        }
+			$html .= self::get_confirmation_field_html( $field, $atts );
+		}
 
         if ( strpos($html, '[collapse_this]') ) {
             $html = str_replace('[collapse_this]', '', $html);
         }
 
         return $html;
-    }
+	}
+
+	/**
+	 * Get the HTML for a confirmation field
+	 *
+	 * @param array $field
+	 * @param array $atts
+	 * @return string
+	 */
+	private static function get_confirmation_field_html( $field, $atts ) {
+		$conf_field = self::create_confirmation_field_array( $field, $atts );
+
+		$args = self::generate_repeat_args_for_conf_field( $field, $atts );
+
+		// Replace shortcodes
+		$conf_html = FrmFieldsHelper::replace_shortcodes( $field['custom_html'], $conf_field, '', '', $args);
+
+		// Add a couple of classes
+		$conf_html = str_replace('frm_primary_label', 'frm_primary_label frm_conf_label', $conf_html);
+		$conf_html = str_replace('frm_form_field', 'frm_form_field frm_conf_field', $conf_html);
+
+		// Remove label if stacked. Hide if inline.
+		if ( $field['conf_field'] == 'inline' ) {
+			$conf_html = str_replace('frm_form_field', 'frm_form_field frm_hidden_container', $conf_html);
+		} else {
+		   $conf_html = str_replace('frm_form_field', 'frm_form_field frm_none_container', $conf_html);
+		}
+
+		return $conf_html;
+	}
+
+	/**
+	 * Create a confirmation field array to prepare for replace_shortcodes function
+	 *
+	 * @since 2.0.25
+	 * @param array $field
+	 * @param array $atts
+	 * @return array
+	 */
+	private static function create_confirmation_field_array( $field, $atts ) {
+		$conf_field = $field;
+
+		$conf_field['id'] = 'conf_' . $field['id'];
+		$conf_field['name'] = __( 'Confirm', 'formidable' ) . ' ' . $field['name'];
+		$conf_field['description'] = $field['conf_desc'];
+		$conf_field['field_key'] = 'conf_' . $field['field_key'];
+
+		if ( $conf_field['classes'] ) {
+			$conf_field['classes'] = str_replace( array( 'first_', 'frm_first' ), '', $conf_field['classes'] );
+		} else if ( $conf_field['conf_field'] == 'inline' ) {
+			$conf_field['classes'] = ' frm_half';
+		}
+
+		//Prevent loop
+		$conf_field['conf_field'] = 'stop';
+
+		// Filter default value/placeholder text
+		$field['conf_input'] = apply_filters('frm_get_default_value', $field['conf_input'], (object) $field, false);
+
+		//If clear on focus, set default value. Otherwise, set value.
+		if ( $conf_field['clear_on_focus'] == 1 ) {
+			$conf_field['default_value'] = $field['conf_input'];
+			$conf_field['value'] = '';
+		} else {
+			$conf_field['value'] = $field['conf_input'];
+		}
+
+		//If going back and forth between pages, keep value in confirmation field
+		if ( ( ! isset( $conf_field['reset_value'] ) || ! $conf_field['reset_value'] ) && isset( $_POST['item_meta'] ) ) {
+			$temp_args = array();
+			if ( isset( $atts['section_id'] ) ) {
+				$temp_args = array( 'parent_field_id' => $atts['section_id'], 'key_pointer' => str_replace( '-', '', $atts['field_plus_id'] ) );
+			}
+			FrmEntriesHelper::get_posted_value( $conf_field['id'], $conf_field['value'], $temp_args );
+		}
+
+		return $conf_field;
+	}
+
+	/**
+	 * Generate the repeat args for a confirmation field
+	 *
+	 * @since 2.0.25
+	 * @param array $field
+	 * @param array $atts
+	 * @return array
+	 */
+	private static function generate_repeat_args_for_conf_field( $field, $atts ) {
+		//If inside of repeating section
+		$args = array();
+		if ( isset( $atts['section_id'] ) ) {
+			$args['field_name'] = preg_replace('/\[' . $field['id'] . '\]$/', '', $atts['field_name']);
+			$args['field_name'] = $args['field_name'] . '[conf_' . $field['id'] . ']';
+			$args['field_id'] = 'conf_' . $atts['field_id'];
+			$args['field_plus_id'] = $atts['field_plus_id'];
+			$args['section_id'] = $atts['section_id'];
+		}
+
+		return $args;
+	}
 
 	/**
 	* Remove the close div from HTML (specifically for divider field types)
@@ -4243,12 +4280,15 @@ DEFAULT_HTML;
 	*
 	* @since 2.0.8
 	* @param array $field
-	* @param string $html_id
 	*/
 	private static function insert_hidden_confirmation_fields( $field ){
-		?>
-		<input type="hidden" name="item_meta[conf_<?php echo esc_attr( $field['id'] ) ?>]" id="<?php echo esc_attr( $field['html_id'] . '-conf' ) ?>" value="<?php echo esc_attr( $_POST['item_meta'][ 'conf_' . $field['id'] ] ); ?>" />
-		<?php
+		if ( isset( $field['reset_value'] ) && $field['reset_value'] ) {
+			$value = '';
+		} else {
+			$value = $_POST['item_meta'][ 'conf_' . $field['id'] ];
+		}
+
+		include( FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/front-end/hidden-conf-field.php' );
 	}
 
 	/**

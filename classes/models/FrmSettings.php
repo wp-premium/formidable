@@ -26,6 +26,7 @@ class FrmSettings{
     public $privkey;
     public $re_lang;
     public $re_msg;
+	public $re_multi;
 
     public function __construct() {
         if ( ! defined('ABSPATH') ) {
@@ -81,6 +82,8 @@ class FrmSettings{
             'use_html'  => true,
             'jquery_css' => false,
             'accordion_js' => false,
+
+			're_multi'  => 0,
 
             'success_msg' => __( 'Your responses were successfully submitted. Thank you!', 'formidable' ),
             'blank_msg' => __( 'This field cannot be blank.', 'formidable' ),

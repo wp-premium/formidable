@@ -512,4 +512,57 @@ class FrmProXMLHelper{
 
 		return $meta_value;
 	}
+
+	/**
+	 * Perform an action after a field is imported
+	 *
+	 * @since 2.0.25
+	 * @param array $f
+	 * @param int $field_id
+	 */
+	public static function after_field_is_imported( $f, $field_id ) {
+		self::add_in_section_value_to_repeating_fields( $f, $field_id );
+	}
+
+	/**
+	 * Add the in_section value to fields in a repeating section
+	 *
+	 * @since 2.0.25
+	 * @param array $f
+	 * @param int $section_id
+	 */
+	private static function add_in_section_value_to_repeating_fields( $f, $section_id ) {
+		if ( $f['type'] == 'divider'
+			&& FrmField::is_option_true( $f['field_options'], 'repeat' )
+			&& FrmField::is_option_true( $f['field_options'], 'form_select' )
+		) {
+			$new_form_id = $f['field_options']['form_select'];
+			$child_fields = FrmDb::get_col( 'frm_fields', array( 'form_id' => $new_form_id ), 'id' );
+
+			if ( ! $child_fields ) {
+				return;
+			}
+
+			self::add_in_section_value_to_field_ids( $child_fields, $section_id );
+		}
+	}
+
+	/**
+	 * Add specific in_section value to an array of field IDs
+	 *
+	 * @since 2.0.25
+	 * @param array $field_ids
+	 * @param int $section_id
+	 */
+	public static function add_in_section_value_to_field_ids( $field_ids, $section_id ) {
+		foreach ( $field_ids as $child_id ) {
+			$child_field_options = FrmDb::get_var( 'frm_fields', array( 'id' => $child_id ), 'field_options' );
+			$child_field_options = maybe_unserialize( $child_field_options );
+			$child_field_options['in_section'] = $section_id;
+
+			// Update now
+			$update_values = array( 'field_options' => $child_field_options );
+			FrmField::update( $child_id, $update_values );
+		}
+	}
 }

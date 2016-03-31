@@ -394,7 +394,7 @@ class FrmProDisplaysController {
 
 	public static function get_content( $content ) {
 		global $post;
-		if ( !$post ) {
+		if ( ! $post ) {
 			return $content;
 		}
 
@@ -868,11 +868,15 @@ class FrmProDisplaysController {
 	}
 
 	public static function custom_display( $id ) {
-		if ( $display = FrmProDisplay::getOne( $id, false, false, array( 'check_post' => true ) ) )
-			return self::get_display_data( $display );
+		_deprecated_function( __FUNCTION__, '2.0.25', 'FrmProDisplaysController::get_view_data' );
+		if ( $view = FrmProDisplay::getOne( $id, false, false, array( 'check_post' => true ) ) ) {
+			return self::get_view_data( $view, '', array() );
+		} else {
+			return '';
+		}
 	}
 
-	// TODO: Maybe make this function deprecated?
+	// TODO: Deprecate this function
 	public static function get_display_data( $view, $content = '', $entry_id = false, $extra_atts = array() ) {
 		$extra_atts['entry_id'] = $entry_id;
 		return self::get_view_data( $view, $content, $extra_atts );
@@ -920,21 +924,23 @@ class FrmProDisplaysController {
 	/**
 	 * Make sure the View object has the necessary properties set
 	 *
+	 * TODO: Maybe do not change a value by reference and return a value
+	 *
 	 * @since 2.0.23
 	 *
 	 * @param object $view
 	 * @return bool
 	 */
 	private static function check_the_view_object( &$view ) {
-		if ( !isset( $view->frm_empty_msg ) ) {
+		if ( ! isset( $view->frm_empty_msg ) ) {
 			$view = FrmProDisplaysHelper::setup_edit_vars( $view, false );
 		}
 
-		if ( !isset( $view->frm_form_id ) || empty( $view->frm_form_id ) ) {
+		if ( ! isset( $view->frm_form_id ) || empty( $view->frm_form_id ) ) {
 			return false;
 		}
 
-		//for backwards compatability
+		//for backwards compatibility
 		$view->id = $view->frm_old_id;
 		$view->display_key = $view->post_name;
 
@@ -973,7 +979,7 @@ class FrmProDisplaysController {
 	 */
 	private static function get_atts_for_view( $atts, $view ) {
 		// If old entry ID is set, save it as an att (for reverse compatibility)
-		if ( $view->frm_show_count == 'one' && is_numeric( $view->frm_entry_id ) && $view->frm_entry_id > 0 && !$atts['entry_id'] ) {
+		if ( $view->frm_show_count == 'one' && is_numeric( $view->frm_entry_id ) && $view->frm_entry_id > 0 && ! $atts['entry_id'] ) {
 			$atts['entry_id'] = $view->frm_entry_id;
 		}
 
@@ -1071,6 +1077,8 @@ class FrmProDisplaysController {
 		$entry_ids = self::order_entry_ids_for_view( $view, $atts, $entry_ids );
 
 		$entry_id = reset( $entry_ids );
+
+		self::maybe_redirect_to_post( $entry_id, $view->ID );
 
 		$before_content = self::get_before_content_for_detail_page( $view );
 		$inner_content = self::get_inner_content_for_detail_page( $view, $entry_id );
@@ -1292,12 +1300,12 @@ class FrmProDisplaysController {
 
 		// If single post is displayed, ignore View filters
 		global $post;
-		if ( !empty( $atts['auto_id'] ) && count( $entry_ids ) == 1 && $post ) {
+		if ( ! empty( $atts['auto_id'] ) && count( $entry_ids ) == 1 && $post ) {
 			$return_now = true;
 		}
 
 		// If entry_id parameter is set, skip all other filters
-		if ( !empty( $atts['entry_id'] ) ) {
+		if ( ! empty( $atts['entry_id'] ) ) {
 			$return_now = true;
 		}
 
@@ -1338,8 +1346,8 @@ class FrmProDisplaysController {
 			$frm_items_where_clause = array();
 			foreach ( $view->frm_where as $i => $where_field ) {
 
-				// If no value is saved for where field, move on
-				if ( $where_field === '' ) {
+				// If no value is saved for where field or current filter is a unique filter, move on
+				if ( $where_field === '' || 'group_by' === $view->frm_where_is[ $i ] ) {
 					continue;
 				}
 
@@ -1378,7 +1386,7 @@ class FrmProDisplaysController {
 	 * @param object $view
 	 */
 	private static function move_drafts_param_to_filter( $atts, &$view ) {
-		if ( !isset( $view->frm_where ) ) {
+		if ( ! isset( $view->frm_where ) ) {
 			$view->frm_where = array();
 		}
 
@@ -1477,7 +1485,7 @@ class FrmProDisplaysController {
 	 * @return bool
 	 */
 	private static function prepare_where_val( $i, &$view ) {
-		if ( !isset( $view->frm_where_val[ $i ] ) ) {
+		if ( ! isset( $view->frm_where_val[ $i ] ) ) {
 			$view->frm_where_val[ $i ] = '';
 		}
 
@@ -1558,7 +1566,7 @@ class FrmProDisplaysController {
 	 * @param string|array $where_val
 	 */
 	private static function do_shortcode_in_where_val( &$where_val ) {
-		if ( !is_array( $where_val ) ) {
+		if ( ! is_array( $where_val ) ) {
 			$where_val = do_shortcode( $where_val );
 		}
 	}
@@ -1572,7 +1580,7 @@ class FrmProDisplaysController {
 	 * @param string $where_val
 	 */
 	private static function prepare_where_val_for_date_columns( $view, $i, &$where_val ) {
-		if ( !in_array( $view->frm_where[ $i ], array( 'created_at', 'updated_at' ) ) ) {
+		if ( ! in_array( $view->frm_where[ $i ], array( 'created_at', 'updated_at' ) ) ) {
 			return;
 		}
 
@@ -1602,7 +1610,7 @@ class FrmProDisplaysController {
 	 * @param string|array $where_val
 	 */
 	private static function prepare_where_val_for_id_and_key_columns( $view, $i, &$where_val ) {
-		if ( in_array( $view->frm_where[ $i ], array( 'id', 'item_key', 'post_id' ) ) && !is_array( $where_val ) && strpos( $where_val, ',' ) ) {
+		if ( in_array( $view->frm_where[ $i ], array( 'id', 'item_key', 'post_id' ) ) && ! is_array( $where_val ) && strpos( $where_val, ',' ) ) {
 			$where_val = explode( ',', $where_val );
 			$where_val = array_filter( $where_val );
 		}
@@ -1655,11 +1663,6 @@ class FrmProDisplaysController {
 	 * @param array $entry_ids
 	 */
 	private static function update_entry_ids_with_field_filter( $view, $i, $atts, &$entry_ids ) {
-		// Don't run the unique filters here
-		if ( $view->frm_where_is[ $i ] == 'group_by' ) {
-			return;
-		}
-
 		$args = array(
 			'where_opt' => $view->frm_where[ $i ],
 			'where_is' => $view->frm_where_is[ $i ],
@@ -1731,11 +1734,11 @@ class FrmProDisplaysController {
 	 * @param array $entry_ids
 	 */
 	private static function check_unique_filters( $view, &$entry_ids ){
-		if ( !$entry_ids || empty( $entry_ids ) ) {
+		if ( ! $entry_ids || empty( $entry_ids ) ) {
 			return;
 		}
 
-		if ( isset( $view->frm_where_is ) && !empty( $view->frm_where_is ) && in_array( 'group_by', $view->frm_where_is ) ) {
+		if ( isset( $view->frm_where_is ) && ! empty( $view->frm_where_is ) && in_array( 'group_by', $view->frm_where_is ) ) {
 			foreach ( $view->frm_where as $i => $filter_field ) {
 				if ( $view->frm_where_is[ $i ] != 'group_by' ) {
 					continue;
@@ -1744,6 +1747,9 @@ class FrmProDisplaysController {
 				if ( is_numeric( $view->frm_where[ $i ] ) ) {
 					self::check_unique_field_filter( $view, $i, $entry_ids );
 				} else {
+					if ( in_array( $view->frm_where[ $i ], array( 'id', 'item_key' ) ) ) {
+						continue;
+					}
 					$results = self::check_unique_frm_items_filter( $view, $i);
 					$entry_ids = self::get_the_entry_ids_for_a_unique_filter( $results, $entry_ids );
 				}
@@ -1976,6 +1982,8 @@ class FrmProDisplaysController {
 		}
 
 		self::maybe_update_view_order( $atts, $view );
+		self::maybe_update_view_limit( $atts, $view );
+		self::maybe_update_view_page_size( $atts, $view );
 
 		$display_page_query = array(
 			'order_by_array' => $view->frm_order_by,
@@ -1983,9 +1991,7 @@ class FrmProDisplaysController {
 			'posts' => $atts['form_posts'],
 			'display' => $view,
 		);
-		self::maybe_add_limit_to_query( $view, $atts, $display_page_query );
-
-		self::get_page_size_for_view( $atts, $view );
+		self::maybe_add_limit_to_query( $view, $display_page_query );
 
 		$where = self::set_where_for_ordering_view_entries( $view, $entry_ids );
 		//self::maybe_add_cat_query( $where );
@@ -2049,27 +2055,18 @@ class FrmProDisplaysController {
 	 * Get the limit for a View
 	 *
 	 * @since 2.0.23
-	 * @param object $view
 	 * @param array $atts
-	 * @return int|string
+	 * @param object $view
 	 */
-	private static function get_view_limit( $view, $atts ) {
-		$limit = '';
-
+	private static function maybe_update_view_limit( $atts, &$view ) {
 		if ( is_numeric( $atts['limit'] ) ) {
 			$view->frm_limit = (int)$atts['limit'];
 		}
 
-		if ( is_numeric( $view->frm_limit ) ) {
-			$limit = $view->frm_limit;
-		}
-
 		// Ignore limit on calendar Views since it doesn't appear as an option
 		if ( $view->frm_show_count == 'calendar' ) {
-			$limit = '';
+			$view->frm_limit = '';
 		}
-
-		return $limit;
 	}
 
 	/**
@@ -2077,14 +2074,11 @@ class FrmProDisplaysController {
 	 *
 	 * @since 2.0.23
 	 * @param object $view
-	 * @param array $atts
 	 * @param array $display_page_query
 	 */
-	private static function maybe_add_limit_to_query( $view, $atts, &$display_page_query ){
-		$limit = self::get_view_limit( $view, $atts );
-
-		if ( is_numeric( $limit ) ) {
-			$display_page_query['limit'] = ' LIMIT ' . $limit;
+	private static function maybe_add_limit_to_query( $view, &$display_page_query ){
+		if ( is_numeric( $view->frm_limit ) ) {
+			$display_page_query['limit'] = ' LIMIT ' . $view->frm_limit;
 		}
 	}
 
@@ -2117,7 +2111,7 @@ class FrmProDisplaysController {
 	 * @param array $atts
 	 * @param object $view
 	 */
-	private static function get_page_size_for_view( $atts, &$view ) {
+	private static function maybe_update_view_page_size( $atts, &$view ) {
 		if ( is_numeric( $atts['page_size'] ) ) {
 			// page_size parameter overrides page size setting
 			$view->frm_page_size = (int) $atts['page_size'];
@@ -2143,6 +2137,8 @@ class FrmProDisplaysController {
 	 * @return array
 	 */
 	private static function package_args_for_view_hooks( $total_entry_count, $entry_ids_on_current_page, $view ) {
+		$total_entry_count = self::check_total_entry_count( $total_entry_count, $view->frm_limit );
+
 		$args = array(
 			'entry_ids' => $entry_ids_on_current_page,
 			'total_count' => count( $entry_ids_on_current_page ),
@@ -2151,6 +2147,51 @@ class FrmProDisplaysController {
 		);
 
 		return $args;
+	}
+
+	/**
+	 * Get the total entry count for a View
+	 *
+	 * @since 2.0.25
+	 *
+	 * @param int $entry_id_total
+	 * @param int $view_limit
+	 * @return int
+	 */
+	private static function check_total_entry_count( $entry_id_total, $view_limit ) {
+		if ( is_numeric( $view_limit ) && $view_limit < $entry_id_total ) {
+			$entry_count = $view_limit;
+		} else {
+			$entry_count = $entry_id_total;
+		}
+
+		return $entry_count;
+	}
+
+	/**
+	 * Conditionally redirect to a post if the current entry has a post
+	 * and the frm_display_id on that post matches the current View ID
+	 *
+	 * @since 2.0.25
+	 * @param int $entry_id
+	 * @param int $view_id
+	 */
+	private static function maybe_redirect_to_post( $entry_id, $view_id ) {
+		if ( in_the_loop() ) {
+
+			// Check if entry has a post
+			$post_id = FrmDb::get_var( 'frm_items', array( 'id' => $entry_id ), 'post_id' );
+
+			if ( $post_id && ! is_single( $post_id ) ) {
+				// If $post_id is a non-zero value and we're not already on the post page
+
+				$frm_display_id = get_post_meta( $post_id, 'frm_display_id', true );
+				if ( $frm_display_id == $view_id ) {
+					// Redirect now
+					die( FrmAppHelper::js_redirect( get_permalink( $post_id ) ) );
+				}
+			}
+		}
 	}
 
 	/**

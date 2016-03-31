@@ -160,14 +160,49 @@ class FrmProField {
             }
         }
 
-        // switch out field ids if selected in a data from entries field
-        if ( 'data' == $values['type'] && isset($values['field_options']['form_select']) &&
-            !empty($values['field_options']['form_select']) && isset($frm_duplicate_ids[$values['field_options']['form_select']]) ) {
-	        $values['field_options']['form_select'] = $frm_duplicate_ids[$values['field_options']['form_select']];
-	    }
+		self::switch_out_form_select( $frm_duplicate_ids, $values );
+
+		self::switch_id_for_section_tracking_field_option( $frm_duplicate_ids, $values );
 
         return $values;
     }
+
+	/**
+	 * Switch out field ids if selected in a Dynamic Field
+	 *
+	 * @since 2.0.25
+	 * @param array $frm_duplicate_ids
+	 * @param array $values
+	 */
+	private static function switch_out_form_select( $frm_duplicate_ids, &$values ){
+		if ( 'data' == $values['type'] && FrmField::is_option_true_in_array( $values['field_options'], 'form_select' ) ) {
+
+			$form_select = $values['field_options']['form_select'];
+
+			if ( isset( $frm_duplicate_ids[ $form_select ] ) ) {
+				$values['field_options']['form_select'] = $frm_duplicate_ids[ $form_select ];
+			}
+		}
+	}
+
+	/**
+	 * Switch the in_section ID when a field is duplicated
+	 *
+	 * @since 2.0.25
+	 * @param array $frm_duplicate_ids
+	 * @param array $values
+	 */
+	private static function switch_id_for_section_tracking_field_option( $frm_duplicate_ids, &$values ) {
+		if ( isset( $values['field_options']['in_section'] ) ) {
+			$old_id = $values['field_options']['in_section'];
+
+			if ( $old_id && isset( $frm_duplicate_ids[ $old_id ] ) ) {
+				$values[ 'field_options' ][ 'in_section' ] = $frm_duplicate_ids[ $old_id ];
+			}
+		} else {
+			$values[ 'field_options' ][ 'in_section' ] = 0;
+		}
+	}
 
 	public static function delete( $id ) {
         $field = FrmField::getOne($id);
@@ -225,24 +260,44 @@ class FrmProField {
 	* @return array $children
 	*/
 	public static function get_children( $field ) {
-		global $wpdb;
-
-		$children = array();
-
-		// If repeating field or embedded form
 		if ( FrmField::is_repeating_field( $field ) || $field['type'] == 'form' ) {
+			// If repeating field or embedded form
+
 			$repeat_id = isset( $field['form_select'] ) ? $field['form_select'] : $field['field_options']['form_select'];
-			$children = FrmDb::get_col( $wpdb->prefix . 'frm_fields', array( 'form_id' => $repeat_id ) );
+			$children = FrmDb::get_col( 'frm_fields', array( 'form_id' => $repeat_id ) );
 
 		} else {
-			$end_divider_order = FrmDb::get_var( $wpdb->prefix . 'frm_fields', array( 'form_id' => $field['form_id'], 'type' => 'end_divider', 'field_order>' => $field['field_order'] ), 'field_order', array( 'order_by' => 'field_order ASC' ), 1 );
-			$min_field_order = $field['field_order'] + 1;
-			$max_field_order = $end_divider_order - 1;
+			// If regular section
 
-			$children = FrmDb::get_col( $wpdb->prefix . 'frm_fields', array( 'form_id' => $field['form_id'], 'field_order>' => $min_field_order, 'field_order<' => $max_field_order ) );
+			$children = self::get_children_from_standard_section( $field );
 		}
 
 		return $children;
+	}
+
+	/**
+	 * Get the field IDs within a regular section
+	 *
+	 * @since 2.0.25
+	 * @param array $field
+	 * @return array|null
+	 */
+	private static function get_children_from_standard_section( $field ) {
+		$child_where = array( 'form_id' => $field['form_id'] );
+
+		// Get minimum field order for children
+		$min_field_order = $field['field_order'] + 1;
+		$child_where['field_order>'] = $min_field_order;
+
+		// Get maximum field order for children
+		$where = array( 'form_id' => $field['form_id'], 'type' => array( 'end_divider', 'divider', 'break' ), 'field_order>' => $min_field_order );
+		$end_divider_order = FrmDb::get_var( 'frm_fields', $where, 'field_order', array( 'order_by' => 'field_order ASC' ), 1 );
+		if ( $end_divider_order ) {
+			$max_field_order = $end_divider_order - 1;
+			$child_where['field_order<'] = $max_field_order;
+		}
+
+		return FrmDb::get_col( 'frm_fields', $child_where );
 	}
 
 	/**

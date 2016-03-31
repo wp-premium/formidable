@@ -11,7 +11,7 @@ class FrmProDb{
         }
 
         if ( $old_db_version ) {
-			$migrations = array( 16, 17, 25, 27, 28, 29, 30, 31, 32 );
+			$migrations = array( 16, 17, 25, 27, 28, 29, 30, 31, 32, 33 );
 			foreach ( $migrations as $migration ) {
 				if ( $db_version >= $migration && $old_db_version < $migration ) {
 					call_user_func( array( __CLASS__, 'migrate_to_' . $migration ) );
@@ -50,6 +50,44 @@ class FrmProDb{
 		delete_site_option( 'frm_autoupdate' );
 		delete_site_option( 'frmpro-wpmu-sitewide' );
     }
+
+
+	/**
+	 * Add in_section variable to all fields within sections
+	 *
+	 * @since 2.0.25
+	 */
+	private static function migrate_to_33(){
+		$dividers = FrmDb::get_col( 'frm_fields', array( 'type' => 'divider' ), 'id' );
+
+		if ( ! $dividers ) {
+			return;
+		}
+
+		foreach ( $dividers as $divider_id ) {
+			$section_field = FrmField::getOne( $divider_id );
+
+			if ( ! $section_field ) {
+				continue;
+			}
+
+			self::add_in_section_variable_to_section_children( $section_field );
+		}
+	}
+
+	/**
+	 * Add in_section variable to all of a section's children
+	 *
+	 * @param object $section_field
+	 */
+	private static function add_in_section_variable_to_section_children( $section_field ) {
+		// Get all children for divider
+		$section_field_array = get_object_vars( $section_field );
+		$children = FrmProField::get_children( $section_field_array );
+
+		// Set in_section variable for all children
+		FrmProXMLHelper::add_in_section_value_to_field_ids( $children, $section_field->id );
+	}
 
 	/**
 	 * Add an "Entry ID is equal to [get param=entry old_filter=1]" filter on single entry Views

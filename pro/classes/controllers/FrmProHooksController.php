@@ -201,6 +201,7 @@ class FrmProHooksController{
 
         // Fields Controller
         add_action('frm_after_field_created', 'FrmProFieldsController::create_multiple_fields', 10, 2);
+        add_filter('frm_prepare_single_field_for_duplication', 'FrmProFieldsController::prepare_single_field_for_duplication' );
         add_action('frm_duplicate_field_divider', 'FrmProFieldsController::duplicate_section', 10, 2);
         add_action('frm_display_added_fields', 'FrmProFieldsController::show');
         add_filter('frm_display_field_options', 'FrmProFieldsController::display_field_options');
@@ -280,6 +281,9 @@ class FrmProHooksController{
         add_filter('frm_xml_export_types', 'FrmProXMLController::xml_export_types');
         add_filter('frm_export_formats', 'FrmProXMLController::export_formats');
         add_action('frm_before_import_csv', 'FrmProXMLController::map_csv_fields');
+
+        // XML Helper
+        add_action( 'frm_after_field_is_imported', 'FrmProXMLHelper::after_field_is_imported', 10, 2 );
     }
 
     public static function load_ajax_hooks() {

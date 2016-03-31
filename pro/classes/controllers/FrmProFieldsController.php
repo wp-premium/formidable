@@ -127,6 +127,9 @@ class FrmProFieldsController{
             }
         }
 
+		global $frm_vars;
+		$frm_vars['readonly'] = 'disabled';
+
         $field_name .= '['. $field['id'] .']';
         $html_id = FrmFieldsHelper::get_html_id($field);
 
@@ -816,7 +819,8 @@ class FrmProFieldsController{
 		$field = apply_filters( 'frm_setup_new_fields_vars', $field, $args['field_data'] );
 
 		// Sort the options
-		$field['options'] = apply_filters( 'frm_data_sort', $field['options'], array( 'metas' => $metas, 'field' => $args['linked_field_id'] ) );
+		$pass_args = array( 'metas' => $metas, 'field' => $args['linked_field_id'], 'dynamic_field' => $field );
+		$field['options'] = apply_filters( 'frm_data_sort', $field['options'], $pass_args );
 	}
 
 	/**
@@ -864,7 +868,7 @@ class FrmProFieldsController{
 		}
 
 		// Sort the options
-		$field['options'] = apply_filters( 'frm_data_sort', $field['options'], array() );
+		$field['options'] = apply_filters( 'frm_data_sort', $field['options'], array( 'dynamic_field' => $field ) );
 	}
 
 	/**
@@ -1078,7 +1082,7 @@ class FrmProFieldsController{
 		FrmAppHelper::permission_check('frm_edit_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
-	    global $wpdb;
+		global $wpdb, $frm_duplicate_ids;
 
 		if ( isset( $_POST['children'] ) ) {
 			$children = array_filter( (array) $_POST['children'], 'is_numeric');
@@ -1112,11 +1116,15 @@ class FrmProFieldsController{
             $field_count++;
             $values['field_order'] = $field_count;
 
-            $field_id = FrmField::create($values);
+	        $values = apply_filters( 'frm_duplicated_field', $values );
+	        $field_id = FrmField::create( $values );
 
-            if ( ! $field_id ) {
-                continue;
-            }
+	        if ( ! $field_id ) {
+		        continue;
+	        }
+
+	        $frm_duplicate_ids[ $field->id ] = $field_id;
+	        $frm_duplicate_ids[ $field->field_key ] = $field_id;
 
             if ( 'end_divider' == $field->type ) {
                 $ended = true;
@@ -1134,6 +1142,20 @@ class FrmProFieldsController{
         // Prevent the function in the free version from completing
         wp_die();
     }
+
+	/**
+	 * Prepare a single field for duplication
+	 * Note: This should ONLY be used when the "Duplicate" button is clicked on a single field
+	 *
+	 * @since 2.0.25
+	 * @param array $field_values
+	 * @return array $field_values
+	 */
+	public static function prepare_single_field_for_duplication( $field_values ){
+		$field_values['field_options']['in_section'] = 0;
+
+		return $field_values;
+	}
 
 	/**
 	*
