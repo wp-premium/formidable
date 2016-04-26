@@ -10,10 +10,6 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 		self::fill_values( $field['value'], $defaults );
 		self::fill_values( $field['default_value'], $defaults );
 
-		if ( $field['default_value'] == $field['value'] ) {
-			$field['value'] = $defaults;
-		}
-
 		$sub_fields = self::get_sub_fields( $field );
 
 		include( FrmAppHelper::plugin_path() .'/pro/classes/views/combo-fields/input.php' );
@@ -32,6 +28,13 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 		$sub_fields = self::get_sub_fields( $field );
 
 		parent::show_in_form_builder( $field, $name, $sub_fields );
+
+		$display = array(
+			'clear_on_focus' => true,
+			'default_blank' => true,
+		);
+
+		FrmFieldsHelper::clear_on_focus_html( $field, $display );
 	}
 
 	public static function get_sub_fields( $field ) {
@@ -94,6 +97,9 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 
 		$new_value = '';
 		if ( ! empty( $value['line1'] ) ) {
+			$defaults = self::empty_value_array();
+			self::fill_values( $value, $defaults );
+
 			$new_value = $value['line1'] . ' <br/>';
 			if ( ! empty( $value['line2'] ) ) {
 				$new_value .= $value['line2'] . ' <br/>';
@@ -120,6 +126,10 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 		return $headings;
 	}
 
+	public static function empty_value_array() {
+		return array( 'line1' => '', 'line2' => '', 'city' => '', 'state' => '', 'zip' => '', 'country' => '' );
+	}
+
 	/**
 	 * Get the label for the CSV
 	 * @since 2.0.23
@@ -140,15 +150,12 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 		}
 
 		if ( empty( $label ) ) {
-			$label = $heading;
+			$label = $field_name;
 		}
 
-		$label = $field->name . ' ' . $label;
-		return $label;
-	}
+		$label = $field->name . ' - ' . $label;
 
-	private static function empty_value_array() {
-		return array( 'line1' => '', 'line2' => '', 'city' => '', 'state' => '', 'zip' => '', 'country' => '' );
+		return $label;
 	}
 
 	private static function default_labels() {

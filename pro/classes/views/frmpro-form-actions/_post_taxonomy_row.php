@@ -73,14 +73,11 @@ if ( $selected_type == 'tag' ) { ?>
             <?php
             }
 
-			FrmProFieldsHelper::get_child_checkboxes( array( 'field' => array(
-				'post_field' => 'post_category', 'form_id' => $values['id'],
-				'field_options' => array(
-					'taxonomy' => $field_vars['meta_name']), 'type' => 'checkbox'
-				),
-				'field_name' =>  $action_control->get_field_name( 'post_category' ) . '[' . $tax_meta . '][exclude_cat]',
+			FrmProFormActionsController::display_taxonomy_checkboxes_for_post_action( array(
+                'form_id' => $values['id'],
+				'taxonomy' => $field_vars['meta_name'],
+				'field_name' =>  $action_control->get_field_name( 'post_category' ) . '[' . $tax_meta . '][exclude_cat][]',
 				'value' => ( isset( $field_vars['exclude_cat'] ) ? $field_vars['exclude_cat'] : 0 ),
-				'exclude' => 'no', 'hide_id' => true, 'tax_num' => $tax_meta,
 			) );
            ?>
         </div>

@@ -203,4 +203,75 @@ class FrmProFormActionsController{
         include(FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-form-actions/_post_taxonomy_select.php');
         wp_die();
     }
+
+	/**
+	 * Display the taxonomy checkboxes for a specific taxonomy in a Create Post action
+	 *
+	 * @since 2.01.0
+	 * @param array $args (MUST include taxonomy, form_id, field_name, and value)
+	 */
+	public static function display_taxonomy_checkboxes_for_post_action( $args ) {
+		if ( ! $args['taxonomy'] ) {
+			return;
+		}
+
+		$args['level'] = 1;
+
+		$args['post_type'] = FrmProFormsHelper::post_type( $args['form_id'] );
+
+		$children = get_categories( array(
+			'hide_empty' => false,
+			'parent' => 0,
+			'type' => $args['post_type'],
+			'taxonomy' => $args['taxonomy'],
+		) );
+
+		foreach ( $children as $key => $cat ) {
+			$args['cat'] = $cat; ?>
+			<div class="frm_catlevel_1"><?php
+				self::display_taxonomy_checkbox_group( $args ); ?>
+			</div><?php
+		}
+	}
+
+	/**
+	 * Display a single taxonomy checkbox and its children
+	 *
+	 * @since 2.01.0
+	 * @param array $args (MUST include cat, value, field_name, post_type, taxonomy, and level)
+	 */
+	private static function display_taxonomy_checkbox_group( $args ) {
+		if ( ! is_object($args['cat']) ) {
+			return;
+		}
+
+		if ( is_array($args['value']) ) {
+			$checked = ( in_array($args['cat']->cat_ID, $args['value'])) ? ' checked="checked" ' : '';
+		} else {
+			$checked = checked( $args['value'], $args['cat']->cat_ID, false );
+		}
+
+		?>
+		<div class="frm_checkbox">
+			<label><input type="checkbox" name="<?php echo esc_attr( $args['field_name'] ) ?>" value="<?php
+			echo esc_attr( $args['cat']->cat_ID ) ?>"<?php
+			echo $checked;
+			?> /><?php echo esc_html( $args['cat']->cat_name ) ?></label><?php
+
+		$children = get_categories( array(
+			'type' => $args['post_type'],
+			'hide_empty' => false,
+			'parent' => $args['cat']->cat_ID,
+			'taxonomy' => $args['taxonomy'],
+		));
+
+		if ( $children ) {
+			$args['level']++;
+			foreach ( $children as $key => $cat ) {
+				$args['cat'] = $cat; ?>
+		<div class="frm_catlevel_<?php echo esc_attr( $args['level'] ) ?>"><?php self::display_taxonomy_checkbox_group( $args ); ?></div>
+<?php       }
+		}
+		echo '</div>';
+	}
 }

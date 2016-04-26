@@ -145,15 +145,21 @@ class FrmProFormsHelper{
         $values = array();
 
         if ( $args['fields'] ) {
-			// Get the ID of the form that houses the embedded form or repeating section
-			$parent_form_id = $args['parent_field']['form_id'];
+			$pass_args = array(
+				'parent_form_id' => $args['parent_field']['form_id'],
+				'parent_field_id' => $args['parent_field']['id'],
+				'key_pointer' => $args['i'],
+				'repeating' => true,
+				'fields' => $args['fields'],
+				'in_embed_form' => $args['parent_field']['type'] == 'form' ? $args['parent_field']['id'] : '0',
+			);
 
             if ( empty($args['entry_id']) ) {
-				$values = FrmEntriesHelper::setup_new_vars( $args['fields'], $args['form'], false, array( 'parent_form_id' => $parent_form_id ) );
+				$values = FrmEntriesHelper::setup_new_vars( $args['fields'], $args['form'], false, $pass_args );
             } else {
                 $entry = FrmEntry::getOne($args['entry_id'], true);
                 if ( $entry && $entry->form_id == $args['form']->id ) {
-					$values = FrmAppHelper::setup_edit_vars( $entry, 'entries', $args['fields'], false, array(), array( 'parent_form_id' => $parent_form_id ) );
+					$values = FrmProEntriesController::setup_entry_values_for_editing( $entry, $pass_args );
                 } else {
                     return;
                 }
@@ -236,6 +242,11 @@ class FrmProFormsHelper{
 				do_action( 'frm_show_other_field_type', $subfield, $args['form'], $field_args );
             }
 
+			// Track whether field is in an embedded form
+	        if ( 'form' == $args['parent_field']['type'] ) {
+		        $subfield['in_embed_form'] = $args['parent_field']['id'];
+	        }
+
             unset($subfield_name, $subfield_id);
             do_action('frm_get_field_scripts', $subfield, $args['form'], $args['parent_field']['form_id']);
         }
@@ -307,7 +318,7 @@ class FrmProFormsHelper{
 			}
 		}
 
-		$prepared_field = apply_filters( 'frm_setup_new_fields_vars', $field_array, $end_field );
+		$prepared_field = apply_filters( 'frm_setup_new_fields_vars', $field_array, $end_field, array() );
 
 		return $prepared_field;
 	}
@@ -353,77 +364,77 @@ class FrmProFormsHelper{
             $triggers .= '<label class="frm_primary_label">&nbsp;</label>';
         }
 
-		$triggers .= '<a href="#" class="frm_remove_form_row' . esc_attr( $args['remove_classes'] ) . '" data-key="' . esc_attr( $args['i'] ) . '" data-parent="' . esc_attr( $args['parent_field']['id'] ) . '">' . $args['remove_icon'] . $args['remove_label'] . '</a> ';
 		$triggers .= '<a href="#" class="frm_add_form_row' . esc_attr( $args['add_classes'] ) . '" data-parent="' . esc_attr( $args['parent_field']['id'] ) . '">' . $args['add_icon'] . $args['add_label'] . '</a>' . "\n";
+		$triggers .= '<a href="#" class="frm_remove_form_row' . esc_attr( $args['remove_classes'] ) . '" data-key="' . esc_attr( $args['i'] ) . '" data-parent="' . esc_attr( $args['parent_field']['id'] ) . '">' . $args['remove_icon'] . $args['remove_label'] . '</a> ';
 
-        $triggers .= '</div>';
+		$triggers .= '</div>';
 
         return $triggers;
     }
 
-    public static function load_chosen_js($frm_vars) {
-        if ( isset($frm_vars['chosen_loaded']) && $frm_vars['chosen_loaded'] ) {
-            ?>$('.frm_chzn').chosen({<?php echo apply_filters('frm_chosen_js', 'allow_single_deselect:true') ?>});<?php
-        }
-    }
+	public static function load_chosen_js( $frm_vars ) {
+		if ( isset( $frm_vars['chosen_loaded' ] ) && $frm_vars['chosen_loaded'] ) {
+			$original_js = 'allow_single_deselect:true';
+			$chosen_js = apply_filters( 'frm_chosen_js', $original_js );
+			if ( $original_js != $chosen_js ) {
+				?>__frmChosen=<?php echo json_encode( $chosen_js ) ?>;<?php
+			}
+		}
+	}
 
-    public static function hide_conditional_fields($frm_vars) {
-		$fields = array( 'hide' => array(), 'check' => array() );
-        if ( ! isset($frm_vars['hidden_fields']) || empty($frm_vars['hidden_fields']) ) {
-			return $fields;
-        }
+	/**
+	 * Load the conditional field IDs for JavaScript
+	 *
+	 * @since 2.01.0
+	 * @param array $frm_vars
+	 */
+	public static function load_hide_conditional_fields_js( $frm_vars ) {
 
-        $display_none = $trigger_check = array();
+		if ( self::is_initial_load_for_at_least_one_form( $frm_vars ) ) {
+			// Check the logic on all dependent fields
+			if ( isset( $frm_vars['dep_logic_fields'] ) && ! empty( $frm_vars['dep_logic_fields'] ) ) {
+				echo 'var frmHide=' . json_encode( $frm_vars['dep_logic_fields'] ) . ';';
+				echo 'if(typeof __frmHideOrShowFields == "undefined"){__frmHideOrShowFields=frmHide;}';
+				echo 'else{__frmHideOrShowFields=jQuery.extend(__frmHideOrShowFields,frmHide);}';
+			}
+		} else {
+			// Save time and just hide the fields that are in frm_hide_fields
+			echo '__frmHideFields=true;';
+		}
 
-        foreach ( (array) $frm_vars['hidden_fields'] as $field ) {
-            foreach ( $field['hide_field'] as $i => $hide_field ) {
-                if ( ! is_numeric($hide_field) || in_array($hide_field, $trigger_check) ) {
-                    continue;
-                }
+		// Check dependent Dynamic fields
+		if ( isset( $frm_vars['dep_dynamic_fields'] )  && ! empty( $frm_vars['dep_dynamic_fields'] ) ) {
+			echo '__frmDepDynamicFields=' . json_encode( $frm_vars['dep_dynamic_fields'] ) . ';';
+		}
+	}
 
-                $observed_field = FrmField::getOne($hide_field);
+	/**
+	 * Check if at least one form is loading for the first time
+	 *
+	 * @since 2.01.0
+	 * @param array $frm_vars
+	 * @return bool
+	 */
+	private static function is_initial_load_for_at_least_one_form( $frm_vars ) {
+		$initial_load = true;
 
-                if ( ! $observed_field ) {
-                    continue;
-                }
+		if ( isset( $_POST['form_id'] ) ) {
+			foreach ( $frm_vars['forms_loaded'] as $form ) {
+				if ( ! is_object( $form ) ) {
+					continue;
+				}
 
-                $trigger_check[] = $observed_field->id;
-                if ( ! isset($field['hide_opt'][$i]) && $observed_field->type == 'data' && self::is_show_data_field($field) ) {
-                    self::hide_some_data_types($field, $observed_field, $display_none);
-                    continue;
-                }
+				if ( isset($frm_vars['prev_page'][ $form->id ]) || self::going_to_prev( $form->id ) || FrmProFormsHelper::saving_draft() ) {
+					$initial_load = false;
+				} else {
+					$initial_load = true;
+					break;
+				}
+			}
+		}
 
-                if ( ! isset($field['hide_opt'][$i]) ) {
-                    continue;
-                }
-
-                if ( $observed_field->type != 'data' ) {
-                    $display_none[] = $field['id'];
-                    continue;
-                }
-
-                if ( $field['hide_opt'][$i] != '' && in_array($observed_field->field_options['data_type'], array( 'radio', 'checkbox', 'select')) ) {
-                    $display_none[] = $field['id'];
-                } else if ( $field['hide_opt'][$i] == '' && self::is_show_data_field($field) ) {
-                    self::hide_some_data_types($field, $observed_field, $display_none);
-                }
-
-            }
-            unset($observed_field, $i, $hide_field);
-        }
-
-		$fields['hide'] = array_unique( $display_none );
-		$fields['check'] = array_unique( $trigger_check );
-
-		return $fields;
-    }
-
-    private static function hide_some_data_types($field, $observed_field, array &$display_none) {
-        $observed_options = maybe_unserialize($observed_field->field_options);
-        if ( in_array($observed_options['data_type'], array( 'checkbox', 'select')) ) {
-            $display_none[] = $field['id'];
-        }
-    }
+		return $initial_load;
+	}
 
 	public static function load_datepicker_js( $frm_vars ) {
         if ( ! isset($frm_vars['datepicker_loaded']) || empty($frm_vars['datepicker_loaded']) || ! is_array($frm_vars['datepicker_loaded']) ) {
@@ -436,6 +447,7 @@ class FrmProFormsHelper{
         $datepicker = key($frm_vars['datepicker_loaded']);
 		$load_lang = false;
 
+		$datepicker_js = array();
         foreach ( $frm_vars['datepicker_loaded'] as $date_field_id => $options ) {
             if ( strpos($date_field_id, '^') === 0 ) {
                 // this is a repeating field
@@ -443,14 +455,40 @@ class FrmProFormsHelper{
             } else {
                 $trigger_id = '#'. $date_field_id;
             }
-        ?>
-$(document).on('focusin','<?php echo $trigger_id ?>', function(){
+
+			$custom_options = self::get_custom_date_js( $date_field_id, $options );
+
+			$date_options = array(
+				'triggerID' => $trigger_id,
+				'locale'    => $options['locale'],
+				'options'   => array(
+					'dateFormat'  => $frmpro_settings->cal_date_format,
+					'changeMonth' => 'true',
+					'changeYear'  => 'true',
+					'yearRange'   => $options['start_year'] . ':' . $options['end_year'],
+					'defaultDate' => empty( $options['default_date'] ) ? "''" : 'new Date(' . $options['default_date'] . ')',
+					'beforeShowDay' => null,
+				),
+				'customOptions'  => $custom_options,
+			);
+			$date_options = apply_filters( 'frm_date_field_options', $date_options, array( 'field_id' => $date_field_id, 'options' => $options ) );
+
+			if ( empty( $custom_options ) ) {
+				$datepicker_js[] = $date_options;
+			} else {
+				?>
+jQuery(document).ready(function($){
+$('<?php echo esc_attr( $trigger_id ) ?>').addClass('frm_custom_date');
+$(document).on('focusin','<?php echo esc_attr( $trigger_id ) ?>', function(){
 $.datepicker.setDefaults($.datepicker.regional['']);
-$(this).datepicker($.extend($.datepicker.regional['<?php echo $options['locale'] ?>'],{dateFormat:'<?php echo $frmpro_settings->cal_date_format ?>',changeMonth:true,changeYear:true,yearRange:'<?php echo $options['start_year'] .':'. $options['end_year'] ?>',defaultDate:<?php echo empty($options['default_date']) ? "''" : 'new Date('. $options['default_date'] .')';
-do_action('frm_date_field_js', $date_field_id, $options);
+$(this).datepicker($.extend($.datepicker.regional['<?php echo $options['locale'] ?>'],{dateFormat:'<?php echo $frmpro_settings->cal_date_format ?>',changeMonth:true,changeYear:true,yearRange:'<?php echo $options['start_year'] . ':' . $options['end_year'] ?>',defaultDate:<?php echo $date_options['options']['defaultDate'];
+echo $custom_options;
 ?>}));
 });
+});
 <?php
+			}
+
 			if ( ! empty( $options['locale'] ) && ! $load_lang ) {
 				$load_lang = true;
 				$base_url = FrmAppHelper::jquery_ui_base_url();
@@ -460,22 +498,40 @@ do_action('frm_date_field_js', $date_field_id, $options);
 			}
         }
 
+		if ( ! empty( $datepicker_js ) ) {
+			echo 'var frmDates=' . json_encode( $datepicker_js ) . ';';
+			echo 'if(typeof __frmDatepicker == "undefined"){__frmDatepicker=frmDates;}';
+			echo 'else{__frmDatepicker=jQuery.extend(__frmDatepicker,frmDates);}';
+		}
         self::load_timepicker_js($datepicker, $frm_vars);
     }
+
+	private static function get_custom_date_js( $date_field_id, $options ) {
+		ob_start();
+		do_action( 'frm_date_field_js', $date_field_id, $options );
+		$custom_options = ob_get_contents();
+		ob_end_clean();
+
+		return $custom_options;
+	}
 
     public static function load_timepicker_js($datepicker, $frm_vars) {
         if ( ! isset($frm_vars['timepicker_loaded']) || empty($frm_vars['timepicker_loaded']) || ! $datepicker ) {
             return;
         }
 
+		$unique_time_fields = array();
         foreach ( $frm_vars['timepicker_loaded'] as $time_field_id => $options ) {
             if ( ! $options ) {
                 continue;
             }
-?>
-$(document.getElementById('<?php echo $datepicker ?>')).change(function(){frmFrontForm.removeUsedTimes(this,'<?php echo $time_field_id ?>');});
-<?php
+
+			$unique_time_fields[] = array( 'dateID' => $datepicker, 'timeID' => $time_field_id );
         }
+
+		if ( ! empty( $unique_time_fields ) ) {
+			echo '__frmUniqueTimes=' . json_encode( $unique_time_fields ) . ';';
+		}
     }
 
     public static function load_calc_js($frm_vars) {
@@ -507,13 +563,8 @@ $(document.getElementById('<?php echo $datepicker ?>')).change(function(){frmFro
                     continue;
                 }
 
-                $html_field_id = '="field_'. $calc_fields[$val]->field_key;
+				$field_keys[$calc_fields[$val]->id] = self::get_field_call_for_calc( $calc_fields[ $val ], $field['parent_form_id'] );
 
-				// If field is inside of repeating section/embedded form or it is a radio, scale, or checkbox field
-				if ( $field['parent_form_id'] != $calc_fields[ $val ]->form_id || in_array($calc_fields[$val]->type, array( 'radio', 'scale', 'checkbox')) ) {
-					$html_field_id = '^'. $html_field_id .'-';
-				}
-                $field_keys[$calc_fields[$val]->id] = '[id'. $html_field_id .'"]';
 				$calc_rules['fieldKeys'] = $calc_rules['fieldKeys'] + $field_keys;
 
                 $calc = str_replace($matches[0][$match_key], '['. $calc_fields[$val]->id .']', $calc);
@@ -529,6 +580,8 @@ $(document.getElementById('<?php echo $datepicker ?>')).change(function(){frmFro
 				'fields'    	=> array(),
 				'field_id'		=> $field['field_id'],
 				'form_id'		=> $field['parent_form_id'],
+	            'inSection'     => $field['in_section'],
+	            'inEmbedForm'   => $field['in_embed_form'],
             );
 
             foreach ( $calc_fields as $calc_field ) {
@@ -538,7 +591,7 @@ $(document.getElementById('<?php echo $datepicker ?>')).change(function(){frmFro
                 } else {
                     $calc_rules['fields'][$calc_field->id] = array(
                         'total' => array($result),
-                        'type'  => $calc_field->type,
+                        'type'  => ( $calc_field->type == 'lookup' ) ? $calc_field->field_options['data_type'] : $calc_field->type,
                         'key'   => $field_keys[$calc_field->id],
                     );
                 }
@@ -552,29 +605,66 @@ $(document.getElementById('<?php echo $datepicker ?>')).change(function(){frmFro
             }
         }
 
-        echo '__FRMCALC='. json_encode($calc_rules) .";\n";
-
         // trigger calculations on page load
         if ( ! empty($triggers) ) {
 			$triggers = array_filter( array_unique( $triggers ) );
-            ?>$('<?php echo implode(',', $triggers) ?>').trigger({type:'change',selfTriggered:true});<?php
+			$calc_rules['triggers'] = array_values( $triggers );
         }
+
+		$var_name = '__FRMCALC';
+		echo 'var frmcalcs=' . json_encode( $calc_rules ) . ";\n";
+		echo 'if(typeof ' . $var_name . ' == "undefined"){' . $var_name . '=frmcalcs;}';
+		echo 'else{' . $var_name . '=jQuery.extend(true,{},' . $var_name . ',frmcalcs);}';
     }
 
-    public static function load_input_mask_js($frm_input_masks) {
+	/**
+	 * Get the field call for a calc field
+	 *
+	 * @since 2.01.0
+	 *
+	 * @param object $calc_field
+	 * @param int $parent_form_id
+	 * @return string $field_call
+	 */
+	private static function get_field_call_for_calc( $calc_field, $parent_form_id ) {
+		$html_field_id = '="field_'. $calc_field->field_key;
+
+		// If field is inside of repeating section/embedded form or it is a radio, scale, or checkbox field
+		if ( in_array( $calc_field->type, array( 'radio', 'scale', 'checkbox' ) ) ||
+			( $calc_field->type == 'lookup' && $calc_field->field_options['data_type'] == 'radio' ) ||
+			$parent_form_id != $calc_field->form_id
+		) {
+			$html_field_id = '^'. $html_field_id .'-';
+		}
+
+		$field_call = '[id'. $html_field_id .'"]';
+
+		return $field_call;
+	}
+
+    public static function load_input_mask_js() {
+		global $frm_input_masks;
         if ( empty($frm_input_masks) ) {
             return;
         }
 
+		$masks = array();
         foreach ( (array) $frm_input_masks as $f_key => $mask ) {
             if ( ! $mask ) {
                 continue;
 			} else if ( $mask !== true ) {
 				// this isn't used in the plugin, but is here for those using the mask filter
-				?>$(document).on('focusin','<?php echo is_numeric($f_key) ? 'input[name="item_meta['. $f_key .']"]' : '#field_'. $f_key; ?>',function(){$(this).mask("<?php echo $mask ?>");});<?php
+				$masks[] = array(
+					'trigger' => is_numeric( $f_key ) ? 'input[name="item_meta[' . $f_key . ']"]' : '#field_' . $f_key,
+					'mask'    => $mask,
+				);
 			}
             unset($f_key, $mask);
         }
+
+		if ( ! empty( $masks ) ) {
+			echo '__frmMasks=' . json_encode( $masks ) . ';';
+		}
     }
 
 	public static function get_default_opts() {

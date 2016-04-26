@@ -81,16 +81,6 @@ class FrmProFieldsController{
     public static function show_field($field, $form, $parent_form_id){
         global $frm_vars;
 
-        if ( ! empty( $field['hide_field'] ) ) {
-            $first = reset($field['hide_field']);
-			if ( is_numeric( $first ) ) {
-                if ( ! isset($frm_vars['hidden_fields']) ) {
-                    $frm_vars['hidden_fields'] = array();
-                }
-                $frm_vars['hidden_fields'][] = $field;
-            }
-        }
-
         if ( $field['use_calc'] && $field['calc'] ) {
 			$ajax = isset( $form->options['ajax_submit'] ) && $form->options['ajax_submit'];
 			$inplace_edit = isset( $frm_vars['inplace_edit'] ) && $frm_vars['inplace_edit'];
@@ -108,11 +98,19 @@ class FrmProFieldsController{
 				'form_id'		=> $form->id,
 				'field_id'		=> $field['id'],
 				'parent_form_id'	=> $parent_form_id,
+	            'in_section'    => isset( $field['in_section'] ) ? $field['in_section'] : '0',
+	            'in_embed_form' => isset( $field['in_embed_form'] ) ? $field['in_embed_form'] : '0',
             );
         }
     }
 
     public static function show( $field, $name = '' ) {
+		// If Lookup Field, route to its own function
+		if ( is_array( $field ) && $field['type'] == 'lookup' ) {
+			FrmProLookupFieldsController::show_lookup_field_input_on_form_builder( $field );
+			return;
+		}
+
         $field_name = empty($name) ? 'item_meta' : $name;
 
         if ( is_object($field) ) {
@@ -171,6 +169,7 @@ class FrmProFieldsController{
 
     public static function display_field_options($display){
         $display['logic'] = true;
+		$display['autopopulate'] = false;
         $display['default_value'] = false;
         $display['calc'] = false;
         $display['visibility'] = true;
@@ -183,6 +182,10 @@ class FrmProFieldsController{
 				$display['max']  = false;
 			}
         }
+
+		if ( isset( $display['field_data']['autopopulate_value'] ) ) {
+			$display['autopopulate'] = true;
+		}
 
         $default_unique = array(
             'default_value' => true,
@@ -274,6 +277,7 @@ class FrmProFieldsController{
             'rte'               => $size_unique + array(
                 'default_blank' => false
             ),
+			'lookup'            => FrmProLookupFieldsController::add_standard_field_options(),
         );
 
         $settings['checkbox'] = $settings['radio'];
@@ -284,7 +288,7 @@ class FrmProFieldsController{
             return $display;
         }
 
-        if ( 'data' == $display['type'] && isset($display['field_data']['data_type']) ) {
+        if ( $display['type'] == 'data' && isset( $display['field_data']['data_type'] ) ) {
             $display['default_value'] = true;
             $display['read_only'] = true;
             $display['unique'] = true;
@@ -333,7 +337,7 @@ class FrmProFieldsController{
         $frm_settings = FrmAppHelper::get_settings();
         $add_html = '';
 
-		if ( FrmField::is_option_true( $field, 'read_only' ) && $field['type'] != 'hidden' ) {
+		if ( FrmField::is_option_true( $field, 'read_only' ) && $field['type'] != 'hidden' && $field['type'] != 'lookup' ) {
             global $frm_vars;
 
             if ( ( isset($frm_vars['readonly']) && $frm_vars['readonly'] == 'disabled' ) || ( current_user_can('frm_edit_entries') && FrmAppHelper::is_admin() ) ) {
@@ -347,6 +351,8 @@ class FrmProFieldsController{
             }
         }
 
+		self::maybe_add_data_attribute_for_section( $field, $add_html );
+
 		if ( FrmField::is_multiple_select( $field ) ) {
             $add_html .= ' multiple="multiple" ';
         }
@@ -359,6 +365,8 @@ class FrmProFieldsController{
             //don't continue if we are on the form builder page
             return $add_html;
         }
+
+		FrmProLookupFieldsController::maybe_add_lookup_input_html( $field, $add_html );
 
 		if ( $frm_settings->use_html ) {
 			if ( FrmField::is_option_true( $field, 'autocom' ) && ($field['type'] == 'select' || ( $field['type'] == 'data' && isset( $field['data_type'] ) && $field['data_type'] == 'select' ) ) ) {
@@ -394,6 +402,21 @@ class FrmProFieldsController{
         return $add_html;
     }
 
+	/**
+	 * Add data-sectionid attribute for fields in section
+	 *
+	 * @since 2.01.0
+	 * @param array $field
+	 * @param string $add_html
+	 */
+	private static function maybe_add_data_attribute_for_section( $field, &$add_html ) {
+		if ( FrmField::is_option_true_in_array( $field, 'in_section' ) ) {
+			$add_html .= ' data-sectionid="' . $field['in_section'] . '"';
+		}
+
+		// TODO: Add data attribute for embedded form fields as well
+	}
+
     public static function add_field_class($class, $field){
 		if ( $field['type'] == 'scale' && FrmField::is_option_true( $field, 'star' ) ) {
             $class .= ' star';
@@ -411,18 +434,32 @@ class FrmProFieldsController{
 		if ( ! FrmAppHelper::is_admin() && FrmField::is_option_true( $field, 'autocom' ) &&
 		( $field['type'] == 'select' || ( $field['type'] == 'data' && isset( $field['data_type'] ) && $field['data_type'] == 'select' ) ) &&
 		! empty( $field['options'] ) && ! FrmField::is_read_only( $field ) ) {
-			 global $frm_vars;
-			 $frm_vars['chosen_loaded'] = true;
-			 $class .= ' frm_chzn';
-
-			 $style = FrmStylesController::get_form_style($field['form_id']);
-			 if ( $style && 'rtl' == $style->post_content['direction'] ) {
-				 $class .= ' chosen-rtl';
-			 }
+			 self::add_autocomplete_classes( $field, $class );
 		}
+
+		FrmProLookupFieldsController::maybe_add_autocomplete_class( $field, $class );
 
         return $class;
     }
+
+	/**
+	* Add the autocomplete classes to a $class string
+	*
+	* @since 2.01.0
+	*
+	* @param array $field
+	* @param string $class
+	*/
+	public static function add_autocomplete_classes( $field, &$class ) {
+		 global $frm_vars;
+		 $frm_vars['chosen_loaded'] = true;
+		 $class .= ' frm_chzn';
+
+		 $style = FrmStylesController::get_form_style( $field['form_id'] );
+		 if ( $style && 'rtl' == $style->post_content['direction'] ) {
+			 $class .= ' chosen-rtl';
+		 }
+	}
 
     public static function add_separate_value_opt_label($field){
         $class = $field['separate_value'] ? '' : ' frm_hidden';
@@ -433,27 +470,31 @@ class FrmProFieldsController{
     }
 
     public static function options_form_before($field) {
-        if ( 'data' == $field['type'] ) {
-			$form_list = FrmForm::get_published_forms();
+		if ( 'lookup' == $field['type'] ) {
+			FrmProLookupFieldsController::show_get_options_from_above_field_options( $field );
+		}
 
-            $selected_field = $selected_form_id = '';
-            $current_field_id = $field['id'];
-            if ( isset($field['form_select']) && is_numeric($field['form_select']) ) {
-                $selected_field = FrmField::getOne($field['form_select']);
-                if ( $selected_field ) {
-                    $selected_form_id = FrmProFieldsHelper::get_parent_form_id($selected_field);
-                    $fields = FrmField::get_all_for_form($selected_form_id);
-                } else {
-                    $selected_field = '';
-                }
-            } else if ( isset($field['form_select']) ) {
-                $selected_field = $field['form_select'];
-            }
+        if ( 'data' == $field['type'] ) {
+	        $form_list = FrmForm::get_published_forms();
+
+	        $selected_field = $selected_form_id = '';
+	        $current_field_id = $field[ 'id' ];
+	        if ( isset( $field[ 'form_select' ] ) && is_numeric( $field[ 'form_select' ] ) ) {
+		        $selected_field = FrmField::getOne( $field[ 'form_select' ] );
+		        if ( $selected_field ) {
+			        $selected_form_id = FrmProFieldsHelper::get_parent_form_id( $selected_field );
+			        $fields = FrmField::get_all_for_form( $selected_form_id );
+		        } else {
+			        $selected_field = '';
+		        }
+	        } else if ( isset( $field[ 'form_select' ] ) ) {
+		        $selected_field = $field[ 'form_select' ];
+	        }
 
 	        include(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/options-form-before.php');
         }
 
-	    include(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/form-builder/options-before.php');
+	    include(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/back-end/options-before.php');
     }
 
     public static function options_form_top($field, $display, $values) {
@@ -467,7 +508,8 @@ class FrmProFieldsController{
 
         $form_fields = false;
         if ( $display['logic'] && ! empty( $field['hide_field'] ) && is_array( $field['hide_field'] ) ) {
-			$form_fields = FrmField::get_all_for_form( $values['id'] );
+			$form_id = ( isset( $values['id'] ) ? $values['id'] : $field['form_id'] );
+			$form_fields = FrmField::get_all_for_form( $form_id );
         }
 
         if ( 'data' == $field['type'] ) {
@@ -479,6 +521,10 @@ class FrmProFieldsController{
         } else if ( $field['type'] == 'file' ) {
             $mimes = get_allowed_mime_types();
         }
+
+		if ( $field['type'] == 'lookup' ) {
+			FrmProLookupFieldsController::show_lookup_field_options_in_form_builder( $field );
+		}
 
         require(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/options-form.php');
     }
@@ -662,12 +708,11 @@ class FrmProFieldsController{
             $entry_id = implode(',', $entry_id);
         }
         $entry_id = trim($entry_id, ',');
-		$field_id = FrmAppHelper::get_param( 'field_id', '', 'get', 'sanitize_title' );
 		$current_field = FrmAppHelper::get_param( 'current_field', '', 'get', 'absint' );
 		$hidden_field_id = FrmAppHelper::get_param( 'hide_id' );
 
-        $data_field = FrmField::getOne($field_id);
-        $current = FrmField::getOne($current_field);
+		$current = FrmField::getOne($current_field);
+		$data_field = FrmField::getOne( $current->field_options['form_select'] );
 		if ( strpos( $entry_id, ',' ) ) {
             $entry_id = explode(',', $entry_id);
             $meta_value = array();
@@ -732,7 +777,6 @@ class FrmProFieldsController{
 			'entry_id' => FrmAppHelper::get_param( 'entry_id' ),
 			'field_id' => FrmAppHelper::get_param( 'field_id', '', 'post', 'absint' ),
 			'container_id' => FrmAppHelper::get_param( 'container_id', '', 'post', 'sanitize_title' ),
-			'linked_field_id' => FrmAppHelper::get_param( 'linked_field_id', '', 'post', 'sanitize_title' ),
 			'default_value' => FrmAppHelper::get_param( 'default_value', '', 'post', 'sanitize_title' ),
 			'prev_val' => FrmAppHelper::get_param( 'prev_val', '', 'post', 'absint' )
 		);
@@ -749,15 +793,15 @@ class FrmProFieldsController{
 
 		$field = self::initialize_dependent_dynamic_field( $args );
 
-		if ( is_numeric( $args['linked_field_id'] ) ) {
+		if ( is_numeric( $args['field_data']->field_options['form_select'] ) ) {
 			// If Dynamic field is pulling options from a regular field
 			self::get_dependent_dynamic_field_options( $args, $field );
 
-		} else if ( $args['linked_field_id'] == 'taxonomy' ) {
+		} else if ( $args['field_data']->field_options['form_select'] == 'taxonomy' ) {
 			// If Dynamic field is pulling options from a taxonomy
 			self::get_dependent_category_field_options( $args, $field );
 
-        }
+		}
 
 		self::get_dependent_dynamic_field_value( $args['prev_val'], $field );
 
@@ -794,7 +838,7 @@ class FrmProFieldsController{
 	* @param array $field
 	*/
 	private static function get_dependent_dynamic_field_options( $args, &$field ) {
-		$linked_field = FrmField::getOne( $args['linked_field_id'] );
+		$linked_field = FrmField::getOne( $args['field_data']->field_options['form_select'] );
 
 		$field['options'] = array();
 
@@ -802,7 +846,7 @@ class FrmProFieldsController{
 		FrmProEntryMetaHelper::meta_through_join( $args['trigger_field_id'], $linked_field, $args['entry_id'], $args['field_data'], $metas );
 		$metas = stripslashes_deep( $metas );
 
-		if ( FrmProFieldsHelper::include_blank_option( $metas, $args['field_data'] ) ) {
+		if ( FrmProDynamicFieldsController::include_blank_option( $metas, $args['field_data'] ) ) {
 			$field['options'][''] = '';
 		}
 
@@ -816,10 +860,10 @@ class FrmProFieldsController{
 		// change the form_select value so the filter doesn't override the values
 		$args['field_data']->field_options['form_select'] = 'filtered_'. $args['field_data']->field_options['form_select'];
 
-		$field = apply_filters( 'frm_setup_new_fields_vars', $field, $args['field_data'] );
+		$field = apply_filters( 'frm_setup_new_fields_vars', $field, $args['field_data'], array() );
 
 		// Sort the options
-		$pass_args = array( 'metas' => $metas, 'field' => $args['linked_field_id'], 'dynamic_field' => $field );
+		$pass_args = array( 'metas' => $metas, 'field' => $linked_field->id, 'dynamic_field' => $field );
 		$field['options'] = apply_filters( 'frm_data_sort', $field['options'], $pass_args );
 	}
 
@@ -845,7 +889,7 @@ class FrmProFieldsController{
 			}
 		}
 
-		$field = apply_filters('frm_setup_new_fields_vars', $field, $args['field_data']);
+		$field = apply_filters( 'frm_setup_new_fields_vars', $field, $args['field_data'], array() );
 		$cat_ids = array_keys($field['options']);
 
 		$cat_args = array( 'include' => implode(',', $cat_ids), 'hide_empty' => false);
@@ -1171,6 +1215,102 @@ class FrmProFieldsController{
 			// Update the repeating form name
 			FrmForm::update( $field->field_options['form_select'], array( 'name' => $atts['value'] ) );
 		}
+	}
+
+	/**
+	 * Setup each field's array when an entry is being edited
+	 * Similar to FrmAppHelper::fill_field_defaults
+	 *
+	 * @since 2.01.0
+	 *
+	 * @param object $entry
+	 * @param array $fields
+	 * @param array $args (always contains 'parent_form_id')
+	 * If field is repeating, $args includes 'repeating', 'parent_field_id' and 'key_pointer'
+	 * @return array
+	*/
+	public static function setup_field_data_for_editing_entry( $entry, $fields, $args ) {
+		$new_fields = array();
+
+		foreach ( $fields as $field ) {
+			$default_value = apply_filters('frm_get_default_value', $field->default_value, $field, true );
+
+			$field_value = self::get_posted_or_saved_value( $entry, $field, $args );
+
+			$field_array = array(
+				'id'            => $field->id,
+				'value'         => $field_value,
+				'default_value' => $default_value,
+				'name'          => $field->name,
+				'description'   => $field->description,
+				'type'          => apply_filters('frm_field_type', $field->type, $field, $field_value),
+				'options'       => $field->options,
+				'required'      => $field->required,
+				'field_key'     => $field->field_key,
+				'field_order'   => $field->field_order,
+				'form_id'       => $field->form_id,
+				'parent_form_id' => $args['parent_form_id'],
+			);
+
+			$opt_defaults = FrmFieldsHelper::get_default_field_opts( $field_array['type'], $field, true );
+
+			$frm_settings = FrmAppHelper::get_settings();
+			foreach ( $opt_defaults as $opt => $default_opt ) {
+				// How does this work with things like 'size' that are outside of the field_options array?
+				$field_array[ $opt ] = ( isset( $field->field_options[ $opt ] ) ? $field->field_options[ $opt ] : $default_opt );
+				if ( $opt == 'blank' && $field_array[ $opt ] == '' ) {
+					$field_array[ $opt ] = $frm_settings->blank_msg;
+				} else if ( $opt == 'invalid' && $field_array[ $opt ] == '' ) {
+					if ( $field->type == 'captcha' ) {
+						$field_array[ $opt ] = $frm_settings->re_msg;
+					} else {
+						$field_array[ $opt ] = sprintf( __( '%s is invalid', 'formidable' ), $field_array['name'] );
+					}
+				}
+			}
+
+			if ( $field_array['custom_html'] == '' ) {
+				$field_array['custom_html'] = FrmFieldsHelper::get_default_html( $field->type );
+			}
+			$field_array['original_type'] = isset( $field->field_options['original_type'] ) ? $field->field_options['original_type'] : $field->type;
+			$field_array = apply_filters( 'frm_setup_edit_fields_vars', $field_array, $field, $entry->id, $args );
+
+			if ( ! isset( $field_array['unique'] ) || ! $field_array['unique'] ) {
+				$field_array['unique_msg'] = '';
+			}
+
+			$field_array = array_merge( $field->field_options, $field_array );
+
+			$values['fields'][ $field->id ] = $field_array;
+
+			$new_fields[ $field->id ] = $field_array;
+		}
+
+		return $new_fields;
+	}
+
+	/**
+	* If the field has a posted value, get it. Otherwise, get the saved field value
+	*
+	* @since 2.01.0
+	* @param object $entry
+	* @param object $field
+	* @param array $args (if repeating, this includes 'repeating', 'parent_field_id', and 'key_pointer')
+	* @return string|array $field_value
+	*/
+	private static function get_posted_or_saved_value( $entry, $field, $args ) {
+		$field_value = '';
+
+		if ( FrmEntriesHelper::value_is_posted( $field, $args ) ) {
+			// If there is a posted field value, get that
+			FrmEntriesHelper::get_posted_value( $field, $field_value, $args );
+
+		} else {
+			// Get the saved field value
+			$field_value = FrmProEntryMetaHelper::get_post_or_meta_value( $entry, $field );
+		}
+
+		return $field_value;
 	}
 
 }

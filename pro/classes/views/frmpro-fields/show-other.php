@@ -9,6 +9,7 @@ if ( $field['type'] == 'hidden' ) {
 	}
 
 	$field['html_id'] = $html_id;
+	FrmProFieldsHelper::load_hidden_sub_field_javascript( $field );
 	FrmProFieldsHelper::insert_hidden_fields( $field, $field_name, $field['value'] );
 
 } else if ( $field['type'] == 'user_id' ) {

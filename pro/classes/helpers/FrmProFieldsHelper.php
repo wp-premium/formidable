@@ -321,7 +321,7 @@ class FrmProFieldsHelper{
                 continue;
             }
 
-            $new_value = FrmAppHelper::get_param('item_meta['. $shortcode .']', false, 'post');
+            $new_value = FrmAppHelper::get_param( 'item_meta['. $shortcode .']', false, 'post', 'wp_kses_post' );
             if ( ! $new_value && isset($atts['default']) ) {
                 $new_value = $atts['default'];
             }
@@ -421,19 +421,9 @@ class FrmProFieldsHelper{
         $values['hide_opt'] = (array) $values['hide_opt'];
 
 		if ( $values['type'] == 'data' && in_array( $values['data_type'], array( 'select', 'radio', 'checkbox' ) ) && is_numeric( $values['form_select'] ) ) {
-            $check = self::check_data_values($values);
-
-            if ( $check ) {
-                $values['options'] = self::get_linked_options($values, $field);
-            } else if ( is_numeric($values['value']) ) {
-				$values['options'] = array();
-				if ( $field->field_options['data_type'] == 'select' ) {
-					// add blank option for dropdown
-					$values['options'][''] = '';
-				}
-				$values['options'][ $values['value'] ] = FrmEntryMeta::get_entry_meta_by_field( $values['value'], $values['form_select'] );
-            }
-            unset($check);
+            FrmProDynamicFieldsController::add_options_for_dynamic_field( $field, $values );
+		} else if ( $values['type'] == 'lookup' ) {
+			FrmProLookupFieldsController::maybe_get_initial_lookup_field_options( $values );
 		} else if ( $values['type'] == 'scale' ) {
             $values['minnum'] = 1;
             $values['maxnum'] = 10;
@@ -484,7 +474,7 @@ class FrmProFieldsHelper{
             $values['value'] = apply_filters('frm_filter_default_value', $values['value'], $field, false);
         }
 
-        self::setup_conditional_fields($values);
+        self::add_field_javascript( $values );
 
         return $values;
     }
@@ -516,6 +506,17 @@ class FrmProFieldsHelper{
 		return $field;
 	}
 
+	/**
+	* Add field-specific JavaScript to global $frm_vars
+	*
+	* @since 2.01.0
+	* @param array $values
+	*/
+	private static function add_field_javascript( $values ) {
+		self::setup_conditional_fields($values);
+		FrmProLookupFieldsController::setup_lookup_field_js( $values );
+	}
+
     public static function setup_edit_vars( $values, $field, $entry_id = false ) {
         $values['use_key'] = false;
 
@@ -525,15 +526,11 @@ class FrmProFieldsHelper{
         $values['hide_field_cond'] = (array) $values['hide_field_cond'];
         $values['hide_opt'] = (array) $values['hide_opt'];
 
-        if ( $values['type'] == 'data' && in_array($values['data_type'], array( 'select', 'radio', 'checkbox')) && is_numeric($values['form_select']) ) {
-            $check = self::check_data_values($values);
+		if ( $values['type'] == 'lookup' ) {
+			FrmProLookupFieldsController::maybe_get_initial_lookup_field_options( $values );
 
-            if ( $check ) {
-                $values['options'] = self::get_linked_options($values, $field, $entry_id);
-            } else if ( is_numeric($values['value']) ) {
-                $values['options'] = array($values['value'] => FrmEntryMeta::get_entry_meta_by_field($values['value'], $values['form_select']));
-            }
-            unset($check);
+		} else if ( $values['type'] == 'data' && in_array($values['data_type'], array( 'select', 'radio', 'checkbox')) && is_numeric($values['form_select']) ) {
+            FrmProDynamicFieldsController::add_options_for_dynamic_field( $field, $values );
         } else if ( $values['type'] == 'date' ) {
             $to_format = preg_match('/^\d{4}-\d{2}-\d{2}$/', $values['value']) ? 'Y-m-d' : 'Y-m-d H:i:s';
             $values['value'] = FrmProAppHelper::maybe_convert_from_db_date($values['value'], $to_format);
@@ -585,9 +582,9 @@ class FrmProFieldsHelper{
         }
 
 		// Format the value in hidden repeating sections
-		self::setup_hidden_sub_form( $values, $field );
+		self::setup_hidden_sub_form( $values );
 
-        self::setup_conditional_fields($values);
+        self::add_field_javascript( $values );
 
         return $values;
     }
@@ -684,31 +681,16 @@ class FrmProFieldsHelper{
 			'in_section' => 0,
         );
 
+		FrmProLookupFieldsController::add_autopopulate_value_field_options( $values, $field, $opts );
+
+		FrmProLookupFieldsController::add_field_options_specific_to_lookup_field( $values, $field, $opts );
+
         $opts = apply_filters('frm_default_field_opts', $opts, $values, $field);
 		$opts = apply_filters( 'frm_default_'. $field_type .'_field_opts', $opts, $values, $field );
 
 		unset( $values, $field );
 
         return $opts;
-    }
-
-	public static function check_data_values( $values ) {
-        $check = true;
-        if ( ! empty($values['hide_field']) && ( ! empty($values['hide_opt']) || ! empty($values['form_select']) ) ) {
-            foreach ( $values['hide_field'] as $hkey => $f ) {
-                if ( ! empty($values['hide_opt'][$hkey]) ) {
-                    continue;
-                }
-                $f = FrmField::getOne($f);
-                if ( $f && $f->type == 'data' ) {
-                    $check = false;
-                    break;
-                }
-                unset($f, $hkey);
-            }
-        }
-
-        return $check;
     }
 
     public static function setup_input_masks($field) {
@@ -837,17 +819,16 @@ class FrmProFieldsHelper{
 	* Format the value in hidden repeating sections when value isn't posted
 	* @since 2.0
 	*/
-	private static function setup_hidden_sub_form( &$values, $field ) {
-		// Make sure this is a repeating section
-		$is_hidden_repeat = ( $values['type'] == 'hidden' && ! isset( $values['value']['form'] ) && ! empty ( $values['value'] ) &&  $values['repeat'] && $values['form_select'] );
+	private static function setup_hidden_sub_form( &$values ) {
+		$is_hidden_repeat_with_saved_value = (
+			$values['original_type'] == 'divider' &&
+			$values['repeat'] &&
+			$values['type'] == 'hidden' &&
+			! isset( $values['value']['form'] ) &&
+			! empty ( $values['value'] )
+		);
 
-		if ( ! $is_hidden_repeat ) {
-			return;
-		}
-
-		// Make 100% sure this is a repeating section (could be Dynamic repeating field)
-		$field_type = FrmField::get_type( $field->id );
-		if ( $field_type != 'divider' ) {
+		if ( ! $is_hidden_repeat_with_saved_value ) {
 			return;
 		}
 
@@ -863,6 +844,7 @@ class FrmProFieldsHelper{
 		// Loop through children and entries to get values
 		foreach ( (array) $values['value']['id'] as $entry_id ) {
 			$values['value'][ 'i' . $entry_id ] = array();
+			$values['value'][ 'i' . $entry_id ][0] = '';
 			$entry = FrmEntry::getOne( $entry_id, true );
 			foreach ( $child_fields as $child ) {
 				$values['value'][ 'i' . $entry_id ][ $child->id ] = isset( $entry->metas[ $child->id ] ) ? $entry->metas[ $child->id ] : '';
@@ -870,188 +852,330 @@ class FrmProFieldsHelper{
 		}
 	}
 
-	public static function setup_conditional_fields( $field ) {
-        if ( FrmAppHelper::is_admin_page('formidable' ) ) {
-            return;
-        }
-
-        global $frm_vars;
-
-        //conditional rules only once on the page
-        if ( FrmAppHelper::doing_ajax() && ( ! isset($frm_vars['footer_loaded']) || $frm_vars['footer_loaded'] !== true ) ) {
-            return;
-        }
-
-        //don't continue if the field has no conditiona
-        if ( empty($field['hide_field']) || ( empty($field['hide_opt']) && empty($field['form_select']) ) ) {
-            return;
-        }
-
-        $conditions = array();
-
-        if ( ! isset($field['show_hide']) ) {
-            $field['show_hide'] = 'show';
-        }
-
-        if ( ! isset($field['any_all']) ) {
-            $field['any_all'] = 'any';
-        }
-
-        foreach ( $field['hide_field'] as $i => $cond ) {
-            if ( ! is_numeric($cond) ) {
-                continue;
-            }
-
-            $parent_field = FrmField::getOne($cond);
-
-            if ( ! $parent_field ) {
-                continue;
-            }
-
-            $parent_opts = maybe_unserialize($parent_field->field_options);
-
-            if ( empty($conditions) ) {
-                foreach ( $field['hide_field'] as $i2 => $cond2 ) {
-                    if ( ! is_numeric($cond2) ) {
-                        continue;
-                    }
-
-                    $sub_opts = array();
-                    if ( (int) $cond2 == (int) $parent_field->id ) {
-                        $sub_field = $parent_field;
-                        $sub_opts = $parent_opts;
-                    } else {
-                        $sub_field = FrmField::getOne($cond2);
-                        if ( $sub_field ) {
-                            $sub_opts = maybe_unserialize($sub_field->field_options);
-                        }
-                    }
-
-					if ( ! $sub_field ) {
-						continue;
-					}
-
-                    $field['org_type'] = $field['type'];
-                    if ( $sub_field->type == 'data' && $field['type'] == 'hidden' ) {
-                        $org_field = FrmField::getOne($field['id']);
-                        $field['org_type'] = $org_field->type;
-                        unset($org_field);
-                    }
-
-                    $condition = array( 'FieldName' => $sub_field->id, 'Condition' => $field['hide_field_cond'][$i2]);
-
-                    if ( $sub_field->type == 'data' && $field['org_type'] == 'data' && ( is_numeric($field['form_select']) || $field['form_select'] == 'taxonomy') ) {
-                        $condition['LinkedField'] = $field['form_select'];
-                        $condition['DataType'] = empty($field['data_type']) ? 'data' : $field['data_type'];
-                    }
-
-                    if ( isset($field['hide_opt']) && ( ! empty($field['hide_opt'][$i2]) || $field['hide_opt'][$i2] == 0) ) {
-                        $condition['Value'] = str_replace('"', '&quot;', self::get_default_value($field['hide_opt'][$i2], FrmField::getOne($field['id']), false ));
-                    }
-
-                    if ( $sub_field->type == 'scale' ) {
-                        $sub_field->type = 'radio';
-                    }
-                    $condition['Type'] = $sub_field->type . (($sub_field->type == 'data') ? '-'. $sub_opts['data_type'] : '');
-                    $conditions[] = $condition;
-                }
-            }
-
-            $rule = array( 'Show' => $field['show_hide'], 'MatchType' => $field['any_all']);
-
-            $rule['Setting'] = array( 'FieldName' => $field['id']);
-
-            $rule['Conditions'] = $conditions;
-
-			$rule['FormId'] = $field['parent_form_id'];
-
-            if ( ! isset($frm_vars['rules']) || ! $frm_vars['rules'] ) {
-                $frm_vars['rules'] = array();
-            }
-
-            if ( ! isset($frm_vars['rules'][$parent_field->id]) ) {
-                $frm_vars['rules'][$parent_field->id] = array();
-            }
-
-            // If field has confirmation field, add script for confirmation field as well
-			if ( ! FrmField::is_option_empty( $field, 'conf_field' ) ) {
-                $conf_rule = $rule;
-                $conf_rule['Setting']['FieldName'] = 'conf_' . $conf_rule['Setting']['FieldName'];
-                $frm_vars['rules'][$parent_field->id][] = $conf_rule;
-            }
-
-            $included = false;
-            foreach ( $frm_vars['rules'][$parent_field->id] as $checked_cond ) {
-                // this condition is already included
-                if ( $checked_cond == $rule ) {
-                    $included = true;
-                }
-                unset($checked_cond);
-            }
-
-            if ( ! $included ) {
-                $frm_vars['rules'][$parent_field->id][] = $rule;
-            }
-
-            unset($rule, $parent_field, $i, $cond);
-        }
-    }
-
-
 	/**
-	* Check if the frm_helpers variable needs to be set up
-	* frm_helpers stores an array of child field IDs as the keys and parent field IDs as the itesm
-	*
-	* @since 2.0.13
-	* @param string $frm_helpers
-	* @param array $fields
-	* @return string $frm_helpers
-	*/
-	public static function maybe_get_parent_child_field_helpers( $frm_helpers, $fields, $args ){
-		if ( isset( $_POST['frm_helpers_' . $args['form_id'] ] ) ) {
-			// If frm_helpers is posted from a previous page, just keep it
-
-			$frm_helpers = FrmAppHelper::get_post_param( 'frm_helpers_' . $args['form_id'], '', 'sanitize_text_field' );
-		} else {
-			// Check if there is anything that should be added to frm_helpers
-
-			$frm_helpers = array();
-			foreach( $fields as $field ) {
-
-				// If field has conditional logic on it
-				if ( $field['hide_field'] && ( $field['hide_opt'] || $field['form_select'] ) ) {
-					self::setup_child_and_parent_helper( $field, $frm_helpers );
-				}
-			}
-
-			// Make sure the array is json encoded so it can be understood by JavaScript
-			$frm_helpers = json_encode( $frm_helpers );
+	 * Set up the $frm_vars['rules'] array
+	 *
+	 * @param array $field
+	 */
+	public static function setup_conditional_fields( $field ) {
+		// TODO: prevent this from being called at all on the form builder page
+		if ( FrmAppHelper::is_admin_page('formidable' ) ) {
+			return;
 		}
 
-		return $frm_helpers;
+		global $frm_vars;
+
+		if ( false == self::are_logic_rules_needed_for_this_field( $field, $frm_vars ) ) {
+			return;
+		}
+
+		self::maybe_initialize_global_rules_array( $frm_vars );
+
+		$logic_rules = self::get_logic_rules_for_field( $field, $frm_vars );
+
+		foreach ( $field['hide_field'] as $i => $logic_field_id ) {
+			$logic_field = self::get_field_from_conditional_logic( $logic_field_id );
+			if ( ! $logic_field ) {
+				continue;
+			}
+			$add_field = true;
+
+			self::add_condition_to_logic_rules( $field, $i, $logic_rules );
+
+			self::maybe_initialize_logic_field_rules( $logic_field, $field['parent_form_id'], $frm_vars );
+
+			self::add_to_logic_field_dependents( $logic_field_id, $field['id'], $frm_vars );
+		}
+		unset( $i, $logic_field_id, $logic_field );
+
+		if ( isset( $add_field ) && $add_field == true ) {
+
+			// Add current field's logic rules to global rules array
+			$frm_vars['rules'][ $field['id'] ] = $logic_rules;
+
+			self::set_logic_rule_status_to_complete( $field['id'], $frm_vars );
+			self::maybe_add_script_for_confirmation_field( $field, $logic_rules, $frm_vars );
+			self::add_field_to_global_dependent_ids( $field, $logic_rules['fieldType'], $frm_vars );
+		}
 	}
 
 	/**
-	* Set up an array of child field IDs as the keys and parent field IDs as the items
-	*
-	* @since 2.0.13
-	* @param array $field
-	* @param array $frm_helpers, pass by reference
-	*/
-	private static function setup_child_and_parent_helper( $field, &$frm_helpers ) {
-		$field_type = isset( $field['original_type'] ) ? $field['original_type'] : $field['type'];
+	 * Check if global conditional logic rules are needed for a field
+	 *
+	 * @since 2.01.0
+	 * @param array $field
+	 * @param array $frm_vars
+	 * @return bool
+	 */
+	private static function are_logic_rules_needed_for_this_field( $field, $frm_vars ) {
+		$logic_rules_needed = true;
 
-		// Check if conditionally hidden field is a "parent" type of field
-		if ( $field_type == 'divider' || $field_type == 'form' ) {
+        if ( empty( $field['hide_field'] ) || ( empty( $field['hide_opt'] ) && empty( $field['form_select'] ) ) ) {
+        	// Field doesn't have conditional logic on it
+            $logic_rules_needed = false;
 
-			// Get all child fields
-			$children = FrmProField::get_children( $field );
-			if ( ! $children ) {
-				return;
+        } else if ( isset( $frm_vars['rules'][ $field['id'] ]['status'] ) && 'complete' == $frm_vars['rules'][ $field['id'] ]['status'] ) {
+        	// Field has already been checked
+        	$logic_rules_needed = false;
+
+        } else if ( FrmAppHelper::doing_ajax() && ( ! isset( $frm_vars['footer_loaded'] ) || $frm_vars['footer_loaded'] !== true ) ) {
+        	// Don't load rules again when adding a row in a repeating section or turning the page in a "Submit with ajax" form
+        	$logic_rules_needed = false;
+        }
+
+        return $logic_rules_needed;
+	}
+
+	/**
+	 * Initialize the $frm_vars rules array if it isn't already initialized
+	 *
+	 * @since 2.01.0
+	 * @param array $frm_vars
+	 */
+	private static function maybe_initialize_global_rules_array( &$frm_vars ) {
+        if ( ! isset( $frm_vars['rules'] ) || ! $frm_vars['rules'] ) {
+			$frm_vars['rules'] = array();
+		}
+	}
+
+	/**
+	 * Get the logic rules for the current field
+	 *
+	 * @since 2.01.0
+	 * @param array $field
+	 * @param array $frm_vars
+	 * @return array
+	 */
+	private static function get_logic_rules_for_field( $field, $frm_vars ) {
+		if ( ! isset( $frm_vars['rules'][ $field['id'] ] ) ) {
+			$logic_rules = self::initialize_logic_rules_for_field_array( $field, $field['parent_form_id'] );
+		} else {
+			$logic_rules = $frm_vars['rules'][ $field['id'] ];
+		}
+
+		return $logic_rules;
+	}
+
+	/**
+	 * Initialize the logic rules for a field
+	 *
+	 * @since 2.01.0
+	 * @param array $field
+	 * @param int $form_id
+	 * @return array
+	 */
+	private static function initialize_logic_rules_for_field_array( $field, $form_id ) {
+        $original_type = self::get_original_field_type( $field );
+
+		$logic_rules = array(
+        	'fieldId' => $field['id'],
+			'fieldKey' => $field['field_key'],
+			'fieldType' => $original_type,
+			'inputType' => self::get_the_input_type_for_logic_rules( $field, $original_type ),
+			'isMultiSelect' => FrmField::is_multiple_select( $field ),
+			'formId' => $form_id,
+			'inSection' => isset( $field['in_section'] ) ? $field['in_section'] : '0',
+			'inEmbedForm' => isset( $field['in_embed_form'] ) ? $field['in_embed_form'] : '0',
+			'isRepeating' => ( $form_id != $field['form_id'] ),
+			'dependents' => array(),
+			'showHide' => isset( $field['show_hide'] ) ? $field['show_hide'] : 'show',
+			'anyAll' => isset( $field['any_all'] ) ? $field['any_all'] : 'any',
+			'conditions' => array(),
+        );
+
+        // Maybe add section key
+        if ( $logic_rules['inSection'] !== '0' && $logic_rules['isRepeating'] ) {
+        	$logic_rules['inSectionKey'] = FrmField::get_key_by_id( $logic_rules['inSection'] );
+        }
+
+        return $logic_rules;
+	}
+
+	/**
+	 * Get the original field type
+	 *
+	 * @since 2.01.0
+	 * @param array $field
+	 * @return string
+	 */
+	private static function get_original_field_type( $field ) {
+		if ( isset( $field['original_type'] ) ) {
+			$field_type = $field['original_type'];
+		} else {
+			$field_type = $field['type'];
+		}
+
+		return $field_type;
+	}
+
+	/**
+	 * Get the input type from a field
+	 *
+	 * @since 2.01.0
+	 * @param array $field
+	 * @param string $field_type
+	 * @return string
+	 */
+	private static function get_the_input_type_for_logic_rules( $field, $field_type ) {
+		if ( $field_type == 'data' || $field_type == 'lookup' ) {
+			$cond_type = $field['data_type'];
+		} else if ( $field_type == 'scale' ) {
+			$cond_type = 'radio';
+		} else {
+			$cond_type = $field_type;
+		}
+
+		return $cond_type;
+	}
+
+	/**
+	 * Set the logic rule status to complete
+	 *
+	 * @since 2.01.0
+	 * @param int $field_id
+	 * @param array $frm_vars
+	 */
+	private static function set_logic_rule_status_to_complete( $field_id, &$frm_vars ) {
+		$frm_vars['rules'][ $field_id ]['status'] = 'complete';
+	}
+
+	/**
+	 * Get the field object for a logic field
+	 *
+	 * @since 2.01.0
+	 * @param mixed $logic_field_id
+	 * @return boolean|object
+	 */
+	private static function get_field_from_conditional_logic( $logic_field_id ) {
+		// TODO: maybe get rid of the getOne call here if the field already exists in $frm_vars['rules']?
+		if ( ! is_numeric( $logic_field_id ) ) {
+			$logic_field = false;
+		} else {
+			$logic_field = FrmField::getOne( $logic_field_id );
+		}
+
+		return $logic_field;
+	}
+
+	/**
+	 * Add a row of conditional logic to the logic_rules array
+	 *
+	 * @since 2.01.0
+	 * @param array $field
+	 * @param int $i
+	 * @param array $logic_rules
+	 */
+	private static function add_condition_to_logic_rules( $field, $i, &$logic_rules ){
+		$logic_rules['conditions'][] = array(
+			'fieldId' => $field['hide_field'][ $i ],
+			'operator' => $field['hide_field_cond'][ $i ],
+			'value' => $field['hide_opt'][ $i ],
+		);
+	}
+
+	/**
+	 * Add a logic field to the frm_vars rules array
+	 *
+	 * @since 2.01.0
+	 * @param object $logic_field
+	 * @param int $form_id
+	 * @param array $frm_vars
+	 */
+	private static function maybe_initialize_logic_field_rules( $logic_field, $form_id, &$frm_vars ) {
+		if ( ! isset( $frm_vars['rules'][ $logic_field->id ] ) ) {
+			$frm_vars['rules'][ $logic_field->id ] = self::initialize_logic_rules_for_fields_object( $logic_field, $form_id );
+		}
+	}
+
+	/**
+	 * Initialize the logic rules for a field object
+	 *
+	 * @since 2.01.0
+	 * @param object $field
+	 * @param int $form_id
+	 * @return array
+	 */
+	private static function initialize_logic_rules_for_fields_object( $field, $form_id ) {
+		$field_options = $field->field_options;
+		$field = get_object_vars( $field );
+		unset( $field['field_options'] );
+		$field = $field + $field_options;
+
+		return self::initialize_logic_rules_for_field_array( $field, $form_id );
+	}
+
+	/**
+	 * Add dependent field to logic field's dependents
+	 *
+	 * @since 2.01.0
+	 * @param int $logic_field_id
+	 * @param int $dep_field_id
+	 * @param array $frm_vars
+	 */
+	private static function add_to_logic_field_dependents( $logic_field_id, $dep_field_id, &$frm_vars ) {
+		$frm_vars['rules'][ $logic_field_id ]['dependents'][] = $dep_field_id;
+	}
+
+	/**
+	 * Add rules for a confirmation field
+	 *
+	 * @since 2.01.0
+	 * @param array $field
+	 * @param array $logic_rules
+	 * @param array $frm_vars
+	 */
+	private static function maybe_add_script_for_confirmation_field( $field, $logic_rules, &$frm_vars ){
+		// TODO: maybe move confirmation field inside of field div
+		if ( ! FrmField::is_option_empty( $field, 'conf_field' ) ) {
+
+			// Add the rules for confirmation field
+			$conf_field_rules = $logic_rules;
+			$conf_field_rules['fieldId'] = 'conf_' . $logic_rules['fieldId'];
+			$conf_field_rules['fieldKey'] = 'conf_' . $logic_rules['fieldKey'];
+			$frm_vars['rules'][ 'conf_' . $field['id'] ] = $conf_field_rules;
+
+			// Add to all logic field dependents
+			self::add_conf_field_to_logic_field_dependents( $conf_field_rules, $frm_vars );
+		}
+	}
+
+	/**
+	 * Add confirmation field as a dependent for all of its logic fields
+	 *
+	 * @since 2.01.0
+	 * @param array $conf_field_rules
+	 * @param array $frm_vars
+	 */
+	private static function add_conf_field_to_logic_field_dependents( $conf_field_rules, &$frm_vars ) {
+		foreach ( $conf_field_rules['conditions'] as $condition ) {
+			self::add_to_logic_field_dependents( $condition['fieldId'], $conf_field_rules['fieldId'], $frm_vars );
+		}
+	}
+
+	/**
+	 * Add dependent field to the dep_logic_fields or dep_dynamic_fields array
+	 *
+	 * @since 2.01.0
+	 * @param array $field
+	 * @param string $original_field_type
+	 * @param array $frm_vars
+	 */
+	private static function add_field_to_global_dependent_ids( $field, $original_field_type, &$frm_vars ) {
+		if ( $original_field_type == 'data' ) {
+			// Add to dep_dynamic_fields
+			if ( ! isset( $frm_vars['dep_dynamic_fields'] ) ) {
+				$frm_vars['dep_dynamic_fields'] = array();
 			}
+			$frm_vars['dep_dynamic_fields'][] = $field['id'];
+		} else {
+			// Add to dep_logic_fields
+			if ( ! isset( $frm_vars['dep_logic_fields'] ) ) {
+				$frm_vars['dep_logic_fields'] = array();
+			}
+			$frm_vars['dep_logic_fields'][] = $field['id'];
 
-			foreach ( $children as $child ) {
-				$frm_helpers[ $child ] = $field['id'];
+			if ( FrmField::is_option_true_in_array( $field, 'conf_field' ) ) {
+				$frm_vars['dep_logic_fields'][] = 'conf_' . $field['id'];
 			}
 		}
 	}
@@ -1296,115 +1420,13 @@ class FrmProFieldsHelper{
     }
 
     public static function get_linked_options( $values, $field, $entry_id = false ) {
-        global $user_ID, $wpdb;
-
-        $metas = array();
-        $selected_field = FrmField::getOne($values['form_select']);
-
-        if ( ! $selected_field ) {
-            return array();
-        }
-
-        $linked_posts = isset( $selected_field->field_options['post_field'] ) && $selected_field->field_options['post_field'] && $selected_field->field_options['post_field'] != '';
-
-        $post_ids = array();
-
-		if ( is_numeric( $values['hide_field'] ) && empty( $values['hide_opt'] ) ) {
-            if ( isset($_POST) && isset($_POST['item_meta']) ) {
-                $observed_field_val = (isset($_POST['item_meta'][$values['hide_field']])) ? $_POST['item_meta'][$values['hide_field']] : '';
-            } else if ( $entry_id ) {
-                $observed_field_val = FrmEntryMeta::get_entry_meta_by_field($entry_id, $values['hide_field']);
-            } else {
-                $observed_field_val = '';
-            }
-
-            $observed_field_val = maybe_unserialize($observed_field_val);
-
-            $metas = array();
-            FrmProEntryMetaHelper::meta_through_join($values['hide_field'], $selected_field, $observed_field_val, false, $metas);
-
-		} else if ( $values['restrict'] && $user_ID ) {
-            $entry_user = $user_ID;
-            if ( $entry_id && FrmAppHelper::is_admin() ) {
-                $entry_user = FrmDb::get_var( 'frm_items', array( 'id' => $entry_id ), 'user_id' );
-                if ( ! $entry_user || empty($entry_user) ) {
-                    $entry_user = $user_ID;
-                }
-            }
-
-			if ( isset( $selected_field->form_id ) ) {
-                $linked_where = array( 'form_id' => $selected_field->form_id, 'user_id' => $entry_user);
-				if ( $linked_posts ) {
-                    $post_ids = FrmDb::get_results( 'frm_items', $linked_where, 'id, post_id' );
-				} else {
-                    $entry_ids = FrmDb::get_col($wpdb->prefix .'frm_items', $linked_where, 'id');
-                }
-                unset($linked_where);
-            }
-
-            if ( isset($entry_ids) && !empty($entry_ids) ) {
-				$metas = FrmEntryMeta::getAll( array( 'it.item_id' => $entry_ids, 'field_id' => (int) $values['form_select'] ), ' ORDER BY meta_value', '');
-            }
-        }else{
-            $limit = '';
-            if ( FrmAppHelper::is_admin_page('formidable' ) ) {
-                $limit = 500;
-            }
-
-            $metas = FrmDb::get_results( 'frm_item_metas', array( 'field_id' => $values['form_select']), 'item_id, meta_value', array( 'order_by' => 'meta_value', 'limit' => $limit) );
-            $post_ids = FrmDb::get_results( 'frm_items', array( 'form_id' => $selected_field->form_id), 'id, post_id', array( 'limit' => $limit) );
-        }
-
-        if ( $linked_posts && ! empty( $post_ids ) ) {
-            foreach ( $post_ids as $entry ) {
-                $meta_value = FrmProEntryMetaHelper::get_post_value( $entry->post_id, $selected_field->field_options['post_field'], $selected_field->field_options['custom_field'], array( 'type' => $selected_field->type, 'form_id' => $selected_field->form_id, 'field' => $selected_field ) );
-                $metas[] = array( 'meta_value' => $meta_value, 'item_id' => $entry->id);
-            }
-        }
-
-        $options = array();
-        foreach ( $metas as $meta ) {
-            $meta = (array) $meta;
-			if ( $meta['meta_value'] == '' ) {
-				continue;
-			}
-
-			if ( $selected_field->type == 'image' ) {
-                $options[$meta['item_id']] = $meta['meta_value'];
-			} else {
-                $options[$meta['item_id']] = FrmEntriesHelper::display_value($meta['meta_value'], $selected_field, array( 'type' => $selected_field->type, 'show_icon' => true, 'show_filename' => false));
-			}
-
-            unset($meta);
-        }
-
-        $options = apply_filters('frm_data_sort', $options, array( 'metas' => $metas, 'field' => $selected_field, 'dynamic_field' => $values ));
-        unset($metas);
-
-        if ( self::include_blank_option($options, $field) ) {
-            $options = array( '' => '') + (array) $options;
-        }
-
-        return stripslashes_deep($options);
+		_deprecated_function( __FUNCTION__, '2.01.0', 'FrmProDynamicFieldsController::get_independent_options' );
+		return FrmProDynamicFieldsController::get_independent_options( $values, $field, $entry_id );
     }
 
-    /**
-     * A dropdown field should include a blank option if it is not multiselect
-     * unless it autocomplete is also enabled
-     *
-     * @since 2.0
-     * @return boolean
-     */
     public static function include_blank_option($options, $field) {
-        if ( empty($options) || $field->type != 'data' ) {
-            return false;
-        }
-
-        if ( ! isset($field->field_options['data_type']) || $field->field_options['data_type'] != 'select' ) {
-            return false;
-        }
-
-		return  ( ! FrmField::is_multiple_select( $field ) || FrmField::is_option_true( $field, 'autocom' ) );
+        _deprecated_function( __FUNCTION__, '2.01.0', 'FrmProDynamicFieldsController::include_blank_option' );
+		return FrmProDynamicFieldsController::include_blank_option( $options, $field );
     }
 
 	public static function get_time_options( $values ) {
@@ -1877,7 +1899,7 @@ DEFAULT_HTML;
     * @return boolean true if field type is radio or Dynamic radio
     */
     public static function is_radio( $field ) {
-        return ( $field['type'] == 'radio' || ( $field['type'] == 'data' && $field['data_type'] == 'radio' ) );
+        return ( $field['type'] == 'radio' || ( $field['type'] == 'data' && $field['data_type'] == 'radio' ) || ( $field['type'] == 'lookup' && $field['data_type'] == 'radio' ) );
     }
 
     /**
@@ -3063,7 +3085,7 @@ DEFAULT_HTML;
 
 		self::maybe_get_show_from_array( $replace_with, $atts );
 
-        $replace_with = apply_filters('frmpro_fields_replace_shortcodes', $replace_with, $tag, $atts, $field);
+		$replace_with = apply_filters('frmpro_fields_replace_shortcodes', $replace_with, $tag, $atts, $field);
 
 		if ( $field->type == 'file' ) {
 			self::get_file_html_from_atts($atts, $replace_with);
@@ -4157,6 +4179,40 @@ DEFAULT_HTML;
 		return FrmField::is_repeating_field( $field );
 	}
 
+	/**
+	* Load JavaScript for hidden subfields
+	* Applies to repeating sections and embed form fields
+	*
+	* @since 2.01.0
+	* @param array $field
+	*/
+	public static function load_hidden_sub_field_javascript( $field ) {
+		if ( ( $field['original_type'] == 'divider' && $field['repeat'] == true ) || $field['original_type'] == 'form' ) {
+			// TODO: clean this up
+
+			$sub_fields = FrmField::get_all_for_form( $field['form_select'] );
+			foreach ( $sub_fields as $s_field ) {
+				$temp = get_object_vars( $s_field );
+				$field_array = $temp['field_options'];
+				unset( $temp['field_options'] );
+				$field_array = $field_array + $temp;
+				$field_array['original_type'] = $field_array['type'];
+				$field_array['type'] = 'hidden';
+				$field_array['parent_form_id'] = $field['form_id'];
+				if ( ! isset( $field_array['value'] ) ) {
+					$field_array['value'] = '';
+				}
+
+				if ( $field['original_type'] == 'form' ) {
+					$field_array['in_embed_form'] = $field['id'];
+				}
+
+				self::add_field_javascript( $field_array );
+			}
+		}
+	}
+
+
     /**
      * Loop through value in hidden field and display arrays in separate fields
      * @since 2.0
@@ -4172,7 +4228,7 @@ DEFAULT_HTML;
         	$html_id = $field['html_id'];
 			self::hidden_html_id( $field, $field_name, $opt_key, $html_id );
 ?>
-<input type="hidden" name="<?php echo esc_attr( $field_name ) ?>" id="<?php echo esc_attr( $html_id ) ?>" value="<?php echo esc_attr( $checked ) ?>" <?php do_action( 'frm_field_input_html', $field ) ?> />
+<input type="hidden" name="<?php echo esc_attr( $field_name ) ?>" id="<?php echo esc_attr( $html_id ) ?>" value="<?php echo esc_attr( $checked ) ?>" <?php do_action( 'frm_field_input_html', $field )?> />
 <?php
 			self::insert_extra_hidden_fields( $field, $opt_key );
         }
@@ -4196,24 +4252,30 @@ DEFAULT_HTML;
 			if ( $opt_key === false && in_array( $field['original_type'], array( 'radio', 'checkbox', 'scale' ) ) ) {
 				$html_id_end = 0;
 			} else if ( $field['original_type'] == 'divider' ) {
-				// pull the field id from the field name
 				$parts = explode( '][', $field_name . '[' );
 
 				if ( count( $parts ) > 2 ) {
-					if ( $parts[2] == 'other' ) {
+					if ( $parts[1] === 'form' || $parts[1] === 'id' ) {
+						// Do nothing
+					} else if ( $parts[2] === 'other' ) {
 						self::get_html_id_for_hidden_other_fields( $parts, $opt_key, $html_id );
 						return;
 					} else {
 						$field_id = absint( $parts[2] );
 
-						$field_key = FrmField::get_type( $field_id, 'field_key' );
-						if ( $field_key ) {
-							$html_id = 'field_' . $field_key;
+						if ( $field_id === 0 ) {
+							$html_id .= '-rowid';
 							$html_id_end = $parts[1];
+						} else {
+							$field_key = FrmField::get_key_by_id( $field_id );
+							if ( $field_key ) {
+								$html_id = 'field_' . $field_key;
+								$html_id_end = $parts[1];
 
-							// allow for a multi-dimensional array for the ids
-							if ( isset( $parts[3] ) && $parts[3] != '' ) {
-								$html_id_end .= '-' . $parts[3];
+								// allow for a multi-dimensional array for the ids
+								if ( isset( $parts[3] ) && $parts[3] != '' ) {
+									$html_id_end .= '-' . $parts[3];
+								}
 							}
 						}
 					}
@@ -4454,6 +4516,8 @@ DEFAULT_HTML;
 		if ( ! $show_credit_card ) {
 			unset( $field_types['credit_card'] );
 		}
+
+		$field_types['lookup'] = FrmProLookupFieldsController::get_lookup_options_for_insert_fields_tab();
 
 		return $field_types;
 	}

@@ -230,4 +230,6 @@ if ( ! $field['size'] ) {
     FrmProFormsHelper::get_sub_form($field_name, $field, array(
         'errors' => $errors, 'repeat' => 5,
     ));
+} else if ( 'lookup' == $field['type'] ) {
+	FrmProLookupFieldsController::get_front_end_lookup_field_html( $field, $field_name, $html_id );
 }

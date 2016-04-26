@@ -4,7 +4,7 @@
     <?php
     $sel = false;
 	foreach ( $form_fields as $ff ) {
-		if ( $ff->id == $field['id'] || FrmField::is_no_save_field( $ff->type ) || in_array( $ff->type, array( 'file', 'rte', 'date' ) ) || FrmProField::is_list_field( $ff ) ) {
+		if ( $ff->id == $field['id'] || FrmField::is_no_save_field( $ff->type ) || in_array( $ff->type, array( 'file', 'rte', 'date', 'address', 'credit_card' ) ) || FrmProField::is_list_field( $ff ) ) {
             continue;
         }
 
