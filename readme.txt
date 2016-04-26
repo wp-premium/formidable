@@ -3,8 +3,8 @@ Contributors: sswells, srwells, jamie.wahlin
 Donate link: http://formidablepro.com/donate
 Tags: contact form, contact, custom form, database, email, feedback, form, forms, poll, Post, captcha, spam, survey, template, widget, multisite, form builder, form creator, form manager
 Requires at least: 3.7
-Tested up to: 4.4
-Stable tag: 2.0.25
+Tested up to: 4.5
+Stable tag: 2.01.0
 
 Beautiful forms in 60 seconds. The WordPress form builder that enables you to create forms with a simple drag-and-drop interface and in-place editing.
 
@@ -89,6 +89,26 @@ A. Try clearing your browser cache. As plugin modifications are made, frequent j
 [See more FAQs](http://formidablepro.com/formidable-faqs/ "Formidable Form FAQs")
 
 == Changelog ==
+= 2.01.0 =
+* Allow shortcodes for the submit button label
+* Increase the timeout for activating a license
+* Add a couple static functions to use in add-ons with form actions
+* Don't show templates on the addons page
+* Add frm_switch_field_types hook for specifying which fields can be switched to/from
+* Add Authorize, Stripe, WOO, and copy icons
+* Some back-end styling improvements
+* Additional bug fixes
+* **Pro Features:** *
+* Add new "Lookup" field type
+* Add "Lookup value" option to several field types
+* Add clear on focus and default blank option to Address fields
+* Move form submit js to js file
+* Add repeating field args to new and edit fields hooks
+* Refactor conditional logic
+* Improve and limit post redirection
+* Cut down on View query size when no field filters are set
+* Additional bug fixes
+
 = 2.0.25 =
 * Add an option to allow multiple recaptchas. This is off by default to avoid new conflicts.
 * Use the recaptcha size setting when displaying multiple recaptchas per page.

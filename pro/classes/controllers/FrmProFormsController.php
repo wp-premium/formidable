@@ -132,6 +132,7 @@ class FrmProFormsController{
     }
 
 	public static function add_form_classes( $form ) {
+		echo ' frm_pro_form ';
 		if ( isset( $form->options['js_validate'] ) && $form->options['js_validate'] ) {
 			echo ' frm_js_validate ';
 		}
@@ -349,9 +350,6 @@ class FrmProFormsController{
 		FrmProFormsHelper::repeat_field_set( $field_name, $args );
 		$response['html'] = ob_get_contents();
 		ob_end_clean();
-
-		global $frm_vars;
-		$response['logic'] = FrmProFormsHelper::hide_conditional_fields( $frm_vars );
 
 		echo json_encode( $response );
 	    wp_die();
@@ -603,6 +601,48 @@ class FrmProFormsController{
 		}
 
 		return $entry_shortcodes;
+	}
+
+	public static function setup_form_data_for_editing_entry( $entry, &$values ) {
+		$form = $entry->form_id;
+		FrmForm::maybe_get_form( $form );
+
+		if ( ! $form || ! is_array( $form->options ) ) {
+			return;
+		}
+
+		$values['form_name'] = $form->name;
+		$values['parent_form_id'] = $form->parent_form_id;
+
+		if ( ! is_array($form->options) ) {
+			return;
+		}
+
+		foreach ( $form->options as $opt => $value ) {
+			$values[ $opt ] = $value;
+		}
+
+		$form_defaults = FrmFormsHelper::get_default_opts();
+
+		foreach ( $form_defaults as $opt => $default ) {
+			if ( ! isset( $values[ $opt ] ) || $values[ $opt ] == '' ) {
+				$values[ $opt ] = $default;
+			}
+		}
+		unset($opt, $defaut);
+
+		$post_values = stripslashes_deep( $_POST );
+		if ( ! isset( $values['custom_style'] ) ) {
+			$frm_settings = FrmAppHelper::get_settings();
+			$values['custom_style'] = ( $post_values && isset( $post_values['options']['custom_style'] ) ) ? absint( $_POST['options']['custom_style'] ) : ( $frm_settings->load_style != 'none' );
+		}
+
+		foreach ( array( 'before', 'after', 'submit' ) as $h ) {
+			if ( ! isset( $values[ $h .'_html' ] ) ) {
+				$values[ $h .'_html' ] = ( isset( $post_values['options'][ $h .'_html' ] ) ? $post_values['options'][ $h .'_html' ] : FrmFormsHelper::get_default_html( $h ) );
+			}
+		}
+		unset($h);
 	}
 
 	/* Trigger model actions */

@@ -352,7 +352,7 @@ class FrmProEntryMeta{
             }
         } else {
             // check allowed file size
-            if ( ! empty($file_uploads['error']) && in_array(1, $file_uploads['error']) ) {
+			if ( ! empty( $file_uploads['error'] ) && in_array( 1, (array) $file_uploads['error'] ) ) {
                 $errors['field'. $field->temp_id] = __( 'This file is too big', 'formidable' );
             }
 
@@ -540,12 +540,12 @@ class FrmProEntryMeta{
             $prev_value = FrmEntryMeta::get_entry_meta_by_field($entry_id, $field->id);
 
             if ( $prev_value != $value && $conf_val != $value ) {
-                $errors['conf_field'. $field->temp_id] = isset($field->field_options['conf_msg']) ? $field->field_options['conf_msg'] : __( 'The entered values do not match', 'formidable' );
+				$errors[ 'conf_field'. $field->temp_id ] = FrmFieldsHelper::get_error_msg( $field, 'conf_msg' );
                 $errors['field' . $field->temp_id] = '';
             }
         } else if ( $args['action'] == 'create' && $conf_val != $value ) {
             //If creating entry
-            $errors['conf_field'. $field->temp_id] = isset($field->field_options['conf_msg']) ? $field->field_options['conf_msg'] : __( 'The entered values do not match', 'formidable' );
+			$errors[ 'conf_field'. $field->temp_id ] = FrmFieldsHelper::get_error_msg( $field, 'conf_msg' );
             $errors['field' . $field->temp_id] = '';
         }
     }
@@ -881,7 +881,6 @@ class FrmProEntryMeta{
 			$get_table = $wpdb->prefix .'frm_item_metas em INNER JOIN '. $wpdb->prefix .'frm_items e ON (e.id=em.item_id)';
 
 			$query['em.field_id'] = $field->id;
-			$query['e.is_draft'] = 0;
         } else if ( $field->field_options['post_field'] == 'post_custom' ) {
 			// If field is a custom field
 			$get_field = 'pm.meta_value';
@@ -905,11 +904,15 @@ class FrmProEntryMeta{
             //$field_options = FrmProFieldsHelper::get_category_options( $field );
         }
 
+		$query['e.is_draft'] = 0;
+
         // Add queries for additional args
         self::add_meta_query( $query, $args );
 
+		$query_args = self::setup_args_for_frmdb_query( $args );
+
         // Get the metas
-		$metas = FrmDb::get_col( $get_table, $query, $get_field );
+		$metas = FrmDb::get_col( $get_table, $query, $get_field, $query_args );
 
         // Maybe unserialize
         foreach ( $metas as $k => $v ) {
@@ -923,7 +926,58 @@ class FrmProEntryMeta{
         return $metas;
     }
 
-    public static function add_meta_query( &$query, $args ) {
+	/**
+	 * Get all entry IDs for a specific field and value
+	 *
+	 * @since 2.01.0
+	 * @param object $field
+	 * @param string $value
+	 * @param array $args
+	 * @return array
+	 */
+	public static function get_entry_ids_for_field_and_value( $field, $value, $args = array() ) {
+		global $wpdb;
+
+		$where = array(
+			'e.form_id' => $field->form_id,
+			'e.is_draft' => 0
+		);
+
+		if ( ! FrmField::is_option_true( $field, 'post_field' ) ) {
+			// If field is not a post field
+			$get_field = 'em.item_id';
+			$get_table = $wpdb->prefix .'frm_item_metas em INNER JOIN '. $wpdb->prefix .'frm_items e ON (e.id=em.item_id)';
+
+			$where['em.field_id'] = $field->id;
+			$where['em.meta_value'] = $value;
+
+		} else if ( $field->field_options['post_field'] == 'post_custom' ) {
+			// If field is a custom field
+			$get_field = 'e.id';
+			$get_table = $wpdb->postmeta . ' pm INNER JOIN ' . $wpdb->prefix . 'frm_items e ON pm.post_id=e.post_id';
+
+			$where['pm.meta_key'] = $field->field_options['custom_field'];
+			$where['pm.meta_value'] = $value;
+
+		} else if ( $field->field_options['post_field'] != 'post_category' ) {
+			// If field is a non-category post field
+			$get_field = 'e.id';
+			$get_table = $wpdb->posts . ' p INNER JOIN ' . $wpdb->prefix . 'frm_items e ON p.ID=e.post_id';
+
+			$where[ 'p.' . sanitize_title( $field->field_options['post_field'] ) ] = $value;
+
+		} else {
+			// If field is a category field
+			//TODO: Make this work
+			return array();
+		}
+
+		self::add_meta_query( $where, $args );
+
+		return FrmDb::get_col( $get_table, $where, $get_field );
+	}
+
+    private static function add_meta_query( &$query, $args ) {
 
         // If entry IDs is set
         if ( isset( $args['entry_ids'] ) ) {
@@ -945,6 +999,27 @@ class FrmProEntryMeta{
             $query['e.created_at <'] = date( 'Y-m-d 23:59:59', strtotime( $args['end_date'] ) );
         }
     }
+
+	/**
+	 * Convert args to usable query args for FrmDb::get_col function
+	 *
+	 * @since 2.01.0
+	 * @param array $args
+	 * @return array
+	 */
+	private static function setup_args_for_frmdb_query( $args ) {
+		$query_args = array();
+
+		if ( isset( $args['limit'] ) ) {
+			$query_args['limit'] = $args['limit'];
+		}
+
+		if ( isset( $args['order_by'] ) ) {
+			$query_args['order_by'] = $args['order_by'];
+		}
+
+		return $query_args;
+	}
 
     public static function set_post_fields($field, $value, &$errors) {
         $errors = FrmProEntryMetaHelper::set_post_fields($field, $value, $errors);

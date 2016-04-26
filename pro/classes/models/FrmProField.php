@@ -164,6 +164,8 @@ class FrmProField {
 
 		self::switch_id_for_section_tracking_field_option( $frm_duplicate_ids, $values );
 
+		self::switch_ids_for_lookup_settings( $frm_duplicate_ids, $values );
+
         return $values;
     }
 
@@ -176,12 +178,7 @@ class FrmProField {
 	 */
 	private static function switch_out_form_select( $frm_duplicate_ids, &$values ){
 		if ( 'data' == $values['type'] && FrmField::is_option_true_in_array( $values['field_options'], 'form_select' ) ) {
-
-			$form_select = $values['field_options']['form_select'];
-
-			if ( isset( $frm_duplicate_ids[ $form_select ] ) ) {
-				$values['field_options']['form_select'] = $frm_duplicate_ids[ $form_select ];
-			}
+			self::maybe_switch_field_id_in_setting( $frm_duplicate_ids, 'form_select', $values['field_options'] );
 		}
 	}
 
@@ -194,13 +191,53 @@ class FrmProField {
 	 */
 	private static function switch_id_for_section_tracking_field_option( $frm_duplicate_ids, &$values ) {
 		if ( isset( $values['field_options']['in_section'] ) ) {
-			$old_id = $values['field_options']['in_section'];
-
-			if ( $old_id && isset( $frm_duplicate_ids[ $old_id ] ) ) {
-				$values[ 'field_options' ][ 'in_section' ] = $frm_duplicate_ids[ $old_id ];
-			}
+			self::maybe_switch_field_id_in_setting( $frm_duplicate_ids, 'in_section', $values['field_options'] );
 		} else {
 			$values[ 'field_options' ][ 'in_section' ] = 0;
+		}
+	}
+
+	/**
+	 * Switch the get_values_form, get_values_field, and watch_lookup IDs when a field is imported
+	 *
+	 * @since 2.01.0
+	 * @param array $frm_duplicate_ids
+	 * @param array $values
+	 */
+	private static function switch_ids_for_lookup_settings( $frm_duplicate_ids, &$values ) {
+		if ( FrmField::is_option_true_in_array( $values['field_options'], 'get_values_field' ) ) {
+			self::maybe_switch_field_id_in_setting( $frm_duplicate_ids, 'get_values_field', $values['field_options'] );
+			self::maybe_switch_field_id_in_setting( $frm_duplicate_ids, 'watch_lookup', $values['field_options'] );
+		}
+	}
+
+	/**
+	 * Switch the field ID for a given setting if a new field ID exists
+	 *
+	 * @since 2.01.0
+	 * @param array $frm_duplicate_ids
+	 * @param string $setting
+	 * @param array $field_options
+	 */
+	private static function maybe_switch_field_id_in_setting( $frm_duplicate_ids, $setting, &$field_options ) {
+		$old_field_id = $field_options[ $setting ];
+
+		if ( ! $old_field_id ) {
+			return;
+		}
+
+		if ( is_array( $old_field_id ) ) {
+			$field_options[ $setting ] = array();
+
+			foreach ( $old_field_id as $old_id ) {
+				if ( isset( $frm_duplicate_ids[ $old_id ] ) ) {
+					$field_options[ $setting ][] = $frm_duplicate_ids[ $old_id ];
+				} else {
+					$field_options[ $setting ][] = $old_id;
+				}
+			}
+		} else if ( isset( $frm_duplicate_ids[ $old_field_id ] ) ) {
+			$field_options[ $setting ] = $frm_duplicate_ids[ $old_field_id ];
 		}
 	}
 

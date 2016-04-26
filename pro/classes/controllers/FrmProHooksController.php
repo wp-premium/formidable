@@ -101,7 +101,6 @@ class FrmProHooksController{
         add_filter('frm_other_custom_html', 'FrmProFieldsHelper::get_default_html', 10, 2);
         add_filter('frm_get_display_value', 'FrmProFieldsHelper::get_display_value', 10, 3);
 		add_filter('frm_pro_available_fields', 'FrmProFieldsHelper::modify_available_fields', 10);
-		add_filter('frm_get_parent_child_field_helpers', 'FrmProFieldsHelper::maybe_get_parent_child_field_helpers', 10, 3);
 		add_filter('frm_is_field_hidden', 'FrmProFieldsHelper::route_to_is_field_hidden', 10, 3);
 		add_filter( 'frm_get_current_page', 'FrmProFieldsHelper::get_current_page', 10, 3 );
 
@@ -326,6 +325,16 @@ class FrmProHooksController{
         add_action('wp_ajax_frm_populate_calc_dropdown', 'FrmProFieldsController::populate_calc_dropdown');
         add_action('wp_ajax_frm_toggle_repeat', 'FrmProFieldsController::toggle_repeat');
         add_action( 'wp_ajax_frm_update_field_after_move', 'FrmProFieldsController::update_field_after_move' );
+
+		// Lookup Fields
+		add_action( 'wp_ajax_frm_add_watch_lookup_row', 'FrmProLookupFieldsController::add_watch_lookup_row' );
+		add_action( 'wp_ajax_frm_get_options_for_get_values_field', 'FrmProLookupFieldsController::ajax_get_options_for_get_values_field' );
+		add_action('wp_ajax_frm_replace_lookup_field_options', 'FrmProLookupFieldsController::ajax_get_dependent_lookup_field_options');
+		add_action('wp_ajax_nopriv_frm_replace_lookup_field_options', 'FrmProLookupFieldsController::ajax_get_dependent_lookup_field_options');
+		add_action('wp_ajax_frm_replace_radio_lookup_options', 'FrmProLookupFieldsController::ajax_get_dependent_radio_lookup_html');
+		add_action('wp_ajax_nopriv_frm_replace_radio_lookup_options', 'FrmProLookupFieldsController::ajax_get_dependent_radio_lookup_html');
+		add_action('wp_ajax_nopriv_frm_get_lookup_text_value', 'FrmProLookupFieldsController::ajax_get_text_field_lookup_value');
+		add_action('wp_ajax_frm_get_lookup_text_value', 'FrmProLookupFieldsController::ajax_get_text_field_lookup_value');
 
         // Form Actions Controller
         add_action('wp_ajax_frm_add_form_logic_row', 'FrmProFormActionsController::_logic_row');

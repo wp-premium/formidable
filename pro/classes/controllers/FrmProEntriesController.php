@@ -180,15 +180,13 @@ class FrmProEntriesController{
     }
 
     public static function footer_js(){
-        global $frm_vars, $frm_input_masks;
+        global $frm_vars;
 
         $frm_vars['footer_loaded'] = true;
 
         if ( empty($frm_vars['forms_loaded']) ) {
             return;
         }
-
-        $trigger_form = ( ! FrmAppHelper::doing_ajax() && ! FrmAppHelper::is_admin_page('formidable-entries') );
 
         include(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-entries/footer_js.php');
 
@@ -564,32 +562,57 @@ class FrmProEntriesController{
         global $frm_vars;
 
         $continue = true;
+		$args = array(
+			'form' => $form,
+			'fields' => $fields,
+			'show_title' => $title,
+			'show_description' => $description,
+			'params' => $params
+		);
 
-        if ( 'edit' == $params['action'] ) {
-            self::front_edit_entry($form, $fields, $title, $description, $continue);
-        } else if ( 'update' == $params['action'] && $params['posted_form_id'] == $form->id ) {
-            self::front_update_entry($form, $fields, $title, $description, $continue, $params);
+		if ( 'edit' == $params['action'] ) {
+			// For initial form load when editing
+			self::maybe_show_front_end_editable_entry_on_first_load( $args, $continue );
+		} else if ( 'update' == $params['action'] && $params['posted_form_id'] == $form->id ) {
+			// For next/submit/previous/save draft clicks
+			self::show_front_end_editable_entry_after_submit_click( $args, $continue );
         } else if ( 'destroy' == $params['action'] ) {
             self::front_destroy_entry($form);
-        } else if ( isset($frm_vars['editing_entry']) && $frm_vars['editing_entry'] ) {
-            self::front_auto_edit_entry($form, $fields, $title, $description, $continue);
+		} else if ( isset( $frm_vars['editing_entry'] ) && $frm_vars['editing_entry'] ) {
+			// For entry_id=x, initial load only
+			self::maybe_show_front_end_editable_entry_with_entry_id_param( $args, $continue);
         } else {
             self::allow_front_create_entry($form, $continue);
         }
 
-        remove_filter('frm_continue_to_new', '__return_'. ( $continue ? 'false' : 'true' ), 15); // remove the opposite filter
-        add_filter('frm_continue_to_new', '__return_'. ($continue ? 'true' : 'false'), 15);
+		self::remove_opposite_continue_to_new_filter( $continue );
     }
 
-    /**
-     * Load form for editing
-     */
-    private static function front_edit_entry( $form, $fields, $title, $description, &$continue ) {
+	private static function remove_opposite_continue_to_new_filter( $continue ) {
+		if ( $continue === true ) {
+			remove_filter('frm_continue_to_new', '__return_false', 15);
+			add_filter('frm_continue_to_new', '__return_true', 15);
+		} else {
+			remove_filter('frm_continue_to_new', '__return_true', 15);
+			add_filter('frm_continue_to_new', '__return_false', 15);
+		}
+	}
+
+	/**
+	 * Load form and entry for editing if user has permission and entry exists
+	 * Used on initial load only, not on page turns
+	 *
+	 * @since 2.01.0
+	 *
+	 * @param array $args (always contains 'form', 'fields' , 'show_title', and 'show_description')
+	 * @param boolean $continue
+	 */
+	private static function maybe_show_front_end_editable_entry_on_first_load( $args, &$continue ) {
         global $wpdb;
 
 		$entry_key = FrmAppHelper::get_param( 'entry', '', 'get', 'sanitize_title' );
 
-        $query = array( 'it.form_id' => $form->id );
+        $query = array( 'it.form_id' => $args['form']->id );
 
         if ( $entry_key ) {
             $query[1] = array( 'or' => 1, 'it.id' => $entry_key, 'it.item_key' => $entry_key );
@@ -602,7 +625,7 @@ class FrmProEntriesController{
             unset($in_form);
         }
 
-        $entry = FrmProEntriesHelper::user_can_edit( $entry_key, $form );
+        $entry = FrmProEntriesHelper::user_can_edit( $entry_key, $args['form'] );
         if ( ! $entry ) {
             return;
         }
@@ -615,46 +638,50 @@ class FrmProEntriesController{
 			global $frm_vars;
 			$entry = reset($entry);
 			$frm_vars['editing_entry'] = $entry->id;
-			self::show_responses($entry, $fields, $form, $title, $description);
+
+			self::show_entry_on_first_load_for_editing( $entry, $args );
 			$continue = false;
         }
     }
 
-    /**
-     * Automatically load the form for editing when a draft exists
-     * or the form is limited to one per user
-     */
-    private static function front_auto_edit_entry( $form, $fields, $title, $description, &$continue ) {
-        global $frm_vars, $wpdb;
+	/**
+	* Load the form for editing when entry_id=x shortcode is used
+	*
+	* @param array $args (contains form, fields, show_title, and show_description)
+	* @param boolean $continue
+	*/
+	private static function maybe_show_front_end_editable_entry_with_entry_id_param( $args, &$continue ) {
+		global $frm_vars;
 
-        $user_ID = get_current_user_id();
-
-        if ( is_numeric($frm_vars['editing_entry']) ) {
-			//get entry from shortcode
+		$entry_id = false;
+		if ( is_numeric( $frm_vars['editing_entry'] ) ) {
+			// For entry_id=x in shortcode
 			$entry_id = $frm_vars['editing_entry'];
-        } else {
-			// get all entry ids for this user
-			$entry_ids = FrmDb::get_col( 'frm_items', array( 'user_id' => $user_ID, 'form_id' => $form->id) );
+		} else if ( $frm_vars['editing_entry'] == 'last' ){
+			// For entry_id="last" in shortcode
 
-            if ( empty($entry_ids) ) {
-                return;
-            }
-
-			//$where_options = $frm_vars['editing_entry']; // Is is possible the entry_id parameter in the shortcode is sql?
-			$get_meta = FrmEntryMeta::getAll( array( 'it.item_id' => $entry_ids ), ' ORDER BY it.created_at DESC', ' LIMIT 1');
-            $entry_id = $get_meta ? $get_meta->item_id : false;
+			// Get the last entry submitted by the current user
+			$user_ID = get_current_user_id();
+			$where = array(
+				'user_id' => $user_ID,
+				'form_id' => $args['form']->id
+			);
+			$entry_id = FrmDb::get_col( 'frm_items', $where, 'id', array(), ' LIMIT 1' );
         }
 
-        if ( ! $entry_id ) {
-            return;
-        }
+		if ( ! $entry_id ) {
+			return;
+		}
 
-		if ( ! FrmProEntriesHelper::user_can_edit( $entry_id, $form ) ) {
+		if ( ! FrmProEntriesHelper::user_can_edit( $entry_id, $args['form'] ) ) {
 			return;
 		}
 
         $frm_vars['editing_entry'] = $entry_id;
-        self::show_responses($entry_id, $fields, $form, $title, $description);
+		$entry = FrmEntry::getOne( $entry_id, true );
+
+		self::show_entry_on_first_load_for_editing( $entry, $args );
+
         $continue = false;
     }
 
@@ -663,38 +690,121 @@ class FrmProEntriesController{
         self::ajax_destroy($form->id, false);
     }
 
-	private static function front_update_entry( $form, $fields, $title, $description, &$continue, $params ) {
+	/**
+	 * Show the form/entry after clicking Next, Previous, Update, Submit, or Save Draft
+	 *
+	 * @since 2.01.0
+	 *
+	 * @param array $args (always contains 'form', 'fields' , 'show_title', 'show_description', and 'params')
+	 * @param boolean $continue
+	 */
+	private static function show_front_end_editable_entry_after_submit_click( $args, &$continue ) {
         global $frm_vars;
 
-        $message = '';
-        $errors = isset($frm_vars['created_entries'][$form->id]) ? $frm_vars['created_entries'][$form->id]['errors'] : false;
+		// Initialize basic entry info
+		$entry_id = $args['params']['id'];
+		$entry = FrmEntry::getOne( $entry_id, true );
+		$frm_vars['editing_entry'] = $entry_id;
 
-        if ( empty($errors) ) {
-            $saving_draft = FrmProFormsHelper::saving_draft();
-            if ( ( ! isset($_POST['frm_page_order_'. $form->id]) && ! FrmProFormsHelper::going_to_prev($form->id) ) || $saving_draft ) {
-                $success_args = array( 'action' => $params['action']);
-                if ( FrmProEntriesHelper::is_new_entry($params['id']) ) {
-                    $success_args['action'] = 'create';
-                }
+		// Add to args
+		$args['errors'] = self::get_posted_form_errors( $frm_vars, $args['form'] );
+		$field_args = array(
+			'parent_form_id' => $args['form']->id,
+			'fields' => $args['fields']
+		);
+		$args['values'] = self::setup_entry_values_for_editing( $entry, $field_args );
+		$args['submit_text'] = self::get_submit_button_text_for_editing_entry( $entry, $args['values'], $args['form'] );
 
-                //check confirmation method
-                $conf_method = apply_filters('frm_success_filter', 'message', $form, $success_args['action']);
+		if ( self::update_button_was_clicked( $args ) ) {
+			// If Update/Submit was clicked
+			self::do_on_update_settings( $entry, $args );
 
-                if ( $conf_method == 'message' ) {
-                    $message = self::confirmation($conf_method, $form, $form->options, $params['id'], $success_args);
-                } else {
-                    do_action('frm_success_action', $conf_method, $form, $form->options, $params['id'], $success_args);
-                    add_filter('frm_continue_to_new', '__return_false', 16);
-                    return;
-                }
-            }
 		} else {
-			$fields = FrmFieldsHelper::get_form_fields( $form->id, true );
+			// If Save Draft, Next, or Previous was clicked
+			$args['show_form'] = true;
+			$args['jump_to_form'] = true;
+			$args['conf_message'] = self::maybe_get_save_draft_message( $args['form'], $entry_id );
+			self::show_front_end_form_with_entry( $entry, $args );
 		}
 
-        self::show_responses($params['id'], $fields, $form, $title, $description, $message, $errors);
-        $continue = false;
+		$continue = false;
     }
+
+	/**
+	 * Show the message + form after the first Save Draft click (on front-end only)
+	 * Replaces FrmProEntriesController::show_responses
+	 *
+	 * @since 2.01.0
+	 *
+	 * @param int $entry_id
+	 * @param array $args
+	 */
+	public static function show_form_after_first_save_draft_click( $entry_id, $args ) {
+		global $frm_vars;
+		$frm_vars['editing_entry'] = $entry_id;
+
+		$entry = FrmEntry::getOne( $entry_id );
+		$field_args = array(
+			'parent_form_id' => $args['form']->id,
+			'fields' => $args['fields']
+		);
+		$args['values'] = self::setup_entry_values_for_editing( $entry, $field_args );
+		$args['submit_text'] = self::get_submit_button_text_for_editing_entry( $entry, $args['values'], $args['form'] );
+		$args['show_form'] = true;
+		$args['jump_to_form'] = true;
+		$args['errors'] = array();
+
+		self::show_front_end_form_with_entry( $entry, $args );
+	}
+
+	/**
+	 * Display a success message and possibly the form after single editable entry is submitted
+	 * Replaces FrmProEntriesController::show_responses
+	 *
+	 * @since 2.01.0
+	 * @param int $entry_id
+	 * @param array $args (always contains 'form', 'fields', 'show_title', and 'show_description')
+	 */
+	public static function show_form_after_single_editable_entry_submission( $entry_id, $args ) {
+		self::show_form_after_first_save_draft_click( $entry_id, $args );
+	}
+
+	/**
+	 * Get errors when validating server-side
+	 *
+	 * @since 2.01.0
+	 *
+	 * @param array $frm_vars
+	 * @param object $form
+	 * @return array
+	 */
+	private static function get_posted_form_errors( $frm_vars, $form ) {
+		if ( isset( $frm_vars['created_entries'][ $form->id ] ) ) {
+			$errors = $frm_vars['created_entries'][ $form->id ]['errors'];
+		} else {
+			$errors = false;
+		}
+		return $errors;
+	}
+
+	/**
+	 * If a draft is being saved, get the save draft message
+	 *
+	 * @since 2.01.0
+	 *
+	 * @param object $form
+	 * @param int $entry_id
+	 * @return string $message
+	 */
+	private static function maybe_get_save_draft_message( $form, $entry_id ){
+		$message = '';
+		if ( FrmProFormsHelper::saving_draft() ) {
+			$success_args = array( 'action' => self::get_current_entry_action( $entry_id ) );
+			$message = self::confirmation( 'message', $form, $form->options, $entry_id, $success_args );
+		}
+
+		return $message;
+	}
 
     /**
      * check to see if user is allowed to create another entry
@@ -711,83 +821,256 @@ class FrmProEntriesController{
 		}
 	}
 
-    public static function show_responses( $id, $fields, $form, $title = false, $description = false, $message = '', $errors = array() ) {
-        global $frm_vars;
+	/**
+	 * This function should only be used when editing an entry (on front-end only)
+	 * Replaces FrmProEntriesController::show_responses
+	 *
+	 * @since 2.01.0
+	 * @param object $entry
+	 * @param array $args (always contains 'form', 'fields', 'show_title', and 'show_description')
+	 */
+	private static function show_entry_on_first_load_for_editing( $entry, $args ) {
+		$field_args = array(
+			'parent_form_id' => $args['form']->id,
+			'fields' => $args['fields']
+		);
+		$args['values'] = self::setup_entry_values_for_editing( $entry, $field_args );
+		$args['submit_text'] = self::get_submit_button_text_for_editing_entry( $entry, $args['values'], $args['form'] );
+		$args['errors'] = array();
+		$args['show_form'] = true;
 
-		if ( is_object( $id ) ) {
-            $item = $id;
-            $id = $item->id;
-		} else {
-            $item = FrmEntry::getOne($id, true);
-        }
+		self::show_front_end_form_with_entry( $entry, $args );
+	}
 
-        $frm_vars['editing_entry'] = $item->id;
-        $values = FrmAppHelper::setup_edit_vars($item, 'entries', $fields);
+	/**
+	 * Update the global $frm_vars so CSS and JavaScript gets loaded correctly
+	 *
+	 * @since 2.01.0
+	 *
+	 * @param array $args always contains 'form', 'fields', 'show_title', 'show_description', 'values', 'errors',
+	 *     'submit_text', and 'show_form'
+	 */
+	private static function update_global_vars_for_entry_editing( &$args ) {
+		global $frm_vars;
 
-        if ( $values['custom_style'] ) {
-            $frm_vars['load_css'] = true;
-        }
-        $show_form = true;
-
-        if ( $item->is_draft ) {
-            if ( isset($values['submit_value']) ) {
-                $edit_create = $values['submit_value'];
-            } else {
-                $frmpro_settings = new FrmProSettings();
-                $edit_create = $frmpro_settings->submit_value;
-            }
-        } else {
-            if ( isset($values['edit_value']) ) {
-                $edit_create = $values['edit_value'];
-            } else {
-                $frmpro_settings = new FrmProSettings();
-                $edit_create = $frmpro_settings->update_value;
-            }
-        }
-
-        $submit = (isset($frm_vars['next_page'][$form->id])) ? $frm_vars['next_page'][$form->id] : $edit_create;
-        unset($edit_create);
-
-		if ( is_object( $submit ) ) {
-            $submit = $submit->name;
+		// Make sure Formidable CSS is loaded
+		if ( $args['values']['custom_style'] ) {
+			$frm_vars['load_css'] = true;
 		}
 
-		if ( ! isset( $frm_vars['prev_page'][ $form->id ] ) && isset( $_POST['item_meta'] ) && empty( $errors ) && $form->id == FrmAppHelper::get_param( 'form_id', '', 'get', 'absint' ) ) {
-            $show_form = (isset($form->options['show_form'])) ? $form->options['show_form'] : true;
-            if ( FrmProFormsHelper::saving_draft() || FrmProFormsHelper::going_to_prev($form->id) ) {
-                $show_form = true;
-            }else{
-                $show_form = apply_filters('frm_show_form_after_edit', $show_form, $form);
-                $success_args = array( 'action' => 'update');
-                if ( FrmProEntriesHelper::is_new_entry($id) ) {
-                    $success_args['action'] = 'create';
-                }
+		// Load JavaScript
+		if ( isset( $args['form']->options['show_form'] ) && $args['form']->options['show_form'] ) {
+			//Do nothing because JavaScript is already loaded
+		} else {
+			//Load JavaScript here
+			$frm_vars['forms_loaded'][] = true;
+		}
+	}
 
-                $conf_method = apply_filters('frm_success_filter', 'message', $form, $success_args['action']);
+	/**
+	 * Set up all the necessary data for editing an entry
+	 * This is now used in place of FrmAppHelper::setup_edit_vars when editing entries
+	 *
+	 * @since 2.01.0
+	 *
+	 * @param object $entry
+	 * @param array $args (always contains 'parent_form_id' and 'fields'; if repeating, will contain 'parent_field_id',
+	 *     'key_pointer' and 'repeating')
+	 * @return array $values
+	 */
+	public static function setup_entry_values_for_editing( $entry, $args ) {
+		$values = array(
+			'id' => $entry->id,
+			'fields' => array()
+		);
 
-                if ( $conf_method != 'message' ) {
-                    do_action('frm_success_action', $conf_method, $form, $form->options, $id, $success_args);
-					// End now so the form isn't shown when "Show Page Content" is selected
-					return;
-                }
-            }
-        } else if ( isset($frm_vars['prev_page'][$form->id]) || ! empty($errors) ) {
-            $jump_to_form = true;
-        }
+		foreach ( array( 'name', 'description' ) as $var ) {
+			$default_val = isset( $entry->{$var} ) ? $entry->{$var} : '';
+			$values[ $var ] = FrmAppHelper::get_param( $var, $default_val );
+			unset($var, $default_val);
+		}
 
-        $user_ID = get_current_user_id();
+		$values['description'] = FrmAppHelper::use_wpautop( $values['description'] );
 
-        if ( isset($form->options['show_form']) && $form->options['show_form'] ) {
-            //Do nothing because JavaScript is already loaded
-        } else {
-            //Load JavaScript here
-            $frm_vars['forms_loaded'][] = true;
-        }
+		$fields = $args['fields'];
+		unset( $args['fields'] );
+		$values['fields'] = FrmProFieldsController::setup_field_data_for_editing_entry( $entry, $fields, $args );
 
-        $frm_settings = FrmAppHelper::get_settings();
-        require(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-entries/edit-front.php');
-        add_filter('frm_continue_to_new', 'FrmProEntriesController::maybe_editing', 10, 3);
-    }
+		FrmProFormsController::setup_form_data_for_editing_entry( $entry, $values );
+
+		$values = FrmEntriesHelper::setup_edit_vars( $values, $entry );
+
+		return $values;
+	}
+
+	/**
+	 * Get the text on the Submit button when editing an entry
+	 * Remember the Submit button may be the Next, Update, or Submit button
+	 *
+	 * @since 2.01.0
+	 *
+	 * @param object $entry
+	 * @param array $values
+	 * @param object $form
+	 * @return string $submit_text
+	 */
+	private static function get_submit_button_text_for_editing_entry( $entry, $values, $form ) {
+		global $frm_vars;
+
+		if ( isset( $frm_vars['next_page'][ $form->id ] ) ) {
+			// If there is a "Next" page, get the Next button text
+			$submit_text = $frm_vars['next_page'][ $form->id ];
+			$submit_text = $submit_text->name;
+		} else {
+			if ( $entry->is_draft ) {
+				// If entry is a draft, get the create button text
+				if ( isset( $values['submit_value'] ) ) {
+					$submit_text = $values['submit_value'];
+				} else {
+					$frmpro_settings = new FrmProSettings();
+					$submit_text = $frmpro_settings->submit_value;
+				}
+			} else {
+				// If entry is not a draft, get the edit button text
+				if ( isset( $values['edit_value'] ) ) {
+					$submit_text = $values['edit_value'];
+				} else {
+					$frmpro_settings = new FrmProSettings();
+					$submit_text = $frmpro_settings->update_value;
+				}
+			}
+		}
+
+		return $submit_text;
+	}
+
+	/**
+	 * Determine whether the "Update" button was clicked
+	 *
+	 * @since 2.01.0
+	 *
+	 * @param array $args (always contains 'form', 'fields' , 'show_title', 'show_description', 'params', 'values',
+	 *     'errors', and 'submit_text')
+	 * @return boolean $update_button_was_clicked
+	 */
+	private static function update_button_was_clicked( &$args ) {
+		global $frm_vars;
+		$update_button_was_clicked = false;
+
+		$form = $args['form'];
+
+		if ( ! isset( $_POST['item_meta'] ) || $args['errors'] ) {
+			// There is no item meta or there are errors, so don't update entry
+
+		} else if ( isset( $frm_vars['prev_page'][ $form->id ] ) || FrmProFormsHelper::going_to_prev( $form->id ) ) {
+			// Back or Next was clicked
+
+		} else if ( $form->id != FrmAppHelper::get_param( 'form_id', '', 'get', 'absint' ) ) {
+			// This form is NOT the one being submitted/updated
+
+		} else if ( FrmProFormsHelper::saving_draft() ) {
+			// Save Draft was clicked
+
+		} else {
+			$update_button_was_clicked = true;
+		}
+
+		return $update_button_was_clicked;
+	}
+
+	/**
+	 * Determine whether the form is displayed after edit
+	 *
+	 * @since 2.01.0
+	 *
+	 * @param object $form
+	 * @return boolean $show_form
+	 */
+	private static function is_form_displayed_after_edit( $form ) {
+		$show_form = ( isset( $form->options['show_form'] ) ) ? $form->options['show_form'] : true;
+		$show_form = apply_filters( 'frm_show_form_after_edit', $show_form, $form );
+		return $show_form;
+	}
+
+	/**
+	 * Determine whether the current entry is being created or updated
+	 *
+	 * @since 2.01.0
+	 *
+	 * @param int $entry_id
+	 * @return boolean
+	 */
+	private static function get_current_entry_action( $entry_id ) {
+		return FrmProEntriesHelper::is_new_entry( $entry_id ) ? 'create' : 'update';
+	}
+
+	/**
+	 * Get the confirmation method selected for "On Update"
+	 *
+	 * @since 2.01.0
+	 *
+	 * @param object $form
+	 * @param array $success_args (always includes 'action' )
+	 * @return string
+	 */
+	private static function get_conf_method_after_edit( $form, $success_args ) {
+		return apply_filters( 'frm_success_filter', 'message', $form, $success_args['action'] );
+	}
+
+	/**
+	 * Do the "On Update" settings (redirect to URL, show a message, or show content from another page)
+	 *
+	 * @since 2.01.0
+	 *
+	 * @param object $entry
+	 * @param array $args
+	 * $args always contains 'form', 'fields' , 'show_title', 'show_description', 'params', 'values', 'errors', and
+	 *     'submit_text'
+	 */
+	private static function do_on_update_settings( $entry, $args ) {
+		$success_args = array( 'action' => self::get_current_entry_action( $entry->id ) );
+		$conf_method = self::get_conf_method_after_edit( $args['form'], $success_args );
+
+		if ( $conf_method == 'message' ) {
+			$args['conf_message'] = self::confirmation( 'message', $args['form'], $args['form']->options, $entry->id, $success_args );
+			$args['show_form'] = self::is_form_displayed_after_edit( $args['form'] );
+			self::show_front_end_form_with_entry( $entry, $args );
+		} else {
+			do_action('frm_success_action', $conf_method, $args['form'], $args['form']->options, $entry->id, $success_args );
+			add_filter('frm_continue_to_new', '__return_false', 16);// Not sure if this is needed
+		}
+	}
+
+	/**
+	 * Show the editable form/entry on the front-end
+	 *
+	 * @since 2.01.0
+	 *
+	 * @param object $entry
+	 * @param array $args
+	 * $args always contains 'form', 'fields', 'show_title', 'show_description', 'values', 'errors', 'submit_text', and
+	 *     'show_form'
+	 */
+	private static function show_front_end_form_with_entry( $entry, $args ) {
+		self::update_global_vars_for_entry_editing( $args );
+
+		// Setup variables for view (maybe do away with this and create a new view)
+		$values = $args['values'];
+		$user_ID = get_current_user_id();
+		$frm_settings = FrmAppHelper::get_settings();
+		$title = $args['show_title'];
+		$description = $args['show_description'];
+		$id = $entry->id;
+		$errors = $args['errors'];
+		$message = isset( $args['conf_message'] ) ? $args['conf_message'] : false;
+		$form = $args['form'];
+		$submit = $args['submit_text'];
+		$show_form = $args['show_form'];
+		$jump_to_form = isset( $args['jump_to_form'] ) ? $args['jump_to_form'] : false;
+
+		require(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-entries/edit-front.php');
+		add_filter('frm_continue_to_new', 'FrmProEntriesController::maybe_editing', 10, 3);
+	}
 
     public static function ajax_submit_button() {
         global $frm_vars;
@@ -877,7 +1160,6 @@ class FrmProEntriesController{
     }
 
 	public static function delete_entry( $post_id ) {
-        global $wpdb;
         $entry = FrmDb::get_row( 'frm_items', array( 'post_id' => $post_id), 'id');
         self::maybe_delete_entry($entry);
     }
@@ -2642,4 +2924,17 @@ $('#frm_form_" . esc_attr( $id ) . "_container .frm-show-form').submit(window.fr
         _deprecated_function( __FUNCTION__, '2.0', 'FrmProEntriesController::trigger_post');
 		FrmProEntry::create_post( $entry_id, $form_id, 'update' );
     }
+
+	public static function show_responses( $id, $fields, $form, $title = false, $description = false, $message = '', $errors = array() ) {
+		_deprecated_function( __FUNCTION__, '2.01.0', array( 'FrmProEntriesController::show_form_after_first_save_draft_click' ) );
+		$args = array(
+			'fields' => $fields,
+			'form' => $form,
+			'show_title' => $title,
+			'show_description' => $description,
+			'conf_message' => $message,
+			'errors' => $errors,
+		);
+		self::show_form_after_first_save_draft_click( $id, $args );
+	}
 }
