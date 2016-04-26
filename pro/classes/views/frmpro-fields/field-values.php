@@ -22,6 +22,9 @@ if ( $new_field->type == 'data' ) {
             $new_field->options[$ent->item_id] = $ent->meta_value;
         }
     }
+} else if ( $new_field->type == 'lookup' ) {
+	$new_field->options = FrmProLookupFieldsController::get_lookup_field_values_for_conditional_logic( $new_field );
+
 } else if ( isset( $new_field->field_options['post_field'] ) && $new_field->field_options['post_field'] == 'post_status' ) {
     $new_field->options = FrmProFieldsHelper::get_status_options($new_field);
 }

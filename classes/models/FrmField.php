@@ -39,6 +39,7 @@ class FrmField {
 			'image'     => __( 'Image URL', 'formidable' ),
 			'scale'     => __( 'Scale', 'formidable' ),
 			'data'      => __( 'Dynamic Field', 'formidable' ),
+			'lookup'	=> __( 'Lookup', 'formidable' ),
 			'form'      => __( 'Embed Form', 'formidable' ),
 			'hidden'    => __( 'Hidden Field', 'formidable' ),
 			'user_id'   => __( 'User ID (hidden)', 'formidable' ),
@@ -598,10 +599,24 @@ class FrmField {
 		}
 
 		if ( is_array( $field ) ) {
-			return $field['type'] == 'checkbox' || ( $field['type'] == 'data' && isset($field['data_type']) && $field['data_type'] == 'checkbox' ) || self::is_multiple_select( $field );
+
+			$is_multi_value_field = (
+				$field['type'] == 'checkbox' ||
+				$field['type'] == 'address' ||
+				( $field['type'] == 'data' && isset($field['data_type']) && $field['data_type'] == 'checkbox' ) ||
+				self::is_multiple_select( $field )
+			);
+
 		} else {
-			return $field->type == 'checkbox' || ( $field->type == 'data' && isset( $field->field_options['data_type'] ) && $field->field_options['data_type'] == 'checkbox' ) || self::is_multiple_select($field);
+			$is_multi_value_field = (
+				$field->type == 'checkbox' ||
+				$field->type == 'address' ||
+				( $field->type == 'data' && isset( $field->field_options['data_type'] ) && $field->field_options['data_type'] == 'checkbox' ) ||
+				self::is_multiple_select( $field )
+			);
 		}
+
+		return $is_multi_value_field;
 	}
 
 	/**
@@ -720,4 +735,12 @@ class FrmField {
         $id = FrmDb::get_var( 'frm_fields', array( 'field_key' => sanitize_title( $key ) ) );
         return $id;
     }
+
+	/**
+	 * @param string $id
+	 * @return string
+	 */
+	public static function get_key_by_id( $id ) {
+		return FrmDb::get_var( 'frm_fields', array( 'id' => $id ), 'field_key' );
+	}
 }

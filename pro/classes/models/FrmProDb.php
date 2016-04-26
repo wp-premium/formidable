@@ -11,7 +11,7 @@ class FrmProDb{
         }
 
         if ( $old_db_version ) {
-			$migrations = array( 16, 17, 25, 27, 28, 29, 30, 31, 32, 33 );
+			$migrations = array( 16, 17, 25, 27, 28, 29, 30, 31, 32, 34 );
 			foreach ( $migrations as $migration ) {
 				if ( $db_version >= $migration && $old_db_version < $migration ) {
 					call_user_func( array( __CLASS__, 'migrate_to_' . $migration ) );
@@ -55,9 +55,9 @@ class FrmProDb{
 	/**
 	 * Add in_section variable to all fields within sections
 	 *
-	 * @since 2.0.25
+	 * @since 2.01.0
 	 */
-	private static function migrate_to_33(){
+	private static function migrate_to_34(){
 		$dividers = FrmDb::get_col( 'frm_fields', array( 'type' => 'divider' ), 'id' );
 
 		if ( ! $dividers ) {
@@ -81,8 +81,12 @@ class FrmProDb{
 	 * @param object $section_field
 	 */
 	private static function add_in_section_variable_to_section_children( $section_field ) {
-		// Get all children for divider
+		// Convert section_field object to flat section field array
 		$section_field_array = get_object_vars( $section_field );
+		$section_field_array += $section_field_array['field_options'];
+		unset( $section_field_array['field_options'] );
+
+		// Get all children for divider
 		$children = FrmProField::get_children( $section_field_array );
 
 		// Set in_section variable for all children

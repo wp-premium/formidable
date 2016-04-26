@@ -8,6 +8,5 @@
 			<option value="us" <?php selected( $field['address_type'], 'us' ) ?>><?php esc_html_e( 'United States', 'formidable' ) ?></option>
 			<option value="generic" <?php selected( $field['address_type'], 'generic' ) ?>><?php esc_html_e( 'Other - exclude country field', 'formidable' ) ?></option>
 		</select>
-		<input type="hidden" name="field_options[clear_on_focus_<?php echo esc_attr( $field['id'] ) ?>]" value="1" />
 	</td>
 </tr>

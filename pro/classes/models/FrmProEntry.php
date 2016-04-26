@@ -13,33 +13,34 @@ class FrmProEntry{
             $values = $fields ? FrmEntriesHelper::setup_new_vars($fields, $form) : array();
             require(FrmAppHelper::plugin_path() .'/classes/views/frm-entries/new.php');
             add_filter('frm_continue_to_create', '__return_false');
-		} else if ( $form->editable && isset( $form->options['single_entry'] ) && $form->options['single_entry'] && $form->options['single_entry_type'] == 'user' ) {
+		} else if ( $form->editable && isset( $form->options['single_entry'] ) && $form->options['single_entry'] && $form->options['single_entry_type'] == 'user' && ! FrmProFormsHelper::saving_draft() ) {
+			$show_form = ( isset( $form->options['show_form'] ) ) ? $form->options['show_form'] : true;
 
-            $user_ID = get_current_user_id();
-			if ( $user_ID ) {
-                $entry = FrmEntry::getAll( array( 'it.user_id' => $user_ID, 'it.form_id' => $form->id), '', 1, true);
-				if ( $entry ) {
-					$entry = reset( $entry );
+			if ( $show_form ) {
+
+				$entry_id = isset( $frm_vars[ 'created_entries' ][ $form->id ][ 'entry_id' ] ) ? $frm_vars[ 'created_entries' ][ $form->id ][ 'entry_id' ] : 0;
+
+				if ( ! $entry_id ) {
+					return;
 				}
-            }else{
-                $entry = false;
-            }
 
-            if ( $entry && ! empty($entry) && ( ! isset($frm_vars['created_entries'][ $form->id ]) || ! isset($frm_vars['created_entries'][ $form->id ]['entry_id']) || $entry->id != $frm_vars['created_entries'][$form->id]['entry_id'] ) ) {
-                FrmProEntriesController::show_responses($entry, $fields, $form, $title, $description);
-            }else{
-                $record = $frm_vars['created_entries'][$form->id]['entry_id'];
-                $saved_message = isset($form->options['success_msg']) ? $form->options['success_msg'] : $frm_settings->success_msg;
-                if ( FrmProFormsHelper::saving_draft() ) {
-                    $saved_message = isset($form->options['draft_msg']) ? $form->options['draft_msg'] : __( 'Your draft has been saved.', 'formidable' );
-                }
-                $saved_message = apply_filters('frm_content', $saved_message, $form, ($record ? $record : false));
-                $message = wpautop(do_shortcode($record ? $saved_message : $frm_settings->failed_msg));
-                $message = '<div class="frm_message" id="message">'. $message .'</div>';
+				$saved_message = isset( $form->options[ 'success_msg' ] ) ? $form->options[ 'success_msg' ] : $frm_settings->success_msg;
+				$saved_message = apply_filters( 'frm_content', $saved_message, $form, ( $entry_id ? $entry_id : false ) );
+				$message = wpautop( do_shortcode( $entry_id ? $saved_message : $frm_settings->failed_msg ) );
+				$message = '<div class="frm_message" id="message">' . $message . '</div>';
 
-                FrmProEntriesController::show_responses($record, $fields, $form, $title, $description, $message);
-            }
-            add_filter('frm_continue_to_create', '__return_false');
+				$args = array(
+					'fields' => $fields,
+					'form' => $form,
+					'show_title' => $title,
+					'show_description' => $description,
+					'conf_message' => $message
+				);
+
+				FrmProEntriesController::show_form_after_single_editable_entry_submission( $entry_id, $args );
+
+				add_filter( 'frm_continue_to_create', '__return_false' );
+			}
 		} else if ( FrmProFormsHelper::saving_draft() ) {
             $record = ( isset( $frm_vars['created_entries'] ) && isset( $frm_vars['created_entries'][ $form->id ] ) ) ? $frm_vars['created_entries'][ $form->id ]['entry_id'] : 0;
 
@@ -55,7 +56,16 @@ class FrmProEntry{
 				'entry_id' => $record, 'class' => 'frm_message',
 			) );
 
-            FrmProEntriesController::show_responses($record, $fields, $form, $title, $description, $message);
+			$args = array(
+				'fields' => $fields,
+				'form' => $form,
+				'show_title' => $title,
+				'show_description' => $description,
+				'conf_message' => $message
+			);
+
+			FrmProEntriesController::show_form_after_first_save_draft_click( $record, $args );
+
             add_filter('frm_continue_to_create', '__return_false');
         }
     }
