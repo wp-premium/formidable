@@ -331,8 +331,8 @@ class FrmProHooksController{
 		add_action( 'wp_ajax_frm_get_options_for_get_values_field', 'FrmProLookupFieldsController::ajax_get_options_for_get_values_field' );
 		add_action('wp_ajax_frm_replace_lookup_field_options', 'FrmProLookupFieldsController::ajax_get_dependent_lookup_field_options');
 		add_action('wp_ajax_nopriv_frm_replace_lookup_field_options', 'FrmProLookupFieldsController::ajax_get_dependent_lookup_field_options');
-		add_action('wp_ajax_frm_replace_radio_lookup_options', 'FrmProLookupFieldsController::ajax_get_dependent_radio_lookup_html');
-		add_action('wp_ajax_nopriv_frm_replace_radio_lookup_options', 'FrmProLookupFieldsController::ajax_get_dependent_radio_lookup_html');
+		add_action('wp_ajax_frm_replace_cb_radio_lookup_options', 'FrmProLookupFieldsController::ajax_get_dependent_cb_radio_lookup_options');
+		add_action('wp_ajax_nopriv_frm_replace_cb_radio_lookup_options', 'FrmProLookupFieldsController::ajax_get_dependent_cb_radio_lookup_options');
 		add_action('wp_ajax_nopriv_frm_get_lookup_text_value', 'FrmProLookupFieldsController::ajax_get_text_field_lookup_value');
 		add_action('wp_ajax_frm_get_lookup_text_value', 'FrmProLookupFieldsController::ajax_get_text_field_lookup_value');
 

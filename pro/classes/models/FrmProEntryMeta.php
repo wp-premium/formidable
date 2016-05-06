@@ -437,12 +437,7 @@ class FrmProEntryMeta{
             return;
         }
 
-		global $frm_hidden_break, $frm_hidden_divider, $frm_hidden_form;
-		$in_hidden_form = $frm_hidden_form && $frm_hidden_form == $field->form_id;
-		$in_hidden_page = $frm_hidden_break && $frm_hidden_break['hidden'];
-		$in_hidden_section = $frm_hidden_divider && $frm_hidden_divider['hidden'] && ( ! $frm_hidden_break || $frm_hidden_break['field_order'] < $frm_hidden_divider['field_order'] );
-
-		if ( $in_hidden_page || $in_hidden_form || $in_hidden_section ) {
+		if ( self::is_field_on_skipped_page( $field ) ) {
             if ( isset($errors['field'. $field->temp_id]) ) {
                 unset($errors['field'. $field->temp_id]);
             }
@@ -452,6 +447,16 @@ class FrmProEntryMeta{
 			}
         }
     }
+
+	private static function is_field_on_skipped_page( $field ) {
+		global $frm_hidden_break, $frm_hidden_divider, $frm_hidden_form;
+
+		$in_hidden_form = $frm_hidden_form && $frm_hidden_form == $field->form_id;
+		$in_hidden_page = $frm_hidden_break && $frm_hidden_break['hidden'];
+		$in_hidden_section = $frm_hidden_divider && $frm_hidden_divider['hidden'] && ( ! $frm_hidden_break || $frm_hidden_break['field_order'] < $frm_hidden_divider['field_order'] );
+
+		return ( $in_hidden_page || $in_hidden_form || $in_hidden_section );
+	}
 
     /**
      * Make sure the [auto_id] is still unique
@@ -597,6 +602,11 @@ class FrmProEntryMeta{
 
 		$is_conditionally_hidden = FrmProFieldsHelper::is_field_hidden( $field, stripslashes_deep( $_POST ) );
 		if ( $is_conditionally_hidden ) {
+			return true;
+		}
+
+		$is_on_skipped_page = self::is_field_on_skipped_page( $field );
+		if ( $is_on_skipped_page ) {
 			return true;
 		}
 

@@ -10,8 +10,12 @@ class FrmProAddress {
 	}
 
 	public static function validate_required_fields( &$errors, $field, $values ) {
-		$skip_required = FrmProEntryMeta::skip_required_validation( $field );
-		if ( $field->required && ! $skip_required ) {
+		if ( $field->required ) {
+
+			$skip_required = FrmProEntryMeta::skip_required_validation( $field );
+			if ( $skip_required ) {
+				return;
+			}
 
 			if ( $values == '' ) {
 				$values = FrmProAddressesController::empty_value_array();

@@ -745,10 +745,6 @@ class FrmProFieldsController{
 			$meta_value = implode( ', ', $meta_value );
 		}
 
-        if ( $value && ! empty($value) ) {
-            echo apply_filters('frm_show_it', "<p class='frm_show_it'>". $value ."</p>\n", $value, array( 'field' => $data_field, 'value' => $meta_value, 'entry_id' => $entry_id));
-        }
-
         $current_field = (array) $current;
 		foreach ( $current->field_options as $o => $v ) {
             if ( ! isset($current_field[$o]) ) {
@@ -762,8 +758,16 @@ class FrmProFieldsController{
         $field_name = 'item_meta';
         FrmProFieldsHelper::get_html_id_from_container($field_name, $html_id, (array) $current, $hidden_field_id);
 
-		echo '<input type="hidden" id="' . esc_attr( $html_id ) . '" name="' . esc_attr( $field_name ) . '" value="' . esc_attr( $value ) . '" ' . do_action( 'frm_field_input_html', $current_field, false ) . '/>';
-        wp_die();
+		if ( FrmProFieldsHelper::is_field_visible_to_user( $current ) ) {
+			if ( $value && ! empty( $value ) ) {
+				echo apply_filters( 'frm_show_it', "<p class='frm_show_it'>" . $value . "</p>\n", $value, array( 'field' => $data_field, 'value' => $meta_value, 'entry_id' => $entry_id ) );
+			}
+			echo '<input type="hidden" id="' . esc_attr( $html_id ) . '" name="' . esc_attr( $field_name ) . '" value="' . esc_attr( $value ) . '" ' . do_action( 'frm_field_input_html', $current_field, false ) . '/>';
+		} else {
+			echo esc_attr( $value );
+		}
+
+		wp_die();
     }
 
 	/**
@@ -1307,7 +1311,11 @@ class FrmProFieldsController{
 
 		} else {
 			// Get the saved field value
-			$field_value = FrmProEntryMetaHelper::get_post_or_meta_value( $entry, $field );
+			$pass_args = array(
+				'links' => false,
+				'truncate' => false,
+			);
+			$field_value = FrmProEntryMetaHelper::get_post_or_meta_value( $entry, $field, $pass_args );
 		}
 
 		return $field_value;

@@ -29,7 +29,7 @@ if ( $display['type'] == 'select' || $field['type'] == 'data' ) {
 } else if ( $field['type'] == 'file' ) {
     include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/file-options.php' );
 
-} else if ( $field['type'] == 'number' && $frm_settings->use_html ) {
+} else if ( $field['type'] == 'number' ) {
     include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/number-range.php' );
 
 } else if ( $field['type'] == 'scale' ) {

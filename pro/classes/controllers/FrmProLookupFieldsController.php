@@ -11,7 +11,8 @@ class FrmProLookupFieldsController{
 		$data_types = array(
 			'select'    => __( 'Dropdown', 'formidable' ),
 			'radio'     => __( 'Radio Buttons', 'formidable' ),
-			'text'     => __( 'Single Line Text', 'formidable' )
+			'checkbox'  => __( 'Checkboxes', 'formidable' ),
+			'text'      => __( 'Single Line Text', 'formidable' ),
 		);
 		return $data_types;
 	}
@@ -120,6 +121,10 @@ class FrmProLookupFieldsController{
 	 * @param array $field
 	 */
 	public static function show_lookup_field_options_in_form_builder( $field ) {
+		// Display as
+		$lookup_args['data_types'] = self::get_lookup_field_data_types();
+		require( FrmAppHelper::plugin_path() . '/pro/classes/views/lookup-fields/back-end/display-as.php' );
+
 		if ( $field['data_type'] == 'text' ) {
 			// Field size
 			$display_max = true;
@@ -128,17 +133,18 @@ class FrmProLookupFieldsController{
 			// Filter options
 			require( FrmAppHelper::plugin_path() . '/pro/classes/views/lookup-fields/back-end/filter.php' );
 
-			// Display as
-			$lookup_args['data_types'] = self::get_lookup_field_data_types();
-			require( FrmAppHelper::plugin_path() . '/pro/classes/views/lookup-fields/back-end/display-as.php' );
 		} else {
-			// Automatic width
+
 			if ( $field['data_type'] == 'select' ) {
+				// Automatic width
 				require( FrmAppHelper::plugin_path() . '/classes/views/frm-fields/back-end/automatic-width.php' );
+
+				// Placeholder text
+				require( FrmAppHelper::plugin_path() . '/pro/classes/views/lookup-fields/back-end/placeholder.php' );
 			}
 
-			// Alignment
-			if ( $field['data_type'] == 'radio' ) {
+			if ( in_array( $field['data_type'], array( 'checkbox', 'radio' ) ) ) {
+				// Alignment
 				require( FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/back-end/alignment.php' );
 			}
 
@@ -151,13 +157,6 @@ class FrmProLookupFieldsController{
 
 			// Option Order
 			require( FrmAppHelper::plugin_path() . '/pro/classes/views/lookup-fields/back-end/order.php' );
-
-			// Display as
-			$lookup_args['data_types'] = self::get_lookup_field_data_types();
-			require( FrmAppHelper::plugin_path() . '/pro/classes/views/lookup-fields/back-end/display-as.php' );
-
-			// Placeholder text
-			require( FrmAppHelper::plugin_path() . '/pro/classes/views/lookup-fields/back-end/placeholder.php' );
 
 			// Dynamic Default Value
 			require( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/dynamic-default-value.php' );
@@ -322,6 +321,9 @@ class FrmProLookupFieldsController{
 
 		// Generate field name and HTML id
 		$field_name = 'item_meta['. $field['id'] .']';
+		if ( 'checkbox' == $field['data_type'] ) {
+			$field_name .= '[]';
+		}
 		$html_id = 'field_' . $field['field_key'];
 
 		// Make sure field value is set
@@ -425,93 +427,12 @@ class FrmProLookupFieldsController{
 	 */
 	private static function get_initial_lookup_field_options( $values ) {
 		if ( self::is_lookup_field_independent( $values['watch_lookup'] ) ) {
-			// If lookup field is not dependent on any other lookup fields
-
-			$linked_field_id = $values['get_values_field'];
-			if ( $linked_field_id ) {
-				$func_name = 'get_independent_' . $values['data_type'] . '_lookup_values';
-				$options = self::$func_name( $linked_field_id, $values );
-			} else {
-				$options = array( $values['lookup_placeholder_text'] );
-			}
+			$options = self::get_independent_lookup_field_options( $values );
 
 		} else {
-			// Lookup field is dependent on another lookup field
-
-			$func_name = 'get_initial_dependent_' . $values['data_type'] . '_lookup_values';
-			$options = self::$func_name( $values );
+			$options = self::get_initial_dependent_lookup_field_options( $values );
 		}
 
-		return $options;
-	}
-
-	/**
-	 * Get the options for an independent Select Lookup field
-	 *
-	 * @since 2.01.0
-	 *
-	 * @param int $linked_field_id
-	 * @param array $values
-	 * @return array $options
-	 */
-	private static function get_independent_select_lookup_values( $linked_field_id, $values ) {
-		$default_option = array( $values['lookup_placeholder_text'] );
-		$options = self::get_independent_lookup_field_values( $linked_field_id, $values );
-		$options = array_merge( $default_option, $options );
-		return $options;
-	}
-
-	/**
-	 * Get the options for an independent Radio Lookup field
-	 *
-	 * @since 2.01.0
-	 *
-	 * @param int $linked_field_id
-	 * @param array $values
-	 * @return array $options
-	 */
-	private static function get_independent_radio_lookup_values( $linked_field_id, $values ) {
-		$options = self::get_independent_lookup_field_values( $linked_field_id, $values );
-		if ( empty( $options ) ) {
-			$options = array( $values['lookup_placeholder_text'] );
-		}
-		return $options;
-	}
-
-	/**
-	 * Get the initial options for a dependent Select Lookup field
-	 *
-	 * @since 2.01.0
-	 *
-	 * @param array $values
-	 * @return array $options
-	 */
-	private static function get_initial_dependent_select_lookup_values( $values ) {
-		$options = array( $values['lookup_placeholder_text'] );
-
-		if ( isset( $values['value'] ) && $values['value'] ) {
-			// If editing an entry or switching between pages, add another option for the saved value
-			$saved_value = array( $values['value'] );
-			$options = array_merge( $options, $saved_value );
-		}
-		return $options;
-	}
-
-	/**
-	 * Get the options for a dependent Radio Lookup field
-	 *
-	 * @since 2.01.0
-	 *
-	 * @param array $values
-	 * @return array $options
-	 */
-	private static function get_initial_dependent_radio_lookup_values( $values ) {
-		if ( isset( $values['value'] ) && $values['value'] ) {
-			// If editing an entry or switching between pages, add another option for the saved value
-			$options = array( $values['value'] );
-		} else {
-			$options = array( $values['lookup_placeholder_text'] );
-		}
 		return $options;
 	}
 
@@ -520,7 +441,7 @@ class FrmProLookupFieldsController{
 	 *
 	 * @since 2.01.0
 	 * @param array $watch_lookup
-	 * @return boolean $indepdendent
+	 * @return boolean $independent
 	 */
 	private static function is_lookup_field_independent( $watch_lookup ) {
 		$watch_lookup = array_filter( $watch_lookup );
@@ -534,6 +455,29 @@ class FrmProLookupFieldsController{
 	}
 
 	/**
+	 * Get the options for an independent Lookup field
+	 *
+	 * @since 2.01.01
+	 * @param array $values
+	 * @return array
+	 */
+	private static function get_independent_lookup_field_options( $values ) {
+		$linked_field_id = $values['get_values_field'];
+		if ( ! $linked_field_id ) {
+			return array();
+		}
+
+		$options = self::get_independent_lookup_field_values( $linked_field_id, $values );
+
+		if ( 'select' == $values['data_type'] ) {
+			$default_option = array( $values['lookup_placeholder_text'] );
+			$options = array_merge( $default_option, $options );
+		}
+
+		return $options;
+	}
+
+	/**
 	 * Get the meta values for an independent lookup field
 	 *
 	 * @since 2.01.0
@@ -543,6 +487,10 @@ class FrmProLookupFieldsController{
 	 */
 	private static function get_independent_lookup_field_values( $linked_field_id, $values ) {
 		$linked_field = FrmField::getOne( $linked_field_id );
+		if ( ! $linked_field ) {
+			return array();
+		}
+
 		$args = array();
 
 		if ( self::need_to_filter_values_for_current_user( $values ) ) {
@@ -561,6 +509,31 @@ class FrmProLookupFieldsController{
 		$options = self::flatten_and_unserialize_meta_values( $options );
 		self::get_unique_values( $options );
 		self::order_values( $values['lookup_option_order'], $options );
+
+		return $options;
+	}
+
+	/**
+	 * Get the initial options for a dependent lookup field
+	 *
+	 * @since 2.01.01
+	 * @param array $values
+	 * @return array
+	 */
+	private static function get_initial_dependent_lookup_field_options( $values ) {
+		if ( isset( $values['value'] ) && $values['value'] ) {
+			// If editing an entry or switching between pages, add an option for the saved value
+			$options = (array) $values['value'];
+		} else {
+			$options = array();
+		}
+
+		if ( 'select' == $values['data_type'] ) {
+			$placeholder = array( $values['lookup_placeholder_text'] );
+			$options = array_merge( $placeholder, $options );
+		} else if ( empty( $options ) ) {
+			$options[] = '';
+		}
 
 		return $options;
 	}
@@ -691,7 +664,7 @@ class FrmProLookupFieldsController{
 	 *
 	 * @since 2.01.0
 	 */
-	public static function ajax_get_dependent_radio_lookup_html() {
+	public static function ajax_get_dependent_cb_radio_lookup_options() {
 		check_ajax_referer( 'frm_ajax', 'nonce' );
 		$field_id = FrmAppHelper::get_param( 'field_id', '', 'post', 'absint' );
 		$parent_args = array(
@@ -705,15 +678,9 @@ class FrmProLookupFieldsController{
 
 		$child_field = FrmField::getOne( $field_id );
 
-		if ( $parent_args['parent_vals'] === 'false' ) {
-			// There were blank parents so don't try to retrieve values
-			$final_values = array();
+		$final_values = self::get_filtered_values_for_dependent_lookup_field( $parent_args, $child_field );
 
-		} else {
-			$final_values = self::get_filtered_values_for_dependent_lookup_field( $parent_args, $child_field );
-		}
-
-		self::show_dependent_radio_lookup_html( $child_field, $args, $final_values );
+		self::show_dependent_cb_radio_lookup_options( $child_field, $args, $final_values );
 
 		wp_die();
 	}
@@ -746,10 +713,10 @@ class FrmProLookupFieldsController{
 	 * @param array $args
 	 * @param array $final_values
 	 */
-	private static function show_dependent_radio_lookup_html( $child_field, $args, $final_values ) {
-		$field = self::initialize_dependent_radio_field_array( $child_field, $final_values );
+	private static function show_dependent_cb_radio_lookup_options( $child_field, $args, $final_values ) {
+		$field = self::initialize_dependent_cb_radio_field_array( $child_field, $final_values );
 
-		$saved_value_array = array( $args['current_value'] );
+		$saved_value_array = (array) $args['current_value'];
 
 		$html_id = 'field_' . $child_field->field_key . $args['row_index'];
 
@@ -757,7 +724,12 @@ class FrmProLookupFieldsController{
 
 		$disabled = ( FrmField::is_read_only( $child_field ) && ! FrmAppHelper::is_admin() ) ?  ' disabled="disabled"' : '';
 
-		require( FrmAppHelper::plugin_path() .'/pro/classes/views/lookup-fields/front-end/radio-rows.php' );
+		if ( 'checkbox' == $field['data_type'] ) {
+			$field_name .= '[]';
+			require( FrmAppHelper::plugin_path() .'/pro/classes/views/lookup-fields/front-end/checkbox-rows.php' );
+		} else {
+			require( FrmAppHelper::plugin_path() .'/pro/classes/views/lookup-fields/front-end/radio-rows.php' );
+		}
 	}
 
 	/**
@@ -769,13 +741,13 @@ class FrmProLookupFieldsController{
 	 * @param array $final_values
 	 * @return array $field
 	 */
-	private static function initialize_dependent_radio_field_array( $child_field, $final_values ) {
+	private static function initialize_dependent_cb_radio_field_array( $child_field, $final_values ) {
 		$field_options = $child_field->field_options;
 		$field = get_object_vars( $child_field ) + $field_options;
 		unset( $field['field_options'] );
 
 		$field['original_type'] = 'lookup';
-		$field['options'] = ( ! empty( $final_values ) ) ? $final_values : array( $field['lookup_placeholder_text'] );
+		$field['options'] = ( ! empty( $final_values ) ) ? $final_values : array( '' );
 
 		return $field;
 	}
@@ -845,13 +817,9 @@ class FrmProLookupFieldsController{
 			$parent_field = FrmField::getOne( $p_field_id );
 			$linked_field = FrmField::getOne( $parent_field->field_options['get_values_field'] );
 
-			if ( $selected_values[ $i ] == $parent_field->field_options['lookup_placeholder_text'] ) {
-				$parent_val = '';//TODO: Maybe make sure value is blank in HTML?
-			} else {
-				$parent_val = $selected_values[ $i ];
-			}
+			$parent_val = $selected_values[ $i ];
 
-			$entry_ids = FrmProEntryMeta::get_entry_ids_for_field_and_value( $linked_field, $parent_val, $args );
+			$entry_ids = self::get_entry_ids_for_parent_field_and_value( $linked_field, $parent_val, $args );
 
 			if ( ! $entry_ids ) {
 				break;
@@ -862,6 +830,29 @@ class FrmProLookupFieldsController{
 
 		return $entry_ids;
 
+	}
+
+	/**
+	 * Get the entry IDs for a given field and value
+	 *
+	 * @since 2.01.01
+	 * @param object $linked_field
+	 * @param string|array $parent_val
+	 * @param array $args
+	 * @return array
+	 */
+	private static function get_entry_ids_for_parent_field_and_value( $linked_field, $parent_val, $args ) {
+		if ( is_array( $parent_val ) ) {
+			$entry_ids = array();
+			foreach ( $parent_val as $p_val ) {
+				$new_entry_ids = FrmProEntryMeta::get_entry_ids_for_field_and_value( $linked_field, $p_val, $args );
+				$entry_ids = array_merge( $entry_ids, $new_entry_ids );
+			}
+		} else {
+			$entry_ids = FrmProEntryMeta::get_entry_ids_for_field_and_value( $linked_field, $parent_val, $args );
+		}
+
+		return $entry_ids;
 	}
 
 	/**
@@ -971,9 +962,10 @@ class FrmProLookupFieldsController{
 	 */
 	public static function get_front_end_lookup_field_html( $field, $field_name, $html_id ) {
 		$disabled = self::get_disabled_input_string( $field );
+		$saved_value_array = (array) $field['value'];
 
-		if ( $field['data_type'] == 'radio' ) {
-			$cont_id = str_replace( 'field_' . $field['field_key'], 'frm_lookup_cont_' . $field['field_key'], $html_id );
+		if ( 'checkbox' == $field['data_type'] ) {
+			$field_name .= '[]';
 		}
 
 		require( FrmAppHelper::plugin_path() .'/pro/classes/views/lookup-fields/front-end/input.php' );
