@@ -8,7 +8,6 @@ class FrmProCreditCard {
 		self::validate_cc_expiration( $errors, $field, $values );
 		self::validate_cvc( $errors, $field, $values );
 
-
 		add_filter( 'frm_redirect_url', 'FrmProCreditCard::secure_before_redirect', 50, 3 );
 		add_action( 'frm_after_entry_processed', 'FrmProCreditCard::secure_after_save', 100 );
 
@@ -16,13 +15,7 @@ class FrmProCreditCard {
 	}
 
 	public static function validate_required_fields( &$errors, $field, $values ) {
-		$skip_required = FrmProEntryMeta::skip_required_validation( $field );
-		if ( $skip_required ) {
-			return;
-		}
-
-		$is_editing = ( $_POST && isset( $_POST['id'] ) && is_numeric( $_POST['id'] ) );
-		if ( $field->required && ! $is_editing ) {
+		if ( self::should_require( $field, $values ) ) {
 			foreach ( $values as $key => $value ) {
 				if ( empty( $value ) ) {
 					$errors[ 'field' . $field->temp_id . '-' . $key ] = '';
@@ -31,10 +24,25 @@ class FrmProCreditCard {
 		}
 	}
 
+	public static function should_require( $field, $values ) {
+		$partial_fill = ( isset( $values['cc'] ) && ! empty( $values['cc'] ) );
+		if ( $partial_fill ) {
+			return true;
+		}
+
+		$is_editing = ( $_POST && isset( $_POST['id'] ) && is_numeric( $_POST['id'] ) );
+		if ( ! $field->required || $is_editing ) {
+			return false;
+		}
+
+		$skip_required = FrmProEntryMeta::skip_required_validation( $field );
+		return ( ! $skip_required );
+	}
+
 	public static function validate_cc_number( &$errors, $field, $values ) {
 		if ( isset( $values['cc'] ) && ! empty( $values['cc'] ) ) {
 			// if a CVC is present, then the user must have added it
-			$should_validate = isset( $values['cvc'] ) && ! empty( $values['cvc'] );
+			$should_validate = ( isset( $values['cvc'] ) && ! empty( $values['cvc'] ) ) || isset( $errors[ 'field' . $field->temp_id . '-cvc' ] );
 			if ( $should_validate ) {
 				$is_valid_cc = self::is_valid_cc_number( $values['cc'] );
 				if ( ! $is_valid_cc ) {
@@ -158,7 +166,8 @@ class FrmProCreditCard {
 		} else if ( $save_digits == 0 ) {
 			$cc_values['cc'] = '';
 		} else if ( ! empty( $cc_values['cc'] ) ) {
-			$cc_values['cc'] = str_repeat( 'x', strlen( $cc_values['cc'] ) - 4 ) . substr( $cc_values['cc'], -4 );
+			$length = max( strlen( $cc_values['cc'] ) - 4, 0 );
+			$cc_values['cc'] = str_repeat( 'x', $length ) . substr( $cc_values['cc'], -4 );
 		}
 	}
 }

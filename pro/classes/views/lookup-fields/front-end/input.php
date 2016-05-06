@@ -1,7 +1,5 @@
 <?php
 
-$saved_value_array = (array) $field['value'];
-
 // If read-only, add hidden fields to hold the values
 if ( $disabled && $field['data_type'] != 'text' ) {
 	foreach ( $saved_value_array as $v ) { ?>
@@ -35,10 +33,19 @@ if ( 'select' == $field['data_type'] ) {
 	if ( ! empty( $field['options'] ) ) {
 		// If there are field options, show them in a radio button field
 
-		?><div class="frm_opt_container" id="<?php echo $cont_id ?>"><?php
+		?><div class="frm_opt_container"><?php
 		require( FrmAppHelper::plugin_path() .'/pro/classes/views/lookup-fields/front-end/radio-rows.php' );
 		?></div><?php
     }
+} else if ( 'checkbox' == $field['data_type'] ) {
+	// Checkbox Lookup Field
+
+	if ( ! empty( $field['options'] ) ) {
+
+		?><div class="frm_opt_container"><?php
+		require( FrmAppHelper::plugin_path() .'/pro/classes/views/lookup-fields/front-end/checkbox-rows.php' );
+		?></div><?php
+	}
 } else if ( 'text' == $field['data_type'] ) {
 	 // Text Lookup Field
 

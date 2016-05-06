@@ -90,10 +90,6 @@ class FrmProEntriesController{
 				$wp_styles->done = array_merge( $wp_styles->done, $registered_styles );
 			}
 		}
-
-		wp_print_footer_scripts();
-
-		self::footer_js();
 	}
 
     /**
@@ -886,7 +882,7 @@ class FrmProEntriesController{
 
 		foreach ( array( 'name', 'description' ) as $var ) {
 			$default_val = isset( $entry->{$var} ) ? $entry->{$var} : '';
-			$values[ $var ] = FrmAppHelper::get_param( $var, $default_val );
+			$values[ $var ] = FrmAppHelper::get_param( $var, $default_val, 'get', 'wp_kses_post' );
 			unset($var, $default_val);
 		}
 
@@ -2697,6 +2693,8 @@ class FrmProEntriesController{
 				// trigger the footer scripts if there is a form to show
 				if ( $errors || ! isset( $processed ) || ! empty( $frm_vars['forms_loaded'] ) ) {
 					self::print_ajax_scripts( $going_backwards ? 'none' : '' );
+					wp_print_footer_scripts();
+					self::footer_js();
                 }
             } else {
                 echo false;
@@ -2834,14 +2832,6 @@ class FrmProEntriesController{
             }
         }
 
-        echo "<script type='text/javascript'>
-/*<![CDATA[*/
-jQuery(document).ready(function($){
-$('#frm_form_" . esc_attr( $id ) . "_container .frm-show-form').submit(window.frmFrontForm.submitForm);
-});
-/*]]>*/
-</script>";
-
         echo FrmFormsController::get_form_shortcode( compact( 'id', 'entry_id', 'fields', 'exclude_fields' ) );
 
 		self::print_ajax_scripts( 'all' );
@@ -2889,13 +2879,13 @@ $('#frm_form_" . esc_attr( $id ) . "_container .frm-show-form').submit(window.fr
     }
 
 	public static function setup_edit_vars( $values ) {
-        if ( ! isset($values['edit_value']) ) {
-            $values['edit_value'] = ($_POST && isset($_POST['options']['edit_value'])) ? $_POST['options']['edit_value'] : __( 'Update', 'formidable' );
+        if ( ! isset( $values['edit_value'] ) ) {
+			$values['edit_value'] = ( $_POST && isset( $_POST['options']['edit_value'] ) ) ? wp_kses_post( $_POST['options']['edit_value'] ) : __( 'Update', 'formidable' );
         }
 
         if ( ! isset($values['edit_msg']) ) {
-            if ( $_POST && isset($_POST['options']['edit_msg']) ) {
-                $values['edit_msg'] = $_POST['options']['edit_msg'];
+			if ( $_POST && isset( $_POST['options']['edit_msg'] ) ) {
+				$values['edit_msg'] = wp_kses_post( $_POST['options']['edit_msg'] );
             } else {
                 $frmpro_settings = new FrmProSettings();
                 $values['edit_msg'] = $frmpro_settings->edit_msg;

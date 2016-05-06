@@ -20,22 +20,31 @@ if ( 'select' == $field['data_type'] ) {
 
 <?php
 
-} else if ( 'radio' == $field['data_type'] ) {
-	 // Radio Button Lookup Field
+} else if ( 'radio' == $field['data_type'] || 'checkbox' == $field['data_type'] ) {
+	// Checkbox and Radio Lookup Fields
 
-?><ul id="frm_field_<?php echo esc_attr( $field['id'] ) ?>_opts" class="frm_sortable_field_opts frm_clear<?php echo (count($field['options']) > 10) ? ' frm_field_opts_list' : ''; ?>"><?php
-	foreach ( $field['options'] as $opt_key => $opt ) {
-		$opt_value = ( $opt == $field['lookup_placeholder_text'] ) ? '' : $opt;
-		$checked = ( in_array( $opt_value, $saved_value_array ) ) ? ' checked="checked"' : '';
+	if ( empty( $field['options'] ) ) {
+		?><span><?php _e( 'No options found', 'formidable' ); ?></span><?php
+	} else if ( count( $field['options'] ) == 1 && reset( $field['options'] ) == '' ) {
+		?><span><?php _e( 'Options will populate dynamically in form', 'formidable' ); ?></span><?php
+	} else {
+		?>
+		<ul id="frm_field_<?php echo esc_attr( $field[ 'id' ] ) ?>_opts"
+			class="frm_sortable_field_opts frm_clear<?php echo ( count( $field[ 'options' ] ) > 10 ) ? ' frm_field_opts_list' : ''; ?>"><?php
+		foreach ( $field[ 'options' ] as $opt_key => $opt_value ) {
+			$checked = ( in_array( $opt_value, $saved_value_array ) ) ? ' checked="checked"' : '';
 
-?>
-	<li class="frm_single_option">
-		<input type="radio" name="<?php echo esc_attr( $field_name ) ?>" value="<?php echo esc_attr( $opt_value ) ?>"<?php echo $checked ?>/>
-		<label class="frm_ipe_field_option field_<?php echo esc_attr( $field['id'] ) ?>_option" id="<?php echo esc_attr( $html_id . '-' . $opt_key ) ?>"><?php echo esc_attr( $opt ) ?></label>
-	</li><?php
+			?>
+			<li class="frm_single_option">
+			<input type="<?php echo esc_attr( $field['data_type'] ); ?>" name="<?php echo esc_attr( $field_name ) ?>"
+				   value="<?php echo esc_attr( $opt_value ) ?>"<?php echo $checked ?>/>
+			<label class="frm_ipe_field_option field_<?php echo esc_attr( $field[ 'id' ] ) ?>_option"
+				   id="<?php echo esc_attr( $html_id . '-' . $opt_key ) ?>"><?php echo esc_attr( $opt_value ) ?></label>
+			</li><?php
+		}
+		unset( $opt_key, $checked, $opt_value ); ?>
+		</ul><?php
 	}
-	unset( $opt_key, $opt, $checked, $opt_value );?>
-</ul><?php
 } else if ( 'text' == $field['data_type'] ) {
 	// Text Lookup Field
 

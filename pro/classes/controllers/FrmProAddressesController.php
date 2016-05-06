@@ -64,7 +64,7 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 		if ( $field['address_type'] == 'us' ) {
 			$fields['state']['type'] = 'select';
 			$fields['state']['options'] = FrmFieldsHelper::get_us_states();
-		} else {
+		} else if ( $field['address_type'] != 'generic' ) {
 			$fields['country'] = array(
 				'type' => 'select', 'classes' => '', 'label' => 0,
 				'options' => FrmFieldsHelper::get_countries(),

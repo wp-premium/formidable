@@ -11,6 +11,6 @@ for ( $i = ( $year - 5 ); $i <= ( $year + 5 ); $i++ ) {
 	echo '<option value="' . esc_attr( $i ) . '"' . ( $i == $year ? ' selected="selected"' : '' ) . '>' . $i . '</option>';
 }
 unset($i);
-?></select> <a href="<?php echo esc_url( add_query_arg( array( 'frmcal-month' => $next_month, 'frmcal-year' => $next_year) ) ) ?>#frmcal-<?php echo esc_attr( $view->ID ) ?>" class="frmcal-next" title="<?php echo esc_attr( $month_names[ $next_month ] ) ?>"><?php echo $month_names[ $next_month ] ?> &rarr;</a><div class="frmcal-title"><span class="frmcal-month"><?php echo $month_names[ $month ] ?></span><span class="frmcal-year"><?php echo $year ?></span></div>
+?></select> <a href="<?php echo esc_url( add_query_arg( array( 'frmcal-month' => $next_month, 'frmcal-year' => $next_year) ) ) ?>#frmcal-<?php echo esc_attr( $view->ID ) ?>" class="frmcal-next" title="<?php echo esc_attr( $month_names[ $next_month ] ) ?>"><?php echo $month_names[ $next_month ] ?> &rarr;</a><div class="frmcal-title"><span class="frmcal-month"><?php echo $month_names[ $month ] ?></span> <span class="frmcal-year"><?php echo $year ?></span></div>
 </div>
 <table class="frmcal-calendar"><tbody>
