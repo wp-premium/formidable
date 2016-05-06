@@ -1024,6 +1024,7 @@ class FrmProFieldsHelper{
 		} else {
 			$cond_type = $field_type;
 		}
+		$cond_type = apply_filters( 'frm_logic_' . $field_type . '_input_type', $cond_type );
 
 		return $cond_type;
 	}
@@ -1065,11 +1066,12 @@ class FrmProFieldsHelper{
 	 * @param int $i
 	 * @param array $logic_rules
 	 */
-	private static function add_condition_to_logic_rules( $field, $i, &$logic_rules ){
+	private static function add_condition_to_logic_rules( $field, $i, &$logic_rules ) {
+		$value = self::get_default_value( $field['hide_opt'][ $i ], $field, false );
 		$logic_rules['conditions'][] = array(
-			'fieldId' => $field['hide_field'][ $i ],
+			'fieldId'  => $field['hide_field'][ $i ],
 			'operator' => $field['hide_field_cond'][ $i ],
-			'value' => $field['hide_opt'][ $i ],
+			'value'    => $value,
 		);
 	}
 
@@ -4070,7 +4072,7 @@ DEFAULT_HTML;
 		$observed_field = FrmField::getOne( $hide_field );
 
 		// Leave now if conditional logic field is not a Dynamic field
-		if ( $observed_field->type != 'data' ) {
+		if ( ! $observed_field || $observed_field->type != 'data' ) {
 			return;
 		}
 
