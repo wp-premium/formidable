@@ -31,7 +31,7 @@
     	    </div>
     	    <?php } ?>
     	    <div id="publishing-action">
-    	    <?php submit_button($submit, 'primary', 'submit', false); ?>
+    	    <?php submit_button($submit, 'primary', '', false); ?>
             </div>
             <div class="clear"></div>
         </div>

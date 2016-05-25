@@ -90,6 +90,8 @@ class FrmProEntriesController{
 				$wp_styles->done = array_merge( $wp_styles->done, $registered_styles );
 			}
 		}
+
+		wp_print_footer_scripts();
 	}
 
     /**
@@ -1908,8 +1910,10 @@ class FrmProEntriesController{
 
 	public static function get_search( $atts ) {
         $atts = shortcode_atts( array(
-            'post_id' => '', 'label' => __( 'Search', 'formidable' ),
+            'post_id' => '',
+			'label' => __( 'Search', 'formidable' ),
             'style' => false,
+			'views' => '',
         ), $atts);
 
         if ( $atts['post_id'] == '' ) {
@@ -2327,7 +2331,7 @@ class FrmProEntriesController{
 				return FrmFormsController::get_form_shortcode( array( 'id' => $atts['form_id'], 'entry_id' => $entry_id, 'fields' => $atts['fields'], 'exclude_fields' => $atts['exclude_fields'] ) );
             }
 
-            $link .= "<script type='text/javascript'>frmFrontForm.scrollToID('". esc_js( $atts['prefix'] . $entry_id ) ."');</script>";
+            $link .= "<script type='text/javascript'>document.addEventListener('DOMContentLoaded',function(){frmFrontForm.scrollToID('". esc_js( $atts['prefix'] . $entry_id ) . "');});</script>";
         }
 
         if ( empty($atts['title']) ) {
@@ -2693,7 +2697,6 @@ class FrmProEntriesController{
 				// trigger the footer scripts if there is a form to show
 				if ( $errors || ! isset( $processed ) || ! empty( $frm_vars['forms_loaded'] ) ) {
 					self::print_ajax_scripts( $going_backwards ? 'none' : '' );
-					wp_print_footer_scripts();
 					self::footer_js();
                 }
             } else {

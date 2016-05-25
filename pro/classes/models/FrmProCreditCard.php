@@ -26,11 +26,12 @@ class FrmProCreditCard {
 
 	public static function should_require( $field, $values ) {
 		$partial_fill = ( isset( $values['cc'] ) && ! empty( $values['cc'] ) );
-		if ( $partial_fill ) {
+		$is_editing = ( $_POST && isset( $_POST['id'] ) && is_numeric( $_POST['id'] ) );
+
+		if ( $partial_fill && ! $is_editing ) {
 			return true;
 		}
 
-		$is_editing = ( $_POST && isset( $_POST['id'] ) && is_numeric( $_POST['id'] ) );
 		if ( ! $field->required || $is_editing ) {
 			return false;
 		}

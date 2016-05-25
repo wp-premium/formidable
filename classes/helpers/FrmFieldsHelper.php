@@ -178,7 +178,7 @@ class FrmFieldsHelper {
 		);
 
 		$msg = FrmField::get_option( $field, $error );
-		$msg = ( $msg == $defaults[ $error ]['full'] || empty( $msg ) ) ? $defaults[ $error ]['part'] : $msg;
+		$msg = empty( $msg ) ? $defaults[ $error ]['part'] : $msg;
 		$msg = do_shortcode( $msg );
 		return $msg;
 	}
@@ -616,6 +616,8 @@ DEFAULT_HTML;
 		if ( ! is_array( $hide_opt ) ) {
 			$hide_opt = rtrim( $hide_opt );
 		}
+
+		$hide_opt = wp_kses_post( $hide_opt );
 
         if ( is_array($observed_value) ) {
             return self::array_value_condition($observed_value, $cond, $hide_opt);

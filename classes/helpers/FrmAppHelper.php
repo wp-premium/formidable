@@ -10,7 +10,7 @@ class FrmAppHelper {
 	/**
 	 * @since 2.0
 	 */
-	public static $plug_version = '2.01.01';
+	public static $plug_version = '2.01.02';
 
     /**
      * @since 1.07.02
@@ -101,7 +101,7 @@ class FrmAppHelper {
      *
      * @since 2.0
      */
-	public static function update_message( $features, $class = '' ) {
+	public static function update_message() {
 		_deprecated_function( __FUNCTION__, '2.0.19' );
     }
 
@@ -493,12 +493,23 @@ class FrmAppHelper {
 	public static function cache_delete_group( $group ) {
     	global $wp_object_cache;
 
-        if ( isset( $wp_object_cache->cache[ $group ] ) ) {
-            foreach ( $wp_object_cache->cache[ $group ] as $k => $v ) {
-                wp_cache_delete($k, $group);
-            }
-            return true;
-        }
+		if ( is_callable( array( $wp_object_cache, '__get' ) ) ) {
+			$group_cache = $wp_object_cache->__get('cache');
+		} elseif ( is_callable( array( $wp_object_cache, 'redis_status' ) ) && $wp_object_cache->redis_status() ) {
+			// check if the object cache is overridden by Redis
+			$wp_object_cache->flush();
+			$group_cache = array();
+		} else {
+			// version < 4.0 fallback
+			$group_cache = $wp_object_cache->cache;
+		}
+
+		if ( isset( $group_cache[ $group ] ) ) {
+			foreach ( $group_cache[ $group ] as $k => $v ) {
+				wp_cache_delete( $k, $group );
+			}
+			return true;
+		}
 
     	return false;
     }
@@ -818,11 +829,12 @@ class FrmAppHelper {
         return $return;
     }
 
-    public static function esc_textarea( $text ) {
-        $safe_text = str_replace('&quot;', '"', $text);
-        $safe_text = htmlspecialchars( $safe_text, ENT_NOQUOTES );
-    	return apply_filters( 'esc_textarea', $safe_text, $text );
-    }
+	public static function esc_textarea( $text ) {
+		$safe_text = str_replace( '&quot;', '"', $text );
+		$safe_text = htmlspecialchars( $safe_text, ENT_NOQUOTES );
+		$safe_text = str_replace( '&amp;', '&', $safe_text );
+		return apply_filters( 'esc_textarea', $safe_text, $text );
+	}
 
     /**
      * Add auto paragraphs to text areas

@@ -14,7 +14,7 @@
 				<a href="javascript:void(0)" class="submitdelete deletion" onclick="history.back(-1)" title="<?php esc_attr_e( 'Cancel', 'formidable' ) ?>"><?php _e( 'Cancel', 'formidable' ) ?></a>
     	    </div>
     	    <div id="publishing-action">
-            <input type="submit" value="<?php echo esc_attr($submit) ?>" class="button-primary" />
+				<?php submit_button( $submit, 'primary', '', false ); ?>
             </div>
             <div class="clear"></div>
         </div>
