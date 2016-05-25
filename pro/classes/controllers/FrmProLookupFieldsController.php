@@ -57,6 +57,25 @@ class FrmProLookupFieldsController{
 	}
 
 	/**
+	 * Clean a Lookup field's options before updating in the database
+	 *
+	 * @since 2.01.02
+	 * @param array $values
+	 * @return array $values
+	 */
+	public static function clean_field_options_before_update( $values ) {
+		if ( $values['type'] == 'lookup' ) {
+
+			// Necessary when switching from another field type to a Lookup
+			if ( isset( $values['field_options']['autopopulate_value'] ) ) {
+				unset( $values['field_options']['autopopulate_value'] );
+			}
+		}
+
+		return $values;
+	}
+
+	/**
 	 * Add Autopopulate Values options for certain field types
 	 * Used on front and back end. Either $values or $field could be false :/
 	 *
@@ -72,7 +91,8 @@ class FrmProLookupFieldsController{
 			$field_type = $values['type'];
 		}
 
-		if ( in_array( $field_type, array( 'text', 'email', 'url', 'number', 'phone', 'date', 'select' ) ) ) {
+		$autopopulate_field_types = self::get_autopopulate_field_types();
+		if ( in_array( $field_type, $autopopulate_field_types ) ) {
 			$opts['autopopulate_value'] = false;
 			$opts['get_values_form'] = '';
 			$opts['get_values_field'] = '';
@@ -80,6 +100,30 @@ class FrmProLookupFieldsController{
 			$opts['get_most_recent_value'] = '';
 			$opts['lookup_filter_current_user'] = false;
 		}
+	}
+
+	/**
+	 * Get the field types that should have the "Autopopulate Value" section
+	 *
+	 * @since 2.01.02
+	 * @return array
+	 */
+	public static function get_autopopulate_field_types() {
+		$autopopulate_field_types = array(
+			'text',
+			'email',
+			'url',
+			'image',
+			'time',
+			'user_id',
+			'number',
+			'phone',
+			'date',
+			'select',
+			'hidden',
+		);
+
+		return $autopopulate_field_types;
 	}
 
 	/**
@@ -213,7 +257,7 @@ class FrmProLookupFieldsController{
 			$form_fields = FrmField::get_all_for_form( $form_id );
 		} else {
 			$where = array(
-				'form_id' => $form_id,
+				'fi.form_id' => $form_id,
 				'type' => $field_type
 			);
 			$form_fields = FrmField::getAll( $where );
@@ -504,6 +548,10 @@ class FrmProLookupFieldsController{
 			$args['user_id'] = $current_user;
 		}
 
+		if ( FrmAppHelper::is_admin_page( 'formidable' ) ) {
+			$args['limit'] = 500;
+		}
+
 		$options = FrmProEntryMeta::get_all_metas_for_field( $linked_field, $args );
 
 		$options = self::flatten_and_unserialize_meta_values( $options );
@@ -648,7 +696,7 @@ class FrmProLookupFieldsController{
 		$field_id = FrmAppHelper::get_param( 'field_id', '', 'post', 'absint' );
 		$parent_args = array(
 			'parent_field_ids' => FrmAppHelper::get_param( 'parent_fields', '', 'post', 'absint' ),
-			'parent_vals' => FrmAppHelper::get_param( 'parent_vals', '', 'post', 'sanitize_text_field' )
+			'parent_vals' => FrmAppHelper::get_param( 'parent_vals', '', 'post', 'wp_kses_post' ),
 		);
 
 		$child_field = FrmField::getOne( $field_id );
@@ -669,7 +717,7 @@ class FrmProLookupFieldsController{
 		$field_id = FrmAppHelper::get_param( 'field_id', '', 'post', 'absint' );
 		$parent_args = array(
 			'parent_field_ids' => FrmAppHelper::get_param( 'parent_fields', '', 'post', 'absint' ),
-			'parent_vals' => FrmAppHelper::get_param( 'parent_vals', '', 'post', 'sanitize_text_field' )
+			'parent_vals' => FrmAppHelper::get_param( 'parent_vals', '', 'post', 'wp_kses_post' ),
 		);
 		$args = array(
 			'row_index' => FrmAppHelper::get_param( 'row_index', '', 'post', 'sanitize_text_field' ),
@@ -779,7 +827,8 @@ class FrmProLookupFieldsController{
 	public static function ajax_get_text_field_lookup_value(){
 		check_ajax_referer( 'frm_ajax', 'nonce' );
 		$parent_field_ids = FrmAppHelper::get_param( 'parent_fields', '', 'post', 'absint' );
-		$parent_vals = FrmAppHelper::get_param( 'parent_vals', '', 'post', 'sanitize_text_field' );
+		$parent_vals = FrmAppHelper::get_param( 'parent_vals', '', 'post', 'wp_kses_post' );
+
 		$field_id = FrmAppHelper::get_param( 'field_id', '', 'post', 'absint' );
 
 		$child_field = FrmField::getOne( $field_id );
@@ -818,6 +867,8 @@ class FrmProLookupFieldsController{
 			$linked_field = FrmField::getOne( $parent_field->field_options['get_values_field'] );
 
 			$parent_val = $selected_values[ $i ];
+
+			$args['comparison_type'] = apply_filters( 'frm_set_comparison_type_for_lookup', 'equals', $parent_field, $child_field );
 
 			$entry_ids = self::get_entry_ids_for_parent_field_and_value( $linked_field, $parent_val, $args );
 
@@ -897,7 +948,7 @@ class FrmProLookupFieldsController{
 	 * @return bool
 	 */
 	private static function need_to_filter_values_for_current_user( $field_options ) {
-		return $field_options['lookup_filter_current_user'] == true && ! current_user_can( 'administrator' ) && ! FrmAppHelper::is_admin();
+		return FrmField::is_option_true_in_array( $field_options, 'lookup_filter_current_user' ) && ! current_user_can( 'administrator' ) && ! FrmAppHelper::is_admin();
 	}
 
 	/**

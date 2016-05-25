@@ -1,5 +1,4 @@
 <div id="form_entries_page" class="wrap">
-    <div class="frmicon icon32"><br/></div>
     <h2 style="height:34px;"><?php _e( 'Add New Entry', 'formidable' ); ?></h2>
 
     <?php if ( empty( $values ) ) { ?>

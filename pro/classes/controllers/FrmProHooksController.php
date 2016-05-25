@@ -127,10 +127,12 @@ class FrmProHooksController{
 		add_action( 'frm_trigger_wppost_action', 'FrmProPost::save_post', 10, 3 );
 		add_action( 'frm_before_destroy_entry', 'FrmProPost::destroy_post', 10, 2 );
 
-        // Stats Controller
-        add_shortcode('frm-graph', 'FrmProStatisticsController::graph_shortcode');
-        add_shortcode('frm-stats', 'FrmProStatisticsController::stats_shortcode');
-        add_action('frm_form_action_reports', 'FrmProStatisticsController::show', 9);
+		// Stats Controller
+		add_shortcode('frm-stats', 'FrmProStatisticsController::stats_shortcode');
+
+		// Graphs Controller
+		add_shortcode('frm-graph', 'FrmProGraphsController::graph_shortcode');
+		add_action('frm_form_action_reports', 'FrmProGraphsController::show_reports', 9);
 
         // notification model
         add_filter('frm_notification_attachment', 'FrmProNotification::add_attachments', 1, 3 );
@@ -283,6 +285,9 @@ class FrmProHooksController{
 
         // XML Helper
         add_action( 'frm_after_field_is_imported', 'FrmProXMLHelper::after_field_is_imported', 10, 2 );
+
+		// Lookup Controller
+		add_filter( 'frm_clean_lookup_field_options_before_update', 'FrmProLookupFieldsController::clean_field_options_before_update' );
     }
 
     public static function load_ajax_hooks() {

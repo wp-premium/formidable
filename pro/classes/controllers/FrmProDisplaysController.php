@@ -1205,14 +1205,22 @@ class FrmProDisplaysController {
 		self::maybe_add_limit_to_query( $view, $display_page_query );
 
 		if ( $view->frm_page_size ) {
-			$page_param = ( $_GET && isset( $_GET['frm-page-'. $view->ID] ) ) ? 'frm-page-'. $view->ID : 'frm-page';
-			$current_page = FrmAppHelper::simple_get( $page_param, 'absint', 1 );
+			$current_page = self::get_current_page_num( $view->ID );
 			$entry_ids = FrmProEntry::get_view_page( $current_page, $view->frm_page_size, $where, $display_page_query );
 		} else {
 			$entry_ids = FrmProEntry::get_view_results( $where, $display_page_query );
 		}
 
 		return $entry_ids;
+	}
+
+	/**
+	 * Get the page number from the url, and make sure it isn't 0
+	 */
+	private static function get_current_page_num( $view_id ) {
+		$page_param = ( $_GET && isset( $_GET[ 'frm-page-' . $view_id ] ) ) ? 'frm-page-' . $view_id : 'frm-page';
+		$current_page = FrmAppHelper::simple_get( $page_param, 'absint', 1 );
+		return max( 1, $current_page );
 	}
 
 	/**
@@ -1737,6 +1745,10 @@ class FrmProDisplaysController {
 
 		$s = FrmAppHelper::get_param( 'frm_search', false, 'get', 'sanitize_text_field' );
 		if ( $s ) {
+			if ( self::apply_frm_search_to_view( $view ) !== true ) {
+				return;
+			}
+
 			$new_ids = FrmProEntriesHelper::get_search_ids( $s, $view->frm_form_id, array( 'is_draft' => 'both' ) );
 
 			if ( isset( $where['it.id'] ) ) {
@@ -1745,6 +1757,29 @@ class FrmProDisplaysController {
 				$where['it.id'] = (array) $new_ids;
 			}
 		}
+	}
+
+	/**
+	 * Check if frm_search should apply to this View
+	 *
+	 * @since 2.01.02
+	 * @param object $view
+	 * @return bool
+	 */
+	private static function apply_frm_search_to_view( $view ) {
+		$apply_frm_search = true;
+
+		$search_view_ids = FrmAppHelper::get_param( 'frm_search_views', '', 'get', 'sanitize_text_field' );
+		$search_view_ids = explode( ',', $search_view_ids );
+
+		// Remove non-numeric values
+		$search_view_ids = array_filter( $search_view_ids, 'is_numeric' );
+
+		if ( ! empty( $search_view_ids ) && ! in_array( $view->ID, $search_view_ids ) ) {
+			$apply_frm_search = false;
+		}
+
+		return $apply_frm_search;
 	}
 
 	/**
@@ -2116,9 +2151,7 @@ class FrmProDisplaysController {
 		$pagination = '';
 
 		if ( is_int( $view->frm_page_size ) ) {
-			$page_param = ( $_GET && isset( $_GET['frm-page-'. $view->ID] ) ) ? 'frm-page-'. $view->ID : 'frm-page';
-			$current_page = FrmAppHelper::simple_get( $page_param, 'absint', 1 );
-
+			$current_page = self::get_current_page_num( $view->ID );
 			$pagination = self::get_pagination( $view, $total_count, $current_page );
 		}
 

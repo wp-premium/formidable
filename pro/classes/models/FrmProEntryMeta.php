@@ -953,13 +953,18 @@ class FrmProEntryMeta{
 			'e.is_draft' => 0
 		);
 
+		$operator = '';
+		if ( isset( $args['comparison_type'] ) && 'like' == $args['comparison_type'] ) {
+			$operator = ' LIKE';
+		}
+
 		if ( ! FrmField::is_option_true( $field, 'post_field' ) ) {
 			// If field is not a post field
 			$get_field = 'em.item_id';
 			$get_table = $wpdb->prefix .'frm_item_metas em INNER JOIN '. $wpdb->prefix .'frm_items e ON (e.id=em.item_id)';
 
 			$where['em.field_id'] = $field->id;
-			$where['em.meta_value'] = $value;
+			$where['em.meta_value' . $operator ] = $value;
 
 		} else if ( $field->field_options['post_field'] == 'post_custom' ) {
 			// If field is a custom field
@@ -967,14 +972,14 @@ class FrmProEntryMeta{
 			$get_table = $wpdb->postmeta . ' pm INNER JOIN ' . $wpdb->prefix . 'frm_items e ON pm.post_id=e.post_id';
 
 			$where['pm.meta_key'] = $field->field_options['custom_field'];
-			$where['pm.meta_value'] = $value;
+			$where['pm.meta_value' . $operator ] = $value;
 
 		} else if ( $field->field_options['post_field'] != 'post_category' ) {
 			// If field is a non-category post field
 			$get_field = 'e.id';
 			$get_table = $wpdb->posts . ' p INNER JOIN ' . $wpdb->prefix . 'frm_items e ON p.ID=e.post_id';
 
-			$where[ 'p.' . sanitize_title( $field->field_options['post_field'] ) ] = $value;
+			$where[ 'p.' . sanitize_title( $field->field_options['post_field'] )  . $operator ] = $value;
 
 		} else {
 			// If field is a category field

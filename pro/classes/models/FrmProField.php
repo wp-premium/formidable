@@ -220,7 +220,7 @@ class FrmProField {
 	 * @param array $field_options
 	 */
 	private static function maybe_switch_field_id_in_setting( $frm_duplicate_ids, $setting, &$field_options ) {
-		$old_field_id = $field_options[ $setting ];
+		$old_field_id = isset( $field_options[ $setting ] ) ? $field_options[ $setting ] : 0;
 
 		if ( ! $old_field_id ) {
 			return;

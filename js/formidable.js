@@ -700,17 +700,10 @@ function frmFrontFormJS(){
 	}
 
 	function operators(op, a, b){
-		if ( typeof b === 'undefined' ) {
-			b = '';
-		}
-		if(jQuery.isArray(b) && jQuery.inArray(a,b) > -1){
-			b = a;
-		}
-		if(String(a).search(/^\s*(\+|-)?((\d+(\.\d+)?)|(\.\d+))\s*$/) !== -1){
-			a = parseFloat(a);
-			b = parseFloat(b);
-		}
-		if ( String(a).indexOf('&quot;') != '-1' && operators(op, a.replace('&quot;', '"'), b) ) {
+		a = prepareLogicValueForComparison( a );
+		b = prepareEnteredValueForComparison( a, b );
+
+		if ( typeof a === 'string' && a.indexOf('&quot;') != '-1' && operators(op, a.replace('&quot;', '"'), b) ) {
 			return true;
 		}
 
@@ -725,8 +718,8 @@ function frmFrontFormJS(){
 					return false;
 				}
 
-				d = prepareEnteredValueForLikeComparison( d );
-				c = prepareLogicValueForLikeComparison( c );
+				d = prepareValueForLikeComparison( d );
+				c = prepareValueForLikeComparison( c );
 
 				return d.indexOf( c ) != -1;
 			},
@@ -736,8 +729,8 @@ function frmFrontFormJS(){
 					return true;
 				}
 
-				d = prepareEnteredValueForLikeComparison( d );
-				c = prepareLogicValueForLikeComparison( c );
+				d = prepareValueForLikeComparison( d );
+				c = prepareValueForLikeComparison( c );
 
 				return d.indexOf( c ) == -1;
 			}
@@ -745,20 +738,44 @@ function frmFrontFormJS(){
 		return theOperators[op](a, b);
 	}
 
-	function prepareEnteredValueForLikeComparison( d ) {
-		if ( typeof d === 'string' ) {
-			d = d.toLowerCase();
-		} else if ( typeof d === 'number' ) {
-			d = d.toString();
+	function prepareLogicValueForComparison( a ) {
+		if ( String(a).search(/^\s*(\+|-)?((\d+(\.\d+)?)|(\.\d+))\s*$/) !== -1 ) {
+			a = parseFloat(a);
+		} else if ( typeof a === 'string' ) {
+			a = a.trim();
 		}
-		return d;
+
+		return a;
 	}
 
-	function prepareLogicValueForLikeComparison( c ) {
-		if ( typeof c === 'string' ) {
-			c = c.toLowerCase();
+	function prepareEnteredValueForComparison( a, b ) {
+		if ( typeof b === 'undefined' ) {
+			b = '';
 		}
-		return c;
+
+		if ( jQuery.isArray(b) && jQuery.inArray(a, b) > -1 ) {
+			b = a;
+		}
+
+		if ( typeof a === 'number' && typeof b === 'string' ) {
+			b = parseFloat(b);
+		}
+
+		if ( typeof b === 'string' ) {
+			b = b.trim();
+		}
+
+		return b;
+	}
+
+
+	function prepareValueForLikeComparison( val ) {
+		if ( typeof val === 'string' ) {
+			val = val.toLowerCase();
+		} else if ( typeof val === 'number' ) {
+			val = val.toString();
+		}
+		return val;
 	}
 
 	/**
@@ -1095,7 +1112,9 @@ function frmFrontFormJS(){
 			// Set the hiddenFields value in the frm_hide_field_formID input
 			hiddenFields = JSON.stringify( hiddenFields );
 			var frmHideFieldsInput = document.getElementById('frm_hide_fields_' + formId);
-			frmHideFieldsInput.value = hiddenFields;
+			if ( frmHideFieldsInput !== null ) {
+				frmHideFieldsInput.value = hiddenFields;
+			}
 		}
 	}
 
@@ -1145,6 +1164,12 @@ function frmFrontFormJS(){
 				setHiddenCheckboxDefaultValue( input.name, defaultValue );
 
 			} else {
+				var addressType = input.getAttribute('autocompletetype');
+				if ( addressType !== null ) {
+					addressType = addressType.replace( 'address-', '' );
+					defaultValue = defaultValue[addressType];
+				}
+
 				input.value = defaultValue;
 			}
 
@@ -1194,8 +1219,7 @@ function frmFrontFormJS(){
 					// TODO: accommodate for when there are multiple default values but the user has removed some
 				}
 			}
-
-		} else {
+		} else if ( hiddenInputs[0] !== null ) {
 			hiddenInputs[0].value = defaultValue;
 		}
 	}
@@ -1577,14 +1601,14 @@ function frmFrontFormJS(){
 		var optContainer = childDiv.getElementsByClassName( 'frm_opt_container' )[0];
 		var inputs = optContainer.getElementsByTagName( 'input' );
 
+		addLoadingIconJS( childDiv, optContainer );
+
 		var currentValue = '';
 		if ( childFieldArgs.inputType == 'radio' ) {
 			currentValue = getValueFromRadioInputs( inputs );
 		} else {
 			currentValue = getValuesFromCheckboxInputs(inputs);
 		}
-
-		addLoadingIconJS( optContainer );
 
 		jQuery.ajax({
 			type:'POST',
@@ -1600,6 +1624,8 @@ function frmFrontFormJS(){
 			},
 			success:function(newHtml){
 				optContainer.innerHTML = newHtml;
+
+				removeLoadingIconJS( childDiv, optContainer );
 
 				if ( inputs.length == 1 && inputs[0].value === '' ) {
 					maybeHideRadioLookup( childFieldArgs, childDiv );
@@ -1653,11 +1679,6 @@ function frmFrontFormJS(){
 			logicArgs.repeatRow = childFieldArgs.repeatRow;
 			hideOrShowSingleField( logicArgs );
 		}
-	}
-
-	// Insert the loading icon
-	function addLoadingIconJS( optContainer ) {
-		optContainer.innerHTML = '<span class="frm-loading-img"></span>';
 	}
 
 	/**
@@ -1800,8 +1821,7 @@ function frmFrontFormJS(){
 	function updateDynamicListData( depFieldArgs, onCurrentPage ){
 		if ( onCurrentPage ) {
 			var $fieldDiv = jQuery( '#' + depFieldArgs.containerId);
-			var $optContainer = $fieldDiv.find('.frm_opt_container');
-			addLoadingIcon($optContainer);
+			addLoadingIcon( $fieldDiv );
 		}
 
 		jQuery.ajax({
@@ -1815,10 +1835,13 @@ function frmFrontFormJS(){
 			},
 			success:function(html){
 				if ( onCurrentPage ) {
-
+					var $optContainer = $fieldDiv.find('.frm_opt_container');
 					$optContainer.html(html);
 					var $listInputs = $optContainer.children('input');
 					var listVal = $listInputs.val();
+
+					removeLoadingIcon( $optContainer );
+
 					if (html === '' || listVal === '') {
 						hideDynamicField(depFieldArgs);
 					} else {
@@ -1848,7 +1871,7 @@ function frmFrontFormJS(){
 		var prevVal = getPrevFieldValue( hiddenInput );
 		var defaultVal = hiddenInput.data('frmval');
 
-		addLoadingIconTemp( $fieldDiv );
+		addLoadingIcon( $fieldDiv );
 
 		jQuery.ajax({
 			type:'POST',
@@ -1868,7 +1891,7 @@ function frmFrontFormJS(){
 				$optContainer.html(html);
 				var $dynamicFieldInputs = $optContainer.find('select, input, textarea');
 
-				removeLoadingIconTemp( $fieldDiv );
+				removeLoadingIcon( $optContainer );
 
 				if ( html === '' || ( $dynamicFieldInputs.length == 1 && $dynamicFieldInputs.attr('type') == 'hidden' ) ) {
 					hideDynamicField( depFieldArgs );
@@ -1909,13 +1932,8 @@ function frmFrontFormJS(){
 		triggerChange( jQuery( listInput ) );
 	}
 
-	// Insert the loading icon
-	function addLoadingIcon( $optContainer ) {
-		$optContainer.html( '<span class="frm-loading-img"></span>' );
-	}
-
-	// Insert the loading icon
-	function addLoadingIconTemp( $fieldDiv ) {
+	// Add the loading icon with jQuery
+	function addLoadingIcon( $fieldDiv ) {
 		var currentHTML = $fieldDiv.html();
 
 		if ( currentHTML.indexOf( 'frm-loading-img' ) > -1 ) {
@@ -1929,16 +1947,36 @@ function frmFrontFormJS(){
 		}
 	}
 
-	function removeLoadingIconTemp( $fieldDiv ) {
-		var currentHTML = $fieldDiv.html();
-		currentHTML = currentHTML.replace( '<span class="frm-loading-img"></span>', '' );
-		$fieldDiv.html( currentHTML );
+	// Add the loading icon with JavaScript
+	function addLoadingIconJS( fieldDiv, optContainer ) {
+		var currentHTML = fieldDiv.innerHTML;
 
-		var $optContainer = $fieldDiv.find('.frm_opt_container');
+		if ( currentHTML.indexOf( 'frm-loading-img' ) > -1 ) {
+			// Loading image already present
+		} else {
+			optContainer.style.display = "none";
 
+			var loadingIcon = document.createElement('span');
+			loadingIcon.setAttribute("class", "frm-loading-img");
+			fieldDiv.insertBefore(loadingIcon, optContainer.nextSibling);
+		}
+	}
+
+	// Remove the loading icon with jQuery
+	function removeLoadingIcon( $optContainer ) {
+		$optContainer.next( '.frm-loading-img' ).remove();
 		$optContainer.show();
 	}
 
+	// Remove the loading icon with JavaScript
+	function removeLoadingIconJS( fieldDiv, optContainer ) {
+		var loadingIcon = fieldDiv.getElementsByClassName( 'frm-loading-img' )[0];
+		if ( loadingIcon !== null && loadingIcon !== undefined ) {
+			loadingIcon.parentNode.removeChild( loadingIcon );
+		}
+
+		optContainer.style.display = "block";
+	}
 
 	// Get the previous field value in a Dynamic field
 	function getPrevFieldValue( inputs ) {
@@ -3300,9 +3338,6 @@ function frmFrontFormJS(){
 				$edit.html(cancel);
 				checkConditionalLogic( 'editInPlace' );
 				checkFieldsOnPage();
-
-				//TODO: Find out why this extra binding is required
-				jQuery('#'+ prefix + entry_id).on('change', 'input[name^="item_meta"], select[name^="item_meta"], textarea[name^="item_meta"]', maybeCheckDependent);
 			}
 		});
 		return false;
@@ -3718,8 +3753,8 @@ function frmFrontFormJS(){
 		},
 
         scrollToID: function(id){
-            var frm_pos = jQuery(document.getElementById(id).offset());
-            window.scrollTo(frm_pos.left, frm_pos.top);
+            var object = jQuery(document.getElementById(id));
+            frmFrontForm.scrollMsg( object, false );
         },
 
 		scrollMsg: function( id, object, animate ) {
