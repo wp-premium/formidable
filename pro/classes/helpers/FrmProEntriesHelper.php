@@ -96,7 +96,7 @@ class FrmProEntriesHelper{
 	*/
 	private static function maybe_get_parent_form_and_entry( &$form, &$entry ) {
 		// If form is a child form, refer to parent form's settings
-		if ( $form->parent_form_id ) {
+		if ( $form && $form->parent_form_id ) {
 			$form = FrmForm::getOne( $form->parent_form_id );
 
 			// Make sure we're also checking the parent entry's permissions

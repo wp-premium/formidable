@@ -26,7 +26,7 @@
 	foreach ( $atts['entries'] as $entry ) {  ?>
         <tr class="frm_<?php echo esc_attr( $class ) ?>">
         <?php if ( in_array( 'id', $atts['fields']) ) { ?>
-            <td><?php echo (int) $entry->id ?></dh>
+            <td><?php echo (int) $entry->id ?></td>
         <?php }
 			foreach ( $atts['form_cols'] as $col ) { ?>
             <td valign="top">

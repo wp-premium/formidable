@@ -183,7 +183,8 @@ class FrmProFieldsController{
 			}
         }
 
-		if ( isset( $display['field_data']['autopopulate_value'] ) ) {
+		$autopopulate_field_types = FrmProLookupFieldsController::get_autopopulate_field_types();
+		if ( in_array( $display['type'], $autopopulate_field_types ) ) {
 			$display['autopopulate'] = true;
 		}
 

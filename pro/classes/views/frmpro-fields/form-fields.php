@@ -133,7 +133,7 @@ if ( 'date' == $field['type'] ) {
 <style type="text/css">#wp-field_<?php echo esc_attr( $field['field_key'] ) ?>-wrap{width:<?php echo esc_attr( $field['size'] ) . ( is_numeric( $field['size'] ) ? 'px' : '' ); ?>;}</style><?php
         }
 
-		wp_editor( str_replace( '&quot;', '"', $field['value'] ), $html_id, $e_args );
+		wp_editor( FrmAppHelper::esc_textarea( $field['value'] ), $html_id, $e_args );
 
         // If submitting with Ajax or on preview page and tinymce is not loaded yet, load it now
         if ( ( FrmAppHelper::doing_ajax() || FrmAppHelper::is_preview_page() ) && ( ! isset($frm_vars['tinymce_loaded']) || ! $frm_vars['tinymce_loaded']) ) {

@@ -495,6 +495,7 @@ echo $custom_options;
 				wp_enqueue_script( 'jquery-ui-i18n', $base_url . '/i18n/jquery-ui-i18n.min.js' );
 				// this was enqueued late, so make sure it gets printed
 				add_action( 'wp_footer', 'print_footer_scripts', 21 );
+				add_action( 'admin_print_footer_scripts', 'print_footer_scripts', 99 );
 			}
         }
 

@@ -7,7 +7,7 @@ if ( $page_count <= 1 ) {
 <ul class="<?php echo esc_attr( apply_filters( 'frm_ul_pagination_class', 'frm_pagination' ) ); ?>">
 <?php
     if ( ! is_numeric($current_page) ) {
-        $current_page = FrmAppHelper::get_param($page_param, '1');
+        $current_page = FrmAppHelper::get_param( $page_param, '1', 'get', 'absint' );
     }
 
 	$page_params = isset( $page_params ) ? $page_params : '';

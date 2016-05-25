@@ -6,7 +6,9 @@
 	} ?>">
 	<?php if ( $sub_field['type'] == 'select' ) { ?>
 		<select name="<?php echo esc_attr( $field_name ) ?>[<?php echo esc_attr( $key ) ?>]" id="<?php echo esc_attr( $html_id .'_'. $key ) ?>">
-			<option value=""> </option>
+			<option value="">
+				<?php echo esc_html( apply_filters( 'frm_combo_dropdown_label', ' ', compact( 'field', 'key', 'sub_field' ) ) ); ?>
+			</option>
 			<?php foreach ( $sub_field['options'] as $option ) { ?>
 				<option value="<?php echo esc_attr( $option ) ?>" <?php selected( $field['value'][ $key ], $option ) ?>>
 					<?php echo esc_html( $option ) ?>

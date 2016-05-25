@@ -531,7 +531,7 @@ class FrmProFieldsHelper{
 
 		} else if ( $values['type'] == 'data' && in_array($values['data_type'], array( 'select', 'radio', 'checkbox')) && is_numeric($values['form_select']) ) {
             FrmProDynamicFieldsController::add_options_for_dynamic_field( $field, $values );
-        } else if ( $values['type'] == 'date' ) {
+        } else if ( $values['type'] == 'date' || $values['original_type'] == 'date' ) {
             $to_format = preg_match('/^\d{4}-\d{2}-\d{2}$/', $values['value']) ? 'Y-m-d' : 'Y-m-d H:i:s';
             $values['value'] = FrmProAppHelper::maybe_convert_from_db_date($values['value'], $to_format);
 		} else if ( $values['type'] == 'file' ) {

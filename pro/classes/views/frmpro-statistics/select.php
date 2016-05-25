@@ -1,5 +1,4 @@
 <div id="form_reports_page" class="wrap frm_charts">
-    <div class="frmicon icon32"><br/></div>
     <h2><?php _e( 'Reports', 'formidable' ) ?></h2>
 
     <div id="menu-management" class="nav-menus-php frm-menu-boxes">
