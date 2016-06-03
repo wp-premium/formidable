@@ -8,12 +8,13 @@
             continue;
         }
 
-		$selected = ( $ff->id == $hide_field ) ? ' selected="selected"' : '';
-		if ( ! empty( $selected ) ) {
+		if ( $ff->id == $hide_field ) {
             $sel = true;
 		}
     ?>
-    <option value="<?php echo esc_attr( $ff->id ) ?>"<?php echo $selected ?>><?php echo esc_html( FrmAppHelper::truncate($ff->name, 24) ); ?></option>
+	<option value="<?php echo esc_attr( $ff->id ) ?>" <?php selected( $ff->id, $hide_field ) ?>>
+		<?php echo esc_html( FrmAppHelper::truncate( $ff->name, 24 ) ); ?>
+	</option>
     <?php } ?>
 </select>
 <?php

@@ -89,8 +89,8 @@ class FrmEntryValidate {
 
         self::validate_recaptcha($errors, $posted_field, $args);
 
-        $errors = apply_filters('frm_validate_field_entry', $errors, $posted_field, $value, $args);
 		$errors = apply_filters( 'frm_validate_' . $posted_field->type . '_field_entry', $errors, $posted_field, $value, $args );
+		$errors = apply_filters( 'frm_validate_field_entry', $errors, $posted_field, $value, $args );
     }
 
 	private static function maybe_clear_value_for_default_blank_setting( $field, &$value ) {

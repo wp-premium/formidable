@@ -95,11 +95,4 @@ class FrmProNotification{
     public static function entry_created($entry_id, $form_id) {
         FrmNotification::entry_created($entry_id, $form_id);
     }
-
-    //send update email notification
-	public static function entry_updated( $entry_id, $form_id ) {
-        _deprecated_function( __FUNCTION__, '2.0', 'FrmFormActionsController::trigger_actions("update", '. $form_id .', '. $entry_id .', "email")');
-        FrmFormActionsController::trigger_actions('update', $form_id, $entry_id, 'email');
-    }
-
 }

@@ -57,6 +57,11 @@ class FrmProHooksController{
 		add_filter( 'frm_default_credit_card_field_opts', 'FrmProCreditCardsController::add_default_options' );
 		add_filter( 'frm_display_credit_card_value_custom', 'FrmProCreditCardsController::display_value' );
 
+		// File field
+		add_filter( 'frm_validate_file_field_entry', 'FrmProFileField::validate', 10, 4 );
+		add_filter( 'frm_prepare_data_before_db', 'FrmProFileField::prepare_data_before_db', 10, 3 );
+		add_action( 'frm_before_destroy_entry', 'FrmProFileField::delete_files_with_entry', 10, 2 );
+
         // Entry and Meta Helpers
         add_filter('frm_show_new_entry_page', 'FrmProEntriesHelper::allow_form_edit', 10, 2);
         add_filter('frm_email_value', 'FrmProEntryMetaHelper::email_value', 10, 3);
@@ -86,7 +91,6 @@ class FrmProHooksController{
         add_filter('frm_add_entry_meta', 'FrmProEntryMeta::before_save');
         add_filter('frm_update_entry_meta', 'FrmProEntryMeta::before_save');
         add_filter('frm_validate_field_entry', 'FrmProEntryMeta::validate', 10, 4);
-		add_action( 'frm_before_destroy_entry', 'FrmProEntryMeta::delete_files_with_entry', 10, 2 );
 
         // Fields Controller
         add_filter('frm_show_normal_field_type', 'FrmProFieldsController::show_normal_field', 10, 2);
@@ -95,6 +99,7 @@ class FrmProHooksController{
         add_filter('frm_field_value_saved', 'FrmProFieldsController::use_field_key_value', 10, 3);
         add_action('frm_field_input_html', 'FrmProFieldsController::input_html', 10, 2);
         add_filter('frm_field_classes', 'FrmProFieldsController::add_field_class', 20, 2);
+		add_action( 'template_redirect', 'FrmProFieldsController::redirect_attachment', 1 );
 
         // Fields Helper
         add_filter('frm_posted_field_ids', 'FrmProFieldsHelper::posted_field_ids');
@@ -200,6 +205,10 @@ class FrmProHooksController{
 		add_action( 'frm_credit_card_field_options_form', 'FrmProCreditCardsController::form_builder_options', 10, 3 );
 		add_filter( 'frm_csv_field_columns', 'FrmProCreditCardsController::add_csv_columns', 10, 2 );
 
+		// Upload Fields
+		add_filter( 'frm_import_val', 'FrmProFileImport::import_attachment', 10, 2 );
+		add_action( 'pre_get_posts', 'FrmProFileField::filter_media_library', 99 );
+
         // Fields Controller
         add_action('frm_after_field_created', 'FrmProFieldsController::create_multiple_fields', 10, 2);
         add_filter('frm_prepare_single_field_for_duplication', 'FrmProFieldsController::prepare_single_field_for_duplication' );
@@ -212,6 +221,7 @@ class FrmProHooksController{
         add_action('frm_field_options_form', 'FrmProFieldsController::options_form', 10, 3);
         add_filter('frm_build_field_class', 'FrmProFieldsController::build_field_class', 10, 2);
 		add_action( 'frm_after_update_field_name', 'FrmProFieldsController::update_repeating_form_name' );
+		add_action( 'restrict_manage_posts', 'FrmProFieldsController::filter_media_library_link' );
 
         // Fields Helper
         add_filter('frm_show_custom_html', 'FrmProFieldsHelper::show_custom_html', 10, 2);
@@ -243,6 +253,8 @@ class FrmProHooksController{
             add_action('frm_add_form_ajax_options', 'FrmProFormsController::add_form_ajax_options');
             add_action('frm_add_form_button_options', 'FrmProFormsController::add_form_button_options');
             add_action('frm_add_form_msg_options', 'FrmProFormsController::add_form_msg_options');
+
+			add_action( 'admin_footer', 'FrmProFieldsController::delete_temp_files' );
         }
 
         add_filter('frm_setup_new_form_vars', 'FrmProFormsController::setup_new_vars');
@@ -330,6 +342,8 @@ class FrmProHooksController{
         add_action('wp_ajax_frm_populate_calc_dropdown', 'FrmProFieldsController::populate_calc_dropdown');
         add_action('wp_ajax_frm_toggle_repeat', 'FrmProFieldsController::toggle_repeat');
         add_action( 'wp_ajax_frm_update_field_after_move', 'FrmProFieldsController::update_field_after_move' );
+		add_action( 'wp_ajax_nopriv_frm_submit_dropzone', 'FrmProFieldsController::ajax_upload' );
+		add_action( 'wp_ajax_frm_submit_dropzone', 'FrmProFieldsController::ajax_upload' );
 
 		// Lookup Fields
 		add_action( 'wp_ajax_frm_add_watch_lookup_row', 'FrmProLookupFieldsController::add_watch_lookup_row' );

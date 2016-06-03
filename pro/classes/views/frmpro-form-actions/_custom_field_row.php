@@ -8,7 +8,7 @@
     }
 
     if ( ! isset($cf_keys) || empty($cf_keys) ) { ?>
-	<input type="text" value="<?php echo $echo ? esc_attr( $custom_data['meta_name'] ) : '' ?>" name="<?php echo esc_attr( $action_control->get_field_name( 'post_custom_fields' ) ) ?>[<?php echo esc_attr( $sanitized_name ) ?>][meta_name]" class="frm_enternew" />
+	<input type="text" value="<?php echo esc_attr( $echo ? $custom_data['meta_name'] : '' ) ?>" name="<?php echo esc_attr( $action_control->get_field_name( 'post_custom_fields' ) ) ?>[<?php echo esc_attr( $sanitized_name ) ?>][meta_name]" class="frm_enternew" />
     <?php }else{ ?>
     <select name="<?php echo esc_attr( $action_control->get_field_name( 'post_custom_fields' ) ) ?>[<?php echo esc_attr( $sanitized_name ) ?>][meta_name]" class="frm_cancelnew">
         <option value=""><?php _e( '&mdash; Select &mdash;' ); ?></option>

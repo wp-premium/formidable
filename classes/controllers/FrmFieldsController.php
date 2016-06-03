@@ -577,7 +577,7 @@ class FrmFieldsController {
     }
 
 	private static function add_html_size( $field, array &$add_html ) {
-		if ( ! isset( $field['size'] ) || $field['size'] <= 0 || in_array( $field['type'], array( 'select', 'data', 'time', 'hidden', 'lookup' ) ) ) {
+		if ( ! isset( $field['size'] ) || $field['size'] <= 0 || in_array( $field['type'], array( 'select', 'data', 'time', 'hidden', 'file', 'lookup' ) ) ) {
             return;
         }
 
@@ -623,7 +623,7 @@ class FrmFieldsController {
 
 	private static function add_html_length( $field, array &$add_html ) {
         // check for max setting and if this field accepts maxlength
-		if ( FrmField::is_option_empty( $field, 'max' ) || in_array( $field['type'], array( 'textarea', 'rte', 'hidden' ) ) ) {
+		if ( FrmField::is_option_empty( $field, 'max' ) || in_array( $field['type'], array( 'textarea', 'rte', 'hidden', 'file' ) ) ) {
             return;
         }
 

@@ -13,8 +13,9 @@ foreach ( $values['fields'] as $fo_key => $fo ) {
         $values[$post_key] = $fo['id'];
     }
     ?>
-    <option value="<?php echo $fo['id'] ?>" <?php selected($form_action->post_content[$post_key], $fo['id']) ?>><?php echo FrmAppHelper::truncate($fo['name'], 50);
-    unset($fo);
-    ?></option>
+	<option value="<?php echo esc_attr( $fo['id'] ) ?>" <?php selected( $form_action->post_content[ $post_key ], $fo['id'] ) ?>>
+		<?php echo esc_html( FrmAppHelper::truncate( $fo['name'], 50 ) ); ?>
+	</option>
 <?php
+	unset( $fo );
 }

@@ -134,22 +134,39 @@ class FrmProDisplaysHelper{
 
         preg_match_all("/\[(if |foreach )?($tagregexp)\b(.*?)(?:(\/))?\](?:(.+?)\[\/\2\])?/s", $content, $matches, PREG_PATTERN_ORDER);
 
-        // run conditional and foreach first
-        $new_order = $matches[0];
-        $move_up = array();
-        foreach ( $new_order as $short_key => $tag ) {
-            $conditional = preg_match('/^\[if/s', $matches[0][$short_key]) ? true : false;
-            $foreach = preg_match('/^\[foreach/s', $matches[0][$short_key]) ? true : false;
-            if ( $conditional || $foreach ) {
-                $move_up[$short_key] = $tag;
-            }
-        }
-
-        if ( ! empty($move_up) ) {
-            $matches[0] = $move_up + $matches[0];
-        }
+		$matches[0] = self::organize_and_filter_shortcodes( $matches[0] );
 
         return $matches;
     }
 
+	/**
+	 * Put conditionals and foreach first
+	 * Remove duplicate conditional and foreach tags
+	 *
+	 * @since 2.01.03
+	 * @param array $shortcodes
+	 * @return array $shortcodes
+	 */
+	private static function organize_and_filter_shortcodes( $shortcodes ) {
+		$move_up = array();
+
+		foreach ( $shortcodes as $short_key => $tag ) {
+			$conditional = preg_match( '/^\[if/s', $shortcodes[ $short_key ] ) ? true : false;
+
+			$foreach = preg_match( '/^\[foreach/s', $shortcodes[ $short_key ] ) ? true : false;
+
+			if ( $conditional || $foreach ) {
+				if ( ! in_array( $tag, $move_up ) ) {
+					$move_up[ $short_key ] = $tag;
+				}
+				unset( $shortcodes[ $short_key ] );
+			}
+		}
+
+		if ( ! empty( $move_up ) ) {
+			$shortcodes = $move_up + $shortcodes;
+		}
+
+		return $shortcodes;
+	}
 }

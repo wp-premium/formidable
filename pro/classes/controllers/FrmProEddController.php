@@ -146,7 +146,7 @@ class FrmProEddController extends FrmAddon {
         ?>
 <div id="pro_cred_form">
 
-    <p><input type="text" name="proplug-license" value="" style="width:97%;" placeholder="<?php esc_attr_e( 'Enter your license number here', 'formidable' ) ?>" id="edd_<?php echo esc_attr( $this->plugin_slug ) ?>_license_key" />
+    <p><input type="text" name="proplug-license" value="" class="frm_98_width" placeholder="<?php esc_attr_e( 'Enter your license number here', 'formidable' ) ?>" id="edd_<?php echo esc_attr( $this->plugin_slug ) ?>_license_key" />
 
     <?php if ( is_multisite() ) {
         $creds = $this->get_pro_cred_form_vals(); ?>

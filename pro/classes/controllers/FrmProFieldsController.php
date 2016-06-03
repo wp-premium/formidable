@@ -82,7 +82,7 @@ class FrmProFieldsController{
         global $frm_vars;
 
         if ( $field['use_calc'] && $field['calc'] ) {
-			$ajax = isset( $form->options['ajax_submit'] ) && $form->options['ajax_submit'];
+			$ajax = FrmProForm::is_ajax_on( $form );
 			$inplace_edit = isset( $frm_vars['inplace_edit'] ) && $frm_vars['inplace_edit'];
 			if ( $ajax && FrmAppHelper::doing_ajax() && ! $inplace_edit ) {
 				return;
@@ -92,15 +92,11 @@ class FrmProFieldsController{
             if ( ! isset($frm_vars['calc_fields']) ) {
                 $frm_vars['calc_fields'] = array();
             }
-            $frm_vars['calc_fields'][$field['field_key']] = array(
-				'calc'			=> $field['calc'],
-				'calc_dec'		=> $field['calc_dec'],
-				'form_id'		=> $form->id,
-				'field_id'		=> $field['id'],
-				'parent_form_id'	=> $parent_form_id,
-	            'in_section'    => isset( $field['in_section'] ) ? $field['in_section'] : '0',
-	            'in_embed_form' => isset( $field['in_embed_form'] ) ? $field['in_embed_form'] : '0',
-            );
+			$frm_vars['calc_fields'][ $field['field_key'] ] = FrmProFormsHelper::get_calc_rule_for_field( array(
+				'field'   => $field,
+				'form_id' => $form->id,
+				'parent_form_id' => $parent_form_id,
+			) );
         }
     }
 
@@ -131,8 +127,31 @@ class FrmProFieldsController{
         $field_name .= '['. $field['id'] .']';
         $html_id = FrmFieldsHelper::get_html_id($field);
 
-        require(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/show.php');
+		$filename = self::get_filename_for_field( $field['type'] );
+		if ( ! empty( $filename ) ) {
+			include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/' . $filename . '.php' );
+		}
     }
+
+	/**
+	 * Get the name of the file to include for this field type
+	 * @since 2.02
+	 */
+	private static function get_filename_for_field( $type ) {
+		$default = array( 'phone', 'tag', 'date', 'number', 'password', 'image' );
+		$has_file = array( 'data', 'file', 'form', 'end_divider', 'html', 'rte', 'time', 'hidden', 'user_id' );
+
+		$filename = '';
+		if ( in_array( $type, $has_file ) ) {
+			$filename = 'back-end/field-' . $type;
+		} elseif ( in_array( $type, $default ) ) {
+			$filename = 'back-end/field-default';
+		} elseif ( $type == 'scale' ) {
+			$filename = '10radio';
+		}
+
+		return $filename;
+	}
 
     public static function &label_position($position, $field, $form) {
         if ( $position && $position != '' ) {
@@ -258,7 +277,6 @@ class FrmProFieldsController{
                 'default_value' => true,
                 'invalid'       => true,
                 'read_only'     => true,
-                'size'          => true,
             ),
             'url'               => $invalid_field,
             'website'           => $invalid_field,
@@ -520,15 +538,75 @@ class FrmProFieldsController{
         if ( $field['type'] == 'date' ) {
             $locales = FrmAppHelper::locales('date');
         } else if ( $field['type'] == 'file' ) {
-            $mimes = get_allowed_mime_types();
+            $mimes = self::get_mime_options( $field );
         }
 
 		if ( $field['type'] == 'lookup' ) {
 			FrmProLookupFieldsController::show_lookup_field_options_in_form_builder( $field );
 		}
 
-        require(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/options-form.php');
+		if ( $display['type'] == 'radio' || $display['type'] == 'checkbox' || ( $display['type'] == 'data' && in_array( $display['field_data']['data_type'], array( 'radio', 'checkbox' ) ) ) ) {
+			include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/alignment.php' );
+		}
+
+		if ( in_array( $display['type'], array( 'radio', 'checkbox', 'select' ) ) && ( ! isset( $field['post_field'] ) || ( $field['post_field'] != 'post_category' ) ) ) {
+		    include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/separate-values.php' );
+		}
+
+		$include_file_for_field = array(
+			'data'        => 'dynamic-field',
+			'divider'     => 'repeat-options',
+			'end_divider' => 'repeat-buttons',
+			'date'        => 'calendar',
+			'time'        => 'clock-settings',
+			'file'        => 'file-options',
+			'number'      => 'number-range',
+			'scale'       => 'scale-options',
+			'html'        => 'html-content',
+			'form'        => 'insert-form',
+			'phone'       => 'phone-format',
+		);
+		if ( isset( $include_file_for_field[ $field['type'] ] ) ) {
+			include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/' . $include_file_for_field[ $field['type'] ] . '.php' );
+		}
+
+		if ( $display['type'] == 'select' || $field['type'] == 'data' ) {
+		    include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/multi-select.php' );
+		}
+
+		$include_file_for_display = array(
+			'visibility' => 'visibility',
+			'conf_field' => 'confirmation',
+			'logic'      => 'logic',
+		);
+
+		foreach ( $include_file_for_display as $option => $file ) {
+			if ( $display[ $option ] ) {
+			    include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/' . $file . '.php' );
+			}
+		}
+
+		if ( $display['default_value'] || $display['calc'] || $display['autopopulate'] ) {
+		    include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/dynamic-values.php' );
+		}
     }
+
+	private static function get_mime_options( $field ) {
+        $mimes = get_allowed_mime_types();
+		$selected_mimes = $field['ftypes'];
+
+		$ordered = array();
+		foreach ( (array) $selected_mimes as $mime ) {
+			$key = array_search( $mime, $mimes );
+			if ( $key !== false ) {
+				$ordered[ $key ] = $mimes[ $key ];
+				unset( $mimes[ $key ] );
+			}
+		}
+
+		$mimes = $ordered + $mimes;
+		return $mimes;
+	}
 
     public static function get_field_selection(){
 		FrmAppHelper::permission_check('frm_view_forms');
@@ -1009,6 +1087,89 @@ class FrmProFieldsController{
             }
         }
     }
+
+	/**
+	 * Add an option at the top of the media library page
+	 * to show the unattached Formidable files based on user role.
+	 * @since 2.02
+	 */
+	public static function filter_media_library_link() {
+		global $current_screen;
+		if ( $current_screen && 'upload' == $current_screen->base && current_user_can('frm_edit_entries') ) {
+			echo '<label for="frm-attachment-filter" class="screen-reader-text">';
+			echo __( 'Show form uploads', 'formidable' );
+			echo '</label>';
+
+			$filtered = FrmAppHelper::get_param( 'frm-attachment-filter', '', 'get', 'absint' );
+			echo '<select name="frm-attachment-filter" id="frm-attachment-filter">';
+			echo '<option value="">' . __( 'Hide form uploads', 'formidable' ) . '</option>';
+			echo '<option value="1" ' . selected( $filtered, 1 ) . '>' . __( 'Show form uploads', 'formidable' ) . '</option>';
+			echo '</select>';
+		}
+	}
+
+	/**
+	 * If this file is a Formidable file,
+	 * temp redirect to the home page
+	 * @since 2.02
+	 */
+	public static function redirect_attachment() {
+		global $post;
+		if ( is_attachment() && absint( $post->post_parent ) < 1 && ! current_user_can('frm_edit_entries') ) {
+			$is_form_upload = get_post_meta( $post->ID, '_frm_file', true );
+			if ( $is_form_upload ) {
+				wp_redirect( get_bloginfo('wpurl'), 302 );
+				die();
+			}
+		}
+	}
+
+	/**
+	 * Check for old temp files and delete them
+	 *
+	 * @since 2.02
+	 */
+	public static function delete_temp_files() {
+		remove_action( 'pre_get_posts', 'FrmProFileField::filter_media_library', 99 );
+
+		$old_uploads = get_posts( array(
+			'post_type' => 'attachment',
+			'date_query' => array(
+				'column' => 'post_date_gmt',
+				'before' => '24 hours ago',
+			),
+			'meta_query' => array(
+				array(
+					'key'   => '_frm_temporary',
+					'compare' => 'EXISTS',
+				),
+			),
+			'post_parent' => 0,
+		) );
+
+		foreach ( $old_uploads as $upload ) {
+			// double check in case other plugins have changed the query
+			$is_temp = get_post_meta( $upload->ID, '_frm_temporary', true );
+			if ( $is_temp ) {
+				wp_delete_attachment( $upload->ID, true );
+			}
+		}
+
+		add_action( 'pre_get_posts', 'FrmProFileField::filter_media_library', 99 );
+	}
+
+	public static function ajax_upload() {
+		$response = FrmProFileField::ajax_upload();
+
+		if ( ! empty( $response['errors'] ) ) {
+			status_header(401);
+			echo implode( ' ', $response['errors'] );
+		} else {
+			echo json_encode( $response['media_ids'] );
+		}
+
+		wp_die();
+	}
 
 	public static function _logic_row(){
         check_ajax_referer( 'frm_ajax', 'nonce' );

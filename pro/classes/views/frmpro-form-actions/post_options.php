@@ -5,12 +5,14 @@
 			<span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php esc_attr_e( 'To setup a new custom post type, install and setup a plugin like \'Custom Post Type UI\', then return to this page to select your new custom post type.', 'formidable' ) ?>" ></span>
         </th>
         <td>
-            <select class="frm_post_type" name="<?php echo $this->get_field_name('post_type') ?>">
+            <select class="frm_post_type" name="<?php echo esc_attr( $this->get_field_name('post_type') ) ?>">
                 <?php foreach ( $post_types as $post_key => $post_type ) {
                         if ( in_array($post_key, array( 'frm_display', 'frm_form_actions', 'frm_styles')) ) {
                             continue;
                         } ?>
-                    <option value="<?php echo $post_key ?>" <?php selected($form_action->post_content['post_type'], $post_key) ?>><?php echo $post_type->label ?></option>
+					<option value="<?php echo esc_attr( $post_key ) ?>" <?php selected( $form_action->post_content['post_type'], $post_key ) ?>>
+						<?php echo esc_html( $post_type->label ) ?>
+					</option>
 <?php
                         unset($post_type);
                     }
@@ -44,7 +46,7 @@
             <th>
                 <label><?php _e( 'Post Title', 'formidable' ) ?> <span class="frm_required">*</span></label>
             </th>
-            <td><select name="<?php echo $this->get_field_name('post_title') ?>" class="frm_single_post_field">
+            <td><select name="<?php echo esc_attr( $this->get_field_name('post_title') ) ?>" class="frm_single_post_field">
                 <option value=""><?php _e( '&mdash; Select &mdash;' ) ?></option>
                 <?php $post_key = 'post_title';
                 $post_field = array( 'text', 'email', 'url', 'radio', 'checkbox', 'select', 'scale', 'number', 'phone', 'time', 'hidden');
@@ -62,10 +64,10 @@
                 <select class="frm_toggle_post_content">
                     <option value=""><?php _e( '&mdash; Select &mdash;' ) ?></option>
                     <option value="post_content" <?php echo is_numeric($form_action->post_content['post_content']) ? 'selected="selected"' : ''; ?>><?php _e( 'Use a single field', 'formidable' ); ?></option>
-                    <option value="dyncontent" <?php echo $display ? 'selected="selected"' : ''; ?>><?php _e( 'Customize post content', 'formidable' ); ?></option>
+                    <option value="dyncontent" <?php echo ( $display ? 'selected="selected"' : '' ); ?>><?php _e( 'Customize post content', 'formidable' ); ?></option>
                 </select>
 
-                <select name="<?php echo $this->get_field_name('post_content') ?>" class="frm_post_content_opt frm_single_post_field <?php echo ( $display || empty($form_action->post_content['post_content']) ) ? 'frm_hidden' : ''; ?>">
+                <select name="<?php echo esc_attr( $this->get_field_name('post_content') ) ?>" class="frm_post_content_opt frm_single_post_field <?php echo esc_attr( $display || empty($form_action->post_content['post_content']) ) ? 'frm_hidden' : ''; ?>">
                     <option value=""><?php _e( '&mdash; Select &mdash;' ) ?></option>
                     <?php
                     $post_key = 'post_content';
@@ -73,16 +75,18 @@
                     ?>
                 </select>
 
-                <select name="<?php echo $this->get_field_name('display_id') ?>" class="frm_dyncontent_opt <?php echo $display ? '' : 'frm_hidden'; ?>">
+                <select name="<?php echo esc_attr( $this->get_field_name('display_id') ) ?>" class="frm_dyncontent_opt <?php echo ( $display ? '' : 'frm_hidden' ); ?>">
                     <option value=""><?php _e( '&mdash; Select &mdash;' ) ?></option>
                     <option value="new"><?php _e( 'Create new view', 'formidable' ) ?></option>
                     <?php foreach ( $displays as $d ) { ?>
-                    <option value="<?php echo $d->ID ?>" <?php if ( $display ) { selected($d->ID, $display->ID); } ?>><?php echo stripslashes($d->post_title) ?></option>
+					<option value="<?php echo absint( $d->ID ) ?>" <?php if ( $display ) { selected($d->ID, $display->ID); } ?>>
+						<?php echo esc_html( stripslashes( $d->post_title ) ) ?>
+					</option>
                     <?php } ?>
                 </select>
             </td>
         </tr>
-        <tr class="frm_dyncontent_opt <?php echo $display ? '' : 'frm_hidden'; ?>">
+        <tr class="frm_dyncontent_opt <?php echo esc_attr( $display ? '' : 'frm_hidden' ); ?>">
             <td colspan="2">
 				<label><?php _e( 'Customize Content', 'formidable' ) ?></label>
 				<span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php esc_attr_e( 'The content shown on your single post page. If nothing is entered here, the regular post content will be used.', 'formidable' ) ?>" ></span><br/>
@@ -99,7 +103,7 @@
             <th>
                 <label><?php _e( 'Excerpt', 'formidable' ) ?></label>
             </th>
-            <td><select name="<?php echo $this->get_field_name('post_excerpt') ?>" class="frm_single_post_field">
+            <td><select name="<?php echo esc_attr( $this->get_field_name('post_excerpt') ) ?>" class="frm_single_post_field">
                 <option value=""><?php echo _e( 'None', 'formidable' ) ?></option>
                 <?php $post_key = 'post_excerpt';
                 include(dirname(__FILE__) .'/_post_field_options.php'); ?>
@@ -109,7 +113,7 @@
 
         <tr>
             <td><label><?php _e( 'Post Password', 'formidable' ) ?></label></td>
-            <td><select name="<?php echo $this->get_field_name('post_password') ?>" class="frm_single_post_field">
+            <td><select name="<?php echo esc_attr( $this->get_field_name('post_password') ) ?>" class="frm_single_post_field">
                 <option value=""><?php echo _e( 'None', 'formidable' ) ?></option>
                 <?php $post_key = 'post_password';
                 include(dirname(__FILE__) .'/_post_field_options.php'); ?>
@@ -119,7 +123,7 @@
 
         <tr>
             <td><label><?php _e( 'Slug', 'formidable' ) ?></label></td>
-            <td><select name="<?php echo $this->get_field_name('post_name') ?>" class="frm_single_post_field">
+            <td><select name="<?php echo esc_attr( $this->get_field_name('post_name') ) ?>" class="frm_single_post_field">
                 <option value=""><?php echo _e( 'Automatically Generate from Post Title', 'formidable' ) ?></option>
                 <?php $post_key = 'post_name';
                 include(dirname(__FILE__) .'/_post_field_options.php'); ?>
@@ -129,7 +133,7 @@
 
         <tr>
             <td><label><?php _e( 'Post Date', 'formidable' ) ?></label></td>
-            <td><select name="<?php echo $this->get_field_name('post_date') ?>" class="frm_single_post_field">
+            <td><select name="<?php echo esc_attr( $this->get_field_name('post_date') ) ?>" class="frm_single_post_field">
                 <option value=""><?php echo _e( 'Date of entry submission', 'formidable' ) ?></option>
                 <?php $post_key = 'post_date';
                     $post_field = array( 'date');
@@ -140,7 +144,7 @@
 
         <tr>
             <td><label><?php _e( 'Post Status', 'formidable' ) ?></label></td>
-            <td><select name="<?php echo $this->get_field_name('post_status') ?>" class="frm_single_post_field">
+            <td><select name="<?php echo esc_attr( $this->get_field_name('post_status') ) ?>" class="frm_single_post_field">
                 <option value=""><?php echo _e( 'Create Draft', 'formidable' ) ?></option>
 				<option value="pending" <?php selected( $form_action->post_content['post_status'], 'pending' ) ?>><?php echo _e( 'Pending', 'formidable' ) ?></option>
                 <option value="publish" <?php selected($form_action->post_content['post_status'], 'publish') ?>><?php echo _e( 'Automatically Publish', 'formidable' ) ?></option>
@@ -201,7 +205,7 @@
                 </table>
                 </div>
 
-                <p><a href="javascript:void(0)" class="frm_add_postmeta_row button" <?php echo (empty($form_action->post_content['post_custom_fields']) ? '' : 'style="display:none;"') ?>>+ <?php _e( 'Add') ?></a></p>
+                <p><a href="javascript:void(0)" class="frm_add_postmeta_row button <?php echo esc_attr( empty( $form_action->post_content['post_custom_fields'] ) ? '' : 'frm_hidden' ) ?>">+ <?php _e( 'Add') ?></a></p>
             </td>
         </tr>
 
