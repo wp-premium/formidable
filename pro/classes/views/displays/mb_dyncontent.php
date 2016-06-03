@@ -2,7 +2,7 @@
 <div class="wrap">
     <h2 class="nav-tab-wrapper">
     	<a href="#frm_content_box" class="nav-tab nav-tab-active" id="frm_listing_tab" data-one="<?php esc_attr_e( 'Detail Page', 'formidable' ); ?>" data-label="<?php esc_attr_e( 'Listing Page', 'formidable' ); ?>"><?php echo ( $post->frm_show_count == 'one' ) ? __( 'Detail Page', 'formidable' ) : __( 'Listing Page', 'formidable' ); ?></a>
-    	<a href="#frm_dyncontent_box" class="nav-tab hide_dyncontent <?php echo $hide_dyn = in_array($post->frm_show_count, array( 'dynamic', 'calendar')) ? '' : 'frm_hidden'; ?>"><?php _e( 'Detail Page', 'formidable' ) ?></a>
+    	<a href="#frm_dyncontent_box" class="nav-tab hide_dyncontent <?php echo esc_attr( $use_dynamic_content ? '' : 'frm_hidden' ); ?>"><?php _e( 'Detail Page', 'formidable' ) ?></a>
     	<!-- <a href="#" class="nav-tab">+</a> -->
     </h2>
     <p class="nav-menu-content frm_content_box hide_single_content <?php echo ( $post->frm_show_count == 'one' ) ? 'frm_hidden' : ''; ?>"><?php _e( 'This page lists multiple entries. Link to a single entry/detail page using [detaillink]', 'formidable' ); ?></p>
@@ -14,7 +14,7 @@
 <p class="hide_single_content <?php echo ( $post->frm_show_count == 'one' ) ? 'frm_hidden' : ''; ?>">
 <label><?php _e( 'Before Content', 'formidable' ); ?>
 	<span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php esc_attr_e( 'This content will not be repeated. This would be a good place to put any HTML table tags.', 'formidable' ) ?>" ></span> (<?php _e( 'optional', 'formidable' ) ?>)
-	<textarea id="before_content" name="options[before_content]" rows="3" style="width:98%"><?php echo FrmAppHelper::esc_textarea( $post->frm_before_content ) ?></textarea>
+	<textarea id="before_content" name="options[before_content]" rows="3" class="frm_98_width"><?php echo FrmAppHelper::esc_textarea( $post->frm_before_content ) ?></textarea>
 </label>
 </p>
 
@@ -43,7 +43,7 @@
 	<label><?php _e( 'After Content', 'formidable' ); ?>
 		<span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php esc_attr_e( 'This content will not be repeated. This would be a good place to close any HTML tags from the Before Content field.', 'formidable' ) ?>" ></span>
 		(<?php _e( 'optional', 'formidable' ) ?>)
-		<textarea id="after_content" name="options[after_content]" rows="3" style="width:98%"><?php echo FrmAppHelper::esc_textarea( $post->frm_after_content ) ?></textarea>
+		<textarea id="after_content" name="options[after_content]" rows="3" class="frm_98_width"><?php echo FrmAppHelper::esc_textarea( $post->frm_after_content ) ?></textarea>
 	</label>
 </p>
 
@@ -51,7 +51,7 @@
 
 
 <div class="nav-menu-content hide-if-js" id="frm_dyncontent_box">
-    <div class="hide_dyncontent <?php echo esc_attr( $hide_dyn ); ?>">
+    <div class="hide_dyncontent <?php echo esc_attr( $use_dynamic_content ? '' : 'frm_hidden' ); ?>">
         <label><?php _e( 'Dynamic Content', 'formidable' ); ?> <span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php printf(__( 'The HTML for the entry on the dynamic page. This content will NOT be repeated, and will only show when the %1$s is clicked.', 'formidable' ), '[detaillink]') ?>" ></span></label>
         <?php wp_editor( $post->frm_dyncontent, 'dyncontent', $editor_args ); ?>
     </div>

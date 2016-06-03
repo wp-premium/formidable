@@ -21,11 +21,11 @@ foreach ( $entries as $entry ) {
 		<item_key><?php echo FrmXMLHelper::cdata($entry->item_key) ?></item_key>
 		<name><?php echo FrmXMLHelper::cdata($entry->name) ?></name>
 		<description><?php echo FrmXMLHelper::cdata($entry->description) ?></description>
-		<created_at><?php echo $entry->created_at ?></created_at>
-		<updated_at><?php echo $entry->updated_at ?></updated_at>
+		<created_at><?php echo esc_html( $entry->created_at ) ?></created_at>
+		<updated_at><?php echo esc_html( $entry->updated_at ) ?></updated_at>
 		<form_id><?php echo absint( $entry->form_id ) ?></form_id>
 		<post_id><?php echo absint( $entry->post_id ) ?></post_id>
-		<ip><?php echo $entry->ip ?></ip>
+		<ip><?php echo esc_html( $entry->ip ) ?></ip>
 		<is_draft><?php echo absint( $entry->is_draft ) ?></is_draft>
 		<user_id><?php echo FrmXMLHelper::cdata(FrmProFieldsHelper::get_display_name($entry->user_id, 'user_login')); ?></user_id>
 		<updated_by><?php echo FrmXMLHelper::cdata(FrmProFieldsHelper::get_display_name($entry->updated_by, 'user_login')); ?></updated_by>

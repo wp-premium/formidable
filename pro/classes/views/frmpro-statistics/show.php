@@ -25,12 +25,12 @@
                 continue;
             }
             ?>
-            <div style="margin-top:25px;" class="pg_<?php echo $class ?>">
+            <div style="margin-top:25px;" class="pg_<?php echo esc_attr( $class ) ?>">
             <div class="alignleft"><?php echo $data[ $field->id ] ?></div>
             <div style="padding:10px; margin-top:40px;">
                 <p><?php _e( 'Response Count', 'formidable' ) ?>: <?php echo FrmProFieldsHelper::get_field_stats($field->id, 'count'); ?></p>
             <?php if ( in_array( $field->type, array( 'number', 'hidden' ) ) ) { ?>
-            <p><?php _e( 'Total', 'formidable' ) ?>: <?php echo $total; ?></p>
+            <p><?php _e( 'Total', 'formidable' ) ?>: <?php echo esc_html( $total ); ?></p>
             <p><?php _e( 'Average', 'formidable' ) ?>: <?php echo FrmProFieldsHelper::get_field_stats($field->id, 'average'); ?></p>
             <p><?php _e( 'Median', 'formidable' ) ?>: <?php echo FrmProFieldsHelper::get_field_stats($field->id, 'median'); ?></p>
             <?php } else if ( $field->type == 'user_id' ) {

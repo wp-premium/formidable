@@ -582,70 +582,13 @@ class FrmProAppHelper{
      * @param int $field_id
      */
 	public static function upload_file( $field_id ) {
-        require_once(ABSPATH . 'wp-admin/includes/file.php');
-        require_once(ABSPATH . 'wp-admin/includes/image.php');
-        require_once(ABSPATH . 'wp-admin/includes/media.php');
-
-        $media_ids = $errors = array();
-        add_filter('upload_dir', array( 'FrmProAppHelper', 'upload_dir'));
-
-		if ( is_array( $_FILES[ $field_id ]['name'] ) ) {
-			foreach ( $_FILES[$field_id]['name'] as $k => $n ) {
-				if ( empty( $n ) ) {
-                    continue;
-				}
-
-                $f_id = $field_id . $k;
-                $_FILES[$f_id] = array(
-                    'name'  => $n,
-                    'type'  => $_FILES[$field_id]['type'][$k],
-                    'tmp_name' => $_FILES[$field_id]['tmp_name'][$k],
-                    'error' => $_FILES[$field_id]['error'][$k],
-                    'size'  => $_FILES[$field_id]['size'][$k]
-                );
-
-                unset($k);
-                unset($n);
-
-                $media_id = media_handle_upload($f_id, 0);
-                if (is_numeric($media_id))
-                    $media_ids[] = $media_id;
-                else
-                    $errors[] = $media_id;
-            }
-        }else{
-            $media_id = media_handle_upload($field_id, 0);
-            if (is_numeric($media_id))
-                $media_ids[] = $media_id;
-            else
-                $errors[] = $media_id;
-        }
-
-        remove_filter('upload_dir', array( 'FrmProAppHelper', 'upload_dir'));
-
-        unset($media_id);
-
-        if(empty($media_ids))
-            return $errors;
-
-        if(count($media_ids) == 1)
-            $media_ids = reset($media_ids);
-
-        return $media_ids;
+		_deprecated_function( __FUNCTION__, '2.02', 'FrmProFileField::upload_file' );
+        return FrmProFileField::upload_file( $field_id );
     }
 
-    //Upload files into "formidable" subdirectory
 	public static function upload_dir( $uploads ) {
-        $relative_path = apply_filters('frm_upload_folder', 'formidable' );
-        $relative_path = untrailingslashit($relative_path);
-
-        if ( ! empty( $relative_path ) ) {
-            $uploads['path'] = $uploads['basedir'] .'/'. $relative_path;
-            $uploads['url'] = $uploads['baseurl'] .'/'. $relative_path;
-            $uploads['subdir'] = '/'. $relative_path;
-        }
-
-        return $uploads;
+		_deprecated_function( __FUNCTION__, '2.02', 'FrmProFileField::upload_dir' );
+        return FrmProFileField::upload_dir( $uploads );
     }
 
 	public static function get_rand( $length ) {
@@ -696,34 +639,4 @@ class FrmProAppHelper{
         return $class;
     }
     /* End Genesis */
-
-	public static function import_csv( $path, $form_id, $field_ids, $entry_key = 0, $start_row = 2, $del = ',', $max = 250 ) {
-        _deprecated_function( __FUNCTION__, '1.07.05', 'FrmProXMLHelper::import_csv()' );
-        return FrmProXMLHelper::import_csv($path, $form_id, $field_ids, $entry_key, $start_row, $del, $max);
-    }
-
-	public static function get_user_id_param( $user_id ) {
-        _deprecated_function( __FUNCTION__, '2.0', 'FrmAppHelper::get_user_id_param' );
-        return FrmAppHelper::get_user_id_param($user_id);
-    }
-
-    public static function get_formatted_time( $date, $date_format = false, $time_format = false ) {
-        _deprecated_function( __FUNCTION__, '2.0', 'FrmAppHelper::get_formatted_time' );
-        return FrmAppHelper::get_formatted_time($date, $date_format, $time_format);
-    }
-
-	public static function get_current_form_id() {
-        _deprecated_function( __FUNCTION__, '2.0', 'FrmForm::get_current_form_id' );
-        return FrmForm::get_current_form_id();
-    }
-
-	public static function get_shortcodes( $content, $form_id ) {
-        _deprecated_function( __FUNCTION__, '2.0', 'FrmFieldsHelper::get_shortcodes' );
-        return FrmFieldsHelper::get_shortcodes($content, $form_id);
-    }
-
-    public static function human_time_diff( $from, $to = '' ) {
-        _deprecated_function( __FUNCTION__, '2.0', 'FrmAppHelper::human_time_diff' );
-        return FrmAppHelper::human_time_diff( $from, $to );
-    }
 }

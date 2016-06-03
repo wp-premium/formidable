@@ -110,7 +110,7 @@ class FrmProFieldsHelper{
 	private static function get_shortcodes_from_string( $string ) {
 		$shortcode_functions = self::get_shortcode_to_functions();
 		$match_shortcodes = implode( '|', array_keys( $shortcode_functions ) );
-		$match_shortcodes .= '|user_meta|post_meta|server|auto_id|date|time|get';
+		$match_shortcodes .= '|user_meta|post_meta|server|auto_id|date|time|age|get';
 		preg_match_all( '/\[(' . $match_shortcodes . '|get-(.?))\b(.*?)(?:(\/))?\]/s', $string, $matches, PREG_PATTERN_ORDER );
 		return $matches;
 	}
@@ -193,6 +193,10 @@ class FrmProFieldsHelper{
 				$new_value = FrmProAppHelper::get_time( $atts );
 			break;
 
+			case 'age':
+				$new_value = self::do_age_shortcode( $atts );
+			break;
+
 			default:
 				$new_value = self::check_posted_item_meta( $args['matches'][0][ $args['match_key'] ], $args['shortcode'], $atts, $args['allow_array'] );
 			break;
@@ -237,6 +241,16 @@ class FrmProFieldsHelper{
 		}
 
 		return $new_value;
+	}
+
+	private static function do_age_shortcode( $args ) {
+		if ( ! isset( $args['id'] ) ) {
+			$value = '';
+		} else {
+			$time = FrmProAppHelper::get_date( 'U' );
+			$value = 'Math.floor((' . absint( $time ) . '/(60*60*24)-[' . esc_attr( $args['id'] ) . '])/365.25)';
+		}
+		return $value;
 	}
 
     /**
@@ -673,7 +687,7 @@ class FrmProFieldsHelper{
             'admin_only' => '', 'locale' => '', 'attach' => false, 'minnum' => $minnum, 'maxnum' => $maxnum,
 			'delete' => false,
             'step' => $step, 'clock' => 12, 'start_time' => '00:00', 'end_time' => '23:'.$end_minute,
-			'unique' => 0, 'use_calc' => 0, 'calc' => '', 'calc_dec' => '',
+			'unique' => 0, 'use_calc' => 0, 'calc' => '', 'calc_dec' => '', 'calc_type' => '',
             'dyn_default_value' => '', 'multiple' => 0, 'unique_msg' => $frm_settings->unique_msg, 'autocom' => 0,
             'format' => '', 'repeat' => 0, 'add_label' => __( 'Add', 'formidable' ), 'remove_label' => __( 'Remove', 'formidable' ),
             'conf_field' => '', 'conf_input' => '', 'conf_desc' => '',
@@ -1587,7 +1601,7 @@ class FrmProFieldsHelper{
 		if ( $current_year >= $start_year && $current_year <= $end_year ) {
 			$default_date = '';
 		} else {
-			$default_date = $start_year .',00,01';
+			$default_date = $start_year .'-01-01 00:00:00';
 		}
 
 		return $default_date;
@@ -1913,7 +1927,7 @@ DEFAULT_HTML;
     * @return boolean true if field type is checkbox or Dynamic checkbox
     */
     public static function is_checkbox( $field ) {
-        return ( $field['type'] == 'checkbox' || ( $field['type'] == 'data' && $field['data_type'] == 'checkbox' ) );
+        return ( $field['type'] == 'checkbox' || ( $field['type'] == 'data' && $field['data_type'] == 'checkbox' ) || ( $field['type'] == 'lookup' && $field['data_type'] == 'checkbox' ) );
     }
 
 	/**
@@ -2226,7 +2240,7 @@ DEFAULT_HTML;
             $label = basename($attachment->guid);
             $image .= " <span id='frm_media_$media_id' class='frm_upload_label'><a href='". wp_get_attachment_url($media_id) ."'>$label</a></span>";
         } else if ( $image ) {
-			$image = '<a href="' . esc_url( wp_get_attachment_url( $media_id ) ) . '">' . $image . '</a>';
+			$image = '<a href="' . esc_url( wp_get_attachment_url( $media_id ) ) . '" class="frm_file_link">' . $image . '</a>';
         }
 
         $image = apply_filters('frm_file_icon', $image, array( 'media_id' => $media_id, 'image' => $orig_image));
@@ -2943,8 +2957,8 @@ DEFAULT_HTML;
                 }
 
             ?>
-                <option value="<?php echo esc_attr( $field->id ) ?>"><?php echo $field_name = esc_html( FrmAppHelper::truncate($field->name, 60) ) ?> (<?php _e( 'ID', 'formidable' ) ?>)</option>
-                <option value="<?php echo esc_attr( $field->field_key ) ?>"><?php echo $field_name ?> (<?php _e( 'Key', 'formidable' ) ?>)</option>
+                <option value="<?php echo esc_attr( $field->id ) ?>"><?php echo esc_html( $field_name =  FrmAppHelper::truncate( $field->name, 60 ) ) ?> (<?php _e( 'ID', 'formidable' ) ?>)</option>
+                <option value="<?php echo esc_attr( $field->field_key ) ?>"><?php echo esc_html( $field_name ) ?> (<?php _e( 'Key', 'formidable' ) ?>)</option>
                 <?php if ( $field->type == 'file' && $type != 'field_opt' && $type != 'calc' ) { ?>
                     <option class="frm_subopt" value="<?php echo esc_attr( $field->field_key ) ?> size=thumbnail"><?php _e( 'Thumbnail', 'formidable' ) ?></option>
                     <option class="frm_subopt" value="<?php echo esc_attr( $field->field_key ) ?> size=medium"><?php _e( 'Medium', 'formidable' ) ?></option>
@@ -3089,13 +3103,9 @@ DEFAULT_HTML;
 
 		$replace_with = apply_filters('frmpro_fields_replace_shortcodes', $replace_with, $tag, $atts, $field);
 
-		if ( $field->type == 'file' ) {
-			self::get_file_html_from_atts($atts, $replace_with);
-		}
-
 		if ( isset( $atts['show'] ) && $atts['show'] == 'count' ) {
 			$replace_with = is_array( $replace_with ) ? count( $replace_with ) : ! empty( $replace_with );
-		} else if ( is_array( $replace_with ) && ! $foreach ) {
+		} else if ( is_array( $replace_with ) && ! $foreach && $field->type != 'file' ) {
 			$keep_array = apply_filters( 'frm_keep_value_array', false, compact( 'field', 'replace_with' ) );
 			$keep_array = apply_filters( 'frm_keep_' . $field->type . '_value_array', $keep_array, compact( 'field', 'replace_with' ) );
 
@@ -3348,7 +3358,7 @@ DEFAULT_HTML;
 		}
 
 		// For html=1
-		$inc_html = ( isset( $atts['html'] ) && $atts['html'] ) ? true : false;
+		$inc_html = ( isset( $atts['html'] ) && $atts['html'] );
 		if ( $inc_html && ! $new_atts['show_image'] ) {
 			$new_atts['show_image'] = true;
 		}
@@ -3356,15 +3366,13 @@ DEFAULT_HTML;
 		// For show_filename with html=1
 		if ( $inc_html && $new_atts['show_filename'] ) {
 			$new_atts['add_link'] = true;
-			$new_atts['show_image'] = false;
 		}
 
 		// For links=1
-		$show_links = ( isset( $atts['links'] ) && $atts['links'] ) ? true : false;
+		$show_links = ( isset( $atts['links'] ) && $atts['links'] );
 		if ( $show_links && ! $new_atts['add_link'] ) {
 			$new_atts['add_link'] = true;
 		}
-
 	}
 
 	/**
@@ -3393,35 +3401,37 @@ DEFAULT_HTML;
 
         $start_pos = strpos($content, $atts['short_key']);
 
-        if ( $start_pos === false ) {
-            return;
-        }
+		// Replace identical conditional and foreach shortcodes in this loop
+        while( $start_pos !== false ) {
 
-        $start_pos_len = strlen($atts['short_key']);
-        $end_pos = strpos($content, '[/'. $condition .' '. $tag .']', $start_pos);
-        $end_pos_len = strlen('[/'. $condition .' '. $tag .']');
+			$start_pos_len = strlen($atts['short_key']);
+			$end_pos = strpos($content, '[/'. $condition .' '. $tag .']', $start_pos);
+			$end_pos_len = strlen('[/'. $condition .' '. $tag .']');
 
-        if ( $end_pos === false ) {
-            $end_pos = strpos($content, '[/'. $condition .']', $start_pos);
-            $end_pos_len = strlen('[/'. $condition .']');
+			if ( $end_pos === false ) {
+				$end_pos = strpos($content, '[/'. $condition .']', $start_pos);
+				$end_pos_len = strlen('[/'. $condition .']');
 
-            if ( $end_pos === false ) {
-                return;
-            }
-        }
+				if ( $end_pos === false ) {
+					return;
+				}
+			}
 
-        $total_len = ( $end_pos + $end_pos_len ) - $start_pos;
+			$total_len = ( $end_pos + $end_pos_len ) - $start_pos;
 
-        if ( empty($replace_with) ) {
-            $content = substr_replace($content, '', $start_pos, $total_len);
-        } else if ( 'foreach' == $condition ) {
-            $content_len = $end_pos - ( $start_pos + $start_pos_len );
-            $repeat_content = substr($content, $start_pos + $start_pos_len, $content_len);
-            self::foreach_shortcode($replace_with, $args, $repeat_content);
-            $content = substr_replace($content, $repeat_content, $start_pos, $total_len);
-        } else {
-            $content = substr_replace($content, '', $end_pos, $end_pos_len);
-            $content = substr_replace($content, '', $start_pos, $start_pos_len);
+			if ( empty($replace_with) ) {
+				$content = substr_replace($content, '', $start_pos, $total_len);
+			} else if ( 'foreach' == $condition ) {
+				$content_len = $end_pos - ( $start_pos + $start_pos_len );
+				$repeat_content = substr($content, $start_pos + $start_pos_len, $content_len);
+				self::foreach_shortcode($replace_with, $args, $repeat_content);
+				$content = substr_replace($content, $repeat_content, $start_pos, $total_len);
+			} else {
+				$content = substr_replace($content, '', $end_pos, $end_pos_len);
+				$content = substr_replace($content, '', $start_pos, $start_pos_len);
+			}
+
+			$start_pos = strpos($content, $atts['short_key']);
         }
     }
 
@@ -3655,6 +3665,7 @@ DEFAULT_HTML;
 	public static function get_displayed_file_html( $ids, $size = 'thumbnail', $atts = array() ) {
 		$defaults = array( 'show_filename' => false, 'show_image' => false, 'add_link' => false );
 		$atts = wp_parse_args( $atts, $defaults );
+		$atts['size'] = $size;
 
 		$img_html = array();
 		foreach ( (array) $ids as $id ) {
@@ -3666,13 +3677,7 @@ DEFAULT_HTML;
 				continue;
 			}
 
-			$image = wp_get_attachment_image_src( $id, $size ); //Returns an array (url, width, height) or false
-
-			if ( $image ) {
-				$img = self::get_file_display_for_image_file( $id, $image, $atts );
-			} else {
-				$img = self::get_file_display_for_non_image_file( $id, $size, $atts );
-			}
+			$img = self::get_file_display( $id, $atts );
 
 			if ( isset( $img ) ) {
 				$img_html[] = $img;
@@ -3688,49 +3693,49 @@ DEFAULT_HTML;
 	}
 
 	/**
-	* Get the HTML to display an image file (uploaded in a File Upload field)
+	* Get the HTML to display an uploaded in a File Upload field
 	*
-	* @since 2.0.19
+	* @since 2.02
 	*
 	* @param int $id
-	* @param array $image
 	* @param array $atts
 	* @return string $img_html
 	*/
-	private static function get_file_display_for_image_file( $id, $image, $atts ) {
-		$default_url = $image[0];
+	private static function get_file_display( $id, $atts ) {
 		$img_html = '';
 
-		// If show_image=1 is included
 		if ( $atts['show_image'] ) {
-			$img_html .= '<img src="' . esc_attr( $default_url ) . '" />';
+			$img_html = wp_get_attachment_image( $id, $atts['size'], false );
+			if ( empty( $img_html ) ) {
+				// this is not an image file
+				$img_html = wp_get_attachment_image( $id, $atts['size'], true );
+			}
 		}
 
 		// If show_filename=1 is included
 		if ( $atts['show_filename'] ) {
 			$label = self::get_single_file_name( $id );
-			if ( ! $label ) {
-				return $default_url;
-			}
+			$img_html .= ' <span id="frm_media_' . absint( $id ) . '" class="frm_upload_label">' . $label . '</span>';
+		}
 
-			$img_html .= $label;
+		if ( empty( $img_html ) ) {
+			$img_html = wp_get_attachment_image_url( $id, $atts['size'], false );
+			if ( $img_html === false ) {
+				// Not an image file
+				$img_html = wp_get_attachment_image_url( $id, $atts['size'], true );
+			}
 		}
 
 		// If add_link=1 is included
 		if ( $atts['add_link'] ) {
-			$full_url = wp_get_attachment_url( $id );
-			if ( ! $img_html ) {
-				$img_html = $default_url;
-			}
-			$img_html = '<a href="' . esc_attr( $full_url ) . '">' . $img_html . '</a>';
+			$image_url = wp_get_attachment_url( $id );
+			$img_html = '<a href="' . esc_url( $image_url ) . '" class="frm_file_link">' . $img_html . '</a>';
 		}
 
-		// If no attributes, display the file URL
-		if ( ! $img_html ) {
-			$img_html = $default_url;
-		}
+		$atts['media_id'] = $id;
+		$img_html = apply_filters( 'frm_image_html_array', $img_html, $atts );
 
-		return $img_html;
+		return $img_html . ' ';
 	}
 
 	/**
@@ -3749,47 +3754,6 @@ DEFAULT_HTML;
 			$filename = basename( $attachment->guid );
 		}
 		return $filename;
-	}
-
-	/**
-	* Get the HTML to display a non-image file (uploaded in a File Upload field)
-	*
-	* @since 2.0.19
-	*
-	* @param int $id
-	* @param string $size
-	* @param array $atts
-	* @return string $img_html
-	*/
-	private static function get_file_display_for_non_image_file( $id, $size, $atts ) {
-		$image_url = wp_get_attachment_url( $id );;
-		$img_html = $image_url;
-
-		// If show_filename=1 is set
-		if ( $atts['show_filename'] ) {
-			$label = self::get_single_file_name( $id );
-			if ( ! $label ) {
-				return $image_url;
-			}
-			$img_html = $label;
-		}
-
-		// If show_image=1 is set, it overrides the other settings (for non-image files)
-		if ( $atts['show_image'] ) {
-			$img_html = wp_get_attachment_link( $id, $size, false, true, false );
-			if ( isset( $label ) ) {
-				$img_html = str_replace( '</a>', $label . '</a>', $img_html );
-			}
-			// Leave here because show_image always adds a link
-			return $img_html;
-		}
-
-		// If add_link=1 is set
-		if ( $atts['add_link'] ) {
-			$img_html = '<a href="' . esc_url( $image_url ) . '">' . $img_html . '</a>';
-		}
-
-		return $img_html;
 	}
 
     public static function get_display_value( $replace_with, $field, $atts = array() ) {
@@ -3872,12 +3836,18 @@ DEFAULT_HTML;
             return $replace_with;
         }
 
-		$atts['sep'] = isset( $atts['sep'] ) ? $atts['sep'] : ' ';
+		$showing_image = ( isset( $atts['html'] ) && $atts['html'] ) || ( isset( $atts['show_image'] ) && $atts['show_image'] );
+		$default_sep = $showing_image ? ' ' : ', ';
+		$atts['sep'] = isset( $atts['sep'] ) ? $atts['sep'] : $default_sep;
 
 		self::get_file_html_from_atts( $atts, $replace_with );
 
         if ( is_array($replace_with) ) {
             $replace_with = implode($atts['sep'], $replace_with);
+
+			if ( $showing_image ) {
+				$replace_with = '<div class="frm_file_container">' . $replace_with . '</div>';
+			}
         }
 
         return $replace_with;
@@ -4601,14 +4571,4 @@ DEFAULT_HTML;
 			}
 		}
 	}
-
-	public static function mobile_check() {
- 	    _deprecated_function( __FUNCTION__, '1.07.10', 'wp_is_mobile' );
- 	    return wp_is_mobile();
-    }
-
-    public static function get_error_msg($field, $error) {
-        _deprecated_function( __FUNCTION__, '2.0', 'FrmFieldsHelper::get_error_msg' );
-        return FrmFieldsHelper::get_error_msg($field, $error);
-    }
 }

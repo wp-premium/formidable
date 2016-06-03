@@ -4,7 +4,7 @@
         <textarea name="options[edit_msg]" id="edit_msg" cols="50" rows="2" class="frm_long_input"><?php echo FrmAppHelper::esc_textarea($values['edit_msg']); ?></textarea>
     </td>
 </tr>
-<tr class="hide_save_draft <?php echo $values['save_draft'] ? '' : ' frm_hidden'; ?>">
+<tr class="hide_save_draft <?php echo esc_attr( $values['save_draft'] ? '' : ' frm_hidden' ); ?>">
     <td>
         <div><?php _e( 'Saved Draft', 'formidable' ) ?></div>
         <textarea name="options[draft_msg]" id="draft_msg" cols="50" rows="2" class="frm_long_input"><?php echo FrmAppHelper::esc_textarea($values['draft_msg']); ?></textarea>

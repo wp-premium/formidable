@@ -1,4 +1,4 @@
-<div id="frm-dynamic-values" class="tabs-panel" style="display:none;max-height:none;">
+<div id="frm-dynamic-values" class="tabs-panel frm_hidden" style="max-height:none;">
 	<p class="howto"><?php _e( 'Add dynamic default values as default text to fields in your form', 'formidable' ) ?>
     <ul class="frm_code_list" style="margin-bottom:0;">
         <?php
@@ -11,11 +11,11 @@
             }
 
         ?>
-            <li class="frm_col_<?php echo $col ?>">
+            <li class="frm_col_<?php echo esc_attr( $col ) ?>">
                 <a href="javascript:void(0)" data-code="<?php echo esc_attr($tag) ?>" class="frmbutton button show_dyn_default_value frm_insert_code<?php
                 if ( ! empty($title) ) {
                     echo ' frm_help" title="'. esc_attr($title);
-                } ?>"><?php echo $label ?></a>
+                } ?>"><?php echo esc_html( $label ) ?></a>
             </li>
         <?php
             $col = ($col == 'one') ? 'two' : 'one';

@@ -27,7 +27,7 @@ echo isset($day_names[$i]) ? $day_names[$i] .' ' : '';
 unset($day_class);
 
 	if ( $i >= $startday ) {
-        ?><div class="frmcal_num"><?php echo $day ?></div></div> <div class="frmcal-content">
+        ?><div class="frmcal_num"><?php echo esc_html( $day ) ?></div></div> <div class="frmcal-content">
 <?php
         if ( isset($daily_entries[$i]) && ! empty($daily_entries[$i]) ) {
             foreach ( $daily_entries[$i] as $entry ) {

@@ -2,28 +2,80 @@
 class FrmProForm{
 
 	public static function update_options( $options, $values ) {
-        $defaults = FrmProFormsHelper::get_default_opts();
-        unset($defaults['logged_in']);
-        unset($defaults['editable']);
+		self::fill_option_defaults( $options, $values );
 
-        foreach ( $defaults as $opt => $default ) {
-            $options[$opt] = (isset($values['options'][$opt])) ? $values['options'][$opt] : $default;
+		if ( isset( $values['id'] ) ) {
+			self::setup_file_protection( array(
+				'new' => $options['protect_files'], 'form_id' => $values['id'],
+			) );
+		}
 
-            unset($opt, $default);
-        }
+		$options['single_entry'] = ( isset( $values['options']['single_entry'] ) ) ? $values['options']['single_entry'] : 0;
+		if ( $options['single_entry'] ) {
+			$options['single_entry_type'] = ( isset( $values['options']['single_entry_type'] ) ) ? $values['options']['single_entry_type'] : 'cookie';
+		}
 
-        unset($defaults);
+		if ( is_multisite() ) {
+			$options['copy'] = (isset($values['options']['copy'])) ? $values['options']['copy'] : 0;
+		}
 
-        $options['single_entry'] = (isset($values['options']['single_entry'])) ? $values['options']['single_entry'] : 0;
-        if ($options['single_entry'])
-            $options['single_entry_type'] = (isset($values['options']['single_entry_type'])) ? $values['options']['single_entry_type'] : 'cookie';
+		return $options;
+	}
 
-        if ( is_multisite() ) {
-            $options['copy'] = (isset($values['options']['copy'])) ? $values['options']['copy'] : 0;
-        }
+	/**
+	 * @since 2.02
+	 */
+	private static function fill_option_defaults( &$options, $values ) {
+		$defaults = FrmProFormsHelper::get_default_opts();
+		unset( $defaults['logged_in'], $defaults['editable'] );
 
-        return $options;
-    }
+		foreach ( $defaults as $opt => $default ) {
+			$options[ $opt ] = ( isset( $values['options'][ $opt ] ) ) ? $values['options'][ $opt ] : $default;
+
+			unset( $opt, $default );
+		}
+	}
+
+	/**
+	 * Create or remove the htaccess for this form folder
+	 * @since 2.02
+	 */
+	private static function setup_file_protection( $atts ) {
+		$previous_opts = FrmDb::get_var( 'frm_forms', array( 'id' => $atts['form_id'] ), 'options' );
+		$previous_opts = maybe_unserialize( $previous_opts );
+		$previous_val = isset( $previous_opts['protect_files'] ) ? $previous_opts['protect_files'] : 0;
+
+		if ( $previous_val != $atts['new'] ) {
+			$folder_name = FrmProFileField::get_upload_dir_for_form( $atts['form_id'] );
+			if ( ! empty( $folder_name ) ) {
+				$content = '';
+				if ( $atts['new'] ) {
+					self::get_htaccess_content( $content );
+				} else {
+					// reset the htaccess to allow access
+					$content = "\r\n";
+				}
+
+				$create_file = new FrmCreateFile( array(
+					'folder_name' => $folder_name, 'file_name' => '.htaccess',
+					'error_message' => sprintf( __( 'Unable to write to %s to protect your uploads.', 'formidable' ), $folder_name . '/.htaccess' ),
+				) );
+				$create_file->create_file( $content );
+			}
+		}
+	}
+
+	/**
+	 * @since 2.02
+	 */
+	private static function get_htaccess_content( &$content ) {
+		$url = home_url();
+		$url = str_replace( array( 'http://', 'https://' ), '', $url );
+
+		$content .= 'RewriteEngine on' . "\r\n";
+		$content .= 'RewriteCond %{HTTP_REFERER} !^http(s)?://(www\.)?' . $url . '/.*$ [NC]' . "\r\n";
+		$content .= 'RewriteRule \.*$ - [F]' . "\r\n";
+	}
 
     public static function save_wppost_actions($settings, $action) {
         $form_id = $action['menu_order'];
@@ -203,37 +255,10 @@ class FrmProForm{
 
 	public static function is_ajax_on( $form ) {
 		$ajax = isset( $form->options['ajax_submit' ] ) ? $form->options['ajax_submit'] : 0;
-
-		if ( $ajax ) {
-			$no_ajax_fields = array( 'file' );
-			$where = array(
-				array( 'or' => 1, 'form.id' => $form->id, 'form.parent_form_id' => $form->id ),
-				'type' => $no_ajax_fields,
-			);
-			if ( isset( $_POST[ 'frm_page_order_' . $form->id ] ) ) {
-				$where['field_order <'] = absint( $_POST[ 'frm_page_order_' . $form->id ] ) - 1;
-			}
-
-			global $wpdb;
-			$no_ajax = FrmDb::get_var( $wpdb->prefix . 'frm_fields field INNER JOIN ' . $wpdb->prefix . 'frm_forms form ON field.form_id = form.id', $where, 'field.id' );
-			$ajax = $no_ajax ? false : true;
-		}
-
 		return $ajax;
 	}
 
 	public static function validate( $errors, $values ) {
-        /*
-        if (isset($values['item_meta'])){
-			foreach( $values['item_meta'] as $key => $value ) {
-                $field = FrmField::getOne($key);
-                if ($field && $field->type == 'hidden' and empty($value))
-                    $errors[] = __( 'Hidden fields must have a value.', 'formidable' );
-            }
-
-        }
-        */
-
         // add a user id field if the form requires one
         if ( isset($values['logged_in']) || isset($values['editable']) || (isset($values['single_entry']) && isset($values['options']['single_entry_type']) && $values['options']['single_entry_type'] == 'user') || (isset($values['options']['save_draft']) && $values['options']['save_draft'] == 1) ) {
             $form_id = $values['id'];
@@ -246,16 +271,6 @@ class FrmProForm{
             }
         }
 
-		if ( isset( $values['options']['auto_responder'] ) ) {
-            if ( ! isset($values['options']['ar_email_message']) || $values['options']['ar_email_message'] == '' ) {
-                $errors[] = __( 'Please insert a message for your auto responder.', 'formidable' );
-            }
-            if ( isset($values['options']['ar_reply_to']) && ! is_email( trim( $values['options']['ar_reply_to'] ) ) ) {
-                $errors[] = __( 'That is not a valid reply-to email address for your auto responder.', 'formidable' );
-            }
-        }
-
         return $errors;
     }
-
 }

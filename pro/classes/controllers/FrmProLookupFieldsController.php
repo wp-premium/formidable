@@ -619,7 +619,6 @@ class FrmProLookupFieldsController{
 			$frm_vars['lookup_fields'][ $values['id'] ]['fieldKey'] = $values['field_key'];
 			$frm_vars['lookup_fields'][ $values['id'] ]['parents'] = $lookup_parents;
 			$frm_vars['lookup_fields'][ $values['id'] ]['fieldType'] = $values['original_type'];
-			$frm_vars['lookup_fields'][ $values['id'] ]['currentValue'] = $values['value'];
 			$frm_vars['lookup_fields'][ $values['id'] ]['formId'] = $values['parent_form_id'];
 			$frm_vars['lookup_fields'][ $values['id'] ]['inSection'] = isset( $values['in_section'] ) ? $values['in_section'] : '0';
 			$frm_vars['lookup_fields'][ $values['id'] ]['isRepeating'] = $values['form_id'] != $values['parent_form_id'];
@@ -668,22 +667,43 @@ class FrmProLookupFieldsController{
 		// TODO: don't reload for ajax
 		if ( isset( $frm_vars['lookup_fields'] ) && ! empty( $frm_vars['lookup_fields'] ) ) {
 			$lookup_field_ids = array();
+			$checked_forms = array();
 			foreach ( $frm_vars['lookup_fields'] as $l_id => $lookup_field ) {
 				if ( $lookup_field['parents'] ) {
 					if ( $lookup_field['fieldType'] == 'lookup' ) {
 						// Update all dependent Lookup fields
 						$lookup_field_ids[] = $l_id;
 					} else {
-						// Only update non-lookup fields if they don't already have a value
-						if ( ! $lookup_field['currentValue'] ) {
+						self::get_form_action( $lookup_field['formId'], $checked_forms, $form_action );
+
+						// Only update non-lookup fields if this is the initial form load
+						if ( 'new' === $form_action ) {
 							$lookup_field_ids[] = $l_id;
 						}
 					}
-					unset( $frm_vars['lookup_fields'][ $l_id ]['currentValue'] );
 				}
 			}
 			echo "__frmDepLookupFields=" . json_encode( $lookup_field_ids ) . ";";
 		}
+	}
+
+	/**
+	 * Get a specific form's action (new, create, edit, update)
+	 *
+	 * @since 2.02
+	 * @param int $form_id
+	 * @param array $checked_forms
+	 * @param string $form_action
+	 */
+	private static function get_form_action( $form_id, &$checked_forms, &$form_action ) {
+		if ( isset( $checked_forms[ $form_id ] ) ) {
+			$form_params = $checked_forms[ $form_id ];
+		} else {
+			$form_params = FrmForm::get_params( $form_id );
+			$checked_forms[ $form_id ] = $form_params;
+		}
+
+		$form_action = $form_params['action'];
 	}
 
 	/**
@@ -839,7 +859,7 @@ class FrmProLookupFieldsController{
 
 		$meta_value = implode( ', ', $meta_values );
 
-		echo $meta_value;
+		echo wp_kses_post( $meta_value );
 
 		wp_die();
 	}

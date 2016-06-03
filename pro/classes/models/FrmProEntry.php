@@ -365,6 +365,8 @@ class FrmProEntry{
 
 	//If page size is set for views, only get the current page of entries
 	public static function get_view_page( $current_p, $p_size, $where, $args ) {
+		_deprecated_function( __FUNCTION__, '2.02', 'FrmProEntry::get_view_results' );
+
 		//Make sure values are ints for use in DB call
 		$current_p = (int) $current_p;
 		$p_size = (int) $p_size;
@@ -555,11 +557,6 @@ class FrmProEntry{
 		return FrmProFormsHelper::can_submit_form_now( $errors, $values );
     }
 
-	public static function get_field( $field = 'is_draft', $id ) {
-        _deprecated_function( __FUNCTION__, '2.0', 'FrmProEntriesHelper::get_field');
-        return FrmProEntriesHelper::get_field($field, $id);
-    }
-
 	public static function setup_post($action, $entry, $form) {
 		_deprecated_function( __FUNCTION__, '2.0.9', array( 'FrmProPost::save_post') );
 		return FrmProPost::setup_post( $action, $entry, $form );
@@ -574,8 +571,4 @@ class FrmProEntry{
 		_deprecated_function( __FUNCTION__, '2.0.9', array( 'FrmProPost::insert_post') );
 		return FrmProPost::insert_post( $entry, $new_post, $post, $form, $action );
 	}
-
-    public static function update_post() {
-        _deprecated_function( __FUNCTION__, '2.0', array( 'FrmProPost::save_post') );
-    }
 }

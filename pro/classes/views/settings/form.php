@@ -39,7 +39,7 @@
         <select name="frm_date_format">
             <?php foreach ( $formats as $f ) { ?>
             <option value="<?php echo esc_attr($f) ?>" <?php selected($frmpro_settings->date_format, $f); ?>>
-                <?php echo $f .' &nbsp; &nbsp; '. date($f); ?>
+                <?php echo esc_html( $f . ' &nbsp; &nbsp; ' . date( $f ) ); ?>
             </option>
             <?php } ?>
         </select>

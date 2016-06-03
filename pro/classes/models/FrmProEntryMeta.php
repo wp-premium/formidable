@@ -78,7 +78,7 @@ class FrmProEntryMeta{
 	}
 
     /**
-     * Upload files and add new tags
+     * Add new tags
      *
      * @since 2.0
      * @param array|string $meta_value (the posted value)
@@ -95,12 +95,7 @@ class FrmProEntryMeta{
 
 		$field = FrmField::getOne($field_id);
 
-		if ( $field->type == 'file' ) {
-			// Upload files and get new meta value for file upload fields
-			$meta_value = self::prepare_file_upload_meta( $meta_value, $field, $entry_id );
-
-		} else if ( $field->type == 'tag' ) {
-			// Create new tags
+		if ( $field->type == 'tag' ) {
 			self::create_new_tags( $field, $entry_id, $meta_value );
 		}
 
@@ -146,6 +141,9 @@ class FrmProEntryMeta{
 
         if ( $field->type == 'form' ||  FrmField::is_repeating_field( $field ) ) {
             self::validate_embedded_form( $errors, $field, $args['exclude'] );
+
+			// get any values updated during nested validation
+			FrmEntriesHelper::get_posted_value( $field, $value, $args );
         } else if ( $field->type == 'user_id' ) {
             // make sure we have a user ID
             if ( ! is_numeric($value) ) {
@@ -170,10 +168,7 @@ class FrmProEntryMeta{
             unset($errors['field'. $field->temp_id]);
         }
 
-        self::validate_file_upload($errors, $field, $args);
-
-        // if saving draft, only check file type since it won't be checked later
-        // and confirmation field since the confirmation field value is not saved
+        // if saving draft, only check confirmation field since the confirmation field value is not saved
         if ( FrmProFormsHelper::saving_draft() ) {
 
             //Check confirmation field if saving a draft
@@ -259,7 +254,8 @@ class FrmProEntryMeta{
 
         foreach ( $subfields as $subfield ) {
 			if ( isset( $_POST['item_meta'][ $field->id ] ) && ! empty( $_POST['item_meta'][ $field->id ] ) ) {
-				foreach ( $_POST['item_meta'][ $field->id ] as $k => $values ) {
+				$posted_values = $_POST['item_meta'][ $field->id ];
+				foreach ( $posted_values as $k => $values ) {
 					if ( ! empty( $k ) && in_array( $k, array( 'form', 'id' ) ) ) {
 						continue;
 					}
@@ -278,89 +274,6 @@ class FrmProEntryMeta{
             } else {
                 // TODO: do something if nothing was submitted
             }
-        }
-    }
-
-    public static function validate_file_upload(&$errors, $field, $args) {
-        //if the field is a file upload, check for a file
-        if ( $field->type != 'file' ) {
-            return;
-        }
-
-        $file_name = 'file'. $field->id;
-
-        if ( isset( $args['key_pointer'] ) && ( $args['key_pointer'] || $args['key_pointer'] === 0 ) ) {
-            $file_name .= '-' . $args['key_pointer'];
-        }
-
-        if ( ! isset($_FILES[$file_name]) ) {
-            return;
-        }
-
-        $file_uploads = $_FILES[$file_name];
-
-        //if the field is a file upload, check for a file
-        if ( empty($file_uploads['name']) ) {
-            return;
-        }
-
-        $filled = true;
-        if ( is_array($file_uploads['name']) ) {
-            $filled = false;
-            foreach ( $file_uploads['name'] as $n ) {
-                if ( !empty($n) ) {
-                    $filled = true;
-                }
-            }
-        }
-
-        if ( ! $filled ) {
-            // no file was uploaded
-            return;
-        }
-
-        // If blank errors are set, remove them since a file was uploaded in this field
-        if ( isset($errors['field'. $field->temp_id]) ) {
-            unset($errors['field'. $field->temp_id]);
-        }
-
-		if ( FrmField::is_option_true( $field, 'restrict' ) && ! FrmField::is_option_empty( $field, 'ftypes' ) ) {
-            $mimes = $field->field_options['ftypes'];
-        } else {
-            $mimes = null;
-        }
-
-        if ( is_array($file_uploads['name']) ) {
-            foreach ( $file_uploads['name'] as $name ) {
-
-                // check allowed file size
-                if ( ! empty($file_uploads['error']) && in_array(1, $file_uploads['error']) ) {
-                    $errors['field'. $field->temp_id] = __( 'This file is too big', 'formidable' );
-                }
-
-                if ( empty($name) ) {
-                    continue;
-                }
-
-                //check allowed mime types for this field
-                $file_type = wp_check_filetype( $name, $mimes );
-                unset($name);
-
-                if ( ! $file_type['ext'] ) {
-                    break;
-                }
-            }
-        } else {
-            // check allowed file size
-			if ( ! empty( $file_uploads['error'] ) && in_array( 1, (array) $file_uploads['error'] ) ) {
-                $errors['field'. $field->temp_id] = __( 'This file is too big', 'formidable' );
-            }
-
-            $file_type = wp_check_filetype( $file_uploads['name'], $mimes );
-        }
-
-        if ( isset($file_type) && ! $file_type['ext'] ) {
-            $errors['field'. $field->temp_id] = ($field->field_options['invalid'] == __( 'This field is invalid', 'formidable' ) || $field->field_options['invalid'] == '' || $field->field_options['invalid'] == $field->name.' '. __( 'is invalid', 'formidable' )) ? __( 'Sorry, this file type is not permitted for security reasons.', 'formidable' ) : $field->field_options['invalid'];
         }
     }
 
@@ -555,16 +468,6 @@ class FrmProEntryMeta{
         }
     }
 
-	public static function validate_number_field( &$errors, $field, $value ) {
-		_deprecated_function( __FUNCTION__, '2.0.18', array( 'FrmEntryValidate::validate_number_field') );
-		FrmEntryValidate::validate_number_field( $errors, $field, $value );
-	}
-
-	public static function validate_phone_field( &$errors, $field, $value ) {
-		_deprecated_function( __FUNCTION__, '2.0.18', array( 'FrmEntryValidate::validate_phone_field') );
-		FrmEntryValidate::validate_phone_field( $errors, $field, $value );
-	}
-
     public static function validate_date_field(&$errors, $field, $value) {
         if ( $field->type != 'date' ) {
             return;
@@ -612,268 +515,6 @@ class FrmProEntryMeta{
 
 		return false;
 	}
-
-	/**
-	* Get media ID(s) to be saved to database and set global media ID values
-	*
-	* @since 2.0
-	* @param array|string $prev_value (posted value)
-	* @param object $field
-	* @param integer $entry_id
-	* @return array|string $meta_value
-	*/
-	private static function prepare_file_upload_meta( $prev_value, $field, $entry_id ) {
-		$last_saved_value = self::get_previous_file_ids( $field, $entry_id );
-
-        // If there are no files to be uploaded, exit now
-        if ( ! isset( $_FILES ) ) {
-			self::delete_removed_files( $last_saved_value, $prev_value, $field );
-			return $prev_value;
-        }
-
-        // Assume this field is not repeating
-        $repeating = $key_pointer = $parent_field = $file_name = false;
-
-        // Get file name
-        self::get_file_name( $field->id, $file_name, $parent_field, $key_pointer, $repeating );
-
-        // If there isn't a file uploaded in this field, exit now
-        if ( ! isset( $_FILES[$file_name]) || empty($_FILES[$file_name]['name']) || (int) $_FILES[$file_name]['size'] == 0 ) {
-			self::delete_removed_files( $last_saved_value, $prev_value, $field );
-			return $prev_value;
-        }
-
-		$media_ids = FrmProAppHelper::upload_file( $file_name );
-
-		$mids = self::get_final_media_ids( $media_ids );
-
-		$new_value = self::set_new_file_upload_meta_value( $field, $mids, $prev_value );
-
-		// If no media IDs to upload, end now
-		if ( ! empty( $mids ) ) {
-			self::update_global_frm_vars_for_uploaded_files( $field->id, $repeating, $mids );
-
-	        // Set new posted values (not sure that this is necessary)
-	        self::set_file_posted_vals( $field->id, $new_value, array( 'repeating' => $repeating, 'parent_field' => $parent_field, 'key_pointer' => $key_pointer ) );
-
-	        // If this is a post field
-			if ( isset( $_POST['frm_wp_post'] ) && FrmField::is_option_true( $field, 'post_field' ) ) {
-	            $_POST['frm_wp_post_custom'][$field->id .'='. $field->field_options['custom_field']] = $mids;
-	        }
-        }
-
-		self::delete_removed_files( $last_saved_value, $new_value, $field );
-		return $new_value;
-    }
-
-	/**
-	 * Automatically delete files when an entry is deleted.
-	 * If the "Delete all entries" button is used, entries will not be deleted
-	 * @since 2.0.22
-	 */
-	public static function delete_files_with_entry( $entry_id, $entry = false ) {
-		if ( empty( $entry ) ) {
-			return;
-		}
-
-		$upload_fields = FrmField::getAll( array( 'fi.type' => 'file', 'fi.form_id' => $entry->form_id ) );
-		foreach ( $upload_fields as $field ) {
-			self::delete_files_from_field( $field, $entry );
-			unset( $field );
-		}
-	}
-
-	/**
-	 * @since 2.0.22
-	 */
-	public static function delete_files_from_field( $field, $entry ) {
-		if ( self::should_delete_files( $field ) ) {
-			$media_ids = self::get_previous_file_ids( $field, $entry );
-			self::delete_files_now( $media_ids );
-		}
-	}
-
-	private static function should_delete_files( $field ) {
-		$auto_delete = FrmField::get_option_in_object( $field, 'delete' );
-		return empty( $auto_delete ) ? false : true;
-	}
-
-	/**
-	 * @since 2.0.22
-	 */
-	private static function get_previous_file_ids( $field, $entry_id ) {
-		return FrmProEntryMetaHelper::get_post_or_meta_value( $entry_id, $field );
-	}
-
-	private static function delete_removed_files( $old_value, $new_value, $field ) {
-		if ( self::should_delete_files( $field ) ) {
-			$media_ids = self::get_removed_file_ids( $old_value, $new_value );
-			self::delete_files_now( $media_ids );
-		}
-	}
-
-	/**
-	 * @since 2.0.22
-	 */
-	private static function get_removed_file_ids( $old_value, $new_value ) {
-		$media_ids = array_diff( (array) $old_value, (array) $new_value );
-		return $media_ids;
-	}
-
-	/**
-	 * @since 2.0.22
-	 */
-	private static function delete_files_now( $media_ids ) {
-		if ( empty( $media_ids ) ) {
-			return;
-		}
-
-		$media_ids = maybe_unserialize( $media_ids );
-		foreach ( (array) $media_ids as $m ) {
-			if ( is_numeric( $m ) ) {
-				wp_delete_attachment( $m, true );
-			}
-		}
-	}
-
-    /**
-    *
-    * @since 2.0
-    * @param int $field_id
-    * @param $new_value to set
-    * @param array $args array with repeating, key_pointer, and parent_field
-    */
-    private static function set_file_posted_vals( $field_id, $new_value, $args = array() ) {
-        // If in repeating section
-        if ( $args['repeating'] ) {
-            $_POST['item_meta'][$args['parent_field']][$args['key_pointer']][$field_id] = $new_value;
-
-        // If not in repeating section
-        } else {
-            $_POST['item_meta'][$field_id] = $new_value;
-        }
-    }
-
-	/**
-	* Get the final media IDs
-	*
-	* @since 2.0
-	* @param array|string $media_ids
-	* @return array $mids
-	*/
-	private static function get_final_media_ids( $media_ids ) {
-        $mids = array();
-        foreach ( (array) $media_ids as $media_id ) {
-            if ( is_numeric($media_id) ) {
-               $mids[] = $media_id;
-            } else {
-                foreach ( $media_id->errors as $error ) {
-                    if ( ! is_array($error[0]) ) {
-                        echo $error[0];
-                    }
-                    unset($error);
-                }
-            }
-            unset($media_id);
-        }
-		$mids = array_filter( $mids );
-
-		return $mids;
-	}
-
-
-	/**
-	* Get the final value for a file upload field
-	*
-	* @since 2.0.19
-	*
-	* @param object $field
-	* @param array $new_mids
-	* @param array|string $prev_value
-	* @return array|string $new_value
-	*/
-	private static function set_new_file_upload_meta_value( $field, $new_mids, $prev_value ) {
-		// If no media IDs to upload, end now
-		if ( empty( $new_mids ) ) {
-			$new_value = $prev_value;
-		} else {
-
-			if ( FrmField::is_option_true( $field, 'multiple' ) ) {
-				// Multi-file upload fields
-
-				if ( ! empty( $prev_value ) ) {
-					$new_value = array_merge( (array) $prev_value, $new_mids );
-				} else {
-					$new_value = $new_mids;
-				}
-
-			} else {
-				// Single file upload fields
-				$new_value = reset( $new_mids );
-			}
-		}
-
-		return $new_value;
-	}
-
-	/**
-	* Update the global $frm_vars for files that were just uploaded
-	*
-	* @since 2.0.19
-	*
-	* @param int $field_id
-	* @param boolean $repeating
-	* @param array $mids
-	*/
-	private static function update_global_frm_vars_for_uploaded_files( $field_id, $repeating, $mids ) {
-		global $frm_vars;
-
-		// Set up progress bar to display on form submission
-		if ( ! isset($frm_vars['loading']) || ! $frm_vars['loading'] ) {
-			$frm_vars['loading'] = true;
-		}
-
-		// Set up global media_id vars. This will be used for post fields.
-		if ( ! isset( $frm_vars['media_id'] ) ) {
-			$frm_vars['media_id'] = array();
-		}
-
-		// If not inside of a repeating section, set the media IDs for this field
-		if ( ! $repeating ) {
-			// What is this for?
-			$frm_vars['media_id'][ $field_id ] = $mids;
-		}
-	}
-
-    /**
-    * Get name of uploaded file
-    *
-    * @since 2.0
-    * @param integer $field_id
-    * @param string $file_name pass by reference
-    * @param int $parent_field. Retrieves ID of repeating section.
-    * @param $key_pointer. Gets pointer if in repeating section.
-    * @param boolean $repeating Tells whether field is inside of repeating section.
-    *
-    */
-    public static function get_file_name( $field_id, &$file_name, &$parent_field, &$key_pointer, &$repeating ) {
-        $file_name = 'file'. $field_id;
-
-        // Check if there are repeating sections in the form, and adjust the filename accordingly
-        if ( isset( $_POST['item_meta']['key_pointer'] ) && isset( $_POST['item_meta']['parent_field'] ) ) {
-            // Get the current pointer
-			$key_pointer = sanitize_title( $_POST['item_meta']['key_pointer'] );
-
-            // Get the current parent
-			$parent_field = absint( $_POST['item_meta']['parent_field'] );
-
-            // Check if the current field is inside of the parent/pointer
-            if ( isset( $_POST['item_meta'][$parent_field][$key_pointer][$field_id] ) ) {
-                $file_name .= '-'. $key_pointer;
-                $repeating = true;
-            }
-        }
-    }
 
     /**
      * Get metas for post or non-post fields
@@ -1080,4 +721,49 @@ class FrmProEntryMeta{
 			$entry->metas[ $field->id ] = $val;
 		}
 	}
+
+	public static function validate_number_field( &$errors, $field, $value ) {
+		_deprecated_function( __FUNCTION__, '2.0.18', array( 'FrmEntryValidate::validate_number_field') );
+		FrmEntryValidate::validate_number_field( $errors, $field, $value );
+	}
+
+	public static function validate_phone_field( &$errors, $field, $value ) {
+		_deprecated_function( __FUNCTION__, '2.0.18', array( 'FrmEntryValidate::validate_phone_field') );
+		FrmEntryValidate::validate_phone_field( $errors, $field, $value );
+	}
+
+    public static function validate_file_upload( &$errors, $field, $args ) {
+        if ( $field->type != 'file' ) {
+            return;
+        }
+
+		_deprecated_function( __FUNCTION__, '2.02', 'FrmProFileField::validate_file_upload' );
+		FrmProFileField::validate_file_upload( $errors, $field, $args );
+    }
+
+	/**
+	 * @since 2.0.22
+	 */
+	public static function delete_files_with_entry( $entry_id, $entry = false ) {
+		_deprecated_function( __FUNCTION__, '2.02', 'FrmProFileField::delete_files_with_entry' );
+		FrmProFileField::delete_files_with_entry( $entry_id, $entry );
+	}
+
+	/**
+	 * @since 2.0.22
+	 */
+	public static function delete_files_from_field( $field, $entry ) {
+		_deprecated_function( __FUNCTION__, '2.02', 'FrmProFileField::delete_files_from_field' );
+		FrmProFileField::delete_files_from_field( $field, $entry );
+	}
+
+    /**
+    * Get name of uploaded file
+    *
+    * @since 2.0
+    *
+    */
+    public static function get_file_name( $field_id, &$file_name, &$parent_field, &$key_pointer, &$repeating ) {
+        _deprecated_function( __FUNCTION__, '2.02' );
+    }
 }

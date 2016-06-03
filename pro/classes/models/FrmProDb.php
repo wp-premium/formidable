@@ -11,7 +11,7 @@ class FrmProDb{
         }
 
         if ( $old_db_version ) {
-			$migrations = array( 16, 17, 25, 27, 28, 29, 30, 31, 32, 34 );
+			$migrations = array( 16, 17, 25, 27, 28, 29, 30, 31, 32, 34, 36 );
 			foreach ( $migrations as $migration ) {
 				if ( $db_version >= $migration && $old_db_version < $migration ) {
 					call_user_func( array( __CLASS__, 'migrate_to_' . $migration ) );
@@ -51,6 +51,32 @@ class FrmProDb{
 		delete_site_option( 'frmpro-wpmu-sitewide' );
     }
 
+	/**
+	 * Add the _frm_file meta to images without a post
+	 * This will prevent old files from showing in the media libarary
+	 */
+	public static function migrate_to_36() {
+		global $wpdb;
+		$file_field_ids = $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM ' . $wpdb->prefix . 'frm_fields WHERE type=%s', 'file' ) );
+		if ( ! empty( $file_field_ids ) ) {
+			$file_field_ids = array_filter( $file_field_ids, 'is_numeric' );
+			$query = 'SELECT meta_value FROM ' . $wpdb->prefix . 'frm_item_metas m LEFT JOIN ' . $wpdb->prefix . 'frm_items e ON (e.id = m.item_id) WHERE e.post_id < %d';
+			$uploaded_files = $wpdb->get_col( $wpdb->prepare( $query, 1 ) . ' AND field_id in (' . implode( ',', $file_field_ids ) . ')' );
+
+			$file_ids = array();
+			foreach ( $uploaded_files as $files ) {
+				if ( ! is_numeric( $files ) ) {
+					$files = maybe_unserialize( $files );
+				}
+				$add_files = array_filter( (array) $files, 'is_numeric' );
+				$file_ids = array_merge( $file_ids, $add_files );
+			}
+
+			foreach ( $file_ids as $file_id ) {
+				update_post_meta( $file_id, '_frm_file', 1 );
+			}
+		}
+	}
 
 	/**
 	 * Add in_section variable to all fields within sections

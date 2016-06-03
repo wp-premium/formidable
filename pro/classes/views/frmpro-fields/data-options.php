@@ -18,7 +18,8 @@ $selected = ( $field['value'] == $opt_key || in_array($opt_key, (array) $field['
     }
 
 } else if ( $field['data_type'] == 'data' && is_numeric( $field['hide_opt'] ) && is_numeric( $field['form_select'] ) ) {
-    echo $value = FrmEntryMeta::get_entry_meta_by_field($field['hide_opt'], $field['form_select']); ?>
+	$value = FrmEntryMeta::get_entry_meta_by_field($field['hide_opt'], $field['form_select']);
+	echo wp_kses_post( $value ); ?>
     <input type="hidden" value="<?php echo esc_attr( $value ) ?>" name="<?php echo esc_attr( $field_name ) ?>" />
 <?php } else if ( $field['data_type'] == 'data' && is_numeric( $field['hide_field'] ) && is_numeric( $field['form_select'] ) ) {
 	$get_id = FrmAppHelper::simple_get( 'id' );
@@ -34,7 +35,7 @@ $selected = ( $field['value'] == $opt_key || in_array($opt_key, (array) $field['
         $value = '';
 	}
 ?>
-<p><?php echo $value ?></p>
+<p><?php echo wp_kses_post( $value ) ?></p>
 <input type="hidden" value="<?php echo esc_attr($value) ?>" name="<?php echo esc_attr( $field_name ) ?>" />
 <?php } else if ( $field['data_type'] == 'data' && ! is_array($field['value']) ) { ?>
 <p><?php echo wp_kses_post( $field['value'] ); ?></p>

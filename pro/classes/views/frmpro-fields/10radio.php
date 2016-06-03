@@ -17,7 +17,7 @@ if ( ! $star ) {
     do_action( 'frm_field_input_html', $field );
 ?> />
 <?php if ( ! $star ) {
-    ?> <?php echo $opt ?></label>
+    echo esc_html( $opt ) ?></label>
 </div>
 <?php }
 

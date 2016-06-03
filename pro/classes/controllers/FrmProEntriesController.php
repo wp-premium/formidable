@@ -153,6 +153,10 @@ class FrmProEntriesController{
             wp_enqueue_script('jquery-chosen');
         }
 
+		if ( isset( $frm_vars['dropzone_loaded'] ) && ! empty( $frm_vars['dropzone_loaded'] ) ) {
+			wp_enqueue_script( 'dropzone' );
+		}
+
         if ( isset($frm_vars['star_loaded']) && ! empty($frm_vars['star_loaded']) ) {
             wp_enqueue_script('jquery-frm-rating');
             wp_enqueue_style( 'dashicons' );
@@ -1296,11 +1300,6 @@ class FrmProEntriesController{
     public static function csv( $form_id = false, $search = '', $fid = '' ) {
 		_deprecated_function( __FUNCTION__, '2.0.19', 'FrmXMLController::csv' );
         FrmXMLController::csv( $form_id, $search, $fid );
-    }
-
-    public static function get_search_str( $where_clause = '', $search_str, $form_id = false, $fid = false ) {
-        _deprecated_function( __FUNCTION__, '2.0', 'FrmProEntriesHelper::get_search_str' );
-        return FrmProEntriesHelper::get_search_str($where_clause, $search_str, $form_id, $fid);
     }
 
 	public static function get_new_vars( $errors = array(), $form = false, $message = '' ) {
@@ -2668,49 +2667,60 @@ class FrmProEntriesController{
 			return;
 		}
 
-        $form = FrmForm::getOne( (int) $_POST['form_id'] );
+		$response = array( 'errors' => array(), 'content' => '', 'pass' => false );
+
+        $form = FrmForm::getOne( FrmAppHelper::get_post_param( 'form_id', 0, 'absint' ) );
         if ( ! $form ) {
-            echo false;
+            echo json_encode( $response );
             wp_die();
         }
 
-        $no_ajax_fields = array( 'file');
-        $errors = FrmEntryValidate::validate( $_POST, $no_ajax_fields );
+		$is_ajax_on = FrmProForm::is_ajax_on( $form );
+		$no_ajax_fields = $is_ajax_on ? false : array( 'file' );
+		$errors = FrmEntryValidate::validate( $_POST, $no_ajax_fields );
 
 		if ( empty( $errors ) ) {
-			if ( FrmProForm::is_ajax_on( $form ) ) {
-                global $frm_vars;
-                $frm_vars['ajax'] = true;
-                $frm_vars['css_loaded'] = true;
+			if ( $is_ajax_on ) {
+				global $frm_vars;
+				$frm_vars['ajax'] = true;
+				$frm_vars['css_loaded'] = true;
 
 				// don't load scripts if we are going backwards in the form
 				$going_backwards = FrmProFormsHelper::going_to_prev( $form->id );
 
 				// save the entry if there is not another page or when saving a draft
 				if ( ( ! isset( $_POST[ 'frm_page_order_' . $form->id ] ) && ! $going_backwards ) || FrmProFormsHelper::saving_draft() ) {
-                    $processed = true;
-                    FrmEntriesController::process_entry($errors, true);
-                }
+					$processed = true;
+					FrmEntriesController::process_entry( $errors, true );
+				}
 
-                echo FrmFormsController::show_form($form->id);
+				$response['content'] .= FrmFormsController::show_form( $form->id );
 
 				// trigger the footer scripts if there is a form to show
 				if ( $errors || ! isset( $processed ) || ! empty( $frm_vars['forms_loaded'] ) ) {
+					ob_start();
 					self::print_ajax_scripts( $going_backwards ? 'none' : '' );
 					self::footer_js();
-                }
-            } else {
-                echo false;
-            }
+					$response['content'] .= ob_get_contents();
+					ob_end_clean();
+				}
+			}
         }else{
             $obj = array();
 			foreach ( $errors as $field => $error ) {
-                $field_id = str_replace('field', '', $field);
-                $obj[$field_id] = $error;
+                $field_id = str_replace( 'field', '', $field );
+                $obj[ $field_id ] = $error;
             }
-            echo json_encode($obj);
+			$response['errors'] = $obj;
+
+			$frm_settings = FrmAppHelper::get_settings();
+			$response['error_message'] = FrmFormsHelper::get_success_message( array(
+				'message' => $frm_settings->invalid_msg, 'form' => $form,
+				'entry_id' => 0, 'class' => 'frm_error_style',
+			) );
         }
 
+		echo json_encode( $response );
         wp_die();
     }
 
@@ -2786,7 +2796,8 @@ class FrmProEntriesController{
         $frm_vars['deleted_entries'][] = $entry->id;
 
         if ( $ajax && $echo ) {
-            echo $message = 'success';
+			$message = 'success';
+			echo esc_attr( $message );
         } else if ( ! $ajax ) {
 			$message = apply_filters('frm_delete_message', __( 'Your entry was successfully deleted', 'formidable' ), $entry);
 
@@ -2896,16 +2907,6 @@ class FrmProEntriesController{
         }
 
         return $values;
-    }
-
-	public static function allow_form_edit( $action, $form ) {
-        _deprecated_function( __FUNCTION__, '2.0', 'FrmProEntriesHelper::allow_form_edit');
-        return FrmProEntriesHelper::allow_form_edit($action, $form);
-    }
-
-	public static function email_value( $value, $meta, $entry ) {
-        _deprecated_function( __FUNCTION__, '2.0', 'FrmProEntryMetaHelper::email_value');
-        return FrmProEntryMetaHelper::email_value($value, $meta, $entry);
     }
 
 	public static function create_post( $entry_id, $form_id ) {
