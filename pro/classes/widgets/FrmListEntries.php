@@ -129,7 +129,7 @@ class FrmListEntries extends WP_Widget {
 					echo '<a href="' . esc_url( add_query_arg( array( 'frm_cat' => $cat_field->field_key, 'frm_cat_id' => $cat_order ), $page_url ) ) . '">';
                 }
 
-                echo $cat;
+                echo esc_html( $cat );
 
                 if ( isset($instance['cat_count']) && (int) $instance['cat_count'] == 1 ) {
                     echo ' ('. FrmProFieldsHelper::get_field_stats($instance['cat_id'], 'count', false, $cat) .')';
@@ -205,40 +205,40 @@ class FrmListEntries extends WP_Widget {
 			  }
 		  }
 ?>
-	<p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e( 'Title', 'formidable' ) ?>:</label>
-	<input type="text" class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" value="<?php echo esc_attr( stripslashes($instance['title']) ); ?>" /></p>
+	<p><label for="<?php echo esc_attr( $this->get_field_id('title') ); ?>"><?php _e( 'Title', 'formidable' ) ?>:</label>
+	<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id('title') ); ?>" name="<?php echo esc_attr( $this->get_field_name('title') ); ?>" value="<?php echo esc_attr( stripslashes($instance['title']) ); ?>" /></p>
 
-	<p><label for="<?php echo $this->get_field_id('display_id'); ?>"><?php _e( 'Use Settings from View', 'formidable' ) ?>:</label>
-	    <select name="<?php echo $this->get_field_name('display_id'); ?>" id="<?php echo $this->get_field_id('display_id'); ?>" class="widefat frm_list_items_display_id">
+	<p><label for="<?php echo esc_attr( $this->get_field_id('display_id') ); ?>"><?php _e( 'Use Settings from View', 'formidable' ) ?>:</label>
+	    <select name="<?php echo esc_attr( $this->get_field_name('display_id') ); ?>" id="<?php echo esc_attr( $this->get_field_id('display_id') ); ?>" class="widefat frm_list_items_display_id">
 	        <option value=""> </option>
             <?php
 			foreach ( $displays as $display ) {
-				echo '<option value="' . esc_attr( $display->ID ) . '" ' . selected( $instance['display_id'], $display->ID, false ) . '>' . FrmAppHelper::kses( $display->post_title ) . '</option>';
+				echo '<option value="' . esc_attr( $display->ID ) . '" ' . selected( $instance['display_id'], $display->ID, false ) . '>' . esc_html( $display->post_title ) . '</option>';
 			}
             ?>
         </select>
 	</p>
 	<p class="description"><?php _e( 'Views with a "Both (Dynamic)" format will show here.', 'formidable' ) ?></p>
 
-	<p><label for="<?php echo $this->get_field_id('post_id'); ?>"><?php _e( 'Page', 'formidable' ) ?>:</label>
-        <select name="<?php echo $this->get_field_name('post_id'); ?>" id="<?php echo $this->get_field_id('post_id'); ?>" class="widefat">
+	<p><label for="<?php echo esc_attr( $this->get_field_id('post_id') ); ?>"><?php _e( 'Page', 'formidable' ) ?>:</label>
+        <select name="<?php echo esc_attr( $this->get_field_name('post_id') ); ?>" id="<?php echo esc_attr( $this->get_field_id('post_id') ); ?>" class="widefat">
 	        <option value=""> </option>
             <?php
 			foreach ( $pages as $page ) {
-				echo '<option value="' . esc_attr( $page->ID ) . '" ' . selected( $instance['post_id'], $page->ID, false ) . '>' . $page->post_title . '</option>';
+				echo '<option value="' . esc_attr( $page->ID ) . '" ' . selected( $instance['post_id'], $page->ID, false ) . '>' . esc_html( $page->post_title ) . '</option>';
 			}
             ?>
         </select>
     </p>
 
-    <p><label for="<?php echo $this->get_field_id('title_id'); ?>"><?php _e( 'Title Field', 'formidable' ) ?>:</label>
-        <select name="<?php echo $this->get_field_name('title_id'); ?>" id="<?php echo $this->get_field_id('title_id'); ?>" class="widefat frm_list_items_title_id">
+    <p><label for="<?php echo esc_attr( $this->get_field_id('title_id') ); ?>"><?php _e( 'Title Field', 'formidable' ) ?>:</label>
+        <select name="<?php echo esc_attr( $this->get_field_name('title_id') ); ?>" id="<?php echo esc_attr( $this->get_field_id('title_id') ); ?>" class="widefat frm_list_items_title_id">
 	        <option value=""> </option>
             <?php
             if ( isset($title_opts) && $title_opts ) {
                 foreach ( $title_opts as $title_opt ) {
                     if ( $title_opt->type != 'checkbox' ) { ?>
-                        <option value="<?php echo $title_opt->id ?>" <?php selected( $instance['title_id'], $title_opt->id ) ?>><?php echo $title_opt->name ?></option>
+                        <option value="<?php echo absint( $title_opt->id ) ?>" <?php selected( $instance['title_id'], $title_opt->id ) ?>><?php echo esc_html( $title_opt->name ) ?></option>
                         <?php
                     }
                 }
@@ -247,12 +247,12 @@ class FrmListEntries extends WP_Widget {
         </select>
 	</p>
 
-    <p><label for="<?php echo $this->get_field_id('cat_list'); ?>"><input class="checkbox frm_list_items_cat_list" type="checkbox" <?php checked($instance['cat_list'], true) ?> id="<?php echo $this->get_field_id('cat_list'); ?>" name="<?php echo $this->get_field_name('cat_list'); ?>" value="1" />
+    <p><label for="<?php echo esc_attr( $this->get_field_id('cat_list') ); ?>"><input class="checkbox frm_list_items_cat_list" type="checkbox" <?php checked($instance['cat_list'], true) ?> id="<?php echo esc_attr( $this->get_field_id('cat_list') ); ?>" name="<?php echo esc_attr( $this->get_field_name('cat_list') ); ?>" value="1" />
 	<?php _e( 'List Entries by Category', 'formidable' ) ?></label></p>
 
-    <div id="<?php echo $this->get_field_id('hide_cat_opts'); ?>" class="frm_list_items_hide_cat_opts <?php echo ( $instance['cat_list'] ) ? '' : 'frm_hidden'; ?>">
-    <p><label for="<?php echo $this->get_field_id('cat_id'); ?>"><?php _e( 'Category Field', 'formidable' ) ?>:</label>
-	    <select name="<?php echo $this->get_field_name('cat_id'); ?>" id="<?php echo $this->get_field_id('cat_id'); ?>" class="widefat frm_list_items_cat_id">
+    <div id="<?php echo esc_attr( $this->get_field_id('hide_cat_opts') ); ?>" class="frm_list_items_hide_cat_opts <?php echo ( $instance['cat_list'] ) ? '' : 'frm_hidden'; ?>">
+    <p><label for="<?php echo esc_attr( $this->get_field_id('cat_id') ); ?>"><?php _e( 'Category Field', 'formidable' ) ?>:</label>
+	    <select name="<?php echo esc_attr( $this->get_field_name('cat_id') ); ?>" id="<?php echo esc_attr( $this->get_field_id('cat_id') ); ?>" class="widefat frm_list_items_cat_id">
 	        <option value=""> </option>
 	        <?php
             if ( isset($title_opts) && $title_opts ) {
@@ -266,18 +266,18 @@ class FrmListEntries extends WP_Widget {
         </select>
 	</p>
 
-	<p><label for="<?php echo $this->get_field_id('cat_count'); ?>"><input class="checkbox" type="checkbox" <?php checked($instance['cat_count'], true) ?> id="<?php echo $this->get_field_id('cat_count'); ?>" name="<?php echo $this->get_field_name('cat_count'); ?>" value="1" />
+	<p><label for="<?php echo esc_attr( $this->get_field_id('cat_count') ); ?>"><input class="checkbox" type="checkbox" <?php checked($instance['cat_count'], true) ?> id="<?php echo esc_attr( $this->get_field_id('cat_count') ); ?>" name="<?php echo esc_attr( $this->get_field_name('cat_count') ); ?>" value="1" />
 	<?php _e( 'Show Entry Counts', 'formidable' ) ?></label></p>
 
-	<p><input class="checkbox" type="radio" <?php checked($instance['cat_name'], 1) ?> id="<?php echo $this->get_field_id('cat_name'); ?>" name="<?php echo $this->get_field_name('cat_name'); ?>" value="1" />
-	<label for="<?php echo $this->get_field_id('cat_name'); ?>"><?php _e( 'Show Only Category Name', 'formidable' ) ?></label><br/>
+	<p><input class="checkbox" type="radio" <?php checked($instance['cat_name'], 1) ?> id="<?php echo esc_attr( $this->get_field_id('cat_name') ); ?>" name="<?php echo esc_attr( $this->get_field_name('cat_name') ); ?>" value="1" />
+	<label for="<?php echo esc_attr( $this->get_field_id('cat_name') ); ?>"><?php _e( 'Show Only Category Name', 'formidable' ) ?></label><br/>
 
-	<input class="checkbox" type="radio" <?php checked($instance['cat_name'], 0) ?> id="<?php echo $this->get_field_id('cat_name'); ?>" name="<?php echo $this->get_field_name('cat_name'); ?>" value="0" />
-	<label for="<?php echo $this->get_field_id('cat_name'); ?>"><?php _e( 'Show Entries Beneath Categories', 'formidable' ) ?></label></p>
+	<input class="checkbox" type="radio" <?php checked($instance['cat_name'], 0) ?> id="<?php echo esc_attr( $this->get_field_id('cat_name') ); ?>" name="<?php echo esc_attr( $this->get_field_name('cat_name') ); ?>" value="0" />
+	<label for="<?php echo esc_attr( $this->get_field_id('cat_name') ); ?>"><?php _e( 'Show Entries Beneath Categories', 'formidable' ) ?></label></p>
 	</div>
 
-	<p><label for="<?php echo $this->get_field_id('limit'); ?>"><?php _e( 'Entry Limit (leave blank to list all)', 'formidable' ) ?>:</label>
-	<input type="text" class="widefat" id="<?php echo $this->get_field_id('limit'); ?>" name="<?php echo $this->get_field_name('limit'); ?>" value="<?php echo esc_attr( $instance['limit'] ); ?>" /></p>
+	<p><label for="<?php echo esc_attr( $this->get_field_id('limit') ); ?>"><?php _e( 'Entry Limit (leave blank to list all)', 'formidable' ) ?>:</label>
+	<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id('limit') ); ?>" name="<?php echo esc_attr( $this->get_field_name('limit') ); ?>" value="<?php echo esc_attr( $instance['limit'] ); ?>" /></p>
 
 <?php
 	}

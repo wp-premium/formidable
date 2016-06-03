@@ -33,7 +33,7 @@ if ( $page_count <= 1 ) {
     $low_page = ($current_page >= 5) ? ($current_page-2) : 2;
     $high_page = (($current_page + 2) < ($page_count-1)) ? ($current_page+2) : ($page_count-1);
     for ( $i = $low_page; $i <= $high_page; $i++ ) { ?>
-<li class="<?php echo esc_attr( $current_page == $i ? 'active' : '' ) ?>"><a href="<?php echo esc_url( add_query_arg( array( $page_param => $i ) ) . $page_params ); ?>"><?php echo $i; ?></a></li> <?php
+<li class="<?php echo esc_attr( $current_page == $i ? 'active' : '' ) ?>"><a href="<?php echo esc_url( add_query_arg( array( $page_param => $i ) ) . $page_params ); ?>"><?php echo absint( $i ); ?></a></li> <?php
     }
     unset($low_page, $high_page, $i);
 
@@ -44,7 +44,7 @@ if ( $page_count <= 1 ) {
 
     // Display the last page icon
 ?>
-<li class="<?php echo esc_attr( $current_page == $page_count ? 'active' : '' ) ?>"><a href="<?php echo esc_url( add_query_arg( array( $page_param => $page_count ) ) . $page_params ); ?>"><?php echo $page_count; ?></a></li><?php
+<li class="<?php echo esc_attr( $current_page == $page_count ? 'active' : '' ) ?>"><a href="<?php echo esc_url( add_query_arg( array( $page_param => $page_count ) ) . $page_params ); ?>"><?php echo absint( $page_count ); ?></a></li><?php
 
     // Display the next page icon if there is a next page
 	if ( $current_page < $page_count ) { ?>

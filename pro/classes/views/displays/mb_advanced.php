@@ -30,7 +30,7 @@
         <td class="frm_left_label"><?php _e( 'Order', 'formidable' ); ?></td>
         <td>
             <div id="frm_order_options" class="frm_add_remove" style="padding-bottom:8px;">
-                <a href="javascript:void(0)" class="frm_add_order_row button" style="<?php echo empty($post->frm_order_by) ? '' : 'display:none'; ?>">+ <?php _e( 'Add', 'formidable' ) ?></a>
+				<a href="javascript:void(0)" class="frm_add_order_row button <?php echo esc_attr( empty( $post->frm_order_by ) ? '' : 'frm_hidden' ); ?>">+ <?php _e( 'Add', 'formidable' ) ?></a>
                 <div class="frm_logic_rows">
             <?php
 			foreach ( $post->frm_order_by as $order_key => $order_by_field ) {
@@ -50,7 +50,7 @@
         </td>
         <td>
             <div id="frm_where_options" class="frm_add_remove">
-                <a href="javascript:void(0)" class="frm_add_where_row button" style="<?php echo empty($post->frm_where) ? '' : 'display:none'; ?>">+ <?php _e( 'Add', 'formidable' ) ?></a>
+				<a href="javascript:void(0)" class="frm_add_where_row button <?php echo esc_attr( empty( $post->frm_where ) ? '' : 'frm_hidden' ); ?>">+ <?php _e( 'Add', 'formidable' ) ?></a>
                 <div class="frm_logic_rows">
             <?php
 				foreach ( $post->frm_where as $where_key => $where_field ) {
@@ -67,7 +67,7 @@
     <tr class="form-field">
         <td><?php _e( 'No Entries Message', 'formidable' ); ?></td>
         <td>
-            <textarea id="empty_msg" name="options[empty_msg]" style="width:98%"><?php echo FrmAppHelper::esc_textarea($post->frm_empty_msg) ?></textarea>
+            <textarea id="empty_msg" name="options[empty_msg]" class="frm_98_width"><?php echo FrmAppHelper::esc_textarea($post->frm_empty_msg) ?></textarea>
         </td>
     </tr>
 </table>

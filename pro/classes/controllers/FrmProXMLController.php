@@ -50,6 +50,8 @@ class FrmProXMLController{
     public static function csv_opts($forms) {
 		$csv_del = FrmAppHelper::get_param( 'csv_del', ',', 'get', 'sanitize_text_field' );
 		$form_id = FrmAppHelper::get_param( 'form_id', '', 'get', 'absint' );
+		$csv_files = FrmAppHelper::get_param( 'csv_files', '', 'get', 'absint' );
+
 		if ( 'object' == gettype( $forms ) ) {
 			// do_action resets an array with a single object in it
 			$forms = array( $forms );
@@ -170,7 +172,7 @@ class FrmProXMLController{
         }
 
         //upload
-        $media_id = ( isset( $_POST[ $name ] ) && ! empty( $_POST[ $name ] ) && is_numeric( $_POST[ $name ] ) ) ? $_POST[ $name ] : FrmProAppHelper::upload_file( $name );
+        $media_id = ( isset( $_POST[ $name ] ) && ! empty( $_POST[ $name ] ) && is_numeric( $_POST[ $name ] ) ) ? $_POST[ $name ] : FrmProFileField::upload_file( $name );
         if ( $media_id && ! is_wp_error( $media_id ) ) {
             $filename = get_attached_file($media_id);
         }
@@ -259,7 +261,8 @@ class FrmProXMLController{
         $imported = FrmProXMLHelper::import_csv($current_path, $vars['form_id'], $vars['data_array'], 0, $start_row+1, $vars['csv_del'], $vars['max']);
 
         $opts[$file_id] = array( 'row' => $vars['row'], 'imported' => $imported);
-        echo $remaining = ( (int) $vars['row'] - (int) $imported );
+        $remaining = ( (int) $vars['row'] - (int) $imported );
+		echo (int) $remaining;
 
         // check if the import is complete
         if ( ! $remaining ) {

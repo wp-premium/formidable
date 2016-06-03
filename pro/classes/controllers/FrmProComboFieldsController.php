@@ -51,7 +51,10 @@ class FrmProComboFieldsController {
 
 	public static function include_sub_label( $atts ) {
 		$is_form_builder = FrmAppHelper::is_admin_page('formidable' );
-		if ( $is_form_builder ) {
+		$ajax_action = FrmAppHelper::get_param( 'action', '', 'get', 'sanitize_text_field' );
+		$is_new_field = FrmAppHelper::doing_ajax() && ( $ajax_action == 'frm_insert_field' || $ajax_action == 'frm_load_field' );
+		
+		if ( $is_form_builder || $is_new_field ) {
 			self::include_inplace_sub_label( $atts );
 		} else {
 			self::show_sub_label( $atts );

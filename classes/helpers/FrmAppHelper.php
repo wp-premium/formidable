@@ -4,13 +4,13 @@ if ( ! defined('ABSPATH') ) {
 }
 
 class FrmAppHelper {
-	public static $db_version = 30; //version of the database we are moving to
-	public static $pro_db_version = 34;
+	public static $db_version = 32; //version of the database we are moving to
+	public static $pro_db_version = 36;
 
 	/**
 	 * @since 2.0
 	 */
-	public static $plug_version = '2.01.02';
+	public static $plug_version = '2.02';
 
     /**
      * @since 1.07.02
@@ -534,20 +534,6 @@ class FrmAppHelper {
         return do_shortcode( $matches[0] );
     }
 
-	public static function load_scripts( $scripts ) {
-        _deprecated_function( __FUNCTION__, '2.0', 'wp_enqueue_script' );
-        foreach ( (array) $scripts as $s ) {
-            wp_enqueue_script($s);
-        }
-    }
-
-	public static function load_styles( $styles ) {
-        _deprecated_function( __FUNCTION__, '2.0', 'wp_enqueue_style' );
-        foreach ( (array) $styles as $s ) {
-            wp_enqueue_style($s);
-        }
-    }
-
     public static function get_pages() {
 		return get_posts( array( 'post_type' => 'page', 'post_status' => array( 'publish', 'private' ), 'numberposts' => -1, 'orderby' => 'title', 'order' => 'ASC' ) );
     }
@@ -829,9 +815,11 @@ class FrmAppHelper {
         return $return;
     }
 
-	public static function esc_textarea( $text ) {
+	public static function esc_textarea( $text, $is_rich_text = false ) {
 		$safe_text = str_replace( '&quot;', '"', $text );
-		$safe_text = htmlspecialchars( $safe_text, ENT_NOQUOTES );
+		if ( ! $is_rich_text ) {
+			$safe_text = htmlspecialchars( $safe_text, ENT_NOQUOTES );
+		}
 		$safe_text = str_replace( '&amp;', '&', $safe_text );
 		return apply_filters( 'esc_textarea', $safe_text, $text );
 	}
@@ -1158,16 +1146,6 @@ class FrmAppHelper {
     <?php
     }
 
-    public static function get_us_states() {
-        _deprecated_function( __FUNCTION__, '2.0', 'FrmFieldsHelper::get_us_states' );
-        return FrmFieldsHelper::get_us_states();
-    }
-
-    public static function get_countries() {
-        _deprecated_function( __FUNCTION__, '2.0', 'FrmFieldsHelper::get_countries' );
-        return FrmFieldsHelper::get_countries();
-    }
-
 	public static function truncate( $str, $length, $minword = 3, $continue = '...' ) {
         if ( is_array( $str ) ) {
             return '';
@@ -1454,20 +1432,6 @@ class FrmAppHelper {
         } else {
             return ( self::get_last_record_num( $r_count, ( $current_p - 1 ), $p_size ) + 1 );
         }
-    }
-
-    /**
-     * @param string $table_name
-     */
-    public static function &getRecordCount( $where = '', $table_name ) {
-        _deprecated_function( __FUNCTION__, '2.0', 'FrmDb::get_count' );
-        $count = FrmDb::get_count( $table_name, $where );
-        return $count;
-    }
-
-    public static function get_referer_info() {
-        _deprecated_function( __FUNCTION__, '2.0', 'FrmAppHelper::get_server_value' );
-        return self::get_server_value('HTTP_REFERER');
     }
 
 	/**

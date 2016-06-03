@@ -1,0 +1,675 @@
+<?php
+
+class FrmProFileField {
+
+	public static function setup_dropzone( $field, $atts ) {
+		global $frm_vars;
+
+		$is_multiple = FrmField::is_option_true( $field, 'multiple' );
+
+		if ( ! isset( $frm_vars['dropzone_loaded'] ) || ! is_array( $frm_vars['dropzone_loaded'] ) ) {
+			$frm_vars['dropzone_loaded'] = array();
+		}
+
+		$the_id = $atts['file_name'] . '_dropzone';
+		if ( ! isset( $frm_vars['dropzone_loaded'][ $the_id ] ) ) {
+			if ( $is_multiple ) {
+				$max = empty( $field['max'] ) ? 99 : absint( $field['max'] );;
+			} else {
+				$max = 1;
+			}
+
+			$frm_vars['dropzone_loaded'][ $the_id ] = array(
+				'paramName'   => $atts['file_name'],
+				'maxFilesize' => self::get_max_file_size( $field['size'] ),
+				'maxFiles'    => $max,
+				'acceptedFiles' => implode( ',', $field['ftypes'] ),
+				'htmlID'      => $the_id,
+				'uploadMultiple' => $is_multiple,
+				'fieldID'     => $field['id'],
+				'formID'      => $field['form_id'],
+				'fieldName'   => $atts['field_name'],
+				'mockFiles'   => array(),
+			);
+
+			self::add_mock_files( $field['value'], $frm_vars['dropzone_loaded'][ $the_id ]['mockFiles'] );
+		}
+	}
+
+	private static function add_mock_files( $media_ids, &$mock_files ) {
+		$media_ids = maybe_unserialize( $media_ids );
+		if ( ! empty( $media_ids ) ) {
+			foreach ( (array) $media_ids as $media_id ) {
+				$file = self::get_mock_file( $media_id );
+				if ( ! empty( $file ) ) {
+					$mock_files[] = $file;
+				}
+			}
+		}
+	}
+
+	private static function get_mock_file( $media_id ) {
+		$file = array();
+		$image = get_attached_file( $media_id );
+		if ( file_exists( $image ) ) {
+			$url = wp_get_attachment_thumb_url( $media_id );
+			if ( ! $url ) {
+				$url = wp_get_attachment_image_src( $media_id, 'thumbnail', true );
+				if ( $url ) {
+					$url = reset( $url );
+				}
+			}
+			$label = basename( $image );
+			$size = filesize( $image );
+
+			$file = array(
+				'name' => $label, 'size' => $size,
+				'url' => $url, 'id' => $media_id,
+			);
+		}
+
+		return $file;
+	}
+
+	/**
+	 * Always hide the temp files from queries.
+	 * Hide all unattached form uploads from those without permission.
+	 */
+	public static function filter_media_library( $query ) {
+		if ( 'attachment' == $query->get('post_type') ) {
+			if ( current_user_can('frm_edit_entries') ) {
+				$show = FrmAppHelper::get_param( 'frm-attachment-filter', '', 'get', 'absint' );
+			} else {
+				$show = false;
+			}
+
+			$meta_query = array(
+				array(
+					'key'     => '_frm_temporary',
+					'compare' => 'NOT EXISTS',
+				),
+				array(
+					'key'     => '_frm_file',
+					'compare' => $show ? 'EXISTS' : 'NOT EXISTS',
+				),
+			);
+			$query->set( 'meta_query', $meta_query );
+		}
+	}
+
+	public static function validate( $errors, $field, $values, $args ) {
+		$field->temp_id = $args['id'];
+
+		$args['file_name'] = 'file' . $field->id;
+		if ( isset( $args['key_pointer'] ) && ( $args['key_pointer'] || $args['key_pointer'] === 0 ) ) {
+			$args['file_name'] .= '-' . $args['key_pointer'];
+		}
+
+		if ( isset( $_FILES[ $args['file_name'] ] ) ) {
+			self::validate_file_upload( $errors, $field, $args, $values );
+			if ( empty( $errors[ 'field' . $field->temp_id ] ) ) {
+				self::maybe_upload_temp_file( $errors, $field, $args, $values );
+			}
+		}
+
+		return $errors;
+	}
+
+	public static function validate_file_upload( &$errors, $field, $args, $values = array() ) {
+		$file_uploads = $_FILES[ $args['file_name'] ];
+
+		if ( self::file_was_selected( $file_uploads ) ) {
+			// If blank errors are set, remove them since a file was uploaded in this field
+			if ( isset( $errors[ 'field' . $field->temp_id ] ) ) {
+				unset( $errors[ 'field' . $field->temp_id ] );
+			}
+
+			self::validate_file_size( $errors, $field, $args );
+			self::validate_file_count( $errors, $field, $args, $values );
+			self::validate_file_type( $errors, $field, $args );
+
+		} elseif ( empty( $values ) ) {
+			$skip_required = FrmProEntryMeta::skip_required_validation( $field );
+			if ( $field->required && ! $skip_required ) {
+				$errors[ 'field' . $field->temp_id ] = FrmFieldsHelper::get_error_msg( $field, 'blank' );
+			}
+		}
+	}
+
+	private static function file_was_selected( $file_uploads ) {
+		//if the field is a file upload, check for a file
+		if ( empty( $file_uploads['name'] ) ) {
+			return false;
+		}
+
+		$filled = true;
+		if ( is_array( $file_uploads['name'] ) ) {
+			$filled = false;
+			foreach ( $file_uploads['name'] as $n ) {
+				if ( ! empty( $n ) ) {
+					$filled = true;
+				}
+			}
+		}
+		return $filled;
+	}
+
+	/**
+	 * @since 2.02
+	 */
+	public static function validate_file_size( &$errors, $field, $args ) {
+		$mb_limit = FrmField::get_option( $field, 'size' );
+		$size_limit = self::get_max_file_size( $mb_limit );
+		$file_uploads = (array) $_FILES[ $args['file_name'] ];
+
+		foreach ( (array) $file_uploads['name'] as $k => $name ) {
+
+			// check allowed file size
+			if ( ! empty( $file_uploads['error'] ) && in_array( 1, (array) $file_uploads['error'] ) ) {
+				$errors[ 'field' . $field->temp_id ] = __( 'This file is too big', 'formidable' );
+			}
+
+			if ( empty( $name ) ) {
+				continue;
+			}
+
+			$this_file_size = is_array( $file_uploads['size'] ) ? $file_uploads['size'][ $k ] : $file_uploads['size'];
+			$this_file_size = $this_file_size / 1000000; // compare in MB
+
+			if ( $this_file_size > $size_limit ) {
+				$errors[ 'field' . $field->temp_id ] = sprintf( __( 'That file is too big. It must be less than %dMB.', 'formidable' ), $size_limit );
+			}
+
+			unset( $name );
+		}
+	}
+
+	public static function get_max_file_size( $mb_limit = 256 ) {
+		if ( empty( $mb_limit ) || ! is_numeric( $mb_limit ) ) {
+			$mb_limit = 256;
+		}
+		$mb_limit = (float) $mb_limit;
+
+		$upload_max = (float) ini_get('upload_max_filesize');
+		$post_max = (float) ini_get('post_max_size');
+
+		return min( $upload_max, $post_max, $mb_limit );
+	}
+
+	/**
+	 * @since 2.02
+	 */
+	private static function validate_file_count( &$errors, $field, $args, $values ) {
+		$multiple_files_allowed = FrmField::get_option( $field, 'multiple' );
+		$file_count_limit = (int) FrmField::get_option( $field, 'max' );
+		if ( ! $multiple_files_allowed || empty( $file_count_limit ) ) {
+			return;
+		}
+
+		$total_upload_count = self::get_new_and_old_file_count( $field, $args, $values );
+		if ( $total_upload_count > $file_count_limit ) {
+			$errors[ 'field' . $field->temp_id ] = sprintf( __( 'You have uploaded too many files. You may only include %d file(s).', 'formidable' ), $file_count_limit );
+		}
+	}
+
+	/**
+	 * Count the number of new files uploaded
+	 * along with any previously uploaded files
+	 *
+	 * @since 2.02
+	 */
+	private static function get_new_and_old_file_count( $field, $args, $values ) {
+		$file_uploads = (array) $_FILES[ $args['file_name'] ];
+		$uploaded_count = count( array_filter( $file_uploads['tmp_name'] ) );
+
+		$previous_uploads = (array) self::get_file_posted_vals( $field->id, $args );
+		$previous_upload_count = count( array_filter( $previous_uploads ) );
+
+		$total_upload_count = $uploaded_count + $previous_upload_count;
+		return $total_upload_count;
+	}
+
+	/**
+	 * @since 2.02
+	 */
+	public static function validate_file_type( &$errors, $field, $args ) {
+		if ( isset( $errors[ 'field' . $field->temp_id ] ) ) {
+			return;
+		}
+
+		if ( FrmField::is_option_true( $field, 'restrict' ) && ! FrmField::is_option_empty( $field, 'ftypes' ) ) {
+            $mimes = $field->field_options['ftypes'];
+        } else {
+            $mimes = null;
+        }
+
+		$file_uploads = $_FILES[ $args['file_name'] ];
+		foreach ( (array) $file_uploads['name'] as $name ) {
+			if ( empty( $name ) ) {
+				continue;
+			}
+
+			//check allowed mime types for this field
+			$file_type = wp_check_filetype( $name, $mimes );
+			unset($name);
+
+			if ( ! $file_type['ext'] ) {
+				break;
+			}
+		}
+
+        if ( isset( $file_type ) && ! $file_type['ext'] ) {
+            $errors[ 'field' . $field->temp_id ] = self::get_invalid_file_type_message( $field );
+        }
+	}
+
+	private static function get_invalid_file_type_message( $field ) {
+		$default_invalid_messages = array( '' );
+		$default_invalid_messages[] = __( 'This field is invalid', 'formidable' );
+		$default_invalid_messages[] = $field->name . ' ' . __( 'is invalid', 'formidable' );
+		$is_default_message = in_array( $field->field_options['invalid'], $default_invalid_messages );
+
+		$invalid_type = __( 'Sorry, this file type is not permitted.', 'formidable' );
+		$invalid_message = $is_default_message ? $invalid_type : $field->field_options['invalid'];
+
+		return $invalid_message;
+	}
+
+    /**
+     * Upload new files, delete removed files
+     *
+     * @since 2.0
+     * @param array|string $meta_value (the posted value)
+     * @param int $field_id
+     * @param int $entry_id
+     * @return array|string $meta_value
+     *
+     */
+	public static function prepare_data_before_db( $meta_value, $field_id, $entry_id ) {
+		// If confirmation field or 0 index, exit now
+		if ( ! is_numeric( $field_id ) || $field_id === 0 ) {
+			return $meta_value;
+		}
+
+		$field = FrmField::getOne( $field_id );
+
+		if ( $field->type == 'file' ) {
+			// Upload files and get new meta value for file upload fields
+			$meta_value = self::prepare_file_upload_meta( $meta_value, $field, $entry_id );
+
+			if ( is_array( $meta_value ) ) {
+				$meta_value = array_map( 'intval', array_filter( $meta_value ) );
+			}
+		}
+
+		return $meta_value;
+    }
+
+	/**
+	* Get media ID(s) to be saved to database and set global media ID values
+	*
+	* @since 2.0
+	* @param array|string $prev_value (posted value)
+	* @param object $field
+	* @param integer $entry_id
+	* @return array|string $meta_value
+	*/
+	private static function prepare_file_upload_meta( $prev_value, $field, $entry_id ) {
+		// remove temp tag on uploads
+		self::remove_meta_from_media( $prev_value );
+
+		$last_saved_value = self::get_previous_file_ids( $field, $entry_id );
+		self::delete_removed_files( $last_saved_value, $prev_value, $field );
+		return $prev_value;
+	}
+
+	private static function maybe_upload_temp_file( &$errors, $field, $args, $values ) {
+		$file_uploads = $_FILES[ $args['file_name'] ];
+
+		if ( self::file_was_selected( $file_uploads ) ) {
+			$response = array( 'errors' => array(), 'media_ids' => array() );
+			self::upload_temp_files( $args['file_name'], $response );
+
+			if ( ! empty( $response['media_ids'] ) ) {
+				$previous_value = self::get_file_posted_vals( $field->id, $args );
+				$new_value = self::set_new_file_upload_meta_value( $field, $response['media_ids'], $previous_value );
+				self::set_file_posted_vals( $field->id, $new_value, $args );
+			}
+
+			if ( ! empty( $response['errors'] ) ) {
+				$errors[ 'field' . $field->temp_id ] = implode( ' ', $response['errors'] );
+			}
+		}
+	}
+
+	public static function ajax_upload() {
+		$response = array( 'errors' => array(), 'media_ids' => array() );
+		if ( ! empty( $_FILES ) ) {
+			$field_id = FrmAppHelper::get_param( 'field_id', '', 'post', 'absint' );
+			if ( $field_id ) {
+				$field = FrmField::getOne( $field_id );
+				$field->temp_id = $field->id;
+
+				foreach ( $_FILES as $file_name => $file ) {
+					$args = array( 'file_name' => $file_name );
+					FrmProFileField::validate_file_type( $response['errors'], $field, $args );
+					FrmProFileField::validate_file_size( $response['errors'], $field, $args );
+
+					if ( empty( $response['errors'] ) ) {
+						self::upload_temp_files( $file_name, $response );
+					}
+				}
+			}
+		}
+
+		return $response;
+	}
+
+	private static function upload_temp_files( $file_name, &$response ) {
+		$new_media_ids = self::upload_file( $file_name );
+
+		if ( empty( $new_media_ids ) ) {
+			$response['errors'][] = __( 'File upload failed', 'formidable' );
+		} else {
+			self::add_meta_to_media( $new_media_ids, 'temporary' );
+			$response['media_ids'] = $response['media_ids'] + (array) $new_media_ids;
+			self::sort_errors_from_ids( $response );
+		}
+	}
+
+    /**
+     * Let WordPress process the uploads
+     * @param int $field_id
+     */
+	public static function upload_file( $field_id ) {
+		require_once( ABSPATH . 'wp-admin/includes/file.php' );
+		require_once( ABSPATH . 'wp-admin/includes/image.php' );
+		require_once( ABSPATH . 'wp-admin/includes/media.php' );
+
+		$response = array( 'media_ids' => array(), 'errors' => array() );
+		add_filter( 'upload_dir', array( 'FrmProFileField', 'upload_dir' ) );
+
+		if ( is_array( $_FILES[ $field_id ]['name'] ) ) {
+			foreach ( $_FILES[ $field_id ]['name'] as $k => $n ) {
+				if ( empty( $n ) ) {
+					continue;
+				}
+
+				$f_id = $field_id . $k;
+				$_FILES[ $f_id ] = array(
+					'name'  => $n,
+					'type'  => $_FILES[ $field_id ]['type'][ $k ],
+					'tmp_name' => $_FILES[ $field_id ]['tmp_name'][ $k ],
+					'error' => $_FILES[ $field_id ]['error'][ $k ],
+					'size'  => $_FILES[ $field_id ]['size'][ $k ]
+				);
+
+				unset( $k, $n );
+
+				self::handle_upload( $f_id, $response );
+			}
+		} else {
+			self::handle_upload( $field_id, $response );
+		}
+
+		remove_filter( 'upload_dir', array( 'FrmProFileField', 'upload_dir' ) );
+
+		self::prepare_upload_response( $response );
+
+		return $response;
+	}
+
+	private static function handle_upload( $field_id, &$response ) {
+		add_filter( 'wp_insert_attachment_data', 'FrmProFileField::change_attachment_slug' );
+		$media_id = media_handle_upload( $field_id, 0 );
+		remove_filter( 'wp_insert_attachment_data', 'FrmProFileField::change_attachment_slug' );
+
+		if ( is_numeric( $media_id ) ) {
+			$response['media_ids'][] = $media_id;
+			self::add_meta_to_media( $media_id, 'file' );
+		} else {
+			$response['errors'][] = $media_id;
+		}
+	}
+
+	/**
+	 * Prevent attachments from using valuable top-level slug names
+	 */
+	public static function change_attachment_slug( $data ) {
+		$data['post_name'] = 'frm-' . $data['post_name'];
+		return $data;
+	}
+
+	private static function prepare_upload_response( &$response ) {
+		if ( empty( $response['media_ids'] ) ) {
+			$response = $response['errors'];
+		} else {
+			$response = $response['media_ids'];
+			if ( count( $response ) == 1 ) {
+				$response = reset( $response );
+			}
+		}
+	}
+
+	/**
+	* Get the final media IDs
+	*
+	* @since 2.0
+	* @param array|string $media_ids
+	* @return array $mids
+	*/
+	private static function sort_errors_from_ids( $response ) {
+        $mids = array();
+        foreach ( (array) $response['media_ids'] as $media_id ) {
+            if ( is_numeric( $media_id ) ) {
+               $mids[] = $media_id;
+            } else {
+                foreach ( $media_id->errors as $error ) {
+                    if ( ! is_array( $error[0] ) ) {
+                        $response['errors'][] = $error[0];
+                    }
+                    unset( $error );
+                }
+            }
+            unset( $media_id );
+        }
+
+		$response['media_ids'] = array_filter( $mids );
+	}
+
+	/**
+	 * Set _frm_temporary and _frm_file metas
+	 * to use for media library filtering
+	 */
+	private static function add_meta_to_media( $media_ids, $type = 'temporary' ) {
+		foreach ( (array) $media_ids as $media_id ) {
+			if ( is_numeric( $media_id ) ) {
+				update_post_meta( $media_id, '_frm_' . $type, 1 );
+			}
+		}
+	}
+
+	/**
+	 * When an entry is saved, remove the temp flag
+	 */
+	private static function remove_meta_from_media( $media_ids ) {
+		foreach ( (array) $media_ids as $media_id ) {
+			if ( is_numeric( $media_id ) ) {
+				delete_post_meta( $media_id, '_frm_temporary' );
+			}
+		}
+	}
+
+    /**
+	 * Upload files into "formidable" subdirectory
+	 */
+	public static function upload_dir( $uploads ) {
+		$form_id = FrmAppHelper::get_post_param( 'form_id', 0, 'absint' );
+		$relative_path = self::get_upload_dir_for_form( $form_id );
+
+		if ( ! empty( $relative_path ) ) {
+			$uploads['path'] = $uploads['basedir'] . '/' . $relative_path;
+			$uploads['url'] = $uploads['baseurl'] . '/' . $relative_path;
+			$uploads['subdir'] = '/' . $relative_path;
+		}
+
+		return $uploads;
+	}
+
+	public static function get_upload_dir_for_form( $form_id ) {
+		$base = 'formidable';
+		if ( $form_id ) {
+			$base .= '/' . $form_id;
+		}
+
+		$relative_path = apply_filters( 'frm_upload_folder', $base, compact( 'form_id' ) );
+		$relative_path = untrailingslashit( $relative_path );
+
+		return $relative_path;
+	}
+
+	/**
+	 * Automatically delete files when an entry is deleted.
+	 * If the "Delete all entries" button is used, entries will not be deleted
+	 * @since 2.0.22
+	 */
+	public static function delete_files_with_entry( $entry_id, $entry = false ) {
+		if ( empty( $entry ) ) {
+			return;
+		}
+
+		$upload_fields = FrmField::getAll( array( 'fi.type' => 'file', 'fi.form_id' => $entry->form_id ) );
+		foreach ( $upload_fields as $field ) {
+			self::delete_files_from_field( $field, $entry );
+			unset( $field );
+		}
+	}
+
+	/**
+	 * @since 2.0.22
+	 */
+	public static function delete_files_from_field( $field, $entry ) {
+		if ( self::should_delete_files( $field ) ) {
+			$media_ids = self::get_previous_file_ids( $field, $entry );
+			self::delete_files_now( $media_ids );
+		}
+	}
+
+	private static function should_delete_files( $field ) {
+		$auto_delete = FrmField::get_option_in_object( $field, 'delete' );
+		return ! empty( $auto_delete );
+	}
+
+	/**
+	 * @since 2.0.22
+	 */
+	private static function get_previous_file_ids( $field, $entry_id ) {
+		return FrmProEntryMetaHelper::get_post_or_meta_value( $entry_id, $field );
+	}
+
+	private static function delete_removed_files( $old_value, $new_value, $field ) {
+		if ( self::should_delete_files( $field ) ) {
+			$media_ids = self::get_removed_file_ids( $old_value, $new_value );
+			self::delete_files_now( $media_ids );
+		}
+	}
+
+	/**
+	 * @since 2.0.22
+	 */
+	private static function get_removed_file_ids( $old_value, $new_value ) {
+		$media_ids = array_diff( (array) $old_value, (array) $new_value );
+		return $media_ids;
+	}
+
+	/**
+	 * @since 2.0.22
+	 */
+	private static function delete_files_now( $media_ids ) {
+		if ( empty( $media_ids ) ) {
+			return;
+		}
+
+		$media_ids = maybe_unserialize( $media_ids );
+		foreach ( (array) $media_ids as $m ) {
+			if ( is_numeric( $m ) ) {
+				wp_delete_attachment( $m, true );
+			}
+		}
+	}
+
+	/**
+	 * @since 2.02
+	 */
+	private static function get_file_posted_vals( $field_id, $args ) {
+		if ( self::is_field_repeating( $field_id, $args ) ) {
+			$value = $_POST['item_meta'][ $args['parent_field_id'] ][ $args['key_pointer'] ][ $field_id ];
+		} else {
+			$value = $_POST['item_meta'][ $field_id ];
+		}
+		return $value;
+	}
+
+    /**
+    *
+    * @since 2.0
+    * @param int $field_id
+    * @param $new_value to set
+    * @param array $args array with repeating, key_pointer, and parent_field
+    */
+    private static function set_file_posted_vals( $field_id, $new_value, $args ) {
+        if ( self::is_field_repeating( $field_id, $args ) ) {
+            $_POST['item_meta'][ $args['parent_field_id'] ][ $args['key_pointer'] ][ $field_id ] = $new_value;
+        } else {
+            $_POST['item_meta'][ $field_id ] = $new_value;
+        }
+    }
+
+	/**
+	* Get the final value for a file upload field
+	*
+	* @since 2.0.19
+	*
+	* @param object $field
+	* @param array $new_mids
+	* @param array|string $prev_value
+	* @return array|string $new_value
+	*/
+	private static function set_new_file_upload_meta_value( $field, $new_mids, $prev_value ) {
+		// If no media IDs to upload, end now
+		if ( empty( $new_mids ) ) {
+			$new_value = $prev_value;
+		} else {
+
+			if ( FrmField::is_option_true( $field, 'multiple' ) ) {
+				// Multi-file upload fields
+
+				if ( ! empty( $prev_value ) ) {
+					$new_value = array_merge( (array) $prev_value, $new_mids );
+				} else {
+					$new_value = $new_mids;
+				}
+
+			} else {
+				// Single file upload fields
+				$new_value = reset( $new_mids );
+			}
+		}
+
+		return $new_value;
+	}
+
+	private static function is_field_repeating( $field_id, $args ) {
+		// Assume this field is not repeating
+		$repeating = false;
+
+		if ( isset( $args['parent_field_id'] ) && $args['parent_field_id'] && isset( $args['key_pointer'] ) ) {
+			// Check if the current field is inside of the parent/pointer
+			if ( isset( $_POST['item_meta'][ $args['parent_field_id'] ][ $args['key_pointer'] ][ $field_id ] ) ) {
+				$repeating = true;
+			}
+		}
+
+		return $repeating;
+	}
+}

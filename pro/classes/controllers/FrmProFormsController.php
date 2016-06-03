@@ -6,6 +6,7 @@ class FrmProFormsController{
         global $frm_vars;
 
         $post_types = FrmProAppHelper::get_custom_post_types();
+		$has_file_field = FrmProFormsHelper::has_field( 'file', $values['id'], true );
 
         require(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-forms/add_form_options.php');
     }
@@ -135,6 +136,9 @@ class FrmProFormsController{
 		echo ' frm_pro_form ';
 		if ( isset( $form->options['js_validate'] ) && $form->options['js_validate'] ) {
 			echo ' frm_js_validate ';
+		}
+		if ( FrmProForm::is_ajax_on( $form ) ) {
+			echo ' frm_ajax_submit ';
 		}
 	}
 

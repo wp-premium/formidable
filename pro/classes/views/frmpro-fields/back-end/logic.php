@@ -1,17 +1,19 @@
-<tr><td><?php _e( 'Conditional Logic', 'formidable' ); ?></td>
+<tr><td><?php esc_html_e( 'Conditional Logic', 'formidable' ); ?></td>
 	<td>
-		<a href="javascript:void(0)" id="logic_<?php echo $field['id'] ?>" class="frm_add_logic_row frm_add_logic_link <?php echo
-		( ! empty($field['hide_field']) && (count($field['hide_field']) > 1 || reset($field['hide_field']) != '') ) ? ' frm_hidden' : '';
-		?>"><?php _e( 'Use Conditional Logic', 'formidable' ) ?></a>
+		<a href="javascript:void(0)" id="logic_<?php echo absint( $field['id'] ) ?>" class="frm_add_logic_row frm_add_logic_link <?php
+		echo ( ! empty($field['hide_field']) && (count($field['hide_field']) > 1 || reset($field['hide_field']) != '') ) ? ' frm_hidden' : '';
+		?>">
+			<?php esc_html_e( 'Use Conditional Logic', 'formidable' ) ?>
+		</a>
 		<div class="frm_logic_rows<?php echo ( ! empty( $field['hide_field'] ) && ( count($field['hide_field']) > 1 || reset( $field['hide_field'] ) != '' ) ) ? '' : ' frm_hidden'; ?>">
-			<div id="frm_logic_row_<?php echo $field['id'] ?>">
-				<select name="field_options[show_hide_<?php echo $field['id'] ?>]">
+			<div id="frm_logic_row_<?php echo absint( $field['id'] ) ?>">
+				<select name="field_options[show_hide_<?php echo absint( $field['id'] ) ?>]">
 					<option value="show" <?php selected($field['show_hide'], 'show') ?>><?php echo ($field['type'] == 'break') ? __( 'Do not skip', 'formidable' ) : __( 'Show', 'formidable' ); ?></option>
 					<option value="hide" <?php selected($field['show_hide'], 'hide') ?>><?php echo ($field['type'] == 'break') ? __( 'Skip', 'formidable' ) : __( 'Hide', 'formidable' ); ?></option>
 				</select>
 
 				<?php $all_select =
-					'<select name="field_options[any_all_'. $field['id'] .']">'.
+					'<select name="field_options[any_all_'. absint( $field['id'] ) .']">'.
 					'<option value="any" '. selected($field['any_all'], 'any', false) .'>'. __( 'any', 'formidable' ) .'</option>'.
 					'<option value="all" '. selected($field['any_all'], 'all', false) .'>'. __( 'all', 'formidable' ) .'</option>'.
 					'</select>';

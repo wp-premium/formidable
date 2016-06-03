@@ -1,5 +1,5 @@
 <div id="<?php echo esc_attr( $id ) ?>" class="frm_logic_row frm_logic_row_<?php echo esc_attr( $key ) ?>">
-<select name="<?php echo $names['hide_field'] ?>" <?php if ( ! empty( $onchange ) ) { ?>onchange="<?php echo $onchange ?>"<?php } ?>>
+<select name="<?php echo esc_attr( $names['hide_field'] ) ?>" <?php if ( ! empty( $onchange ) ) { ?>onchange="<?php echo $onchange ?>"<?php } ?>>
     <option value=""><?php _e( '&mdash; Select &mdash;' ) ?></option>
     <?php
     foreach ( $form_fields as $ff ) {
@@ -19,7 +19,7 @@
 </select>
 <?php _e( 'is', 'formidable' ); ?>
 
-<select name="<?php echo $names['hide_field_cond'] ?>">
+<select name="<?php echo esc_attr( $names['hide_field_cond'] ) ?>">
     <option value="==" <?php selected($condition['hide_field_cond'], '==') ?>><?php _e( 'equal to', 'formidable' ) ?></option>
     <option value="!=" <?php selected($condition['hide_field_cond'], '!=') ?>><?php _e( 'NOT equal to', 'formidable' ) ?> &nbsp;</option>
     <option value=">" <?php selected($condition['hide_field_cond'], '>') ?>><?php _e( 'greater than', 'formidable' ) ?></option>

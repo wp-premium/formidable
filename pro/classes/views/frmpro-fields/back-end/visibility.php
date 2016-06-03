@@ -11,7 +11,7 @@
 		}
 		?>
 
-		<select name="field_options[admin_only_<?php echo $field['id'] ?>]">
+		<select name="field_options[admin_only_<?php echo absint( $field['id'] ) ?>]">
 			<option value=""><?php _e( 'Everyone', 'formidable' ) ?></option>
 			<?php FrmAppHelper::roles_options($field['admin_only']); ?>
 			<option value="loggedin" <?php selected($field['admin_only'], 'loggedin') ?>><?php _e( 'Logged-in Users', 'formidable' ) ?></option>

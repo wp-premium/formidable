@@ -99,10 +99,25 @@ class FrmProField {
             FrmField::update($field->id, array( 'options' => serialize($options)));
         } else if ( $field->type == 'hidden' && isset($field_options['required']) && $field_options['required'] ) {
             $field_options['required'] = false;
+        } else if ( $field->type == 'file' ) {
+        	self::format_mime_types( $field_options );
         }
 
         return $field_options;
     }
+
+	private static function format_mime_types( &$options ) {
+		$file_options = isset( $options['ftypes'] ) ? $options['ftypes'] : array();
+		if ( ! empty( $file_options ) ) {
+			$mime_array = array();
+
+			foreach ( $file_options as $file_option ) {
+				$values = explode( '|||', $file_option );
+				$mime_array[ $values[0] ] = $values[1];
+			}
+			$options['ftypes'] = $mime_array;
+		}
+	}
 
 	public static function duplicate( $values ) {
         global $frm_duplicate_ids;

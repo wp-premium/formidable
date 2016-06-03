@@ -129,6 +129,10 @@ input.frm_insert_in_template{
     visibility:hidden;
 }
 
+.frm_no_float{
+	float:none;
+}
+
 .frm_clear_none{
     clear:none;
 }
@@ -609,14 +613,6 @@ form label.frm_primary_label input{font-size:12px;}
 }
 .frm_form_fields div.star a, .frm_form_fields div.star a:hover, .frm_form_fields div.star a:visited{position:static;right:auto;}
 
-.edit_field_type_file ~ .edit_field_type_break .frm_hidden.frm_pro_tip{
-	display:block;
-	color:red;
-	border-color:red;
-	background-color: transparent;
-	margin-top:10px;
-}
-
 .frm_ext_sc{display:none;}
 .frm_long_input{width:95% !important;}
 
@@ -660,7 +656,7 @@ label input[type="checkbox"], label input[type="radio"] {vertical-align:inherit;
 }
 .frm_form_builder a:hover{text-decoration:underline;}
 .frm_form_builder .widget-title h4 {padding:10px 15px;}
-.frm_form_builder .widget-top a.widget-action:after {padding: 7px 12px 0;}
+.frm_form_builder .widget-top a.widget-action:after{margin: 7px 12px 0;}
 #postbox-container-1{width:270px;}
 #postbox-container-1 .nodrag a{cursor:pointer;}
 #postbox-container-1 .frm_field_list #frm-insert-fields{
@@ -1084,6 +1080,8 @@ select.frm_cancelnew, input.frm_enternew{width:175px;}
 	-moz-animation-delay: 0.5s;
 	animation-delay: 0.5s;
 }
+
+.frm_98_width{width:98% !important;}
 
 /*Form Settings Tab*/
 .frm_form_settings .advanced_settings .form-table{margin-top:0;}

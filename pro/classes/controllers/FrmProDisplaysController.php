@@ -352,6 +352,8 @@ class FrmProDisplaysController {
 			$editor_args['tinymce'] = false;
 		}
 
+		$use_dynamic_content = in_array( $post->frm_show_count, array( 'dynamic', 'calendar' ) );
+
 		include( FrmAppHelper::plugin_path() . '/pro/classes/views/displays/mb_dyncontent.php' );
 	}
 
@@ -361,7 +363,7 @@ class FrmProDisplaysController {
 		//add form nav via javascript
 		$form = get_post_meta( $post->ID, 'frm_form_id', true );
 		if ( $form ) {
-			echo '<div id="frm_nav_container" style="display:none;margin-top:-10px">';
+			echo '<div id="frm_nav_container" class="frm_hidden" style="margin-top:-10px">';
 			FrmAppController::get_form_nav( $form, true, 'hide' );
 			echo '<div class="clear"></div>';
 			echo '</div>';
@@ -1196,32 +1198,84 @@ class FrmProDisplaysController {
 			return $where['it.id'];
 		}
 
-		$display_page_query = array(
+		$query_args = array(
 			'order_by_array' => $view->frm_order_by,
 			'order_array' => $view->frm_order,
 			'posts' => $atts['form_posts'],
 			'display' => $view,
 		);
-		self::maybe_add_limit_to_query( $view, $display_page_query );
 
 		if ( $view->frm_page_size ) {
-			$current_page = self::get_current_page_num( $view->ID );
-			$entry_ids = FrmProEntry::get_view_page( $current_page, $view->frm_page_size, $where, $display_page_query );
+			$entry_ids = self::get_view_page( $view, $where, $query_args );
 		} else {
-			$entry_ids = FrmProEntry::get_view_results( $where, $display_page_query );
+			self::maybe_add_limit_to_query( $view, $query_args );
+			$entry_ids = FrmProEntry::get_view_results( $where, $query_args );
 		}
 
 		return $entry_ids;
 	}
 
 	/**
-	 * Get the page number from the url, and make sure it isn't 0
+	 * Get a page of entries for a View
+	 *
+	 * @since 2.02
+	 * @param object $view
+	 * @param array $where
+	 * @param array $args
+	 * @return array
+	 */
+	private static function get_view_page( $view, $where, $args ) {
+		$current_page = self::get_current_page_num( $view->ID );
+
+		$entry_limit_for_page = self::get_entry_limit_for_current_page( $current_page, $view );
+
+		if ( $entry_limit_for_page < 0 ) {
+			return array();
+		}
+
+		$end_index = $current_page * $entry_limit_for_page;
+		$start_index = $end_index - $entry_limit_for_page;
+
+		$args['limit'] = " LIMIT $start_index,$entry_limit_for_page";
+		$results = FrmProEntry::get_view_results( $where, $args );
+
+		return $results;
+	}
+
+	/**
+	 * Get the page number from the URL, and make sure it isn't 0
+	 *
+	 * @param int $view_id
+	 * @return int
 	 */
 	private static function get_current_page_num( $view_id ) {
 		$page_param = ( $_GET && isset( $_GET[ 'frm-page-' . $view_id ] ) ) ? 'frm-page-' . $view_id : 'frm-page';
 		$current_page = FrmAppHelper::simple_get( $page_param, 'absint', 1 );
 		return max( 1, $current_page );
 	}
+
+	/**
+	 * Get the number of entries that should be displayed on the current page
+	 * Takes into account the limit, page size, and the current page being displayed
+	 *
+	 * @since 2.02
+	 * @param int $current_page
+	 * @param object $view
+	 * @return int
+	 */
+	private static function get_entry_limit_for_current_page( $current_page, $view ) {
+		$page_size = $view->frm_page_size;
+		if ( is_numeric( $view->frm_limit ) ) {
+			$current_page_size = $view->frm_limit - ( ( $current_page - 1 ) * $view->frm_page_size );
+
+			if ( $current_page_size < 0 || $current_page_size < $view->frm_page_size ) {
+				$page_size = $current_page_size;
+			}
+		}
+
+		return (int) $page_size;
+	}
+
 
 	/**
 	 * Skip the filters when a post is displayed or the entry_id parameter is set in shortcode
@@ -2582,11 +2636,6 @@ class FrmProDisplaysController {
 
         wp_die();
     }
-
-	public static function get_pagination_file( $filename, $atts ) {
-		_deprecated_function( __FUNCTION__, '2.0', 'FrmAppHelper::get_file_contents' );
-		return FrmAppHelper::get_file_contents($filename, $atts);
-	}
 
 	public static function filter_after_content( $content, $display, $show, $atts ) {
 		_deprecated_function( __FUNCTION__, '2.0.23', 'FrmProDisplaysController::replace_entry_count_shortcode()' );

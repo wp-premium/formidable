@@ -231,6 +231,7 @@ class FrmAppController {
 		wp_register_style( 'formidable-admin', FrmAppHelper::plugin_url() . '/css/frm_admin.css', array(), $version );
         wp_register_script( 'bootstrap_tooltip', FrmAppHelper::plugin_url() . '/js/bootstrap.min.js', array( 'jquery' ), '3.3.4' );
 		wp_register_style( 'formidable-grids', FrmAppHelper::plugin_url() . '/css/frm_grids.css', array(), $version );
+		wp_register_style( 'formidable-dropzone', FrmAppHelper::plugin_url() . '/css/dropzone.css', array(), $version );
 
 		// load multselect js
 		wp_register_script( 'bootstrap-multiselect', FrmAppHelper::plugin_url() . '/js/bootstrap-multiselect.js', array( 'jquery', 'bootstrap_tooltip' ), '0.9.8', true );
@@ -249,6 +250,7 @@ class FrmAppController {
 
             wp_enqueue_style( 'formidable-admin' );
 			wp_enqueue_style( 'formidable-grids' );
+			wp_enqueue_style( 'formidable-dropzone' );
             add_thickbox();
 
             wp_register_script( 'formidable-editinplace', FrmAppHelper::plugin_url() . '/js/jquery/jquery.editinplace.packed.js', array( 'jquery' ), '2.3.0' );
@@ -289,11 +291,6 @@ class FrmAppController {
     	return preg_replace_callback( $regex, 'FrmAppHelper::widget_text_filter_callback', $content );
     }
 
-    public static function widget_text_filter_callback( $matches ) {
-        _deprecated_function( __FUNCTION__, '2.0', 'FrmAppHelper::widget_text_filter_callback' );
-        return FrmAppHelper::widget_text_filter_callback( $matches );
-    }
-
     public static function front_head() {
         if ( is_multisite() ) {
             $old_db_version = get_option( 'frm_db_version' );
@@ -318,11 +315,6 @@ class FrmAppController {
 	public static function load_css() {
 		_deprecated_function( __FUNCTION__, '2.0.9', 'FrmStylesController::load_saved_css' );
 		return FrmStylesController::load_saved_css();
-	}
-
-	public static function footer_js( $location = 'footer' ) {
-		_deprecated_function( __FUNCTION__, '2.0', 'FrmAppHelper::widget_text_filter_callback' );
-		return FrmFormsController::footer_js( $location );
 	}
 
 	/**
@@ -423,10 +415,5 @@ class FrmAppController {
     public static function get_form_shortcode( $atts ) {
         _deprecated_function( __FUNCTION__, '1.07.05', 'FrmFormsController::get_form_shortcode()' );
         return FrmFormsController::get_form_shortcode( $atts );
-    }
-
-    public static function get_postbox_class() {
-        _deprecated_function( __FUNCTION__, '2.0' );
-        return 'postbox-container';
     }
 }

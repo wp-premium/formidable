@@ -20,7 +20,7 @@
 		<a href="#" class="button-secondary alignright frm_show_comment" data-frmtoggle="#frm_comment_form">+ <?php esc_html_e( 'Add Note/Comment', 'formidable' ) ?></a>
         <div class="clear"></div>
 
-        <form action="<?php echo esc_url( '?page=formidable-entries&frm_action=show&id=' . absint( $entry->form_id ) . '#frm_comment_form' ) ?>" name="frm_comment_form" id="frm_comment_form" method="post" class="frm_hidden">
+        <form action="<?php echo esc_url( '?page=formidable-entries&frm_action=show&id=' . absint( $entry->id ) . '#frm_comment_form' ) ?>" name="frm_comment_form" id="frm_comment_form" method="post" class="frm_hidden">
             <input type="hidden" name="frm_action" value="show" />
             <input type="hidden" name="field_id" value="0" />
 			<input type="hidden" name="item_id" value="<?php echo absint( $entry->id ) ?>" />

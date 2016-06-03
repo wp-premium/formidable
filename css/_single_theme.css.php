@@ -402,11 +402,6 @@ if ( ! isset( $center_form ) ) {
     color:transparent<?php echo esc_html( $important ) ?>;
 }
 
-.<?php echo esc_html( $style_class ) ?> .frm_file_names, .<?php echo esc_html( $style_class ) ?> .frm_uploaded_files .frm_remove_link{
-	font-family:<?php echo FrmAppHelper::kses( $font . $important ) ?>;
-	font-size:<?php echo esc_html( $field_font_size . $important ) ?>;
-}
-
 .<?php echo esc_html( $style_class ) ?> .frm_default,
 .<?php echo esc_html( $style_class ) ?> .placeholder,
 .<?php echo esc_html( $style_class ) ?> .chosen-container-multi .chosen-choices li.search-field .default,
@@ -489,6 +484,7 @@ if ( ! isset( $center_form ) ) {
 
 <?php
 if ( ! $submit_style ) { ?>
+.<?php echo esc_html( $style_class ) ?> .frm_compact .frm_dropzone.dz-clickable .dz-message,
 .<?php echo esc_html( $style_class ) ?> input[type=submit],
 .<?php echo esc_html( $style_class ) ?> .frm_submit input[type=button],
 .frm_form_submit_style,
@@ -752,6 +748,25 @@ if ( ! $submit_style ) { ?>
 }
 .<?php echo esc_html( $style_class ) ?> .frm_button .frm_icon_font:before{
     font-size:<?php echo esc_html( $submit_font_size . $important ) ?>;
+}
+
+/* Dropzone */
+.<?php echo esc_html( $style_class ) ?> .frm_dropzone{
+	border-color:#<?php echo esc_html( $border_color . $important ) ?>;
+	border-radius:<?php echo esc_html( $border_radius . $important ) ?>;
+	color:#<?php echo esc_html( $text_color . $important ) ?>;
+	background-color:<?php echo esc_html( ( empty( $bg_color ) ? 'transparent' : '#' . $bg_color ) . $important ); ?>;
+}
+
+.<?php echo esc_html( $style_class ) ?> .frm_dropzone .frm_upload_icon:before,
+.<?php echo esc_html( $style_class ) ?> .frm_dropzone .dz-remove{
+	color:#<?php echo esc_html( $text_color . $important ) ?>;
+}
+
+.<?php echo esc_html( $style_class ) ?> .frm_blank_field .frm_dropzone{
+	border-color:#<?php echo esc_html( $border_color_error . $important ) ?>;
+	color:#<?php echo esc_html( $text_color_error . $important ) ?>;
+	background-color:<?php echo esc_html( ( empty( $bg_color_error ) ? 'transparent' : '#' . $bg_color_error ) . $important ); ?>;
 }
 
 /* RTL Grids */

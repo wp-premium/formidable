@@ -436,6 +436,18 @@ class FrmProFormsHelper{
 		return $initial_load;
 	}
 
+	public static function load_dropzone_js( $frm_vars ) {
+		if ( ! isset( $frm_vars['dropzone_loaded'] ) || empty( $frm_vars['dropzone_loaded'] ) || ! is_array( $frm_vars['dropzone_loaded'] ) ) {
+			return;
+		}
+
+		$js = array();
+		foreach ( $frm_vars['dropzone_loaded'] as $field_id => $options ) {
+			$js[] = $options;
+		}
+		echo '__frmDropzone=' . json_encode( $js ) . ';';
+	}
+
 	public static function load_datepicker_js( $frm_vars ) {
         if ( ! isset($frm_vars['datepicker_loaded']) || empty($frm_vars['datepicker_loaded']) || ! is_array($frm_vars['datepicker_loaded']) ) {
             return;
@@ -466,7 +478,7 @@ class FrmProFormsHelper{
 					'changeMonth' => 'true',
 					'changeYear'  => 'true',
 					'yearRange'   => $options['start_year'] . ':' . $options['end_year'],
-					'defaultDate' => empty( $options['default_date'] ) ? "''" : 'new Date(' . $options['default_date'] . ')',
+					'defaultDate' => empty( $options['default_date'] ) ? '' : $options['default_date'],
 					'beforeShowDay' => null,
 				),
 				'customOptions'  => $custom_options,
@@ -475,13 +487,13 @@ class FrmProFormsHelper{
 
 			if ( empty( $custom_options ) ) {
 				$datepicker_js[] = $date_options;
-			} else {
+			} else if ( $date_field_id ) {
 				?>
 jQuery(document).ready(function($){
 $('<?php echo esc_attr( $trigger_id ) ?>').addClass('frm_custom_date');
 $(document).on('focusin','<?php echo esc_attr( $trigger_id ) ?>', function(){
 $.datepicker.setDefaults($.datepicker.regional['']);
-$(this).datepicker($.extend($.datepicker.regional['<?php echo $options['locale'] ?>'],{dateFormat:'<?php echo $frmpro_settings->cal_date_format ?>',changeMonth:true,changeYear:true,yearRange:'<?php echo $options['start_year'] . ':' . $options['end_year'] ?>',defaultDate:<?php echo $date_options['options']['defaultDate'];
+$(this).datepicker($.extend($.datepicker.regional['<?php echo esc_js( $options['locale'] ) ?>'],{dateFormat:'<?php echo esc_js( $frmpro_settings->cal_date_format ) ?>',changeMonth:true,changeYear:true,yearRange:'<?php echo esc_js( $date_options['options']['yearRange'] ) ?>',defaultDate:'<?php echo esc_js( $date_options['options']['defaultDate'] ); ?>'<?php
 echo $custom_options;
 ?>}));
 });
@@ -552,6 +564,7 @@ echo $custom_options;
         foreach ( $frm_vars['calc_fields'] as $result => $field ) {
 			$calc_rules['fieldsWithCalc'][ $field['field_id'] ] = $result;
             $calc = $field['calc'];
+			FrmProFieldsHelper::replace_non_standard_formidable_shortcodes( compact('field'), $calc );
             preg_match_all("/\[(.?)\b(.*?)(?:(\/))?\]/s", $calc, $matches, PREG_PATTERN_ORDER);
 
             $field_keys = $calc_fields = array();
@@ -571,19 +584,19 @@ echo $custom_options;
                 $calc = str_replace($matches[0][$match_key], '['. $calc_fields[$val]->id .']', $calc);
 
 				// Prevent invalid decrement error for -- in calcs
-				$calc = str_replace( '-[', '- [', $calc );
+				if ( $field['calc_type'] != 'text' ) {
+					$calc = str_replace( '-[', '- [', $calc );
+				}
 			}
 
             $triggers[] = reset($field_keys);
-            $calc_rules['calc'][$result] = array(
-				'calc'      	=> $calc,
-				'calc_dec'		=> $field['calc_dec'],
-				'fields'    	=> array(),
-				'field_id'		=> $field['field_id'],
-				'form_id'		=> $field['parent_form_id'],
-	            'inSection'     => $field['in_section'],
-	            'inEmbedForm'   => $field['in_embed_form'],
-            );
+			$calc_rules['calc'][ $result ] = self::get_calc_rule_for_field( array(
+				'field'    => $field,
+				'calc'     => $calc,
+				'field_id' => $field['field_id'],
+				'form_id'  => $field['parent_form_id'],
+			) );
+			$calc_rules['calc'][ $result ]['fields'] = array();
 
             foreach ( $calc_fields as $calc_field ) {
                 $calc_rules['calc'][$result]['fields'][] = $calc_field->id;
@@ -618,6 +631,29 @@ echo $custom_options;
 		echo 'else{' . $var_name . '=jQuery.extend(true,{},' . $var_name . ',frmcalcs);}';
     }
 
+	public static function get_calc_rule_for_field( $atts ) {
+		$field = $atts['field'];
+
+		$rule = array(
+			'calc'			=> isset( $atts['calc'] ) ? $atts['calc'] : $field['calc'],
+			'calc_dec'		=> $field['calc_dec'],
+			'calc_type'		=> $field['calc_type'],
+			'form_id'		=> $atts['form_id'],
+			'field_id'		=> isset( $atts['field_id'] ) ? $atts['field_id'] : $field['id'],
+			'in_section'    => isset( $field['in_section'] ) ? $field['in_section'] : '0',
+			'in_embed_form' => isset( $field['in_embed_form'] ) ? $field['in_embed_form'] : '0',
+		);
+
+		$rule['inSection'] = $rule['in_section'];
+		$rule['inEmbedForm'] = $rule['in_embed_form'];
+
+		if ( isset( $atts['parent_form_id'] ) ) {
+			$rule['parent_form_id'] = $atts['parent_form_id'];
+		}
+
+		return $rule;
+	}
+
 	/**
 	 * Get the field call for a calc field
 	 *
@@ -631,11 +667,16 @@ echo $custom_options;
 		$html_field_id = '="field_'. $calc_field->field_key;
 
 		// If field is inside of repeating section/embedded form or it is a radio, scale, or checkbox field
-		if ( in_array( $calc_field->type, array( 'radio', 'scale', 'checkbox' ) ) ||
-			( $calc_field->type == 'lookup' && $calc_field->field_options['data_type'] == 'radio' ) ||
-			$parent_form_id != $calc_field->form_id
-		) {
+		$has_changing_ids = in_array( $calc_field->type, array( 'radio', 'scale', 'checkbox' ) );
+		$is_radio_lookup = ( $calc_field->type == 'lookup' && $calc_field->field_options['data_type'] == 'radio' );
+		$in_child_form = $parent_form_id != $calc_field->form_id;
+		if ( $has_changing_ids || $is_radio_lookup || $in_child_form ) {
 			$html_field_id = '^'. $html_field_id .'-';
+		} else if ( $calc_field->type == 'select' ) {
+			$is_multiselect = FrmField::get_option( $calc_field, 'multiselect' );
+			if ( $is_multiselect ) {
+				$html_field_id = '^'. $html_field_id;
+			}
 		}
 
 		$field_call = '[id'. $html_field_id .'"]';
@@ -681,6 +722,7 @@ echo $custom_options;
             'success_page_id' => '', 'success_url' => '', 'ajax_submit' => 0,
             'cookie_expiration' => 8000, 'prev_value' => __( 'Previous', 'formidable' ),
 			'submit_align' => '', 'js_validate' => 0,
+			'protect_files' => 0,
         );
     }
 
@@ -952,10 +994,4 @@ echo $custom_options;
 
         return $type;
     }
-
-    public static function hex2rgb($hex) {
-        _deprecated_function( __FUNCTION__, '2.0', 'FrmStylesHelper::hex2rgb' );
-        return FrmStylesHelper::hex2rgb($hex);
-    }
-
 }

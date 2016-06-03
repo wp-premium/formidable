@@ -423,12 +423,14 @@ class FrmProPost {
 						$wpdb->query( $wpdb->prepare( 'UPDATE ' . $wpdb->posts . ' SET post_parent = %d' . $where['where'], $where['values'] ) );
 
 						foreach ( $media_id as $m ) {
+							delete_post_meta( $m, '_frm_file' );
 							clean_attachment_cache( $m );
 							unset($m);
 						}
 					}
 				} else {
-					$wpdb->update( $wpdb->posts, array( 'post_parent' => $post_ID), array( 'ID' => $media_id, 'post_type' => 'attachment' ) );
+					$wpdb->update( $wpdb->posts, array( 'post_parent' => $post_ID ), array( 'ID' => $media_id, 'post_type' => 'attachment' ) );
+					delete_post_meta( $media_id, '_frm_file' );
 					clean_attachment_cache( $media_id );
 				}
 			}
@@ -438,21 +440,22 @@ class FrmProPost {
 	}
 
 	private static function unlink_post_attachments( $post_ID, $editing, $exclude_attached ) {
-		if ( ! $editing || ! count($_FILES) ) {
+		if ( ! $editing ) {
 			return;
 		}
 
 		$args = array(
 			'post_type' => 'attachment', 'numberposts' => -1,
 			'post_status' => null, 'post_parent' => $post_ID,
-			'exclude' => $exclude_attached
+			'exclude' => $exclude_attached,
 		);
 
 		global $wpdb;
 
 		$attachments = get_posts( $args );
 		foreach ( $attachments as $attachment ) {
-			$wpdb->update( $wpdb->posts, array( 'post_parent' => null), array( 'ID' => $attachment->ID ) );
+			$wpdb->update( $wpdb->posts, array( 'post_parent' => null ), array( 'ID' => $attachment->ID ) );
+			update_post_meta( $media_id, '_frm_file', 1 );
 		}
 	}
 
