@@ -582,7 +582,7 @@ class FrmProEntryMeta{
 	 *
 	 * @since 2.01.0
 	 * @param object $field
-	 * @param string $value
+	 * @param string|array $value
 	 * @param array $args
 	 * @return array
 	 */
@@ -654,6 +654,15 @@ class FrmProEntryMeta{
         if ( isset( $args['end_date'] ) ) {
             $query['e.created_at <'] = date( 'Y-m-d 23:59:59', strtotime( $args['end_date'] ) );
         }
+
+		// If is_draft is set
+		if ( isset( $args['is_draft'] ) ) {
+			if ( 'both' === $args['is_draft'] ) {
+				unset( $query['e.is_draft'] );
+			} else {
+				$query['e.is_draft'] = $args['is_draft'];
+			}
+		}
     }
 
 	/**
