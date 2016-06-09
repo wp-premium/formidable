@@ -548,10 +548,6 @@ class FrmProFieldsHelper{
         } else if ( $values['type'] == 'date' || $values['original_type'] == 'date' ) {
             $to_format = preg_match('/^\d{4}-\d{2}-\d{2}$/', $values['value']) ? 'Y-m-d' : 'Y-m-d H:i:s';
             $values['value'] = FrmProAppHelper::maybe_convert_from_db_date($values['value'], $to_format);
-		} else if ( $values['type'] == 'file' ) {
-			if ( $values['post_field'] != 'post_custom' ) {
-                $values['value'] = FrmEntryMeta::get_entry_meta_by_field($entry_id, $values['id']);
-            }
         } else if ( $values['type'] == 'hidden' && FrmAppHelper::is_admin() && current_user_can('administrator') && ! FrmAppHelper::is_admin_page('formidable' ) ) {
             if ( self::field_on_current_page($field) ) {
                 $values['type'] = 'text';
@@ -1601,7 +1597,7 @@ class FrmProFieldsHelper{
 		if ( $current_year >= $start_year && $current_year <= $end_year ) {
 			$default_date = '';
 		} else {
-			$default_date = $start_year .'-01-01 00:00:00';
+			$default_date = 'January 1, ' . $start_year . ' 00:00:00';
 		}
 
 		return $default_date;
@@ -3702,7 +3698,10 @@ DEFAULT_HTML;
 	* @return string $img_html
 	*/
 	private static function get_file_display( $id, $atts ) {
-		$img_html = '';
+		if ( empty( $id ) ) {
+			return '';
+		}
+		$img_html = $image_url = '';
 
 		if ( $atts['show_image'] ) {
 			$img_html = wp_get_attachment_image( $id, $atts['size'], false );
@@ -3722,13 +3721,15 @@ DEFAULT_HTML;
 			$img_html = wp_get_attachment_image_url( $id, $atts['size'], false );
 			if ( $img_html === false ) {
 				// Not an image file
-				$img_html = wp_get_attachment_image_url( $id, $atts['size'], true );
+				$img_html = $image_url = wp_get_attachment_url( $id );
 			}
 		}
 
 		// If add_link=1 is included
 		if ( $atts['add_link'] ) {
-			$image_url = wp_get_attachment_url( $id );
+			if ( empty( $image_url ) ) {
+				$image_url = wp_get_attachment_url( $id );
+			}
 			$img_html = '<a href="' . esc_url( $image_url ) . '" class="frm_file_link">' . $img_html . '</a>';
 		}
 
