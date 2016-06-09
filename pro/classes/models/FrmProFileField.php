@@ -23,13 +23,17 @@ class FrmProFileField {
 				'paramName'   => $atts['file_name'],
 				'maxFilesize' => self::get_max_file_size( $field['size'] ),
 				'maxFiles'    => $max,
-				'acceptedFiles' => implode( ',', $field['ftypes'] ),
+				'acceptedFiles' => '', //cover this in the php to minimize differences in mime types
 				'htmlID'      => $the_id,
 				'uploadMultiple' => $is_multiple,
 				'fieldID'     => $field['id'],
 				'formID'      => $field['form_id'],
 				'fieldName'   => $atts['field_name'],
 				'mockFiles'   => array(),
+				'cancel'      => __( 'Cancel upload', 'formidable' ),
+				'cancelConfirm' => __( 'Are you sure you want to cancel this upload?', 'formidable' ),
+				'remove'      => __( 'Remove file', 'formidable' ),
+				'maxFilesExceeded' => __( 'You can not upload any more files.', 'formidable' ),
 			);
 
 			self::add_mock_files( $field['value'], $frm_vars['dropzone_loaded'][ $the_id ]['mockFiles'] );
@@ -237,11 +241,7 @@ class FrmProFileField {
 			return;
 		}
 
-		if ( FrmField::is_option_true( $field, 'restrict' ) && ! FrmField::is_option_empty( $field, 'ftypes' ) ) {
-            $mimes = $field->field_options['ftypes'];
-        } else {
-            $mimes = null;
-        }
+		$mimes = self::get_allowed_mimes( $field );
 
 		$file_uploads = $_FILES[ $args['file_name'] ];
 		foreach ( (array) $file_uploads['name'] as $name ) {
@@ -261,6 +261,15 @@ class FrmProFileField {
         if ( isset( $file_type ) && ! $file_type['ext'] ) {
             $errors[ 'field' . $field->temp_id ] = self::get_invalid_file_type_message( $field );
         }
+	}
+
+	private static function get_allowed_mimes( $field ) {
+		$mimes = FrmField::get_option( $field, 'ftypes' );
+		$restrict = FrmField::is_option_true( $field, 'restrict' ) && ! empty( $mimes );
+		if ( ! $restrict ) {
+			$mimes = null;
+		}
+		return $mimes;
 	}
 
 	private static function get_invalid_file_type_message( $field ) {
