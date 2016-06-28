@@ -11,7 +11,7 @@ class FrmProFileField {
 			$frm_vars['dropzone_loaded'] = array();
 		}
 
-		$the_id = $atts['file_name'] . '_dropzone';
+		$the_id = $atts['file_name'];
 		if ( ! isset( $frm_vars['dropzone_loaded'][ $the_id ] ) ) {
 			if ( $is_multiple ) {
 				$max = empty( $field['max'] ) ? 99 : absint( $field['max'] );;
@@ -20,10 +20,9 @@ class FrmProFileField {
 			}
 
 			$frm_vars['dropzone_loaded'][ $the_id ] = array(
-				'paramName'   => $atts['file_name'],
 				'maxFilesize' => self::get_max_file_size( $field['size'] ),
 				'maxFiles'    => $max,
-				'acceptedFiles' => '', //cover this in the php to minimize differences in mime types
+				//'acceptedFiles' => '', //cover this in the php to minimize differences in mime types
 				'htmlID'      => $the_id,
 				'uploadMultiple' => $is_multiple,
 				'fieldID'     => $field['id'],
@@ -35,6 +34,18 @@ class FrmProFileField {
 				'remove'      => __( 'Remove file', 'formidable' ),
 				'maxFilesExceeded' => __( 'You can not upload any more files.', 'formidable' ),
 			);
+
+			if ( strpos( $the_id, '-i' ) ) {
+				// we are editing, so get the base settings added too
+				$id_parts = explode( '-i', $the_id );
+				$base_id = $id_parts[0] . '-0';
+				$base_settings = $frm_vars['dropzone_loaded'][ $the_id ];
+				if ( ! isset( $frm_vars['dropzone_loaded'][ $base_id ] ) && strpos( $base_settings['fieldName'], '[i' . $id_parts[1] . ']' ) ) {
+					$base_settings['htmlID'] = $base_id;
+					$base_settings['fieldName'] = str_replace( '[i' . $id_parts[1] . ']', '[0]', $base_settings['fieldName'] );
+					$frm_vars['dropzone_loaded'][ $base_id ] = $base_settings;
+				}
+			}
 
 			self::add_mock_files( $field['value'], $frm_vars['dropzone_loaded'][ $the_id ]['mockFiles'] );
 		}
@@ -56,6 +67,7 @@ class FrmProFileField {
 		$file = array();
 		$image = get_attached_file( $media_id );
 		if ( file_exists( $image ) ) {
+			$file_url = wp_get_attachment_url( $media_id );
 			$url = wp_get_attachment_thumb_url( $media_id );
 			if ( ! $url ) {
 				$url = wp_get_attachment_image_src( $media_id, 'thumbnail', true );
@@ -69,6 +81,7 @@ class FrmProFileField {
 			$file = array(
 				'name' => $label, 'size' => $size,
 				'url' => $url, 'id' => $media_id,
+				'file_url' => $file_url,
 			);
 		}
 
@@ -190,14 +203,13 @@ class FrmProFileField {
 
 	public static function get_max_file_size( $mb_limit = 256 ) {
 		if ( empty( $mb_limit ) || ! is_numeric( $mb_limit ) ) {
-			$mb_limit = 256;
+			$mb_limit = 516;
 		}
 		$mb_limit = (float) $mb_limit;
 
-		$upload_max = (float) ini_get('upload_max_filesize');
-		$post_max = (float) ini_get('post_max_size');
+		$upload_max = wp_max_upload_size() / 1000000;
 
-		return min( $upload_max, $post_max, $mb_limit );
+		return min( $upload_max, $mb_limit );
 	}
 
 	/**

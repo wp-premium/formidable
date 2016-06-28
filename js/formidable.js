@@ -94,20 +94,33 @@ function frmFrontFormJS(){
 		) );
 	}
 
-	function loadDropzones(){
+	function loadDropzones( repeatRow ) {
 		if ( typeof __frmDropzone === 'undefined'  ) {
 			return;
 		}
 
 		var uploadFields = __frmDropzone;
 		for ( var i = 0; i < uploadFields.length; i++ ) {
-			loadDropzone( i );
+			loadDropzone( i, repeatRow );
 		}
 	}
 
-	function loadDropzone( i ) {
+	function loadDropzone( i, repeatRow ) {
 		var uploadFields = __frmDropzone;
-		var field = jQuery( '#' + uploadFields[i].htmlID );
+		var selector = '#'+ uploadFields[i].htmlID + '_dropzone';
+		var fieldName = uploadFields[i].fieldName;
+
+		if ( typeof repeatRow !== 'undefined' && selector.indexOf('-0_dropzone') !== -1 ) {
+			selector = selector.replace( '-0_dropzone', '-' + repeatRow +'_dropzone' );
+			fieldName = fieldName.replace('[0]', '['+ repeatRow +']');
+			delete uploadFields[i].mockFiles;
+		}
+
+		var field = jQuery(selector);
+		if ( field.length < 1 || field.hasClass('dz-clickable') ) {
+			return;
+		}
+
 		var max = uploadFields[i].maxFiles;
 		if ( typeof uploadFields[i].mockFiles !== 'undefined' ) {
 			var uploadedCount = uploadFields[i].mockFiles.length;
@@ -123,10 +136,9 @@ function frmFrontFormJS(){
 		field.dropzone({
 			url:frm_js.ajax_url,
 			addRemoveLinks: true,
-        	paramName: uploadFields[i].paramName,
+			paramName: field.attr('id').replace('_dropzone', ''),
 			maxFilesize: uploadFields[i].maxFilesize,
 			maxFiles: max,
-			acceptedFiles: uploadFields[i].acceptedFiles,
 			uploadMultiple: uploadFields[i].uploadMultiple,
 			dictCancelUpload: uploadFields[i].cancel,
 			dictCancelUploadConfirmation: uploadFields[i].cancelConfirm,
@@ -147,7 +159,7 @@ function frmFrontFormJS(){
 					var mediaIDs = jQuery.parseJSON(response);
 					for ( var m = 0; m < mediaIDs.length; m++ ) {
 						if ( uploadFields[i].uploadMultiple !== true ) {
-							jQuery('input[name="'+ uploadFields[i].fieldName +'"]').val( mediaIDs[m] );
+							jQuery('input[name="'+ fieldName +'"]').val( mediaIDs[m] );
 						}
 					}
 				});
@@ -161,13 +173,22 @@ function frmFrontFormJS(){
 
 				this.on('removedfile', function( file ) {
 					if ( uploadFields[i].uploadMultiple !== true ) {
-						jQuery('input[name="'+ uploadFields[i].fieldName +'"]').val('');
+						jQuery('input[name="'+ fieldName +'"]').val('');
 					}
 				});
 
 				this.on('complete', function( file ) {
-					if ( uploadFields[i].uploadMultiple && typeof file.mediaID !== 'undefined' ) {
-						jQuery(file.previewElement).append( getHiddenUploadHTML( uploadFields[i], file.mediaID ) );
+					if ( typeof file.mediaID !== 'undefined' ) {
+						if ( uploadFields[i].uploadMultiple ) {
+							jQuery(file.previewElement).append( getHiddenUploadHTML( uploadFields[i], file.mediaID ) );
+						}
+
+						// Add download link to the file
+						var fileName = file.previewElement.querySelectorAll('[data-dz-name]');
+						for ( var _i = 0, _len = fileName.length; _i < _len; _i++ ) {
+							var node = fileName[_i];
+							node.innerHTML = '<a href="'+ file.url +'">'+ file.name +'</a>';
+						}
 					}
 				});
 
@@ -194,6 +215,7 @@ function frmFrontFormJS(){
 						var mockFile = {
 							name: uploadFields[i].mockFiles[f].name,
 							size: uploadFields[i].mockFiles[f].size,
+							url:uploadFields[i].mockFiles[f].file_url,
 							mediaID: uploadFields[i].mockFiles[f].id
 						};
 
@@ -719,6 +741,7 @@ function frmFrontFormJS(){
 	 * @param {boolean} logicFieldArgs.isRepeating
 	 * @param {string} logicFieldArgs.fieldId
 	 * @param {object} depFieldArgs
+	 * @param {string} depFieldArgs.inEmbedForm
 	 * @param {string} depFieldArgs.inSection
 	 * @param {string} depFieldArgs.repeatRow
 	 * @returns {string}
@@ -728,7 +751,12 @@ function frmFrontFormJS(){
 
 		if ( logicFieldArgs.isRepeating ) {
 			// If the trigger field is repeating, the child must be repeating as well
-			var sectionId = depFieldArgs.inSection;
+			var sectionId = '';
+			if ( depFieldArgs.inEmbedForm !== "0" ) {
+				sectionId = depFieldArgs.inEmbedForm;
+			} else {
+				sectionId = depFieldArgs.inSection;
+			}
 			var rowId = depFieldArgs.repeatRow;
 			inputName = 'item_meta[' + sectionId + '][' + rowId + '][' + logicFieldArgs.fieldId + ']';
 		} else {
@@ -1284,10 +1312,15 @@ function frmFrontFormJS(){
 				setHiddenCheckboxDefaultValue( input.name, defaultValue );
 
 			} else {
-				var addressType = input.getAttribute('autocompletetype');
-				if ( addressType !== null ) {
-					addressType = addressType.replace( 'address-', '' );
-					defaultValue = defaultValue[addressType];
+				if ( defaultValue.constructor === Object ) {
+					var addressType = input.getAttribute('name').split('[').slice(-1)[0];
+					if ( addressType !== null ) {
+						addressType = addressType.replace(']', '');
+						defaultValue = defaultValue[addressType];
+						if ( typeof defaultValue == 'undefined' ) {
+							defaultValue = '';
+						}
+					}
 				}
 
 				input.value = defaultValue;
@@ -1404,7 +1437,7 @@ function frmFrontFormJS(){
 		}
 
 		if ( childFieldArgs.fieldType == 'lookup' ) {
-			updateLookupFieldOptions( childFieldArgs );
+			updateLookupFieldOptions( childFieldArgs, parentRepeatArgs );
 		} else {
 			// If the original event was NOT triggered from a direct value change to the Lookup field,
 			// do not update the text field value
@@ -1414,13 +1447,40 @@ function frmFrontFormJS(){
 		}
 	}
 
-	function updateLookupFieldOptions( childFieldArgs ) {
-		var childFieldElements = getAllFieldDivsOnCurrentPage(childFieldArgs);
+	function updateLookupFieldOptions( childFieldArgs, parentRepeatArgs ) {
+		var childFieldElements = [];
+		if ( parentRepeatArgs.repeatRow !== '' ) {
+			childFieldElements = getRepeatingFieldDivOnCurrentPage( childFieldArgs, parentRepeatArgs );
+		} else {
+			childFieldElements = getAllFieldDivsOnCurrentPage(childFieldArgs);
+		}
 
 		for ( var i = 0, l=childFieldElements.length; i<l; i++ ) {
 			addRepeatRow( childFieldArgs, childFieldElements[i].id );
 			updateSingleLookupField( childFieldArgs, childFieldElements[i] );
 		}
+	}
+
+	/**
+	 * Get the div for a repeating field on the current page
+	 * @param {Object} childFieldArgs
+	 * @param {string} childFieldArgs.fieldId
+	 * @param {Object} parentRepeatArgs
+	 * @param {string} parentRepeatArgs.repeatingSection
+	 * @param {string} parentRepeatArgs.repeatRow
+	 * @returns {Array}
+     */
+	function getRepeatingFieldDivOnCurrentPage( childFieldArgs, parentRepeatArgs ) {
+		var childFieldDivs = [];
+
+		var selector = 'frm_field_' + childFieldArgs.fieldId + '-';
+		selector += parentRepeatArgs.repeatingSection + '-' + parentRepeatArgs.repeatRow + '_container';
+		var container = document.getElementById( selector );
+		if ( container !== null ) {
+			childFieldDivs.push( container );
+		}
+
+		return childFieldDivs;
 	}
 
 	function updateWatchingFieldValue( childFieldArgs, parentRepeatArgs ) {
@@ -1612,6 +1672,8 @@ function frmFrontFormJS(){
 				triggerChange(jQuery(childSelect), childFieldArgs.fieldKey);
 			}
 		} else {
+			addLoadingTextToLookup( childSelect );
+
 			// If all parents have values, check for updated options
 			jQuery.ajax({
 				type:'POST',
@@ -1634,6 +1696,13 @@ function frmFrontFormJS(){
 	function maybeUpdateChosenOptions( childSelect ) {
 		if ( childSelect.className.indexOf( 'frm_chzn' ) > -1 && jQuery().chosen ) {
 			jQuery( childSelect ).trigger('chosen:updated');
+		}
+	}
+
+	function addLoadingTextToLookup( childSelect ) {
+		if ( ! childSelect.value ) {
+			childSelect.options.length = 1;
+			childSelect.options[1] = new Option(frm_js.loading_text, '', false, false);
 		}
 	}
 
@@ -3464,6 +3533,7 @@ function frmFrontFormJS(){
 					}
                 });
 
+				loadDropzones( repeatArgs.repeatRow );
 				loadStars();
 
 				// trigger autocomplete
@@ -3512,6 +3582,9 @@ function frmFrontFormJS(){
 				$edit.removeClass('frm_inplace_edit').addClass('frm_cancel_edit');
 				$edit.html(cancel);
 				checkConditionalLogic( 'editInPlace' );
+
+				// Make sure fields just loaded are properly bound
+				jQuery(document).on('change', '.frm-show-form input[name^="item_meta"], .frm-show-form select[name^="item_meta"], .frm-show-form textarea[name^="item_meta"]', maybeCheckDependent);
 				checkFieldsOnPage();
 			}
 		});
@@ -3807,7 +3880,7 @@ function frmFrontFormJS(){
 			});
 
 			jQuery(document).on('change', '.frm-show-form input[name^="item_meta"], .frm-show-form select[name^="item_meta"], .frm-show-form textarea[name^="item_meta"]', maybeCheckDependent);
-			
+
 			jQuery(document).on('click', '.frm-show-form input[type="submit"], .frm-show-form input[name="frm_prev_page"], .frm-show-form .frm_save_draft', setNextPage);
             
             jQuery(document).on('change', '.frm_other_container input[type="checkbox"], .frm_other_container input[type="radio"], .frm_other_container select', showOtherText);
@@ -3846,8 +3919,10 @@ function frmFrontFormJS(){
 		},
 
 		submitForm: function(e){
-			var object = this;
+			frmFrontForm.submitFormManual( e, this );
+		},
 
+		submitFormManual: function(e, object){
 			var classList = object.classList;
 			if ( classList ) {
 				var isPro = classList.contains('frm_pro_form');
@@ -3866,8 +3941,13 @@ function frmFrontFormJS(){
 			if ( Object.keys(errors).length === 0 ) {
 				jQuery(object).find('.frm_ajax_loading').addClass('frm_loading_now');
 				if ( classList.contains('frm_ajax_submit') ) {
-					action = jQuery(object).find('input[name="frm_action"]').val();
-					frmFrontForm.checkFormErrors( object, action );
+					var hasFileFields = jQuery(object).find('input[type="file"]').length;
+					if ( hasFileFields < 1 ) {
+						action = jQuery(object).find('input[name="frm_action"]').val();
+						frmFrontForm.checkFormErrors( object, action );
+					} else {
+						object.submit();
+					}
 				} else {
 					object.submit();
 				}

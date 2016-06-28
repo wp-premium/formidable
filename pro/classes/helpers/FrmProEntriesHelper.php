@@ -555,15 +555,17 @@ class FrmProEntriesHelper{
 	 * @return array
 	 */
 	private static function get_where_arguments_for_frm_items_column( $fid, $search_param ) {
-		if ( $fid == 'user_id' ) {
+		if ( 'user_id' == $fid ) {
 			$search_param = self::replace_search_param_with_user_ids( $search_param );
-		}
-
-		if ( 'created_at' == $fid ) {
+			$where = array( 'it.' . $fid => $search_param );
+		} else if ( 'created_at' == $fid || 'updated_at' == $fid ) {
 			$search_param = implode( ' ', $search_param );
+			$where = array( 'it.' . $fid . ' like' => $search_param );
+		} else {
+			$where = array( 'it.' . $fid => $search_param );
 		}
 
-		return array( 'it.' . $fid . ' like' => $search_param );
+		return $where;
 	}
 
 	/**

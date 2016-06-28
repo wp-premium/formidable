@@ -7,7 +7,7 @@ class FrmProFileImport {
 			return $val;
 		}
 
-		$should_import_files = FrmAppHelper::get_param( 'csv_files', '', 'get', 'absint' );
+		$should_import_files = FrmAppHelper::get_param( 'csv_files', '', 'REQUEST', 'absint' );
 		if ( ! $should_import_files ) {
 			return $val;
 		}

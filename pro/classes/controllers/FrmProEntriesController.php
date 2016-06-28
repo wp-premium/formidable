@@ -67,7 +67,7 @@ class FrmProEntriesController{
 			} else {
 				$keep_scripts = array(
 					'recaptcha-api', 'jquery-frm-rating', 'jquery-chosen',
-					'google_jsapi',
+					'google_jsapi', 'dropzone',
 					'flashcanvas', 'jquery-signaturepad', 'frm-signature', // Remove these after add-on update
 				);
 				$keep_styles = array( 'dashicons', 'jquery-theme' );

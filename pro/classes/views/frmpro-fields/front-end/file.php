@@ -31,7 +31,7 @@ if ( FrmField::is_read_only( $field ) ) {
 	}
 
 	global $frm_vars;
-	$file_settings = $frm_vars['dropzone_loaded'][ $file_name . '_dropzone' ];
+	$file_settings = $frm_vars['dropzone_loaded'][ $file_name ];
 
 ?>
 <input type="hidden" name="<?php echo esc_attr( $input_name ) ?>" value="<?php echo esc_attr( $hidden_value ) ?>" data-frmfile="<?php echo esc_attr( $field['id'] ) ?>" />
@@ -47,7 +47,7 @@ if ( FrmField::is_read_only( $field ) ) {
 				<div class="dz-details">
 					<div class="dz-filename">
 						<span data-dz-name="">
-							<?php echo esc_html( $file['name'] ) ?>
+							<a href="<?php echo esc_attr( $file['file_url'] ) ?>"><?php echo esc_html( $file['name'] ) ?></a>
 						</span>
 					</div>
 				</div>

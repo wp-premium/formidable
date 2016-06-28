@@ -325,7 +325,7 @@ class FrmProPost {
 
 	private static function populate_from_custom_code( &$new_post ) {
 		if ( isset($_POST['frm_wp_post']) ) {
-			_deprecated_argument( 'frm_wp_post', '2.0', __( 'Use <code>frm_new_post</code> filter instead.', 'formidable' ) );
+			_deprecated_argument( 'frm_wp_post', '2.0', 'Use <code>frm_new_post</code> filter instead.' );
 			foreach ( (array) $_POST['frm_wp_post']  as $key => $value ) {
 				list($field_id, $meta_name) = explode('=', $key);
 				if ( ! empty($meta_name) ) {
@@ -337,7 +337,7 @@ class FrmProPost {
 		}
 
 		if ( isset($_POST['frm_wp_post_custom']) ) {
-			_deprecated_argument( 'frm_wp_post_custom', '2.0', __( 'Use <code>frm_new_post</code> filter instead.', 'formidable' ) );
+			_deprecated_argument( 'frm_wp_post_custom', '2.0', 'Use <code>frm_new_post</code> filter instead.' );
 			foreach ( (array) $_POST['frm_wp_post_custom']  as $key => $value ) {
 				list($field_id, $meta_name) = explode('=', $key);
 				if ( ! empty($meta_name) ) {
@@ -349,7 +349,7 @@ class FrmProPost {
 		}
 
 		if ( isset($_POST['frm_tax_input']) ) {
-			_deprecated_argument( 'frm_tax_input', '2.0', __( 'Use <code>frm_new_post</code> filter instead.', 'formidable' ) );
+			_deprecated_argument( 'frm_tax_input', '2.0', 'Use <code>frm_new_post</code> filter instead.' );
 			foreach ( (array) $_POST['frm_tax_input']  as $key => $value ) {
 				self::fill_taxonomies($new_post['taxonomies'], $key, $value);
 				unset($key, $value);

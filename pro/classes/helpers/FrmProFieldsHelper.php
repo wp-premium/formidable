@@ -546,8 +546,8 @@ class FrmProFieldsHelper{
 		} else if ( $values['type'] == 'data' && in_array($values['data_type'], array( 'select', 'radio', 'checkbox')) && is_numeric($values['form_select']) ) {
             FrmProDynamicFieldsController::add_options_for_dynamic_field( $field, $values );
         } else if ( $values['type'] == 'date' || $values['original_type'] == 'date' ) {
-            $to_format = preg_match('/^\d{4}-\d{2}-\d{2}$/', $values['value']) ? 'Y-m-d' : 'Y-m-d H:i:s';
-            $values['value'] = FrmProAppHelper::maybe_convert_from_db_date($values['value'], $to_format);
+            $values['value'] = FrmProAppHelper::maybe_convert_from_db_date( $values['value'] );
+
         } else if ( $values['type'] == 'hidden' && FrmAppHelper::is_admin() && current_user_can('administrator') && ! FrmAppHelper::is_admin_page('formidable' ) ) {
             if ( self::field_on_current_page($field) ) {
                 $values['type'] = 'text';
@@ -858,6 +858,11 @@ class FrmProFieldsHelper{
 			$entry = FrmEntry::getOne( $entry_id, true );
 			foreach ( $child_fields as $child ) {
 				$values['value'][ 'i' . $entry_id ][ $child->id ] = isset( $entry->metas[ $child->id ] ) ? $entry->metas[ $child->id ] : '';
+
+				if ( $child->type == 'date' ) {
+					$current_value = $values['value'][ 'i' . $entry_id ][ $child->id ];
+					$values['value'][ 'i' . $entry_id ][ $child->id ] = FrmProAppHelper::maybe_convert_from_db_date( $current_value );
+				}
 			}
 		}
 	}
@@ -2055,7 +2060,7 @@ DEFAULT_HTML;
 		$args = self::generate_repeat_args_for_conf_field( $field, $atts );
 
 		// Replace shortcodes
-		$conf_html = FrmFieldsHelper::replace_shortcodes( $field['custom_html'], $conf_field, '', '', $args);
+		$conf_html = FrmFieldsHelper::replace_shortcodes( $field['custom_html'], $conf_field, $atts['errors'], '', $args);
 
 		// Add a couple of classes
 		$conf_html = str_replace('frm_primary_label', 'frm_primary_label frm_conf_label', $conf_html);
@@ -3101,13 +3106,15 @@ DEFAULT_HTML;
 
 		if ( isset( $atts['show'] ) && $atts['show'] == 'count' ) {
 			$replace_with = is_array( $replace_with ) ? count( $replace_with ) : ! empty( $replace_with );
-		} else if ( is_array( $replace_with ) && ! $foreach && $field->type != 'file' ) {
+		} else if ( is_array( $replace_with ) && ! $foreach ) {
 			$keep_array = apply_filters( 'frm_keep_value_array', false, compact( 'field', 'replace_with' ) );
 			$keep_array = apply_filters( 'frm_keep_' . $field->type . '_value_array', $keep_array, compact( 'field', 'replace_with' ) );
 
-			if ( ! $keep_array ) {
+			if ( ! $keep_array && $field->type != 'file' ) {
 				$replace_with = FrmAppHelper::array_flatten( $replace_with );
 				$replace_with = implode( $sep, $replace_with );
+			} else if ( empty( $replace_with ) ) {
+				$replace_with = '';
 			}
 		}
 
@@ -3348,20 +3355,24 @@ DEFAULT_HTML;
 	* @param array $new_atts
 	*/
 	private static function modify_atts_for_reverse_compatibility( $atts, &$new_atts ) {
+		// For show=label
 		if ( ! $new_atts['show_filename'] && isset( $atts['show'] ) && $atts['show'] == 'label' ) {
-			// For show=label
 			$new_atts['show_filename'] = true;
 		}
 
 		// For html=1
 		$inc_html = ( isset( $atts['html'] ) && $atts['html'] );
 		if ( $inc_html && ! $new_atts['show_image'] ) {
-			$new_atts['show_image'] = true;
-		}
 
-		// For show_filename with html=1
-		if ( $inc_html && $new_atts['show_filename'] ) {
-			$new_atts['add_link'] = true;
+			if ( $new_atts['show_filename'] ) {
+				// For show_filename with html=1
+				$new_atts['show_image'] = false;
+				$new_atts['add_link'] = true;
+			} else {
+				// html=1 without show_filename=1
+				$new_atts['show_image'] = true;
+				$new_atts['add_link_for_non_image'] = true;
+			}
 		}
 
 		// For links=1
@@ -3656,10 +3667,15 @@ DEFAULT_HTML;
 	* @param array $ids
 	* @param string $size
 	* @param array $atts
-	* @return $img_html
+	* @return array|string
 	*/
 	public static function get_displayed_file_html( $ids, $size = 'thumbnail', $atts = array() ) {
-		$defaults = array( 'show_filename' => false, 'show_image' => false, 'add_link' => false );
+		$defaults = array(
+			'show_filename' => false,
+			'show_image' => false,
+			'add_link' => false,
+			'add_link_for_non_image' => false,
+		);
 		$atts = wp_parse_args( $atts, $defaults );
 		$atts['size'] = $size;
 
@@ -3701,32 +3717,36 @@ DEFAULT_HTML;
 		if ( empty( $id ) ) {
 			return '';
 		}
+
 		$img_html = $image_url = '';
+		$image = wp_get_attachment_image_src( $id, $atts['size'], false );
+		$is_non_image = empty( $image );
 
 		if ( $atts['show_image'] ) {
-			$img_html = wp_get_attachment_image( $id, $atts['size'], false );
-			if ( empty( $img_html ) ) {
-				// this is not an image file
-				$img_html = wp_get_attachment_image( $id, $atts['size'], true );
-			}
+			$img_html = wp_get_attachment_image( $id, $atts['size'], $is_non_image );
 		}
 
 		// If show_filename=1 is included
 		if ( $atts['show_filename'] ) {
 			$label = self::get_single_file_name( $id );
-			$img_html .= ' <span id="frm_media_' . absint( $id ) . '" class="frm_upload_label">' . $label . '</span>';
+			if ( $atts['show_image'] ) {
+				$img_html .= ' <span id="frm_media_' . absint( $id ) . '" class="frm_upload_label">' . $label . '</span>';
+			} else {
+				$img_html .= $label;
+			}
 		}
 
+		// If neither show_image or show_filename are included, get file URL
 		if ( empty( $img_html ) ) {
-			$img_html = wp_get_attachment_image_url( $id, $atts['size'], false );
-			if ( $img_html === false ) {
-				// Not an image file
+			if ( $is_non_image ) {
 				$img_html = $image_url = wp_get_attachment_url( $id );
+			} else {
+				$img_html = $image['0'];
 			}
 		}
 
 		// If add_link=1 is included
-		if ( $atts['add_link'] ) {
+		if ( $atts['add_link'] || ( $is_non_image && $atts['add_link_for_non_image'] ) ) {
 			if ( empty( $image_url ) ) {
 				$image_url = wp_get_attachment_url( $id );
 			}
@@ -3736,7 +3756,7 @@ DEFAULT_HTML;
 		$atts['media_id'] = $id;
 		$img_html = apply_filters( 'frm_image_html_array', $img_html, $atts );
 
-		return $img_html . ' ';
+		return $img_html;
 	}
 
 	/**
@@ -3972,158 +3992,328 @@ DEFAULT_HTML;
 		return $hidden;
 	}
 
-	public static function is_field_hidden( $field, $values ) {
-		if ( $field->type == 'user_id' || $field->type == 'hidden' || ! isset( $field->field_options['hide_field'] ) || empty( $field->field_options['hide_field'] ) ) {
-			return false;
-		}
-
-         $field->field_options['hide_field'] = (array) $field->field_options['hide_field'];
-         if ( ! isset($field->field_options['hide_field_cond']) ) {
-             $field->field_options['hide_field_cond'] = array( '==');
-         }
-         $field->field_options['hide_field_cond'] = (array) $field->field_options['hide_field_cond'];
-         $field->field_options['hide_opt'] = (array) $field->field_options['hide_opt'];
-
-         if ( ! isset($field->field_options['show_hide']) ) {
-             $field->field_options['show_hide'] = 'show';
-         }
-
-         if ( ! isset($field->field_options['any_all']) ) {
-             $field->field_options['any_all'] = 'any';
-         }
-
-         $hidden = false;
-         $hide = array();
-
-		 foreach ( $field->field_options['hide_field'] as $hide_key => $hide_field ) {
-			 if ( $hidden && $field->field_options['any_all'] == 'any' && $field->field_options['show_hide'] == 'hide' ) {
-                 continue;
-			 }
-
-			$observed_value = '';
-			if ( isset( $values['item_meta'][ $hide_field ] ) ) {
-				$observed_value = $values['item_meta'][ $hide_field ];
-			} else if ( isset( $field->temp_id ) && $field->id != $field->temp_id ) {
-				// this field depends on a field in a repeating section
-
-				$id_parts = explode( '-', $field->temp_id );
-				if ( isset( $_POST['item_meta'][ $id_parts[1] ] ) && isset( $_POST['item_meta'][ $id_parts[1] ][ $id_parts[2] ] ) && isset( $_POST['item_meta'][ $id_parts[1] ][ $id_parts[2] ][ $hide_field ] ) ) {
-					$observed_value = stripslashes_deep( $_POST['item_meta'][ $id_parts[1] ][ $id_parts[2] ][ $hide_field ] );
-				}
-			}
-
-			 if ( $field->type == 'data' ) {
-				 // Don't require a Dynamic Field with no available options
-				 self::is_dynamic_field_empty( $field, $hide_key, $hide_field, $observed_value );
-			 }
-
-             $hidden = FrmFieldsHelper::value_meets_condition($observed_value, $field->field_options['hide_field_cond'][$hide_key], $field->field_options['hide_opt'][$hide_key]);
-			 if ( $field->field_options['show_hide'] == 'show' ) {
-				 $hidden = $hidden ? false : true;
-			 }
-
-			 $hide[ $hidden ] = $hidden;
-         }
-
-         if ( $field->field_options['any_all'] == 'all' && ! empty( $hide ) && isset( $hide[0] ) && isset( $hide[1] ) ) {
-			 $hidden = ( $field->field_options['show_hide'] == 'show' ) ? true : false;
-		 } else if ( $field->field_options['any_all'] == 'any' && $field->field_options['show_hide'] == 'show' && isset( $hide[0] ) ) {
-             $hidden = false;
-		 }
-
-         return $hidden;
-    }
-
 	/**
-	 * Don't require a dynamic field that has no options
-	 * @since 2.0
+	 * Check if a field is conditionally hidden
+	 *
+	 * @param object $field
+	 * @param array $values
+	 * @return bool
 	 */
-	public static function is_dynamic_field_empty( &$field, $key, $hide_field, $observed_value ) {
-		// Get the field that conditional logic is dependent on
-		$observed_field = FrmField::getOne( $hide_field );
-
-		// Leave now if conditional logic field is not a Dynamic field
-		if ( ! $observed_field || $observed_field->type != 'data' ) {
-			return;
-		}
-
-		// Check if current posted value is set for conditional logic checking
-		if ( empty( $field->field_options['hide_opt'][ $key ] ) ) {
-			$field->field_options['hide_opt'][ $key ] = $observed_value;
-
-			// If logic is 'Dynamic parent is equal to anything' and no value
-			// is set in parent field, make sure logic doesn't return true
-			if ( empty( $observed_value ) && $field->field_options['hide_field_cond'][$key] == '==' ) {
-				$field->field_options['hide_opt'][$key] = 'anything';
-				return;
-			} else if ( $field->field_options['data_type'] == 'data' ) {
-				return;
-			}
-		}
-
-		// Get linked field data
-		$selected_field_id = isset( $field->field_options['form_select'] ) ? $field->field_options['form_select'] : '';
-		if ( $selected_field_id == 'taxonomy' ) {
-			self::update_dynamic_category_field_if_empty( $field, $key );
-			return;
-		}
-		$data_field = FrmField::getOne( $selected_field_id );
-
-		// Get value from previous Dynamic field
-		$parent_val = $field->field_options['hide_opt'][ $key ];
-
-		// Makes sure this works with multi-select and non multi-select fields
-		if ( ! is_array( $parent_val ) ) {
-			$parent_val = explode( ',', $parent_val );
-		}
-
-		// If this is a regular dynamic field
-		$metas = array();
-		FrmProEntryMetaHelper::meta_through_join( $hide_field, $data_field, $parent_val, $field, $metas );
-
-		if ( empty( $metas ) ) {
-			// indicate that this field is hidden
-			$field->field_options['hide_opt'][ $key ] = '';
-		}
-
-		$field->field_options['hide_opt'][ $key ] = apply_filters( 'frm_is_dynamic_field_empty', $field->field_options['hide_opt'][ $key ], compact( 'field', 'key', 'hide_field', 'observed_value' )  );
+	public static function is_field_hidden( $field, $values ) {
+		return ! self::is_field_conditionally_shown( $field, $values );
 	}
 
 	/**
-	* Don't require a dynamic taxonomy field that has no options
-	*
-	* @since 2.0.13
-	*
-	* @param object $field - pass by reference
-	* @param int $key
-	*/
-	private static function update_dynamic_category_field_if_empty( &$field, $key ) {
-		// Get value selected in parent field
-		$parent_val = $field->field_options['hide_opt'][ $key ];
-		if ( ! $parent_val ) {
+	 * Check if a field is conditionally shown
+	 *
+	 * @since 2.02.03
+	 * @param object $field
+	 * @param array $values
+	 * @return bool
+	 */
+	private static function is_field_conditionally_shown( $field, $values ) {
+		if ( ! self::field_needs_conditional_logic_checking( $field ) ) {
+			return true;
+		}
+
+		self::prepare_conditional_logic( $field );
+
+		$logic_outcomes = self::get_conditional_logic_outcomes( $field, $values );
+
+		$visible = self::is_field_visible_from_logic_outcomes( $field, $logic_outcomes );
+
+		if ( $visible && ! self::dynamic_field_has_options( $field, $values ) ) {
+			$visible = false;
+		}
+
+		return $visible;
+	}
+
+	/**
+	 * Check if a field needs to have the conditional logic checked
+	 *
+	 * @since 2.02.03
+	 * @param object $field
+	 * @return bool
+	 */
+	private static function field_needs_conditional_logic_checking( $field ) {
+		$needs_check = true;
+
+		if ( $field->type == 'user_id' || $field->type == 'hidden' || ! isset( $field->field_options['hide_field'] ) || empty( $field->field_options['hide_field'] ) ) {
+			$needs_check = false;
+		}
+
+		return $needs_check;
+	}
+
+	/**
+	 * Prepare conditional logic settings
+	 *
+	 * @since 2.02.03
+	 * @param object $field
+	 */
+	private static function prepare_conditional_logic( &$field ) {
+		$field->field_options['hide_field'] = (array) $field->field_options['hide_field'];
+
+		if ( isset( $field->field_options['hide_field_cond'] ) ) {
+			$field->field_options['hide_field_cond'] = (array) $field->field_options['hide_field_cond'];
+		} else {
+			$field->field_options['hide_field_cond'] = array( '==');
+		}
+
+		$field->field_options['hide_opt'] = (array) $field->field_options['hide_opt'];
+	}
+
+	/**
+	 * Get the conditional logic outcomes for a field
+	 *
+	 * @since 2.02.03
+	 * @param object $field
+	 * @param array $values
+	 * @return array
+	 */
+	private static function get_conditional_logic_outcomes( $field, $values ) {
+		$logic_outcomes = array();
+		foreach ( $field->field_options['hide_field'] as $logic_key => $logic_field ) {
+
+			$observed_value = self::get_observed_logic_value( $field, $values, $logic_field );
+			$logic_value = self::get_conditional_logic_value( $field, $logic_key, $observed_value );
+			$operator = $field->field_options['hide_field_cond'][ $logic_key ];
+
+			$logic_outcomes[] = FrmFieldsHelper::value_meets_condition( $observed_value, $operator, $logic_value );
+		}
+
+		return $logic_outcomes;
+	}
+
+	/**
+	 * Check if a field is conditionally shown based on the conditional logic outcomes
+	 *
+	 * @since 2.02.03
+	 * @param object $field
+	 * @param array $logic_outcomes
+	 * @return bool
+	 */
+	private static function is_field_visible_from_logic_outcomes( $field, $logic_outcomes ) {
+		$action = isset( $field->field_options['show_hide'] ) ? $field->field_options['show_hide'] : 'show';
+		$any_all = isset( $field->field_options['any_all'] ) ? $field->field_options['any_all'] : 'any';
+		$visible = ( 'show' == $action ) ? true : false;
+
+		self::check_logic_outcomes( $any_all, $logic_outcomes, $visible );
+
+		return $visible;
+	}
+
+	/**
+	 * Check if a Dynamic field has options at validation
+	 *
+	 * @since 2.02.03
+	 * @param object $field
+	 * @param array $values
+	 * @return bool
+	 */
+	private static function dynamic_field_has_options( $field, $values ) {
+		$has_options = true;
+
+		if ( $field->type != 'data' || $field->field_options['data_type'] == 'data' ) {
+			return $has_options;
+		}
+
+		foreach ( $field->field_options['hide_field'] as $logic_field_id ) {
+			if ( ! self::is_dynamic_field( $logic_field_id ) ) {
+				continue;
+			}
+
+			if ( ! self::logic_field_retrieves_options( $field, $values, $logic_field_id ) ) {
+				$has_options = false;
+				break;
+			}
+		}
+
+		$args = array( 'field' => $field, 'values' => $values );
+		$has_options = apply_filters( 'frm_dynamic_field_has_options', $has_options, $args );
+
+		return $has_options;
+	}
+
+	/**
+	 * Get the value for a single row of conditional logic
+	 *
+	 * @since 2.02.03
+	 * @param object $field
+	 * @param int $key
+	 * @param string|array $observed_value
+	 * @return string|array
+	 */
+	private static function get_conditional_logic_value( $field, $key, $observed_value ) {
+		$logic_value = $field->field_options['hide_opt'][ $key ];
+		self::get_logic_value_for_dynamic_field( $field, $key, $observed_value, $logic_value );
+
+		return $logic_value;
+	}
+
+	/**
+	 * Get the observed value from a logic field
+	 *
+	 * @since 2.02.03
+	 * @param object $field
+	 * @param array $values
+	 * @param int $logic_field_id
+	 * @return bool
+	 */
+	private static function get_observed_logic_value( $field, $values, $logic_field_id ) {
+		$observed_value = '';
+		if ( isset( $values['item_meta'][ $logic_field_id ] ) ) {
+			// logic field is not repeating/embedded
+			$observed_value = $values['item_meta'][ $logic_field_id ];
+		} else if ( isset( $field->temp_id ) && $field->id != $field->temp_id ) {
+			// logic field is repeating/embedded
+			$id_parts = explode( '-', $field->temp_id );
+			if ( isset( $_POST['item_meta'][ $id_parts[1] ][ $id_parts[2] ] ) && isset( $_POST['item_meta'][ $id_parts[1] ][ $id_parts[2] ][ $logic_field_id ] ) ) {
+				$observed_value = stripslashes_deep( $_POST['item_meta'][ $id_parts[1] ][ $id_parts[2] ][ $logic_field_id ] );
+			}
+		}
+
+		return $observed_value;
+	}
+
+	/**
+	 * Get the value for a single row of conditional logic when field and parent is Dynamic
+	 *
+	 * @since 2.02.03
+	 * @param object $field
+	 * @param int $key
+	 * @param mixed $observed_value
+	 * @param string $logic_value
+	 */
+	private static function get_logic_value_for_dynamic_field( $field, $key, $observed_value, &$logic_value ) {
+		if ( $field->type != 'data' || $field->field_options['data_type'] == 'data' ) {
 			return;
 		}
 
-		// Makes sure this works with multi-select and non multi-select fields
-		if ( ! is_array( $parent_val ) ) {
-			$parent_val = explode( ',', $parent_val );
+		if ( ! self::is_dynamic_field( $field->field_options['hide_field'][ $key ] ) ) {
+			return;
 		}
 
-		// Get all category IDs that have a parent equal to the parent_val
-		$cats = array();
-		foreach ( $parent_val as $parent_id ) {
+		// If logic is "Dynamic field is equal to anything"
+		if ( empty( $field->field_options['hide_opt'][ $key ] ) ) {
+			$logic_value = $observed_value;
+
+			// If no value is set in parent field, make sure logic doesn't return true
+			if ( empty( $observed_value ) && $field->field_options['hide_field_cond'][$key] == '==' ) {
+				$logic_value = 'anything';
+			}
+		}
+
+		$hide_field = FrmField::getOne( $field->field_options['hide_field'][ $key ] );
+		$logic_value = apply_filters( 'frm_is_dynamic_field_empty', $logic_value, compact( 'field', 'key', 'hide_field', 'observed_value' )  );
+		if ( has_filter( 'frm_is_dynamic_field_empty' ) ) {
+			_deprecated_function( 'The frm_is_dynamic_field_empty filter', '2.02.03', 'the frm_dynamic_field_has_options filter' );
+		}
+	}
+
+	/**
+	 * Check whether a field is visible or not from conditional logic outcomes
+	 *
+	 * @since 2.02.03
+	 * @param string $any_all
+	 * @param array $logic_outcomes
+	 * @param bool $visible
+	 */
+	private static function check_logic_outcomes( $any_all, $logic_outcomes, &$visible ) {
+		if ( 'any' == $any_all ) {
+			if ( ! in_array( true, $logic_outcomes ) ) {
+				$visible = ! $visible;
+			}
+		} else {
+			if ( in_array( false, $logic_outcomes ) ) {
+				$visible = ! $visible;
+			}
+		}
+	}
+
+	/**
+	 * Check if a field is Dynamic
+	 *
+	 * @since 2.02.03
+	 * @param int $field_id
+	 * @return bool
+	 */
+	private static function is_dynamic_field( $field_id ) {
+		$field_type = FrmField::get_type( $field_id );
+		return ( $field_type && $field_type == 'data' );
+	}
+
+	/**
+	 * Check if a Dynamic logic field retrieves options for the child
+	 *
+	 * @since 2.02.03
+	 * @param object $field
+	 * @param array $values
+	 * @param int $logic_field_id
+	 * @return bool
+	 */
+	private static function logic_field_retrieves_options( $field, $values, $logic_field_id ) {
+		$observed_value = self::get_observed_logic_value( $field, $values, $logic_field_id );
+
+		if ( empty( $observed_value ) ) {
+			return false;
+		}
+
+		if ( ! is_array( $observed_value ) ) {
+			$observed_value = explode( ',', $observed_value );
+		}
+
+		$linked_field_id = isset( $field->field_options['form_select'] ) ? $field->field_options['form_select'] : '';
+
+		if ( $linked_field_id == 'taxonomy' ) {
+			// Category fields
+			$has_options = self::does_parent_taxonomy_have_children( $field->field_options['taxonomy'], $observed_value );
+		} else {
+			// Standard dynamic fields
+			$linked_field = FrmField::getOne( $linked_field_id );
+			$field_options = array();
+			FrmProEntryMetaHelper::meta_through_join( $logic_field_id, $linked_field, $observed_value, $field, $field_options );
+			$has_options = ! empty( $field_options );
+		}
+
+		return $has_options;
+	}
+
+	/**
+	 * Checks if child categories exist for a given taxonomy and parent taxonomy IDs
+	 *
+	 * @since 2.02.03
+	 *
+	 * @param string $taxonomy
+	 * @param array $parent_taxonomy_ids
+	 * @return array
+	 */
+	private static function does_parent_taxonomy_have_children( $taxonomy, $parent_taxonomy_ids ) {
+		$has_children = false;
+
+		if ( empty( $parent_taxonomy_ids ) ) {
+			return $has_children;
+		}
+
+		$child_categories = array();
+		foreach ( $parent_taxonomy_ids as $parent_id ) {
 			$args = array(
 				'parent' => (int) $parent_id,
-				'taxonomy'	=> $field->field_options['taxonomy'],
-				'hide_empty'	=> 0,
+				'taxonomy' => $taxonomy,
+				'hide_empty' => 0,
 			);
-			$cats = array_merge( get_categories( $args ), $cats );
+			$new_cats = get_categories( $args );
+			$child_categories = array_merge( $new_cats, $child_categories );
+
+			// Stop as soon as there are options
+			if ( ! empty( $child_categories ) ) {
+				$has_children = true;
+				break;
+			}
 		}
 
-		if ( empty( $cats )  ) {
-			// Field should not be required so indicate that this field is hidden
-			$field->field_options['hide_opt'][ $key ] = '';
-		}
+		return $has_children;
 	}
 
     public static function &is_field_visible_to_user($field) {
