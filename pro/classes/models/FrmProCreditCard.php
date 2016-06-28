@@ -3,6 +3,10 @@
 class FrmProCreditCard {
 
 	public static function validate( $errors, $field, $values, $args ) {
+		if ( ! isset( $field->temp_id ) ) {
+			$field->temp_id = $field->id;
+		}
+
 		self::validate_required_fields( $errors, $field, $values );
 		self::validate_cc_number( $errors, $field, $values );
 		self::validate_cc_expiration( $errors, $field, $values );

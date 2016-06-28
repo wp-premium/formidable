@@ -458,12 +458,12 @@ class FrmProEntryMeta{
             $prev_value = FrmEntryMeta::get_entry_meta_by_field($entry_id, $field->id);
 
             if ( $prev_value != $value && $conf_val != $value ) {
-				$errors[ 'conf_field'. $field->temp_id ] = FrmFieldsHelper::get_error_msg( $field, 'conf_msg' );
+				$errors[ 'fieldconf_' . $field->temp_id ] = FrmFieldsHelper::get_error_msg( $field, 'conf_msg' );
                 $errors['field' . $field->temp_id] = '';
             }
         } else if ( $args['action'] == 'create' && $conf_val != $value ) {
             //If creating entry
-			$errors[ 'conf_field'. $field->temp_id ] = FrmFieldsHelper::get_error_msg( $field, 'conf_msg' );
+			$errors[ 'fieldconf_' . $field->temp_id ] = FrmFieldsHelper::get_error_msg( $field, 'conf_msg' );
             $errors['field' . $field->temp_id] = '';
         }
     }

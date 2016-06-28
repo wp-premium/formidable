@@ -14,12 +14,11 @@
         <?php } ?>
         </select>
     </p>
-    <p class="howto"><?php _e( 'Note: Only entries can by imported via CSV.', 'formidable' ) ?></p>
+	<p>
+		<label for="csv_files">
+			<input type="checkbox" name="csv_files" id="csv_files" value="1" <?php checked( $csv_files, 1 ) ?> />
+			<?php esc_html_e( 'Import files. If you are importing from another site, check this box to copy external files to this site.', 'formidable' ); ?>
+		</label>
+	</p>
+	<p class="howto"><?php _e( 'Note: Only entries can by imported via CSV.', 'formidable' ) ?></p>
 </div>
-
-<p>
-	<label for="csv_files">
-		<input type="checkbox" name="csv_files" id="csv_files" value="1" <?php checked( $csv_files, 1 ) ?> />
-		<?php esc_html_e( 'Import files. If you are importing from another site, check this box to copy external files to this site.', 'formidable' ); ?>
-	</label>
-</p>

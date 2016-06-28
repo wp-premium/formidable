@@ -185,6 +185,7 @@ class FrmProXMLController{
 
         $headers = $example = '';
 		$csv_del = FrmAppHelper::get_param( 'csv_del', ',', 'get', 'sanitize_text_field' );
+		$csv_files = FrmAppHelper::get_param( 'csv_files', ',', 'get', 'absint' );
 		$form_id = FrmAppHelper::get_param( 'form_id', '', 'get', 'absint' );
 
         setlocale(LC_ALL, get_locale());
@@ -220,6 +221,7 @@ class FrmProXMLController{
         $current_path = get_attached_file($media_id);
 		$row = FrmAppHelper::get_param('row', 0, 'get', 'absint' );
 		$csv_del = FrmAppHelper::get_param( 'csv_del', ',', 'get', 'sanitize_text_field' );
+		$csv_files = FrmAppHelper::get_param( 'csv_files', ',', 'get', 'absint' );
 		$form_id = FrmAppHelper::get_param( 'form_id', 0, 'get', 'absint' );
 
         $opts = get_option('frm_import_options');
@@ -236,6 +238,7 @@ class FrmProXMLController{
 
         $mapping = FrmAppHelper::get_param('data_array');
         $url_vars = "&csv_del=". urlencode($csv_del) ."&form_id={$form_id}&frm_import_file={$media_id}&row={$row}&max={$import_count}";
+		$url_vars .= "&csv_files=" . $csv_files;
 
         foreach ( $mapping as $mkey => $map ) {
             $url_vars .= "&data_array[$mkey]=$map";
