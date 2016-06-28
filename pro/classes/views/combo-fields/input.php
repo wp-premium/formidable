@@ -29,6 +29,10 @@
 			'field' => $field, 'option_name' => $key . '_desc'
 		) );
 	}
+
+	if ( ! empty( $errors ) && isset( $errors[ 'field' . $field['id'] . '-' . $key ] ) ) {
 	?>
+	<div class="frm_error"><?php echo esc_html( $errors[ 'field' . $field['id'] . '-' . $key ] ) ?></div>
+	<?php } ?>
 </div>
 <?php } ?>

@@ -16,6 +16,7 @@
 		<input type="hidden" name="row" value="<?php echo esc_attr( $row ) ?>" />
 		<input type="hidden" name="form_id" value="<?php echo esc_attr( $form_id ) ?>" />
         <input type="hidden" name="csv_del" value="<?php echo esc_attr($csv_del) ?>" />
+        <input type="hidden" name="csv_files" value="<?php echo esc_attr($csv_files) ?>" />
         <table class="form-table">
             <thead>
             <tr class="form-field">
