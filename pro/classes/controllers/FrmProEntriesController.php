@@ -1390,101 +1390,67 @@ class FrmProEntriesController{
 		$defaults = array( 'html' => 0, 'type' => $field->type, 'keepjs' => 0 );
 		$atts = array_merge( $defaults, $atts );
 
-        switch ( $atts['type'] ) {
-            case 'user_id':
-                $value = FrmProFieldsHelper::get_display_name($value);
-            break;
-            case 'date':
-                $value = FrmProFieldsHelper::get_date($value);
-            break;
-            case 'file':
-                $old_value = $value;
-                if ( $atts['html'] ) {
-                    $value = '<div class="frm_file_container">';
-                } else {
-                    $value = '';
+		if ( $atts['type'] == 'image' ) {
+			$atts['html'] = true;
+		} elseif ( isset( $atts['show'] ) && empty( $atts['show'] ) ) {
+			unset( $atts['show'] );
+		}
+
+		if ( $atts['type'] == 'file' && $atts['html'] && $atts['sep'] == ', ' ) {
+			$atts['sep'] = '';
+			$atts['show_image'] = true;
+			if ( ! isset( $atts['add_link'] ) ) {
+				$atts['add_link'] = true;
+			}
+		}
+
+        if ( $atts['type'] == 'data' ) {
+
+            if ( ! is_numeric($value) ) {
+                if ( ! is_array($value) ) {
+                    $value = explode($atts['sep'], $value);
                 }
 
-                foreach ( (array) $old_value as $mid ) {
-                    if ( $atts['html'] ){
-                        $img = FrmProFieldsHelper::get_file_icon($mid);
-                        $value .= $img;
-						if ( $atts['show_filename'] && $img && preg_match( '/wp-includes\/images\/(crystal|media)/', $img ) ) {
-                            //prevent two filenames
-                            $atts['show_filename'] = $show_filename = false;
+                if ( is_array($value) ) {
+                    $new_value = '';
+                    foreach ( $value as $entry_id ) {
+                        if ( ! empty( $new_value ) ) {
+                            $new_value .= $atts['sep'];
                         }
 
-                        unset($img);
-
-                        if ( $atts['html'] && $atts['show_filename'] ) {
-                            $value .= '<br/>' . FrmProFieldsHelper::get_file_name($mid) . '<br/>';
-                        }
-
-                        if ( isset( $show_filename ) ) {
-                            //if skipped filename, show it for the next file
-                            $atts['show_filename'] = true;
-                            unset($show_filename);
-                        }
-                    } else if ( $mid ) {
-                        $value .= FrmProFieldsHelper::get_file_name($mid) . $atts['sep'];
-                    }
-                }
-
-                $value = rtrim($value, $atts['sep']);
-                if ( $atts['html'] ) {
-                    $value .= '</div>';
-                }
-            break;
-
-            case 'data':
-                if ( ! is_numeric($value) ) {
-                    if ( ! is_array($value) ) {
-                        $value = explode($atts['sep'], $value);
-                    }
-
-                    if ( is_array($value) ) {
-                        $new_value = '';
-                        foreach ( $value as $entry_id ) {
-                            if ( ! empty( $new_value ) ) {
-                                $new_value .= $atts['sep'];
-                            }
-
-                            if ( is_numeric($entry_id) ) {
-                                $new_value .= FrmProFieldsHelper::get_data_value($entry_id, $field, $atts);
-                            } else {
-                                $new_value .= $entry_id;
-                            }
-                        }
-                        $value = $new_value;
-                    }
-                } else {
-                    //replace item id with specified field
-                    $new_value = FrmProFieldsHelper::get_data_value($value, $field, $atts);
-
-					if ( FrmProField::is_list_field( $field ) ) {
-                        $linked_field = FrmField::getOne($field->field_options['form_select']);
-                        if ( $linked_field && $linked_field->type == 'file' ) {
-                            $old_value = explode(', ', $new_value);
-                            $new_value = '';
-                            foreach ( $old_value as $v ) {
-								$new_value .= '<img src="' . esc_url( $v ) . '" class="frm_image_from_url" alt="" />';
-                                if ( $atts['show_filename'] ) {
-                                    $new_value .= '<br/>'. $v;
-                                }
-                                unset($v);
-                            }
+                        if ( is_numeric($entry_id) ) {
+                            $new_value .= FrmProFieldsHelper::get_data_value($entry_id, $field, $atts);
                         } else {
-                            $new_value = $value;
+                            $new_value .= $entry_id;
                         }
                     }
-
                     $value = $new_value;
                 }
-            break;
+			} else {
+                //replace item id with specified field
+                $new_value = FrmProFieldsHelper::get_data_value($value, $field, $atts);
 
-            case 'image':
-				$value = FrmProFieldsHelper::get_image_display_value( $value, array( 'html' => true ) );
-            break;
+				if ( FrmProField::is_list_field( $field ) ) {
+                    $linked_field = FrmField::getOne($field->field_options['form_select']);
+                    if ( $linked_field && $linked_field->type == 'file' ) {
+                        $old_value = explode(', ', $new_value);
+                        $new_value = '';
+                        foreach ( $old_value as $v ) {
+							$new_value .= '<img src="' . esc_url( $v ) . '" class="frm_image_from_url" alt="" />';
+                            if ( $atts['show_filename'] ) {
+                                $new_value .= '<br/>'. $v;
+                            }
+                            unset($v);
+                        }
+                    } else {
+                        $new_value = $value;
+                    }
+                }
+
+                $value = $new_value;
+            }
+        } else {
+			$value = FrmProFieldsHelper::get_display_value( $value, $field, $atts );
         }
 
         if ( ! $atts['keepjs'] ) {

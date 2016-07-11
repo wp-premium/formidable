@@ -3,6 +3,10 @@
 class FrmProAddress {
 
 	public static function validate( $errors, $field, $values, $args ) {
+		if ( ! isset( $field->temp_id ) ) {
+			$field->temp_id = $field->id;
+		}
+
 		self::validate_required_fields( $errors, $field, $values );
 		self::validate_zip( $errors, $field, $values );
 
