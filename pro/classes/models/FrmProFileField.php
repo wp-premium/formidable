@@ -19,8 +19,10 @@ class FrmProFileField {
 				$max = 1;
 			}
 
+			$file_size = self::get_max_file_size( $field['size'] );
+
 			$frm_vars['dropzone_loaded'][ $the_id ] = array(
-				'maxFilesize' => self::get_max_file_size( $field['size'] ),
+				'maxFilesize' => round( $file_size ),
 				'maxFiles'    => $max,
 				//'acceptedFiles' => '', //cover this in the php to minimize differences in mime types
 				'htmlID'      => $the_id,
@@ -479,7 +481,7 @@ class FrmProFileField {
 	* @param array|string $media_ids
 	* @return array $mids
 	*/
-	private static function sort_errors_from_ids( $response ) {
+	private static function sort_errors_from_ids( &$response ) {
         $mids = array();
         foreach ( (array) $response['media_ids'] as $media_id ) {
             if ( is_numeric( $media_id ) ) {

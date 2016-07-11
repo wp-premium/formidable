@@ -617,6 +617,7 @@ DEFAULT_HTML;
 			$hide_opt = rtrim( $hide_opt );
 		}
 
+		$observed_value = wp_kses_post( $observed_value );
 		$hide_opt = wp_kses_post( $hide_opt );
 
         if ( is_array($observed_value) ) {
@@ -927,7 +928,7 @@ DEFAULT_HTML;
             'user_id', 'tag', 'password',
         );
 		$multiple_input = array( 'radio', 'checkbox', 'select', 'scale', 'lookup' );
-		$other_type = array( 'divider', 'html', 'break' );
+		$other_type = array( 'html', 'break' );
 
 		$field_selection = array_merge( FrmField::pro_field_selection(), FrmField::field_selection() );
 

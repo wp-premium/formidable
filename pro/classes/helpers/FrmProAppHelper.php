@@ -409,8 +409,6 @@ class FrmProAppHelper{
 				return;
 			}
 
-			$filter_args = array();
-
 			$linked_id = FrmDb::get_col( 'frm_items', array(
 				'form_id' => $linked_field->form_id,
 				'item_key ' . FrmDb::append_where_is( $args['temp_where_is'] ) => $args['where_val'],

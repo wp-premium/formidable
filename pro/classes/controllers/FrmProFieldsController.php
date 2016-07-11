@@ -439,7 +439,7 @@ class FrmProFieldsController{
     public static function add_field_class($class, $field){
 		if ( $field['type'] == 'scale' && FrmField::is_option_true( $field, 'star' ) ) {
             $class .= ' star';
-        } else if ( $field['type'] == 'date' ) {
+        } else if ( $field['type'] == 'date' && ! FrmField::is_read_only( $field ) ) {
             $class .= ' frm_date';
 		} else if ( $field['type'] == 'file' && FrmField::is_option_true( $field, 'multiple' ) ) {
             $class .= ' frm_multiple_file';

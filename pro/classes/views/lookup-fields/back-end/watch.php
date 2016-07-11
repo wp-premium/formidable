@@ -7,9 +7,6 @@
 		<div id="frm_watch_lookup_block_<?php echo esc_attr( $field['id'] ) ?>"<?php echo ( empty( $field['watch_lookup'] ) ) ? ' class="frm_hidden"' : '' ?>><?php
 		$field_id = $field['id'];
 		foreach ( $field['watch_lookup'] as $row_key => $selected_field ) {
-			if ( empty( $selected_field ) ) {
-				continue;
-			}
 			include( FrmAppHelper::plugin_path() .'/pro/classes/views/lookup-fields/back-end/watch-row.php' );
 		}
 		?></div>

@@ -487,7 +487,7 @@ class FrmProEntry{
             //if field is custom field
 			if ( $o_field->field_options['post_field'] == 'post_custom' ) {
                 $query['select'] .= $wpdb->prepare(' LEFT JOIN '. $wpdb->postmeta .' pm'. $o_key .' ON pm'. $o_key .'.post_id=it.post_id AND pm'. $o_key .'.meta_key = %s ', $o_field->field_options['custom_field']);
-                $query['order'] .= 'CASE when pm'. $o_key .'.meta_value IS NULL THEN 1 ELSE 0 END, pm'. $o_key .'.meta_value '. $args['order_array'][$o_key] .', ';
+				$query['order'] .= 'CASE when pm'. $o_key .'.meta_value IS NULL THEN 1 ELSE 0 END, pm'. $o_key .'.meta_value ' . ( in_array($o_field->type, array( 'number', 'scale')) ? '+0 ' : '') . $args['order_array'][$o_key] .', ';
             } else if ( $o_field->field_options['post_field'] != 'post_category' ) {
                 //if field is a non-category post field
                 $query['select'] .= $first_order ? ' INNER ' : ' LEFT ';

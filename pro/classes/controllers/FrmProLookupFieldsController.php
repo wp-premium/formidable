@@ -194,6 +194,7 @@ class FrmProLookupFieldsController{
 
 			// Watch Lookup Fields
 			$lookup_fields = self::get_lookup_fields_for_watch_row( $field );
+			$field['watch_lookup'] = array_filter( $field['watch_lookup'] );
 			require( FrmAppHelper::plugin_path() . '/pro/classes/views/lookup-fields/back-end/watch.php' );
 
 			// Filter options
@@ -273,26 +274,9 @@ class FrmProLookupFieldsController{
 	 * @return array $lookup_fields
 	 */
 	private static function get_lookup_fields_for_watch_row( $field ) {
-		$parent_form_id = self::get_current_form_id_on_form_builder( $field );
+		$parent_form_id = isset( $field['parent_form_id'] ) ? $field['parent_form_id'] : $field['form_id'];
 		$lookup_fields = self::get_limited_lookup_fields_in_form( $parent_form_id, $field['form_id'] );
 		return $lookup_fields;
-	}
-
-	/**
-	 * Get the ID of the form being edited on the form builder page
-	 *
-	 * @since 2.01.0
-	 * @param array $field
-	 * @return int $parent_form_id
-	 */
-	private static function get_current_form_id_on_form_builder( $field ) {
-		if ( isset( $_GET['id'] ) ) {
-			$parent_form_id = (int) $_GET['id'];
-		} else {
-			$parent_form_id = $field['form_id'];
-		}
-
-		return $parent_form_id;
 	}
 
 	/**
