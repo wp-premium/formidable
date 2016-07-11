@@ -325,7 +325,13 @@ function frmFrontFormJS(){
 		var originalEvent = getOriginalEvent( e );
 		checkFieldsWatchingLookup( field_id, jQuery(this), originalEvent );
 		doCalculation(field_id, jQuery(this));
-		validateField( field_id, this );
+		maybeValidateChange( field_id, this );
+	}
+
+	function maybeValidateChange( field_id, field ) {
+		if ( jQuery(field).closest('form').hasClass('frm_js_validate') ) {
+			validateField( field_id, field );
+		}
 	}
 
 	function getOriginalEvent( e ) {
@@ -703,6 +709,9 @@ function frmFrontFormJS(){
 
 		if ( logicFieldInputs.length == 1 && logicFieldInputs[0].type != 'hidden' ) {
 			selectedVals = jQuery( '[name^="' + inputName + '"]' ).val();
+			if ( selectedVals === null ) {
+				selectedVals = '';
+			}
 		} else {
 			selectedVals = getValuesFromCheckboxInputs( logicFieldInputs );
 		}
@@ -901,7 +910,7 @@ function frmFrontFormJS(){
 			b = '';
 		}
 
-		if ( jQuery.isArray(b) && jQuery.inArray(a, b) > -1 ) {
+		if ( jQuery.isArray(b) && jQuery.inArray( String(a), b) > -1 ) {
 			b = a;
 		}
 
@@ -1702,7 +1711,7 @@ function frmFrontFormJS(){
 	function addLoadingTextToLookup( childSelect ) {
 		if ( ! childSelect.value ) {
 			childSelect.options.length = 1;
-			childSelect.options[1] = new Option(frm_js.loading_text, '', false, false);
+			childSelect.options[1] = new Option(frm_js.loading, '', false, false);
 		}
 	}
 
@@ -2034,7 +2043,7 @@ function frmFrontFormJS(){
 					if (html === '' || listVal === '') {
 						hideDynamicField(depFieldArgs);
 					} else {
-						showDynamicField(depFieldArgs, $fieldDiv, $listInputs);
+						showDynamicField( depFieldArgs, $fieldDiv, $listInputs, true );
 					}
 				} else {
 					updateHiddenDynamicListField( depFieldArgs, html );
@@ -2056,9 +2065,9 @@ function frmFrontFormJS(){
 	function updateDynamicFieldOptions( depFieldArgs, fieldElement ){
 		var $fieldDiv = jQuery( '#' + depFieldArgs.containerId );
 
-		var hiddenInput = $fieldDiv.find('select[name^="item_meta"], textarea[name^="item_meta"], input[name^="item_meta"]');
-		var prevVal = getPrevFieldValue( hiddenInput );
-		var defaultVal = hiddenInput.data('frmval');
+		var $fieldInputs = $fieldDiv.find( 'select[name^="item_meta"], input[name^="item_meta"]' );
+		var prevValue = getFieldValueFromInputs( $fieldInputs );
+		var defaultVal = $fieldInputs.data('frmval');
 
 		addLoadingIcon( $fieldDiv );
 
@@ -2072,24 +2081,30 @@ function frmFrontFormJS(){
 				field_id:depFieldArgs.fieldId,
 				default_value:defaultVal,
 				container_id:depFieldArgs.containerId,
-				prev_val:prevVal,
+				prev_val:prevValue,
 				nonce:frm_js.nonce
 			},
 			success:function(html){
 				var $optContainer = $fieldDiv.find('.frm_opt_container');
 				$optContainer.html(html);
-				var $dynamicFieldInputs = $optContainer.find('select, input, textarea');
+				var $dynamicFieldInputs = $optContainer.find( 'select, input[type="checkbox"], input[type="radio"]' );
 
 				removeLoadingIcon( $optContainer );
 
-				if ( html === '' || ( $dynamicFieldInputs.length == 1 && $dynamicFieldInputs.attr('type') == 'hidden' ) ) {
+				if ( html === '' || $dynamicFieldInputs.length < 1 ) {
 					hideDynamicField( depFieldArgs );
 				} else {
-					showDynamicField( depFieldArgs, $fieldDiv, $dynamicFieldInputs );
+					var valueChanged = dynamicFieldValueChanged( depFieldArgs, $dynamicFieldInputs, prevValue );
+					showDynamicField( depFieldArgs, $fieldDiv, $dynamicFieldInputs, valueChanged );
 				}
 			}
 		});
 
+	}
+
+	function dynamicFieldValueChanged( depFieldArgs, $dynamicFieldInputs, prevValue ) {
+		var newValue = getFieldValueFromInputs( $dynamicFieldInputs );
+		return ( prevValue !== newValue );
 	}
 
 	/**
@@ -2153,7 +2168,7 @@ function frmFrontFormJS(){
 
 	// Remove the loading icon with jQuery
 	function removeLoadingIcon( $optContainer ) {
-		$optContainer.next( '.frm-loading-img' ).remove();
+		$optContainer.parent().children( '.frm-loading-img').remove();
 		$optContainer.show();
 	}
 
@@ -2167,28 +2182,28 @@ function frmFrontFormJS(){
 		optContainer.style.display = "block";
 	}
 
-	// Get the previous field value in a Dynamic field
-	function getPrevFieldValue( inputs ) {
-		var prev = [];
-		var thisVal = '';
-		inputs.each(function(){
-			thisVal = this.value;
+	// Get the field value from all the inputs
+	function getFieldValueFromInputs( $inputs ) {
+		var fieldValue = [];
+		var currentValue = '';
+		$inputs.each(function(){
+			currentValue = this.value;
 			if ( this.type === 'radio' || this.type === 'checkbox' ) {
 				if ( this.checked === true ) {
-					prev.push( thisVal );
+					fieldValue.push( currentValue );
 				}
 			} else {
-				if ( thisVal !== '' ) {
-					prev.push( thisVal );
+				if ( currentValue !== '' ) {
+					fieldValue.push( currentValue );
 				}
 			}
 		});
 
-		if ( prev.length === 0 ) {
-			prev = '';
+		if ( fieldValue.length === 0 ) {
+			fieldValue = '';
 		}
 
-		return prev;
+		return fieldValue;
 	}
 
 	// Hide and clear a Dynamic Field
@@ -2197,7 +2212,7 @@ function frmFrontFormJS(){
 	}
 
 	// Show Dynamic field
-	function showDynamicField( depFieldArgs, $fieldDiv, $fieldInputs ) {
+	function showDynamicField( depFieldArgs, $fieldDiv, $fieldInputs, valueChanged ) {
 		if ( isFieldConditionallyHidden( depFieldArgs.containerId, depFieldArgs.formId ) ) {
 			removeFromHideFields( depFieldArgs.containerId, depFieldArgs.formId );
 			$fieldDiv.show();
@@ -2207,7 +2222,9 @@ function frmFrontFormJS(){
 			loadChosen();
 		}
 
-		triggerChange( $fieldInputs );
+		if ( valueChanged === true ) {
+			triggerChange($fieldInputs);
+		}
 	}
 
 	/*************************************************
@@ -2837,7 +2854,7 @@ function frmFrontFormJS(){
 		var errors = [];
 
 		var $fieldCont = jQuery(field).closest('.frm_form_field');
-		if ( $fieldCont.hasClass('.frm_required_field') && ! jQuery(field).hasClass('.frm_optional') ) {
+		if ( $fieldCont.hasClass('frm_required_field') && ! jQuery(field).hasClass('frm_optional') ) {
 			errors = checkRequiredField( field, errors );
 		}
 
@@ -3923,9 +3940,9 @@ function frmFrontFormJS(){
 		},
 
 		submitFormManual: function(e, object){
-			var classList = object.classList;
+			var classList = object.className.trim().split(/\s+/gi);
 			if ( classList ) {
-				var isPro = classList.contains('frm_pro_form');
+				var isPro = classList.indexOf('frm_pro_form') > -1;
 				if ( ! isPro ) {
 					return;
 				}
@@ -3940,7 +3957,7 @@ function frmFrontFormJS(){
 
 			if ( Object.keys(errors).length === 0 ) {
 				jQuery(object).find('.frm_ajax_loading').addClass('frm_loading_now');
-				if ( classList.contains('frm_ajax_submit') ) {
+				if ( classList.indexOf('frm_ajax_submit') > -1 ) {
 					var hasFileFields = jQuery(object).find('input[type="file"]').length;
 					if ( hasFileFields < 1 ) {
 						action = jQuery(object).find('input[name="frm_action"]').val();

@@ -364,7 +364,7 @@ class FrmProFieldsHelper{
         }
 
 		//If checkbox, multi-select dropdown, or checkbox data from entries field and default value has a comma
-		if ( FrmField::is_field_with_multiple_values( $field ) && ( $field->type == 'data' || ! in_array( $value, $field->options ) ) ) {
+		if ( FrmField::is_field_with_multiple_values( $field ) && ( in_array( $field->type, array( 'data', 'lookup' ) ) || ! in_array( $value, $field->options ) ) ) {
 			//If the default value does not match any options OR if data from entries field (never would have commas in values), explode to array
 			$value = explode(',', $value);
 		}
@@ -2063,14 +2063,23 @@ DEFAULT_HTML;
 		$conf_html = FrmFieldsHelper::replace_shortcodes( $field['custom_html'], $conf_field, $atts['errors'], '', $args);
 
 		// Add a couple of classes
-		$conf_html = str_replace('frm_primary_label', 'frm_primary_label frm_conf_label', $conf_html);
-		$conf_html = str_replace('frm_form_field', 'frm_form_field frm_conf_field', $conf_html);
+		$label_class = 'frm_primary_label';
+		if ( strpos( $conf_html, $label_class ) === false ) {
+			$label_class = 'frm_pos_';
+		}
+		$conf_html = str_replace( $label_class, 'frm_conf_label ' . $label_class, $conf_html );
+
+		$container_class = 'frm_form_field';
+		if ( strpos( $conf_html, $container_class ) === false ) {
+			$container_class = 'form-field';
+		}
+		$conf_html = str_replace( $container_class, $container_class . ' frm_conf_field', $conf_html );
 
 		// Remove label if stacked. Hide if inline.
 		if ( $field['conf_field'] == 'inline' ) {
-			$conf_html = str_replace('frm_form_field', 'frm_form_field frm_hidden_container', $conf_html);
+			$conf_html = str_replace( $container_class, $container_class . ' frm_hidden_container', $conf_html );
 		} else {
-		   $conf_html = str_replace('frm_form_field', 'frm_form_field frm_none_container', $conf_html);
+		   $conf_html = str_replace( $container_class, $container_class . ' frm_none_container', $conf_html );
 		}
 
 		return $conf_html;
@@ -3912,7 +3921,10 @@ DEFAULT_HTML;
                     $atts['decimal'] = isset($num[1]) ? strlen($num[1]) : 0;
                 }
 
-                $n = number_format($n, $atts['decimal'], $atts['dec_point'], $atts['thousands_sep']);
+				if ( is_numeric( $n ) ) {
+					$n = number_format($n, $atts['decimal'], $atts['dec_point'], $atts['thousands_sep']);
+				}
+
                 $new_val[] = $n;
             }
 

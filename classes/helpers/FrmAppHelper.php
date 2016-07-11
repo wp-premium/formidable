@@ -10,7 +10,7 @@ class FrmAppHelper {
 	/**
 	 * @since 2.0
 	 */
-	public static $plug_version = '2.02.03';
+	public static $plug_version = '2.02.04';
 
     /**
      * @since 1.07.02
@@ -1720,7 +1720,6 @@ class FrmAppHelper {
 			'offset'    => apply_filters( 'frm_scroll_offset', 4 ),
 			'nonce'     => wp_create_nonce( 'frm_ajax' ),
 			'id'        => __( 'ID', 'formidable' ),
-			'loading_text' => __( 'Options are loading...', 'formidable' ),
 		) );
 
 		if ( $location == 'admin' ) {

@@ -463,9 +463,9 @@ class FrmProFormsHelper{
         foreach ( $frm_vars['datepicker_loaded'] as $date_field_id => $options ) {
             if ( strpos($date_field_id, '^') === 0 ) {
                 // this is a repeating field
-                $trigger_id = 'input[id^="'. str_replace('^', '', $date_field_id) .'"]';
+                $trigger_id = 'input[id^="'. str_replace('^', '', esc_attr( $date_field_id ) ) .'"]';
             } else {
-                $trigger_id = '#'. $date_field_id;
+                $trigger_id = '#'. esc_attr( $date_field_id );
             }
 
 			$custom_options = self::get_custom_date_js( $date_field_id, $options );
@@ -490,8 +490,8 @@ class FrmProFormsHelper{
 			} else if ( $date_field_id ) {
 				?>
 jQuery(document).ready(function($){
-$('<?php echo esc_attr( $trigger_id ) ?>').addClass('frm_custom_date');
-$(document).on('focusin','<?php echo esc_attr( $trigger_id ) ?>', function(){
+$('<?php echo $trigger_id ?>').addClass('frm_custom_date');
+$(document).on('focusin','<?php echo $trigger_id ?>', function(){
 $.datepicker.setDefaults($.datepicker.regional['']);
 $(this).datepicker($.extend($.datepicker.regional['<?php echo esc_js( $options['locale'] ) ?>'],{dateFormat:'<?php echo esc_js( $frmpro_settings->cal_date_format ) ?>',changeMonth:true,changeYear:true,yearRange:'<?php echo esc_js( $date_options['options']['yearRange'] ) ?>',defaultDate:'<?php echo esc_js( $date_options['options']['defaultDate'] ); ?>'<?php
 echo $custom_options;
