@@ -25,9 +25,12 @@ class FrmProAddress {
 				$values = FrmProAddressesController::empty_value_array();
 			}
 
+			$blank_msg = FrmFieldsHelper::get_error_msg( $field, 'blank' );
+
 			foreach ( $values as $key => $value ) {
 				if ( empty( $value ) && $key != 'line2' ) {
 					$errors[ 'field' . $field->temp_id . '-' . $key ] = '';
+					$errors[ 'field' . $field->temp_id ] = $blank_msg;
 				}
 			}
 		}

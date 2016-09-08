@@ -206,6 +206,9 @@ class FrmProLookupFieldsController{
 			// Dynamic Default Value
 			require( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/dynamic-default-value.php' );
 		}
+
+		FrmProFieldsController::show_visibility_option( $field );
+		FrmProFieldsController::show_conditional_logic_option( $field );
 	}
 
 	/**
@@ -969,6 +972,10 @@ class FrmProLookupFieldsController{
 			if ( is_array( $meta_val ) ) {
 				$final_values = array_merge( $final_values, $meta_val );
 			} else {
+				if ( ! is_numeric( $meta_val ) ) {
+					$meta_val = ucfirst( $meta_val );
+				}
+
 				$final_values[] = $meta_val;
 			}
 		}

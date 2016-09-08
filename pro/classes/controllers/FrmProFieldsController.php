@@ -351,30 +351,13 @@ class FrmProFieldsController{
     }
 
     public static function input_html( $field, $echo = true ) {
-        global $frm_vars;
-
-        $frm_settings = FrmAppHelper::get_settings();
         $add_html = '';
 
-		if ( FrmField::is_option_true( $field, 'read_only' ) && $field['type'] != 'hidden' && $field['type'] != 'lookup' ) {
-            global $frm_vars;
-
-            if ( ( isset($frm_vars['readonly']) && $frm_vars['readonly'] == 'disabled' ) || ( current_user_can('frm_edit_entries') && FrmAppHelper::is_admin() ) ) {
-                //not read only
-            //}else if($field['type'] == 'select'){
-                //$add_html .= ' disabled="disabled" ';
-            } else if ( in_array($field['type'], array( 'radio', 'checkbox')) ) {
-                $add_html .= ' disabled="disabled" ';
-            }else{
-                $add_html .= ' readonly="readonly" ';
-            }
-        }
+		self::add_readonly_input_attributes( $field, $add_html );
 
 		self::maybe_add_data_attribute_for_section( $field, $add_html );
 
-		if ( FrmField::is_multiple_select( $field ) ) {
-            $add_html .= ' multiple="multiple" ';
-        }
+		self::add_multiple_select_attribute( $field, $add_html );
 
         if ( FrmAppHelper::is_admin_page('formidable' ) ) {
             if ( $echo ) {
@@ -387,32 +370,11 @@ class FrmProFieldsController{
 
 		FrmProLookupFieldsController::maybe_add_lookup_input_html( $field, $add_html );
 
-		if ( $frm_settings->use_html ) {
-			if ( FrmField::is_option_true( $field, 'autocom' ) && ($field['type'] == 'select' || ( $field['type'] == 'data' && isset( $field['data_type'] ) && $field['data_type'] == 'select' ) ) ) {
-                //add label for autocomplete fields
-                $add_html .= ' data-placeholder=" "';
-            }
-
-            if ( $field['type'] == 'number' || $field['type'] == 'range' ) {
-                if ( ! is_numeric($field['minnum']) ) {
-                    $field['minnum'] = 0;
-                }
-                if ( ! is_numeric($field['maxnum']) ) {
-                    $field['maxnum'] = 9999999;
-                }
-                if ( ! is_numeric( $field['step'] ) && $field['step'] != 'any' ) {
-                    $field['step'] = 1;
-                }
-                $add_html .= ' min="' . esc_attr( $field['minnum'] ) . '" max="' . esc_attr( $field['maxnum'] ) . '" step="' . esc_attr( $field['step'] ) . '"';
-			} else if ( in_array( $field['type'], array( 'url', 'email', 'image' ) ) ) {
-                if ( ( ! isset($frm_vars['novalidate']) || ! $frm_vars['novalidate'] ) && ( $field['type'] != 'email' || ( isset($field['value']) && $field['default_value'] == $field['value'] ) ) ) {
-                    // add novalidate for drafts
-                    $frm_vars['novalidate'] = true;
-                }
-            }
-        }
+		self::add_html5_input_attributes( $field, $add_html );
 
 		$add_html .= FrmProFieldsHelper::setup_input_masks( $field );
+
+		self::add_pattern_attribute( $field, $add_html );
 
 		if ( $echo ) {
             echo $add_html;
@@ -420,6 +382,94 @@ class FrmProFieldsController{
 
         return $add_html;
     }
+
+	/**
+	 * Add readonly/disabled input attributes
+	 *
+	 * @since 2.02.06
+	 * @param array $field
+	 * @param string $add_html
+	 */
+    private static function add_readonly_input_attributes( $field, &$add_html ) {
+		if ( FrmField::is_option_true( $field, 'read_only' ) && $field[ 'type' ] != 'hidden' && $field[ 'type' ] != 'lookup' ) {
+			global $frm_vars;
+
+			if ( ( isset( $frm_vars['readonly'] ) && $frm_vars['readonly'] == 'disabled' ) || ( current_user_can( 'frm_edit_entries' ) && FrmAppHelper::is_admin() ) ) {
+				//not read only
+				//}else if($field['type'] == 'select'){
+				//$add_html .= ' disabled="disabled" ';
+			} else if ( in_array( $field[ 'type' ], array( 'radio', 'checkbox' ) ) ) {
+				$add_html .= ' disabled="disabled" ';
+			} else {
+				$add_html .= ' readonly="readonly" ';
+			}
+		}
+	}
+
+	/**
+	 * Add multiple select attribute
+	 *
+	 * @since 2.02.06
+	 * @param array $field
+	 * @param string $add_html
+	 */
+	private static function add_multiple_select_attribute( $field, &$add_html ) {
+		if ( FrmField::is_multiple_select( $field ) ) {
+			$add_html .= ' multiple="multiple" ';
+		}
+	}
+
+	/**
+	 * Add a few HTML5 input attributes
+	 *
+	 * @since 2.02.06
+	 * @param array $field
+	 * @param string $add_html
+	 */
+	private static function add_html5_input_attributes( $field, &$add_html ) {
+		global $frm_vars;
+		$frm_settings = FrmAppHelper::get_settings();
+
+		if ( $frm_settings->use_html ) {
+			if ( FrmField::is_option_true( $field, 'autocom' ) && ($field['type'] == 'select' || ( $field['type'] == 'data' && isset( $field['data_type'] ) && $field['data_type'] == 'select' ) ) ) {
+				//add label for autocomplete fields
+				$add_html .= ' data-placeholder=" "';
+			}
+
+			if ( $field['type'] == 'number' || $field['type'] == 'range' ) {
+				if ( ! is_numeric($field['minnum']) ) {
+					$field['minnum'] = 0;
+				}
+				if ( ! is_numeric($field['maxnum']) ) {
+					$field['maxnum'] = 9999999;
+				}
+				if ( ! is_numeric( $field['step'] ) && $field['step'] != 'any' ) {
+					$field['step'] = 1;
+				}
+				$add_html .= ' min="' . esc_attr( $field['minnum'] ) . '" max="' . esc_attr( $field['maxnum'] ) . '" step="' . esc_attr( $field['step'] ) . '"';
+			} else if ( in_array( $field['type'], array( 'url', 'email', 'image' ) ) ) {
+				if ( ( ! isset($frm_vars['novalidate']) || ! $frm_vars['novalidate'] ) && ( $field['type'] != 'email' || ( isset($field['value']) && $field['default_value'] == $field['value'] ) ) ) {
+					// add novalidate for drafts
+					$frm_vars['novalidate'] = true;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Add pattern attribute
+	 *
+	 * @since 2.02.06
+	 * @param array $field
+	 * @param string $add_html
+	 */
+	private static function add_pattern_attribute( $field, &$add_html ) {
+		if ( $field['type'] == 'phone' || ( $field['type'] == 'text' && FrmField::is_option_true_in_array( $field, 'format' ) ) ) {
+			$format = FrmEntryValidate::phone_format( $field );
+			$format = substr( $format, 2, -1 );
+			$add_html .= ' pattern="' . esc_attr( $format ) . '"';
+		}
+	}
 
 	/**
 	 * Add data-sectionid attribute for fields in section
@@ -521,6 +571,10 @@ class FrmProFieldsController{
     }
 
 	public static function options_form( $field, $display, $values ) {
+		if ( in_array( $field['type'], array( 'phone', 'lookup', 'text' ) ) ) {
+			return;
+		}
+
         global $frm_vars;
 
         $frm_settings = FrmAppHelper::get_settings();
@@ -541,10 +595,6 @@ class FrmProFieldsController{
             $mimes = self::get_mime_options( $field );
         }
 
-		if ( $field['type'] == 'lookup' ) {
-			FrmProLookupFieldsController::show_lookup_field_options_in_form_builder( $field );
-		}
-
 		if ( $display['type'] == 'radio' || $display['type'] == 'checkbox' || ( $display['type'] == 'data' && in_array( $display['field_data']['data_type'], array( 'radio', 'checkbox' ) ) ) ) {
 			include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/alignment.php' );
 		}
@@ -564,7 +614,6 @@ class FrmProFieldsController{
 			'scale'       => 'scale-options',
 			'html'        => 'html-content',
 			'form'        => 'insert-form',
-			'phone'       => 'phone-format',
 		);
 		if ( isset( $include_file_for_field[ $field['type'] ] ) ) {
 			include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/' . $include_file_for_field[ $field['type'] ] . '.php' );
@@ -591,6 +640,52 @@ class FrmProFieldsController{
 		}
     }
 
+	/**
+	 * Display the format option
+	 *
+	 * @since 2.02.06
+	 * @param array $field
+	 */
+	public static function show_format_option( $field ) {
+		include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/value-format.php' );
+	}
+
+	/**
+	 * Display the visibility option
+	 *
+	 * @since 2.02.06
+	 * @param array $field
+	 */
+	public static function show_visibility_option( $field ) {
+		include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/visibility.php' );
+	}
+
+	/**
+	 * Display the conditional logic option
+	 *
+	 * @since 2.02.06
+	 * @param array $field
+	 */
+	public static function show_conditional_logic_option( $field ) {
+		$form_fields = false;
+		if ( ! empty( $field['hide_field'] ) && is_array( $field['hide_field'] ) ) {
+			$form_id = ( isset( $values['id'] ) ? $values['id'] : $field['form_id'] );
+			$form_fields = FrmField::get_all_for_form( $form_id );
+		}
+		include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/logic.php' );
+	}
+
+	/**
+	 * Display the Dynamic Values section
+	 *
+	 * @since 2.02.06
+	 * @param array $field
+	 * @param array $display
+	 */
+	public static function show_dynamic_values_options( $field, $display ) {
+		include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/dynamic-values.php' );
+	}
+
 	private static function get_mime_options( $field ) {
         $mimes = get_allowed_mime_types();
 		$selected_mimes = $field['ftypes'];
@@ -612,7 +707,6 @@ class FrmProFieldsController{
 		FrmAppHelper::permission_check('frm_view_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
-        $ajax = true;
 		$current_field_id = FrmAppHelper::get_post_param( 'field_id', '', 'absint' );
 		$form_id = FrmAppHelper::get_post_param( 'form_id', '', 'sanitize_text_field' );
 
@@ -946,7 +1040,7 @@ class FrmProFieldsController{
 		$field = apply_filters( 'frm_setup_new_fields_vars', $field, $args['field_data'], array() );
 
 		// Sort the options
-		$pass_args = array( 'metas' => $metas, 'field' => $linked_field->id, 'dynamic_field' => $field );
+		$pass_args = array( 'metas' => $metas, 'field' => $linked_field, 'dynamic_field' => $field );
 		$field['options'] = apply_filters( 'frm_data_sort', $field['options'], $pass_args );
 	}
 
@@ -1393,6 +1487,7 @@ class FrmProFieldsController{
 	 * @param array $fields
 	 * @param array $args (always contains 'parent_form_id')
 	 * If field is repeating, $args includes 'repeating', 'parent_field_id' and 'key_pointer'
+	 * If field is embedded, $args includes 'in_embed_form'
 	 * @return array
 	*/
 	public static function setup_field_data_for_editing_entry( $entry, $fields, $args ) {
@@ -1416,6 +1511,7 @@ class FrmProFieldsController{
 				'field_order'   => $field->field_order,
 				'form_id'       => $field->form_id,
 				'parent_form_id' => $args['parent_form_id'],
+				'in_embed_form' => isset( $args['in_embed_form'] ) ? $args['in_embed_form'] : '0',
 			);
 
 			$opt_defaults = FrmFieldsHelper::get_default_field_opts( $field_array['type'], $field, true );
@@ -1465,22 +1561,34 @@ class FrmProFieldsController{
 	* @return string|array $field_value
 	*/
 	private static function get_posted_or_saved_value( $entry, $field, $args ) {
-		$field_value = '';
+		if ( isset( $args['save_draft_click'] ) && $args['save_draft_click'] && FrmField::is_repeating_field( $field ) ) {
+			// If save draft was just clicked, and this is a repeating section, get the saved value
+			$field_value = self::get_saved_value( $entry, $field );
 
-		if ( FrmEntriesHelper::value_is_posted( $field, $args ) ) {
-			// If there is a posted field value, get that
+		} else if ( FrmEntriesHelper::value_is_posted( $field, $args ) ) {
 			FrmEntriesHelper::get_posted_value( $field, $field_value, $args );
 
 		} else {
-			// Get the saved field value
-			$pass_args = array(
-				'links' => false,
-				'truncate' => false,
-			);
-			$field_value = FrmProEntryMetaHelper::get_post_or_meta_value( $entry, $field, $pass_args );
+			$field_value = self::get_saved_value( $entry, $field );
 		}
 
 		return $field_value;
+	}
+
+	/**
+	 * Get the saved value for a field
+	 *
+	 * @since 2.02.05
+	 * @param object $entry
+	 * @param object $field
+	 * @return array|bool|mixed|string
+	 */
+	private static function get_saved_value( $entry, $field ) {
+		$pass_args = array(
+			'links' => false,
+			'truncate' => false,
+		);
+		return FrmProEntryMetaHelper::get_post_or_meta_value( $entry, $field, $pass_args );
 	}
 
 }

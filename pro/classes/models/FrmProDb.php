@@ -11,7 +11,7 @@ class FrmProDb{
         }
 
         if ( $old_db_version ) {
-			$migrations = array( 16, 17, 25, 27, 28, 29, 30, 31, 32, 34, 36 );
+			$migrations = array( 16, 17, 25, 27, 28, 29, 30, 31, 32, 34, 36, 37 );
 			foreach ( $migrations as $migration ) {
 				if ( $db_version >= $migration && $old_db_version < $migration ) {
 					call_user_func( array( __CLASS__, 'migrate_to_' . $migration ) );
@@ -50,6 +50,67 @@ class FrmProDb{
 		delete_site_option( 'frm_autoupdate' );
 		delete_site_option( 'frmpro-wpmu-sitewide' );
     }
+
+	/**
+	 * Delete orphaned entries from duplicated repeating section data
+	 */
+    public static function migrate_to_37() {
+		// Get all section fields on site
+		$dividers = FrmDb::get_col( 'frm_fields', array( 'type' => 'divider' ), 'id' );
+
+		if ( ! $dividers ) {
+			return;
+		}
+
+		foreach ( $dividers as $divider_id ) {
+			$section_field = FrmField::getOne( $divider_id );
+
+			if ( ! $section_field || ! FrmField::is_repeating_field( $section_field ) ) {
+				continue;
+			}
+
+			self::delete_duplicate_data_in_section( $section_field );
+		}
+	}
+
+	/**
+	 * Delete orphaned entries from duplicated repeating section data
+	 *
+	 * @param object $section_field
+	 */
+	private static function delete_duplicate_data_in_section( $section_field ) {
+    	// Get all parent entry IDs for section field's parent form
+		$check_parents = FrmDb::get_col( 'frm_items', array( 'form_id' => $section_field->form_id ), 'id' );
+
+		if ( ! $check_parents ) {
+			return;
+		}
+
+		$child_form_id = $section_field->field_options['form_select'];
+
+		foreach ( $check_parents as $parent_id ) {
+			$all_child_ids = FrmDb::get_col( 'frm_items', array( 'form_id' => $child_form_id, 'parent_item_id' => $parent_id ), 'id' );
+
+			if ( ! $all_child_ids ) {
+				continue;
+			}
+
+			$keep_child_ids = FrmDb::get_var( 'frm_item_metas', array( 'field_id' => $section_field->id, 'item_id' => $parent_id ), 'meta_value' );
+			$keep_child_ids = maybe_unserialize( $keep_child_ids );
+
+			if ( ! is_array( $keep_child_ids ) ) {
+				$keep_child_ids = (array) $keep_child_ids;
+			}
+
+			foreach ( $all_child_ids as $child_id ) {
+				if ( in_array( $child_id, $keep_child_ids ) ) {
+					// Do nothing
+				} else {
+					FrmEntry::destroy( $child_id );
+				}
+			}
+		}
+	}
 
 	/**
 	 * Add the _frm_file meta to images without a post

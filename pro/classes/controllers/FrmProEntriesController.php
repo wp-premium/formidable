@@ -712,7 +712,8 @@ class FrmProEntriesController{
 		$args['errors'] = self::get_posted_form_errors( $frm_vars, $args['form'] );
 		$field_args = array(
 			'parent_form_id' => $args['form']->id,
-			'fields' => $args['fields']
+			'fields' => $args['fields'],
+			'save_draft_click' => FrmProFormsHelper::saving_draft(),
 		);
 		$args['values'] = self::setup_entry_values_for_editing( $entry, $field_args );
 		$args['submit_text'] = self::get_submit_button_text_for_editing_entry( $entry, $args['values'], $args['form'] );
@@ -748,7 +749,8 @@ class FrmProEntriesController{
 		$entry = FrmEntry::getOne( $entry_id );
 		$field_args = array(
 			'parent_form_id' => $args['form']->id,
-			'fields' => $args['fields']
+			'fields' => $args['fields'],
+			'save_draft_click' => true,
 		);
 		$args['values'] = self::setup_entry_values_for_editing( $entry, $field_args );
 		$args['submit_text'] = self::get_submit_button_text_for_editing_entry( $entry, $args['values'], $args['form'] );
@@ -877,7 +879,7 @@ class FrmProEntriesController{
 	 *
 	 * @param object $entry
 	 * @param array $args (always contains 'parent_form_id' and 'fields'; if repeating, will contain 'parent_field_id',
-	 *     'key_pointer' and 'repeating')
+	 *     'key_pointer' and 'repeating'; if embedded, will contain in_embed_form)
 	 * @return array $values
 	 */
 	public static function setup_entry_values_for_editing( $entry, $args ) {
@@ -2499,7 +2501,14 @@ class FrmProEntriesController{
 			$atts['html'] = 1;
 		}
 
-		if ( ! empty( $atts['format'] ) || ( isset($atts['show']) && ! empty($atts['show']) ) ) {
+		$tested_field_types = array( 'time' );
+
+		if ( in_array( $field->type, $tested_field_types ) || ! empty( $atts['format'] ) || ( isset($atts['show']) && ! empty($atts['show']) ) ) {
+
+			if ( empty( $atts['format'] ) ) {
+				unset( $atts['format'] );
+			}
+			
 			$value = FrmFieldsHelper::get_display_value($value, $field, $atts);
 		} else {
 			$value = FrmEntriesHelper::display_value( $value, $field, $atts);

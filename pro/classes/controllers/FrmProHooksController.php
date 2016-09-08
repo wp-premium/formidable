@@ -300,7 +300,14 @@ class FrmProHooksController{
 
 		// Lookup Controller
 		add_filter( 'frm_clean_lookup_field_options_before_update', 'FrmProLookupFieldsController::clean_field_options_before_update' );
-    }
+		add_filter( 'frm_lookup_field_options_form', 'FrmProLookupFieldsController::show_lookup_field_options_in_form_builder', 10, 3 );
+
+		// Phone Controller
+		add_filter( 'frm_phone_field_options_form', 'FrmProPhoneFieldsController::show_field_options_in_form_builder', 10, 3 );
+
+		// Phone Controller
+		add_filter( 'frm_text_field_options_form', 'FrmProTextFieldsController::show_field_options_in_form_builder', 10, 3 );
+	}
 
     public static function load_ajax_hooks() {
         // Displays Controller
@@ -361,9 +368,9 @@ class FrmProHooksController{
         add_action('wp_ajax_frm_add_posttax_row', 'FrmProFormActionsController::_posttax_row');
         add_action('wp_ajax_frm_replace_posttax_options', 'FrmProFormActionsController::_replace_posttax_options');
 
-        // Forms Controller
-        add_action('wp_ajax_frm_add_form_row', 'FrmProFormsController::add_form_row');
-        add_action('wp_ajax_nopriv_frm_add_form_row', 'FrmProFormsController::add_form_row');
+		// Nested forms controller
+		add_action('wp_ajax_frm_add_form_row', 'FrmProNestedFormsController::ajax_add_repeat_row');
+		add_action('wp_ajax_nopriv_frm_add_form_row', 'FrmProNestedFormsController::ajax_add_repeat_row');
 
         // XML Controller
         add_action('wp_ajax_frm_import_csv', 'FrmProXMLController::import_csv_entries');
@@ -405,6 +412,7 @@ class FrmProHooksController{
         add_filter('frm_get_paged_fields', 'FrmProFieldsHelper::get_form_fields', 10, 3);
         add_filter('frm_before_replace_shortcodes', 'FrmProFieldsHelper::before_replace_shortcodes', 10, 2);
         add_filter('frm_replace_shortcodes', 'FrmProFieldsHelper::replace_html_shortcodes', 10, 3);
+		add_filter( 'frm_field_div_classes', 'FrmProFieldsHelper::get_field_div_classes', 10, 3 );
 
         // Forms Controller
 		add_filter( 'frm_form_classes', 'FrmProFormsController::add_form_classes' );

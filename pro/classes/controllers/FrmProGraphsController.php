@@ -2,804 +2,1970 @@
 
 class FrmProGraphsController {
 
+	/**
+	 * Do the frm-graph shortcode
+	 *
+	 * @param array $atts
+	 * @return string
+	 */
 	public static function graph_shortcode( $atts ) {
+		self::convert_old_atts_to_new_atts( $atts );
+
+		self::combine_defaults_and_user_defined_attributes( $atts );
+
+		self::format_atts( $atts );
+
+		if ( empty( $atts['fields'] ) && empty( $atts['form'] ) ) {
+			return __( 'You must include a field id or key in your graph shortcode.', 'formidable' );
+		}
+
+		$graph_data = self::generate_google_graph_data( $atts );
+
+		$html = self::get_graph_html( $graph_data, $atts );
+
+		return $html;
+	}
+
+	/**
+	 * Convert old, deprecated attributes to the new attributes to maintain reverse compatibility
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 */
+	private static function convert_old_atts_to_new_atts( &$atts ) {
+		self::convert_id_parameter_to_fields_parameter( $atts );
+
+		if ( isset( $atts['min'] ) ) {
+			$atts['y_min'] = $atts['min'];
+			unset( $atts['min'] );
+		}
+
+		if ( isset( $atts['max'] ) ) {
+			$atts['y_max'] = $atts['max'];
+			unset( $atts['max'] );
+		}
+
+		self::adjust_deprecated_date_parameters( $atts );
+
+		if ( isset( $atts['entry_id'] ) ) {
+			$atts['entry'] = $atts['entry_id'];
+			unset( $atts['entry_id'] );
+		}
+
+		if ( isset( $atts['x_order'] ) && ! $atts['x_order'] ) {
+			$atts['x_order'] = 'field_opts';
+		}
+
+		if ( isset( $atts['include_js'] ) ) {
+			unset( $atts['include_js'] );
+		}
+
+		if ( isset( $atts['truncate_label'] ) ) {
+			unset( $atts['truncate_label'] );
+		}
+
+		if ( isset( $atts['response_count'] ) ) {
+			unset( $atts['response_count'] );
+		}
+	}
+
+	/**
+	 * Convert the old id and ids parameters to the new fields parameter
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 */
+	private static function convert_id_parameter_to_fields_parameter( &$atts ) {
+		$id = '';
+		if ( isset( $atts['id'] ) && $atts['id'] ) {
+			$id_array = explode( ',', $atts['id'] );
+
+			if ( count( $id_array ) > 1 ) {
+				_e( 'Using multiple values in the id graph parameter has been removed as of version 2.02.04', 'formidable' );
+			}
+
+			$id = reset( $id_array ) . ',';
+			unset( $atts['id'] );
+		}
+
+		$ids = '';
+		if ( isset( $atts['ids'] ) ) {
+			if ( $atts['ids'] ) {
+				$ids = $atts['ids'];
+			}
+			unset ( $atts['ids'] );
+		}
+
+		if ( ! isset( $atts['fields'] ) ) {
+			$atts['fields'] = $id . $ids;
+		}
+	}
+
+	/**
+	 * Convert the deprecated x_start, x_end, start_date, and end_date parameters to the new
+	 * x_greater_than, x_less_than, created_at_greater_than, and created_at_less_than parameters
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 */
+	private static function adjust_deprecated_date_parameters( &$atts ) {
+		if ( isset( $atts['x_start'] ) ) {
+			$atts['start_date'] = $atts['x_start'];
+			unset( $atts['x_start'] );
+		}
+
+		if ( isset( $atts['x_end'] ) ) {
+			$atts['end_date'] = $atts['x_end'];
+			unset( $atts['x_end'] );
+		}
+
+		if ( ! isset( $atts['start_date'] ) && ! isset( $atts['end_date'] ) ) {
+			return;
+		}
+
+		if ( isset( $atts['x_axis'] ) ) {
+			$x_axis_field = self::get_x_axis_field( $atts['x_axis'] );
+		} else {
+			$x_axis_field = '';
+		}
+
+		self::convert_old_date_parameters_to_new_parameters( 'start_date', $x_axis_field, $atts );
+		self::convert_old_date_parameters_to_new_parameters( 'end_date', $x_axis_field, $atts );
+	}
+
+	/**
+	 * Convert start_date and end_date to new parameters
+	 *
+	 * @since 2.02.05
+	 * @param string $old_key
+	 * @param string|object $x_axis_field
+	 * @param array $atts
+	 */
+	private static function convert_old_date_parameters_to_new_parameters( $old_key, $x_axis_field, &$atts ) {
+		if ( isset( $atts[ $old_key ] ) ) {
+			if ( $old_key == 'start_date' ) {
+				$operator_text = '_greater_than';
+			} else if ( $old_key == 'end_date' ) {
+				$operator_text = '_less_than';
+			} else {
+				return;
+			}
+
+			if ( self::is_date_field( $x_axis_field ) ) {
+				$atts[ $x_axis_field->id . $operator_text ] = $atts[ $old_key ];
+			} else {
+				$atts['created_at' . $operator_text ] = $atts[ $old_key ];
+			}
+
+			unset( $atts[ $old_key ] );
+		}
+	}
+
+	/**
+	 * Combine the graph defaults with the user-defined attributes
+	 * Removes defaults with a blank value
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 */
+	private static function combine_defaults_and_user_defined_attributes( &$atts ) {
+		$defaults = self::get_graph_defaults();
+
+		$combined_atts = array();
+		foreach ( $defaults as $k => $value ) {
+			if ( isset( $atts[ $k ] ) ) {
+				$combined_atts[ $k ] = $atts[ $k ];
+				unset( $atts[ $k ] );
+			} else if ( $value !== '' || in_array( $k, array( 'fields', 'form' ) ) ) {
+				$combined_atts[ $k ] = $value;
+			}
+		}
+
+		$combined_atts['filters'] = $atts;
+
+		$atts = $combined_atts;
+	}
+
+	/**
+	 * Get the default graph attributes
+	 *
+	 * @since 2.02.05
+	 * @return array
+	 */
+	private static function get_graph_defaults( ) {
 
 		$defaults = array(
-			'id' => false,
-			'ids' => array(),
-			'colors' => '',
+			'fields' => '',
+			'form' => '',
+			'type' => 'column',
+			'data_type' => 'count',
+			'limit' => '',
+			'include_zero' => false,
+			'created_at_greater_than' => '',
+			'created_at_less_than' => '',
+			'group_by' => '',
+			'user_id' => '',
+			'entry' => '',
+			'drafts' => '',
+			'title' => '',
+			'title_size' => 14,
+			'title_font' => '',
+			'title_bold' => false,
+			'title_color' => '#666',
+			'truncate' => 40,
+			'tooltip_label' => '',
+			'show_key' => false,
+			'legend_size' => '',
+			'legend_position' => '',
+			'x_axis' => '',
+			'x_title' => '',
+			'x_title_size' => 13,
+			'x_title_color' => '#666',
+			'x_labels_size' => '',
+			'x_slanted_text' => true,
+			'x_text_angle' => 20,
+			'x_min' => '',
+			'x_max' => '',
+			'x_order' => 'default',
+			'x_show_text_every' => '',
+			'y_title' => '',
+			'y_title_size' => 13,
+			'y_title_color' => '#666',
+			'y_labels_size' => '',
+			'y_min' => '',
+			'y_max' => '',
+			'colors' => self::get_default_colors(),
 			'grid_color' => '#CCC',
+			'bg_color' => '#FFFFFF',
 			'is3d' => false,
 			'height' => 400,
 			'width' => 400,
-			'truncate_label' => 7,
-			'bg_color' => '#FFFFFF',
-			'truncate' => 40,
-			'response_count' => 10,
-			'user_id' => false,
-			'entry_id' => false,
-			'title' => '',
-			'type' => 'default',
-			'x_axis' => false,
-			'data_type' => 'count',
-			'limit' => '',
-			'show_key' => false,
-			'min' => '',
-			'max' => '',
-			'y_title' => '',
-			'x_title' => '',
-			'include_zero' => false,
-			'field' => false,
-			'title_size' => '',
-			'title_font' => '',
-			'tooltip_label' => '',
-			'start_date' => '',
-			'end_date' => '',
-			'x_start' => '',
-			'x_end' => '',
-			'group_by' => '',
-			'x_order' => 'default',
-			'atts' => false,
+			'chart_area' => '',
+			'is_stacked' => false,
+			'pie_hole' => '',
+			'curve_type' => '',
+			'no_data' => __( 'No data', 'formidable' ),
 		);
 
-		// TODO: Remove limit from docs, add x_order='desc' and x_order='field_options'
-		// TODO: Remove id from docs. Just use ids to simplify.
-		// TODO: Remove either x start or start_date from docs
-		// TODO: Remove either x_end or end_date from docs
-		// TODO: Make sure x_order is set up to work with abc
+		return $defaults;
+	}
 
-		// If no id, stop now
-		if ( ! $atts || ! $atts[ 'id' ] ) {
-			$html = __( 'You must include a field id or key in your graph shortcode.', 'formidable' );
-			return $html;
-		}
+	private static function get_default_colors() {
+		return '#00bbde,#fe6672,#eeb058,#8a8ad6,#ff855c,#00cfbb,#5a9eed,#73d483,#c879bb,#0099b6';
+	}
 
-		if ( isset( $atts[ 'type' ] ) && $atts[ 'type' ] == 'geo' ) {
-			$defaults[ 'truncate_label' ] = 100;
-			$defaults[ 'width' ] = 600;
-		}
+	/**
+	 * Format the user-defined attributes
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 */
+	private static function format_atts( &$atts ) {
+		self::convert_field_keys_to_ids( $atts );
 
-		if ( isset( $atts[ 'include_js' ] ) ) {
-			unset( $atts[ 'include_js' ] );
-		}
-
-		// Set up array for filtering fields
-		// TODO: Ask about simpler way
-		$temp_atts = $atts;
-		foreach ( $defaults as $unset => $val ) {
-			unset( $temp_atts[ $unset ], $unset, $val );
-		}
-		foreach ( $temp_atts as $unset => $val ) {
-			unset( $atts[ $unset ] );
-			$atts[ 'atts' ][ $unset ] = $val;
-			unset( $unset, $val );
-		}
-
-		// User's values should override default values
-		$atts = array_merge( $defaults, $atts );
-
-		global $wpdb;
-
-		//x_start and start_date do the same thing
-		// Reverse compatibility for x_start
-		if ( $atts[ 'start_date' ] || $atts[ 'x_start' ] ) {
-			if ( $atts[ 'x_start' ] ) {
-				$atts[ 'start_date' ] = $atts[ 'x_start' ];
-				unset( $atts[ 'x_start' ] );
+		if ( ! empty( $atts['fields'] ) ) {
+			$atts['fields'] = FrmField::getAll( array( 'fi.id' => $atts['fields'] ) );
+		} else if ( ! empty( $atts['form'] ) ) {
+			$atts['form'] = FrmForm::getOne( $atts['form'] );
+			if ( ! $atts['form'] ) {
+				return;
 			}
-			$atts[ 'start_date' ] = FrmAppHelper::replace_quotes( $atts[ 'start_date' ] );
+
+			$atts['form_id'] = $atts['form']->id;
+		} else {
+			return;
 		}
 
-		//x_end and end_date do the same thing
-		// Reverse compatibility for x_end
-		if ( $atts[ 'end_date' ] || $atts[ 'x_end' ] ) {
-			if ( $atts[ 'x_end' ] ) {
-				$atts[ 'end_date' ] = $atts[ 'x_end' ];
-				unset( $atts[ 'x_end' ] );
-			}
-			$atts[ 'end_date' ] = FrmAppHelper::replace_quotes( $atts[ 'end_date' ] );
+		if ( isset( $atts['created_at_greater_than'] ) ) {
+			$atts['created_at_greater_than'] = FrmAppHelper::replace_quotes( $atts['created_at_greater_than'] );
 		}
 
-		// Reverse compatibility for x_order=0
-		if ( ! $atts[ 'x_order' ] ) {
-			$atts[ 'x_order' ] = 'field_opts';
+		if ( isset( $atts['created_at_less_than'] ) ) {
+			$atts['created_at_less_than'] = FrmAppHelper::replace_quotes( $atts['created_at_less_than'] );
 		}
 
 		// If limit is set, get only the top results
-		if ( $atts[ 'limit' ] ) {
-			$atts[ 'x_order' ] = 'desc';
+		if ( isset( $atts['limit'] ) ) {
+			$atts['x_order'] = 'desc';
 		}
 
-		$atts[ 'user_id' ] = FrmAppHelper::get_user_id_param( $atts[ 'user_id' ] );
-
-		if ( $atts[ 'entry_id' ] ) {
-			$atts[ 'entry_id' ] = explode( ',', $atts[ 'entry_id' ] );
-
-			//make sure all values are numeric
-			//TODO: Make this work with entry keys
-			$atts[ 'entry_id' ] = array_filter( $atts[ 'entry_id' ], 'is_numeric' );
-			if ( empty( $atts[ 'entry_id' ] ) ) {
-				// don't continue if there are no entry ids
-				return '';
-			}
-			$atts[ 'entry_id' ] = implode( ',', $atts[ 'entry_id' ] );
-		}
-		// Switch to entry_ids for easier reference
-		$atts[ 'entry_ids' ] = $atts[ 'entry_id' ];
-		unset( $atts[ 'entry_id' ] );
-
-		//Convert $tooltip_label to array
-		if ( $atts[ 'tooltip_label' ] ) {
-			$atts[ 'tooltip_label' ] = explode( ',', $atts[ 'tooltip_label' ] );
+		if ( isset( $atts['user_id'] ) ) {
+			$atts['user_id'] = FrmAppHelper::get_user_id_param( $atts['user_id'] );
 		}
 
-		// This will only be an object when coming from show()
-		if ( is_object( $atts[ 'field' ] ) ) {
-			$fields = array( $atts[ 'field' ] );
+		if ( isset( $atts['drafts'] ) ) {
+			$atts['is_draft'] = $atts['drafts'];
+			unset( $atts['drafts'] );
+		}
 
-			// If creating multiple graphs with one shortcode
-		} else {
-			$atts[ 'id' ] = explode( ',', $atts[ 'id' ] );
+		self::convert_entry_keys_to_ids( $atts );
+	}
 
-			foreach ( $atts[ 'id' ] as $key => $id ) {
-				//If using field keys, retrieve the field IDs
-				if ( ! is_numeric( $id ) ) {
-					$atts[ 'id' ][ $key ] = FrmDb::get_var( $wpdb->prefix . 'frm_fields', array( 'field_key' => $id ) );
+	/**
+	 * Convert field keys to IDs
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 */
+	private static function convert_field_keys_to_ids( &$atts ) {
+		$atts['fields'] = self::convert_keys_to_ids( $atts['fields'], 'field' );
+	}
+
+	/**
+	 * Convert entry keys to IDs
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 */
+	private static function convert_entry_keys_to_ids( &$atts ) {
+		if ( isset( $atts['entry'] ) ) {
+			$atts['entry_ids'] = self::convert_keys_to_ids( $atts['entry'], 'entry' );
+			unset( $atts['entry'] );
+		}
+	}
+
+	/**
+	 * Convert field or entry keys to ids
+	 *
+	 * @since 2.02.05
+	 * @param array $keys
+	 * @param string $type
+	 * @return array
+	 */
+	private static function convert_keys_to_ids( $keys, $type ) {
+		if ( $keys ) {
+			$keys = explode( ',', $keys );
+
+			foreach ( $keys as $i => $k ) {
+				if ( ! is_numeric( $k ) ) {
+					if ( 'entry' === $type ) {
+						$id = FrmEntry::get_id_by_key( $k );
+					} else {
+						$id = FrmField::get_id_by_key( $k );
+					}
+					if ( $id ) {
+						$keys[ $i ] = $id;
+					} else {
+						unset( $keys[ $i ] );
+					}
 				}
-				unset( $key, $id );
 			}
-			//make sure all field IDs are numeric - TODO: ask Steph if this is redundant
-			$atts[ 'id' ] = array_filter( $atts[ 'id' ], 'is_numeric' );
-			if ( empty( $atts[ 'id' ] ) ) {
-				// don't continue if there is nothing to graph
-				return '';
-			}
-
-			$fields = FrmField::getAll( array( 'fi.id' => $atts[ 'id' ] ) );
-
-			// No longer needed
-			unset( $atts[ 'id' ] );
 		}
 
-		if ( ! empty( $atts[ 'colors' ] ) ) {
-			$atts[ 'colors' ] = explode( ',', $atts[ 'colors' ] );
-		}
+		return $keys;
+	}
 
-		// Trigger js load
-		global $frm_vars;
-		$frm_vars[ 'forms_loaded' ][] = true;
-
-		$html = '';
-		foreach ( $fields as $field ) {
-			$data = self::get_google_graph( $field, $atts );
-
-			if ( empty( $data ) ) {
-				$html .= apply_filters( 'frm_no_data_graph', '<div class="frm_no_data_graph">' . __( 'No Data', 'formidable' ) . '</div>' );
-				continue;
-			}
-
-			$html .= '<div id="chart_' . $data[ 'graph_id' ] . '" style="height:' . $atts[ 'height' ] . ';width:' . $atts[ 'width' ] . '"></div>';
+	/**
+	 * Get the HTML for a graph
+	 *
+	 * @since 2.02.05
+	 * @param array $graph_data
+	 * @param array $atts
+	 * @return string
+	 */
+	private static function get_graph_html( $graph_data, $atts ) {
+		if ( empty( $graph_data['data'] ) ) {
+			$html = apply_filters( 'frm_no_data_graph', '<div class="frm_no_data_graph">' . $atts['no_data'] . '</div>' );
+		} else {
+			$html = '<div id="chart_' . $graph_data['graph_id'] . '" style="height:' . $atts['height'] . ';';
+			$html .= 'width:' . $atts['width'] . '"></div>';
 		}
 
 		return $html;
 	}
 
-	private static function get_google_graph($field, $args){
-		$defaults = array( 'allowed_col_types' => array( 'string', 'number'));
+	/**
+	 * Generate the data, options, package, etc. for a google graph
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @return array
+	 */
+	private static function generate_google_graph_data( $atts ) {
+		global $frm_vars;
 
-		$args = wp_parse_args($args, $defaults);
-		$vals = self::get_graph_values($field, $args);
+		self::prepare_frm_vars( $frm_vars );
 
-		if ( empty($vals) ) {
-			return '';
-		}
+		$type = self::get_graph_type( $atts );
+		$data = self::get_graph_data( $atts );
+		$options = self::get_graph_options( $type, $atts );
+		$graph_package = self::get_graph_package( $type );
 
-		$pie = ( $args['type'] == 'default' ) ? $vals['pie'] : ( $args['type'] == 'pie' ? true : false );
-		if ( $pie ) {
-			$args['type'] = 'pie';
-
-			//map each array position in rows array
-			$vals['cols'] = array( 'Field' => array( 'type' => 'string'), 'Entries' => array( 'type' => 'number'));
-
-			foreach ( $vals['values'] as $val_key => $val ) {
-				if ( $val ) {
-					$vals['rows'][] = array($vals['labels'][$val_key], $val);
-				}
-			}
-		} else {
-			if ( ! isset($vals['options']['hAxis']) ) {
-				$vals['options']['hAxis'] = array();
-			}
-
-			$vals['options']['vAxis'] = array( 'gridlines' => array( 'color' => $args['grid_color']));
-			if ( $vals['combine_dates'] && ! strpos($args['width'], '%') && ( ( count($vals['labels']) * 50 ) > (int) $args['width'] ) ) {
-				$vals['options']['hAxis']['showTextEvery'] = ceil(( count($vals['labels']) * 50 ) / (int) $args['width'] );
-			}
-
-			$vals['options']['hAxis']['slantedText'] = true;
-			$vals['options']['hAxis']['slantedTextAngle'] = 20;
-
-			$rn_order = array();
-			foreach ( $vals['labels'] as $lkey => $l ) {
-				if ( isset($x_field) && $x_field && $x_field->type == 'number' ) {
-					$l = (float) $l;
-					$rn_order[] = $l;
-				}
-
-				$row = array($l, $vals['values'][$lkey]);
-				foreach ( $vals['f_values'] as $f_id => $f_vals ) {
-					$row[] = isset($f_vals[$lkey]) ? $f_vals[$lkey] : 0;
-				}
-
-				// add an untruncated tooltip
-				if ( isset($vals['tooltips'][$lkey]) ) {
-					$row['tooltip'] = wordwrap( $vals['tooltips'][ $lkey ] . ': ' . $row[1], 50, "\r\n" );
-				}
-
-				$vals['rows'][] = $row;
-				unset($lkey, $l);
-			}
-
-			if ( isset($args['max']) && $args['max'] != '' ) {
-				$vals['options']['vAxis']['viewWindow']['max'] = $args['max'];
-			}
-
-			if ( $args['min'] != '' ) {
-				$vals['options']['vAxis']['viewWindow']['min'] = $args['min'];
-			}
-
-			if ( isset($args['y_title']) && ! empty($args['y_title']) ) {
-				$vals['options']['vAxis']['title'] = $args['y_title'];
-			}
-
-			if ( isset($args['x_title']) && ! empty($args['x_title']) ) {
-				$vals['options']['hAxis']['title'] = $args['x_title'];
-			}
-		}
-
-		if ( isset( $rn_order ) && ! empty( $rn_order ) ) {
-			asort($rn_order);
-			$sorted_rows = array();
-			foreach ( $rn_order as $rk => $rv ) {
-				$sorted_rows[] = $vals['rows'][$rk];
-			}
-
-			$vals['rows'] = $sorted_rows;
-		}
-
-		$vals['options']['backgroundColor'] = $args['bg_color'];
-		$vals['options']['is3D'] = $args['is3d'] ? true : false;
-
-		if ( in_array($args['type'], array( 'bar', 'bar_flat', 'bar_glass')) ) {
-			$args['type'] = 'column';
-		} else if ( $args['type'] == 'hbar' ) {
-			$args['type'] = 'bar';
-		}
-
-		$allowed_types = array( 'pie', 'line', 'column', 'area', 'SteppedArea', 'geo', 'bar');
-		if ( ! in_array($args['type'], $allowed_types) ) {
-			$args['type'] = 'column';
-		}
-
-		$vals['options'] = apply_filters( 'frm_google_chart', $vals['options'], array(
-			'rows' => $vals['rows'], 'cols' => $vals['cols'], 'type' => $args['type'], 'atts' => $args['atts'],
-		) );
-		return self::convert_to_google($vals['rows'], $vals['cols'], $vals['options'], $args['type']);
-	}
-
-	private static function get_graph_values( $field, $args ) {
-		// These are variables that will be returned at the end
-		$values = $labels = $tooltips = $f_values = $rows = $cols = $options = $x_inputs = array();
-		$pie = $combine_dates = false;
-
-		// Get fields and ids array
-		$fields_and_ids = self::get_fields( $field, $args['ids'] );
-		$args['ids'] = $fields_and_ids['ids'];
-		$args['fields'] = $fields_and_ids['fields'];
-
-		// Get x field
-		self::get_x_field( $args );
-
-		// Get columns
-		self::get_graph_cols( $cols, $field, $args );
-
-		// Get options
-		self::get_graph_options( $options, $field, $args );
-
-		// Get entry IDs
-		self::get_entry_ids( $field, $args );
-
-		// If there are no matching entry IDs for filtering values, end now
-		if ( $args['atts'] && ! $args['entry_ids'] ) {
-			return array();
-		}
-
-		// Get values when x axis is set
-		if ( $args['x_axis'] ) {
-			self::get_x_axis_values( $values, $f_values, $labels, $tooltips, $x_inputs, $field, $args );
-
-			if ( ! $values ) {
-				return array();
-			}
-
-			self::combine_dates( $combine_dates, $values, $labels, $tooltips, $f_values, $args);
-
-			// Graph by month or quarter
-			self::graph_by_period( $values, $f_values, $labels, $tooltips, $args );
-
-			// Get values by field if no x axis is set and multiple fields are being graphed
-		} else if ( $args['ids'] ) {
-			self::get_multiple_id_values( $values, $labels, $tooltips, $args );
-
-			// Get values for posts and non-posts
-		} else {
-			// TODO: Make sure this works with truncate_label
-			self::get_count_values( $values, $labels, $tooltips, $pie, $field, $args );
-
-			if ( empty( $values ) ) {
-				return array();
-			}
-		}
-
-		// Reset keys for labels, values, and tooltips
-		$labels = FrmProAppHelper::reset_keys($labels);
-		$values = FrmProAppHelper::reset_keys($values);
-		$tooltips = FrmProAppHelper::reset_keys($tooltips);
-		foreach ( $f_values as $f_field_id => $f_value ) {
-			$f_values[ $f_field_id ] = FrmProAppHelper::reset_keys( $f_value );
-			unset( $f_field_id, $f_value );
-		}
-
-		// Filter hooks
-		$values = apply_filters('frm_graph_values', $values, $args, $field);
-		$labels = apply_filters('frm_graph_labels', $labels, $args, $field);
-		$tooltips = apply_filters('frm_graph_tooltips', $tooltips, $args, $field);
-
-		// Return values
-		$return = array(
-			'f_values' => $f_values,
-			'labels' => $labels,
-			'values' => $values,
-			'pie' => $pie,
-			'combine_dates' => $combine_dates,
-			'ids' => $args['ids'],
-			'cols' => $cols,
-			'rows' => $rows,
+		$graph_data = array(
+			'type' => $type,
+			'data' => $data,
 			'options' => $options,
-			'fields' => $args['fields'],
-			'tooltips' => $tooltips,
-			'x_inputs' => $x_inputs,
+			'package' => $graph_package,
+			'graph_id' => '_frm_' . strtolower( $type ) . ( count( $frm_vars['google_graphs']['graphs'] ) + 1 ),
 		);
 
-		// Allow complete customization with this hook:
-		$return = apply_filters( 'frm_final_graph_values', $return, $args, $field );
+		$frm_vars['google_graphs']['graphs'][] = $graph_data;
 
-		return $return;
+		return $graph_data;
 	}
 
-	private static function convert_to_google($rows, $cols, $options, $type) {
-		$num_col = array();
-
-		global $frm_vars;
+	/**
+	 * Prepare frm_vars for the graphs to be loaded
+	 *
+	 * @since 2.02.05
+	 * @param array $frm_vars
+	 */
+	private static function prepare_frm_vars( &$frm_vars ) {
 		$frm_vars['forms_loaded'][] = true;
-		if ( ! isset($frm_vars['google_graphs']) ) {
+
+		if ( ! isset( $frm_vars['google_graphs'] ) ) {
 			$frm_vars['google_graphs'] = array();
 		}
 
-		$graph_type = ($type == 'geo' ) ? 'geochart' : 'corechart';
-		if ( ! isset($frm_vars['google_graphs'][$graph_type]) ) {
-			$frm_vars['google_graphs'][$graph_type] = array();
+		if ( ! isset( $frm_vars['google_graphs']['graphs'] ) ) {
+			$frm_vars['google_graphs']['graphs'] = array();
+		}
+	}
+
+	/**
+	 * Get the graph type
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @return string
+	 */
+	private static function get_graph_type( $atts ) {
+		$type = lcfirst( $atts['type'] );
+
+		if ( 'bar' === $type ) {
+			$type = 'column';
+		} else if ( 'hbar' === $type ) {
+			$type = 'bar';
+		} else if ( $type == 'stepped_area' ) {
+			$type = 'steppedArea';
 		}
 
-		$graph = array(
-			'data'      => array(),
-			'options'   => $options,
-			'type'      => $type,
-			'graph_id'  => '_frm_'. strtolower($type) . ( count($frm_vars['google_graphs'][$graph_type]) +1 ),
+		$allowed_types = array(
+			'pie',
+			'line',
+			'column',
+			'area',
+			'steppedArea',
+			'geo',
+			'bar',
+			'scatter',
+			'histogram',
+			'table',
 		);
 
-		$new_cols = array();
-		if ( ! empty($cols) ) {
-			$pos = 0;
-			foreach ( (array) $cols as $col_name => $col ) {
-				$new_cols[] = array( 'type' => $col['type'], 'name' => $col_name);
-
-				// save the number cols so we can make sure they are formatted correctly below
-				if ( 'number' == $col['type'] ) {
-					$num_col[] = $pos;
-				}
-				$pos++;
-
-				unset($col_name, $col);
-			}
+		if ( ! in_array( $type, $allowed_types ) ) {
+			$type = 'column';
 		}
 
-		if ( ! empty($rows) && ! empty($num_col) ) {
-			// make sure number fields are displayed as numbers
-			foreach ( $rows as $row_k => $row ) {
-				foreach ( $num_col as $k ) {
-					$rows[$row_k][$k] = (float) $rows[$row_k][$k];
-					unset($k);
-				}
-
-				unset($row_k, $row);
-			}
-		}
-
-		$graph['rows'] = $rows;
-		$graph['cols'] = $new_cols;
-
-		$frm_vars['google_graphs'][$graph_type][] = $graph;
-
-		return $graph;
+		return $type;
 	}
 
 	/**
-	 * Get fields and ids arrays
+	 * Get the row and column data for a google graph
 	 *
-	 * @since 2.0
-	 *
-	 * @param object $field
-	 * @param array $ids additional field ids
-	 * @return array $return - multidimensional array of fields and ids
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @return array
 	 */
-	private static function get_fields( $field, $ids ) {;
-		$fields = array();
-		$fields[$field->id] = $field;
+	private static function get_graph_data( $atts ) {
 
-		// If multiple fields are being graphed
-		if ( $ids ) {
-			$ids = explode(',', $ids);
+		if ( $atts['form'] ) {
+			$data = self::get_data_for_form_graph( $atts );
+		} else if ( isset( $atts['x_axis'] ) ) {
+			$data = self::get_data_for_x_axis_graph( $atts );
+		} else if ( count( $atts['fields'] ) > 1 ) {
+			$data = self::get_data_for_multi_field_graph( $atts );
+		} else {
+			$data = self::get_data_for_single_field_graph( $atts );
+		}
 
-			foreach ( $ids as $id_key => $f ) {
-				$ids[$id_key] = $f = trim($f);
-				if ( ! $f ) {
-					unset( $ids[$id_key] );
+		self::apply_deprecated_filters();
+		$data = apply_filters( 'frm_graph_data', $data, $atts );
+
+		return $data;
+	}
+
+	/**
+	 * Get the options for a google graph
+	 *
+	 * @param string $type
+	 * @param array $atts
+	 * @return array
+	 */
+	private static function get_graph_options( $type, $atts ) {
+		$options = array();
+
+		self::add_title_options( $atts, $options );
+
+		self::add_legend_options( $atts, $options );
+
+		self::add_tooltip_options( $options );
+
+		self::add_size_options( $atts, $options );
+
+		self::add_color_options( $atts, $options );
+
+		self::add_pie_graph_options( $type, $atts, $options );
+
+		self::add_line_graph_options( $type, $atts, $options );
+
+		if ( $type != 'pie' && $type != 'geo' ) {
+
+			if ( isset( $atts['is_stacked'] ) && $atts['is_stacked'] ) {
+				$options['isStacked'] = true;
+			}
+
+			self::add_axis_options( $atts, $options );
+		}
+
+		$options = apply_filters( 'frm_google_chart', $options, array( 'atts' => $atts, 'type' => $type ) );
+
+		return $options;
+	}
+
+	/**
+	 * Get the package type for a given graph type
+	 *
+	 * @since 2.02.05
+	 * @param string $type
+	 * @return string
+	 */
+	private static function get_graph_package( $type ) {
+		if ( 'geo' == $type ) {
+			$graph_package = 'geochart';
+		} else if ( 'table' == $type ) {
+			$graph_package = 'table';
+		} else {
+			$graph_package = 'corechart';
+		}
+
+		return $graph_package;
+	}
+
+	/**
+	 * Set up the title for a google graph
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @param array $options
+	 */
+	private static function add_title_options( $atts, &$options ) {
+		// title
+		$options['title'] = self::get_graph_title( $atts );
+
+		$options['titleTextStyle'] = array();
+
+		// bold title
+		self::convert_shortcode_att_to_bool_google_att( 'title_bold', 'bold', $atts, $options['titleTextStyle'] );
+
+		// title size
+		self::convert_shortcode_att_to_google_att( 'title_size', 'fontSize', $atts, $options['titleTextStyle'] );
+
+		// title font
+		self::convert_shortcode_att_to_google_att( 'title_font', 'fontName', $atts, $options['titleTextStyle'] );
+
+		// title color
+		self::convert_shortcode_att_to_google_att( 'title_color', 'color', $atts, $options['titleTextStyle'] );
+	}
+
+	/**
+	 * Get the graph title
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @return string
+	 */
+	private static function get_graph_title( $atts ) {
+		if ( isset( $atts['title'] ) ) {
+			// Title defined by user
+			$title = $atts['title'];
+
+		} else if ( isset( $atts['form'] ) && is_object( $atts['form'] ) ) {
+			// Title is form name for form graphs
+			$title = preg_replace( "/&#?[a-z0-9]{2,8};/i", "", FrmAppHelper::truncate( $atts['form']->name, $atts['truncate'], 0 ) );
+
+		} else if ( ! empty( $atts['fields'] ) ) {
+			// Title is field name if single field, otherwise set to "Submissions"
+			if ( count( $atts['fields'] ) > 1 ) {
+				$title = __( 'Submissions', 'formidable' );
+			} else {
+				$first_field = reset( $atts['fields'] );
+				$title = preg_replace( "/&#?[a-z0-9]{2,8};/i", "", FrmAppHelper::truncate( $first_field->name, $atts['truncate'], 0 ) );
+			}
+
+		} else {
+			// Default to blank
+			$title = '';
+		}
+
+		return $title;
+	}
+
+	/**
+	 * Convert graph shortcode attributes to google options
+	 *
+	 * @since 2.02.05
+	 * @param string $shortcode_att
+	 * @param string $google_att
+	 * @param array $atts
+	 * @param array $options
+	 */
+	private static function convert_shortcode_att_to_google_att( $shortcode_att, $google_att, $atts, &$options ) {
+		if ( isset( $atts[ $shortcode_att ] ) ) {
+			$options[ $google_att ] = $atts[ $shortcode_att ];
+		}
+	}
+
+	/**
+	 * Convert graph shortcode attributes to boolean google options
+	 *
+	 * @since 2.02.05
+	 * @param string $shortcode_att
+	 * @param string $google_att
+	 * @param array $atts
+	 * @param array $options
+	 */
+	private static function convert_shortcode_att_to_bool_google_att( $shortcode_att, $google_att, $atts, &$options ) {
+		if ( isset( $atts[ $shortcode_att ] ) ) {
+			if ( $atts[ $shortcode_att ] ) {
+				$options[ $google_att ] = true;
+			} else {
+				$options[ $google_att ] = false;
+			}
+		}
+	}
+
+	/**
+	 * Add width, height, and chart area options
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @param array $options
+	 */
+	private static function add_size_options( $atts, &$options ) {
+		$options['width'] = $atts['width'];
+		$options['height'] = $atts['height'];
+
+		if ( isset( $atts['chart_area'] ) ) {
+			$chart_area_parts = explode( ',', $atts['chart_area'] );
+			foreach ( $chart_area_parts as $chart_area ) {
+				$single_item = explode( ':', $chart_area );
+				if ( count( $single_item ) !== 2 ) {
 					continue;
 				}
+				$key = trim( $single_item[ 0 ] );
+				$value = trim( $single_item[ 1 ] );
+				$options['chartArea'][ $key ] = $value;
+			}
+		}
+	}
 
-				if ( $add_field = FrmField::getOne( $f ) ) {
-					$fields[$add_field->id] = $add_field;
-					$ids[$id_key] = $add_field->id;
+	/**
+	 * Add legend options
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @param array $options
+	 */
+	private static function add_legend_options( $atts, &$options ) {
+		$options['legend'] = array( 'position' => 'none' );
+
+		if ( $atts['show_key'] ) {
+			$options['legend'] = array();
+
+			// legend size
+			if ( isset( $atts['legend_size'] ) ) {
+				$options['legend']['textStyle'] = array( 'fontSize' => $atts['legend_size'] );
+			} else if ( is_numeric( $atts['show_key'] ) && $atts['show_key'] >= 10 ) {
+				// reverse compatibility with show_key=fontSize
+				$options['legend']['textStyle'] = array( 'fontSize' => $atts['show_key'] );
+			}
+
+			// legend position
+			if ( isset( $atts['legend_position'] ) ) {
+				$options['legend']['position'] = $atts['legend_position'];
+			} else {
+				$options['legend']['position'] = 'right';
+			}
+		}
+	}
+
+	/**
+	 * Add tooltip options
+	 *
+	 * @since 2.02.05
+	 * @param array $options
+	 */
+	private static function add_tooltip_options( &$options ) {
+		$options['tooltip'] = array( 'isHtml' => true );
+	}
+
+	/**
+	 * Add color options
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @param array $options
+	 */
+	private static function add_color_options( $atts, &$options ) {
+		if ( $atts['colors'] ) {
+			$options['colors'] = explode( ',', $atts['colors'] );
+		}
+
+		$options['backgroundColor'] = $atts['bg_color'];
+
+		// is3D
+		self::convert_shortcode_att_to_bool_google_att( 'is3d', 'is3D', $atts, $options );
+	}
+
+	/**
+	 * Add pie-specific options
+	 *
+	 * @since 2.02.05
+	 * @param string $type
+	 * @param array $atts
+	 * @param array $options
+	 */
+	private static function add_pie_graph_options( $type, $atts, &$options ) {
+		if ( $type === 'pie' ) {
+			self::convert_shortcode_att_to_bool_google_att( 'pie_hole', 'pieHole', $atts, $options );
+		}
+	}
+
+	/**
+	 * Add line graph-specific options
+	 *
+	 * @since 2.02.05
+	 * @param string $type
+	 * @param array $atts
+	 * @param array $options
+	 */
+	private static function add_line_graph_options( $type, $atts, &$options ) {
+		if ( $type === 'line' ) {
+			self::convert_shortcode_att_to_google_att( 'curve_type', 'curveType', $atts, $options );
+		}
+	}
+
+	/**
+	 * Add axis options
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @param array $options
+	 */
+	private static function add_axis_options( $atts, &$options ) {
+		$options['hAxis'] = self::set_up_x_axis_options( $atts );
+		$options['vAxis'] = self::set_up_y_axis_options( $atts );
+	}
+
+	/**
+	 * Set up the x-axis options
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @return array
+	 */
+	private static function set_up_x_axis_options( $atts ) {
+		$x_axis = array(
+			'titleTextStyle' => array( 'italic' => false ),
+			'textStyle' => array(),
+		);
+
+		// x min and max
+		if ( isset( $atts['x_min'] ) || isset( $atts['x_max'] ) ) {
+			$x_axis['viewWindow'] = self::add_axis_max_or_min( 'x_min', 'x_max', $atts );
+		}
+
+		// x title
+		self::convert_shortcode_att_to_google_att( 'x_title', 'title', $atts, $x_axis );
+
+		// showTextEvery
+		self::convert_shortcode_att_to_google_att( 'x_show_text_every', 'showTextEvery', $atts, $x_axis );
+
+		// slantedTextAngle
+		self::convert_shortcode_att_to_google_att( 'x_text_angle', 'slantedTextAngle', $atts, $x_axis );
+
+		// slantedText
+		$x_axis['slantedText'] = ( $atts['x_slanted_text'] ) ? true : false;
+
+		// x-axis title size
+		self::convert_shortcode_att_to_google_att( 'x_title_size', 'fontSize', $atts, $x_axis['titleTextStyle'] );
+
+		// x-axis color
+		self::convert_shortcode_att_to_google_att( 'x_title_color', 'color', $atts, $x_axis['titleTextStyle'] );
+
+		// x axis labels size
+		self::convert_shortcode_att_to_google_att( 'x_labels_size', 'fontSize', $atts, $x_axis['textStyle'] );
+
+		return $x_axis;
+	}
+
+	/**
+	 * Set up the y-axis options
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @return array
+	 */
+	private static function set_up_y_axis_options( $atts ) {
+		$y_axis = array(
+			'titleTextStyle' => array( 'italic' => false ),
+			'gridlines' => array( 'color' => $atts['grid_color'] ),
+			'textStyle' => array(),
+		);
+
+		// y min and max
+		if ( isset( $atts['y_min'] ) || isset( $atts['y_max'] ) ) {
+			$y_axis['viewWindow'] = self::add_axis_max_or_min( 'y_min', 'y_max', $atts );
+		}
+
+		// y-axis title
+		self::convert_shortcode_att_to_google_att( 'y_title', 'title', $atts, $y_axis );
+
+		// y-axis title size
+		self::convert_shortcode_att_to_google_att( 'y_title_size', 'fontSize', $atts, $y_axis['titleTextStyle'] );
+
+		// y-axis color
+		self::convert_shortcode_att_to_google_att( 'y_title_color', 'color', $atts, $y_axis['titleTextStyle'] );
+
+		// y axis labels size
+		self::convert_shortcode_att_to_google_att( 'y_labels_size', 'fontSize', $atts, $y_axis['textStyle'] );
+
+
+		return $y_axis;
+	}
+
+	/**
+	 * Add min and/or max axis limit
+	 *
+	 * @since 2.02.05
+	 * @param string $min_key
+	 * @param string $max_key
+	 * @param array $atts
+	 * @return array
+	 */
+	private static function add_axis_max_or_min( $min_key, $max_key, $atts ) {
+		$viewWindow = array();
+
+		// add axis minimum
+		self::convert_shortcode_att_to_google_att( $min_key, 'min', $atts, $viewWindow );
+
+		// add axis maximum
+		self::convert_shortcode_att_to_google_att( $max_key, 'max', $atts, $viewWindow );
+
+		return $viewWindow;
+	}
+
+	/**
+	 * Get the data for a single field graph
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @return array
+	 */
+	private static function get_data_for_single_field_graph( $atts ) {
+		$field = reset( $atts['fields'] );
+
+		$field_values = self::get_meta_values_for_single_field( $field, $atts );
+
+		$graph_data = self::format_meta_values_for_single_field( $field, $field_values, $atts );
+
+		if ( ! empty( $graph_data ) ) {
+			$graph_label = $field->name;
+			$tooltip_text = self::get_tooltip_text( $atts );
+			$first_row = array( $graph_label, $tooltip_text );
+
+			array_unshift( $graph_data, $first_row );
+
+			self::add_user_defined_column_colors( $atts, $graph_data );
+		}
+
+		return $graph_data;
+	}
+
+	/**
+	 * Get the meta values for a single field
+	 *
+	 * @since 2.02.05
+	 * @param object $field
+	 * @param array $atts
+	 * @return array
+	 */
+	private static function get_meta_values_for_single_field( $field, $atts ) {
+		$atts['form_id'] = $field->form_id;
+		self::check_field_filters( $atts );
+
+		// If there are field filters and entry IDs is empty, stop now
+		if ( ! empty( $atts['filters'] ) && empty( $atts['entry_ids'] ) ) {
+			return array();
+		}
+
+		$meta_args = self::package_filtering_arguments_for_query( $atts );
+
+		$field_values = FrmProEntryMeta::get_all_metas_for_field( $field, $meta_args );
+
+		self::clean_field_values( $field, $atts, $field_values );
+
+		return $field_values;
+	}
+
+	/**
+	 * Package specific filtering arguments in an array
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @return array
+	 */
+	private static function package_filtering_arguments_for_query( $atts ) {
+		$pass_args = array(
+			'entry_ids' => 'entry_ids',
+			'user_id' => 'user_id',
+			'created_at_greater_than' => 'start_date',
+			'created_at_less_than' => 'end_date',
+			'is_draft' => 'is_draft',
+			'form_id' => 'form_id',
+		);
+
+		$meta_args = array();
+		foreach ( $pass_args as $atts_key => $arg_key ) {
+			if ( isset( $atts[ $atts_key ] ) ) {
+				$meta_args[ $arg_key ] = $atts[ $atts_key ];
+			}
+		}
+
+		return $meta_args;
+	}
+
+	/**
+	 * Check all field, created_at, and updated_at filters
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 */
+	private static function check_field_filters( &$atts ) {
+		if ( ! empty( $atts['filters'] ) ) {
+
+			if ( ! isset( $atts['entry_ids'] ) ) {
+				$atts['entry_ids'] = array();
+				$atts['after_where'] = false;
+			} else {
+				$atts['after_where'] = true;
+			}
+
+			foreach ( $atts['filters'] as $key => $value ) {
+				$atts['entry_ids'] = self::get_entry_ids_for_field_filter( $key, $value, $atts );
+				$atts['after_where'] = true;
+
+				if ( ! $atts['entry_ids'] ) {
+					return;
 				}
 			}
-			unset( $f, $id_key );
 		}
-		$return = compact( 'fields', 'ids' );
-		return $return;
 	}
 
 	/**
-	 * Get all posts for this form
+	 * Get the entry IDs for a field filter
 	 *
-	 * @since 2.0
-	 *
-	 * @param object $field
+	 * @since 2.02.05
+	 * @param string $key
+	 * @param string $value
 	 * @param array $args
-	 * @return array $form_posts - posts for form
+	 * @return array
 	 */
-	private static function get_form_posts( $field, $args ) {
-		global $wpdb;
-		if ( $args['entry_ids'] && is_array( $args['entry_ids'] ) ) {
-			$args['entry_ids'] = implode( ', ', $args['entry_ids'] );
-		}
+	private static function get_entry_ids_for_field_filter( $key, $value, $args ) {
+		$pass_args = array(
+			'orig_f' => $key,
+			'val' => $value,
+			'entry_ids' => $args['entry_ids'],
+			'after_where' => $args['after_where'],
+			'drafts' => isset( $args['is_draft'] ) ? $args['is_draft'] : 0,
+			'form_id' => $args['form_id'],
+			'form_posts' => self::get_form_posts( $args ),
+		);
 
-		$query = array( 'form_id' => $field->form_id, 'post_id >' => 1);
-		if ( $args['user_id'] !== false ) {
-			$query['user_id'] = $args['user_id'];
-		}
-		if ( $args['entry_ids'] ) {
-			$query['id'] = $args['entry_ids'];
-		}
-
-		$form_posts = FrmDb::get_results( $wpdb->prefix .'frm_items', $query, 'id, post_id' );
-
-		return $form_posts;
+		return FrmProStatisticsController::get_field_matches( $pass_args );
 	}
 
 	/**
-	 * Get entry IDs array for graph - only when entry_id is set or filtering by another field
+	 * Get the entry and attached post ID for all entries that have posts attached
 	 *
-	 * @since 2.0
-	 *
-	 * @param object $field
+	 * @since 2.02.05
 	 * @param array $args
+	 * @return array
 	 */
-	private static function get_entry_ids( $field, &$args ) {
-		if ( ! $args['entry_ids'] && ! $args['atts'] ) {
+	private static function get_form_posts( $args ) {
+		$where_post = array(
+			'form_id' => $args['form_id'],
+			'post_id >' => 1,
+		);
+
+		if ( isset( $args['is_draft'] ) && $args['is_draft'] != 'both' ) {
+			$where_post['is_draft'] = $args['is_draft'];
+		}
+
+		if ( isset( $args['user_id'] ) ) {
+			$where_post['user_id'] = $args['user_id'];
+		}
+
+		return FrmDb::get_results( 'frm_items', $where_post, 'id,post_id' );
+	}
+
+	/**
+	 * Format a single field's meta values
+	 *
+	 * @since 2.02.05
+	 * @param object $field
+	 * @param array $meta_values
+	 * @param array $atts
+	 * @return array
+	 */
+	private static function format_meta_values_for_single_field( $field, $meta_values, $atts ) {
+		if ( ! $meta_values ) {
+			return array();
+		}
+
+		$count_values = array();
+		foreach ( $meta_values as $meta ) {
+			$meta = self::get_displayed_value( $field, $meta );
+
+			if ( isset( $count_values[ $meta ] ) ) {
+				$count_values[ $meta ]++;
+			} else {
+				$count_values[ $meta ] = 1;
+			}
+		}
+
+		self::order_values_for_single_field_graph( $field, $atts, $count_values );
+
+		// Get slice of array
+		if ( isset( $atts['limit'] ) && is_numeric( $atts['limit'] ) ) {
+			$count_values = array_slice( $count_values, 0, $atts['limit'] );
+		}
+
+		$graph_data = array();
+		foreach ( $count_values as $meta_value => $count ) {
+			if ( $meta_value === '' ) {
+				continue;
+			}
+
+			if ( $atts['type'] == 'pie' ) {
+				$meta_value = (string)$meta_value;
+			}
+
+			$graph_data[] = array( $meta_value, $count );
+		}
+
+		return $graph_data;
+	}
+
+	/**
+	 * Order the values for a single field graph
+	 *
+	 * @since 2.02.05
+	 * @param object $field
+	 * @param array $atts
+	 * @param array $count_values
+	 */
+	private static function order_values_for_single_field_graph( $field, $atts, &$count_values ) {
+		if ( $atts['x_order'] == 'field_opts' && in_array( $field->type, array( 'radio', 'checkbox', 'select', 'data' ) ) ) {
+			// Sort values by order of field options
+			self::sort_data_by_field_options( $field, $count_values );
+
+		} else if ( $atts['x_order'] == 'desc' ) {
+			// Sort by descending count
+			arsort( $count_values );
+
+		} else {
+			// Sort alphabetically by default
+			ksort( $count_values );
+		}
+	}
+
+	/**
+	 * Get the tooltip text
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @return string
+	 */
+	private static function get_tooltip_text( $atts ) {
+		if ( isset( $atts['tooltip_label'] ) ) {
+			$tooltip_text = $atts['tooltip_label'];
+		} else if ( 'total' == $atts['data_type'] ) {
+			$tooltip_text = __( 'Total', 'formidable' );
+		} else if ( 'average' == $atts['data_type'] ) {
+			$tooltip_text = __( 'Average', 'formidable' );
+		} else {
+			$tooltip_text = __( 'Submissions', 'formidable' );
+		}
+
+		return $tooltip_text;
+	}
+
+	/**
+	 * Get the data for a multi-field graph without an x-axis
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @return array
+	 */
+	private static function get_data_for_multi_field_graph( $atts ) {
+		$tooltip_text = self::get_tooltip_text( $atts );
+		$graph_data = array(  array( __( 'Fields', 'formidable' ), $tooltip_text ) );
+
+		foreach ( $atts['fields'] as $field ) {
+			$meta_values = self::get_meta_values_for_single_field( $field, $atts );
+
+			if ( 'total' == $atts['data_type'] ) {
+				// get total
+				$y_value = array_sum( $meta_values );
+			} else if ( 'average' == $atts['data_type'] ) {
+				// get average
+				$y_value = array_sum( $meta_values )/count( $meta_values );
+			} else {
+				// get count
+				$y_value = count( $meta_values );
+			}
+
+			$graph_data[] = array(
+				$field->name,
+				$y_value,
+			);
+		}
+
+		self::apply_column_colors( $atts, $graph_data );
+
+		return $graph_data;
+	}
+
+	/**
+	 * Get the data for a form graph
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @return array
+	 */
+	private static function get_data_for_form_graph( $atts ) {
+		self::prepare_atts_for_form_graph( $atts );
+
+		if ( ! self::can_continue_with_form_graph( $atts ) ) {
+			return array();
+		}
+
+		$x_axis_data = $y_axis_data = self::get_associative_values_for_x_axis( $atts['x_axis_field'], $atts );
+
+		self::order_x_axis_values( $atts, $x_axis_data );
+
+		$graph_data = self::combine_data_by_id( $x_axis_data, array( $y_axis_data ), $atts );
+
+		self::maybe_add_zero_value_dates( $atts, $graph_data );
+
+		self::add_first_row_to_graph_data( $atts, $graph_data );
+
+		return $graph_data;
+	}
+
+	/**
+	 * Prepare a few items in the $atts array for a form graph
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 */
+	private static function prepare_atts_for_form_graph( &$atts ) {
+		$atts['x_axis_field'] = $atts['x_axis'] = 'created_at';
+		if ( ! $atts['include_zero'] ) {
+			$atts['include_zero'] = true;
+		}
+
+		self::get_default_start_date_for_form_graph( $atts );
+
+		self::get_default_end_date_for_form_graph( $atts );
+
+		self::check_field_filters( $atts );
+	}
+
+	/**
+	 * Check if the necessary atts are present to continue with a form graph
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @return bool
+	 */
+	private static function can_continue_with_form_graph( $atts ) {
+		$continue = true;
+
+		if ( ! isset( $atts['form_id'] ) ) {
+			// If there is no form
+			$continue = false;
+		} else if  ( ! empty( $atts['filters'] ) && empty( $atts['entry_ids'] ) ) {
+			// If there are field filters and entry IDs is empty, stop now
+			$continue = false;
+		}
+
+		return $continue;
+	}
+
+	/**
+	 * Get the default start date for a form graph
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 */
+	private static function get_default_start_date_for_form_graph( &$atts ) {
+		if ( ! isset( $atts['created_at_greater_than'] ) || ! $atts['created_at_greater_than'] ) {
+			$group_by = isset( $atts['group_by'] ) ? $atts['group_by'] : '';
+
+			if ( $group_by == 'month' ) {
+				$atts['created_at_greater_than'] = '-1 year';
+			} else if ( $group_by == 'quarter' ) {
+				$atts['created_at_greater_than'] = '-2 years';
+			} else if ( $group_by == 'year' ) {
+				$atts['created_at_greater_than'] = '-10 years';
+			} else {
+				$atts['created_at_greater_than'] = '-1 month';
+			}
+		}
+
+		$atts['x_start'] = $atts['created_at_greater_than'];
+	}
+
+	/**
+	 * Get the default end date for a form graph
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 */
+	private static function get_default_end_date_for_form_graph( &$atts ) {
+		if ( ! isset( $atts['created_at_less_than'] ) || ! $atts['created_at_less_than'] ) {
+			$atts['created_at_less_than'] = 'NOW';
+		}
+
+		$atts['x_end'] = $atts['created_at_less_than'];
+	}
+
+	/**
+	 * Add the zero values for all dates between specified start and end date
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @param array $graph_data
+	 */
+	private static function maybe_add_zero_value_dates( $atts, &$graph_data ) {
+		if ( ! $atts['include_zero'] ) {
 			return;
 		}
 
-		// Check if form creates posts
-		$form_posts = self::get_form_posts( $field, $args );
+		if ( self::is_created_at_or_updated_at( $atts['x_axis_field'] ) || self::is_date_field( $atts['x_axis_field'] ) ) {
 
-		$entry_ids = array();
+			$start_date = self::get_start_date_for_x_axis_date_include_zero_graph( $atts, $graph_data );
+			$end_date = self::get_end_date_for_x_axis_date_include_zero_graph( $atts, $graph_data );
+			$group_by = isset( $atts['group_by'] ) ? $atts['group_by'] : '';
 
-		// If entry ID is set in shortcode
-		if ( $args['entry_ids'] ) {
-			$entry_ids = explode( ',', $args['entry_ids'] );
-		}
+			$all_dates = self::get_all_dates_for_period( $start_date, $end_date, $group_by );
+			$new_graph_data = array();
+			$count = 0;
 
-		//If filtering by other fields
-		if ( $args['atts'] ) {
-			//Get the entry IDs for fields being used to filter graph data
-			$after_where = false;
-			foreach ( $args['atts'] as $orig_f => $val ) {
-				$entry_ids = FrmProFieldsHelper::get_field_matches( array(
-					'entry_ids' => $entry_ids, 'orig_f' => $orig_f, 'val' => $val,
-					'id' => $field->id, 'atts' => $args['atts'], 'field' => $field,
-					'form_posts' => $form_posts, 'after_where' => $after_where ,
-					'drafts' => false,
-				));
-				$after_where = true;
-			}
-		}
-		$args['entry_ids'] = $entry_ids;
-	}
-
-	/**
-	 * Get x_field
-	 *
-	 * @since 2.0
-	 *
-	 * @param args (array), passed by reference
-	 */
-	private static function get_x_field( &$args ) {
-		// Assume there is no x field
-		$args['x_field'] = false;
-
-		// If there is an x_axis and it is a field ID or key
-		if ( $args['x_axis'] && ! in_array( $args['x_axis'], array( 'created_at', 'updated_at' ) ) ) {
-			$args['x_field'] = FrmField::getOne( $args['x_axis'] );
-		}
-	}
-
-	/**
-	 * Get inputs, x_inputs, and f_inputs for graph when x_axis is set
-	 * TODO: Clean this function
-	 *
-	 * @since 2.0
-	 *
-	 * @param array $inputs - inputs for main field
-	 * @param array $f_inputs - multi-dimensional array for additional field inputs
-	 * @param array $x_inputs - x-axis inputs
-	 * @param object $field
-	 * @param array $args
-	 */
-	private static function get_x_axis_inputs( &$inputs, &$f_inputs, &$x_inputs, $field, $args ) {
-		global $wpdb;
-
-		// Set up both queries
-		$query = $x_query = 'SELECT em.meta_value, em.item_id FROM ' . $wpdb->prefix . 'frm_item_metas em';
-
-		// Join regular query with items table
-		$query .= ' LEFT JOIN '. $wpdb->prefix . 'frm_items e ON (e.id=em.item_id)';
-
-		// If x axis is a field
-		if ( $args['x_field'] ) {
-			$x_query .= ' LEFT JOIN '. $wpdb->prefix . 'frm_items e ON (e.id=em.item_id)';
-			$x_query .= " WHERE em.field_id=" . $args['x_field']->id;
-
-			// If x-axis is created_at or updated_at
-		} else {
-			$x_query = 'SELECT id, '. $args['x_axis'] .' FROM '. $wpdb->prefix . 'frm_items e';
-			$x_query .= " WHERE form_id=". $field->form_id;
-		}
-
-		// Will be used when graphing multiple fields
-		$select_query = $query;
-		$and_query = '';
-
-		// Add where to regular query
-		$query .= " WHERE em.field_id=". (int) $field->id;
-
-		self::add_to_x_axis_queries( $query, $x_query, $and_query, $args);
-
-		// If graphing multiple fields, set up multiple queries
-		$q = array();
-		foreach ( $args['fields'] as $f_id => $f ) {
-			if ( $f_id != $field->id ) {
-				$q[$f_id] = $select_query . " WHERE em.field_id=". (int) $f_id;
-				if ( $args['user_id'] !== false ) {
-					$select_query .= ' AND user_id=' . $args['user_id'];
+			foreach ( $all_dates as $date_str ) {
+				if ( isset( $graph_data[ $count ] ) && $graph_data[ $count ][ 0 ] == $date_str ) {
+					$new_graph_data[] = $graph_data[ $count ];
+					$count++;
+				} else {
+					$add_row = array( $date_str );
+					if ( is_array( $atts['fields'] ) && ! empty( $atts['fields'] ) ) {
+						$field_count = count( $atts['fields'] );
+						for ( $i = 1; $i <= $field_count; $i++ ) {
+							$add_row[] = 0;
+						}
+					} else {
+						$add_row[] = 0;
+					}
+					$new_graph_data[] = $add_row;
 				}
-				$q[$f_id] .= $and_query;
 			}
-			unset($f, $f_id);
-		}
-		if ( empty($q) ) {
-			$f_inputs = array();
-		}
 
-		//Set up $x_query for data from entries fields.
-		if ( $args['x_field'] && $args['x_field']->type == 'data' ) {
-			$linked_field = $args['x_field']->field_options['form_select'];
-			$x_query = str_replace('SELECT em.meta_value, em.item_id', 'SELECT dfe.meta_value, em.item_id', $x_query);
-			$x_query = str_replace($wpdb->prefix . 'frm_item_metas em', $wpdb->prefix . 'frm_item_metas dfe, ' . $wpdb->prefix . 'frm_item_metas em', $x_query);
-			$x_query = str_replace('WHERE', 'WHERE dfe.item_id=em.meta_value AND dfe.field_id=' . $linked_field . ' AND', $x_query);
-		}
-
-		// Get inputs
-		$query = apply_filters('frm_graph_query', $query, $field, $args);
-		$inputs = $wpdb->get_results($query, ARRAY_A); // TODO: Check for prepare
-
-		// Get x inputs
-		$x_query = apply_filters('frm_graph_xquery', $x_query, $field, $args);
-		$x_inputs = $wpdb->get_results($x_query, ARRAY_A); // TODO: Check for prepare
-
-		unset( $query, $x_query );
-
-		// Get all entry IDs from x_inputs
-		$x_entries = array();
-		foreach ( $x_inputs as $x_input ) {
-			$x_entries[] = (  isset( $x_input['item_id'] ) ? $x_input['item_id'] : $x_input['id'] );
-			unset( $x_input );
-		}
-
-		//If there are multiple fields being graphed
-		foreach ( $q as $f_id => $query ) {
-			$f_inputs[$f_id] = $wpdb->get_results($query, ARRAY_A); // TODO: Check for prepare
-			self::clean_inputs( $f_inputs[$f_id], $field, $args, $x_entries );
-			unset($f_id, $query);
-		}
-
-		// Clean up inputs
-		self::clean_inputs( $inputs, $field, $args, $x_entries );
-		self::clean_inputs( $x_inputs, $field, $args);
-	}
-
-	/**
-	 * Get graph columns
-	 *
-	 * @since 2.0
-	 *
-	 * @param array $cols
-	 * @param object $field
-	 * @param array $args
-	 */
-	private static function get_graph_cols( &$cols, $field, $args ) {
-		// Set default x-axis type
-		$cols['xaxis'] = array( 'type' => 'string');
-
-		if ( $args['x_field'] ) {
-			$cols['xaxis'] = array( 'type' => ( in_array( $args['x_field']->type, $args['allowed_col_types']) ? $args['x_field']->type : 'string' ), 'id' => $args['x_field']->id );
-		}
-
-		// If x axis is not set, only set up cols as if there were one field
-		if ( ! $args['x_axis'] ) {
-			$args['fields'] = array( $field->id => $field );
-		}
-
-		//add columns for each field
-		$count = 0;
-		$tooltip_label = $args['tooltip_label'];
-		foreach ( $args['fields'] as $f_id => $f ) {
-			$type = in_array( $f->type, $args['allowed_col_types'] ) ? $f->type : 'number';
-			// If custom tooltip label is set, change the tooltip label to match user-defined text
-			if ( isset( $tooltip_label[ $count ] ) && ! empty( $tooltip_label[ $count ] ) ) {
-				$cols[ $tooltip_label[ $count ] ] = array( 'type' => $type, 'id' => $f->id );
-				$count++;
-
-				// If tooltip label is not set by user, use the field name
-			} else {
-				$cols[ $f->name ] = array( 'type' => $type, 'id' => $f->id );
-			}
-			unset($f, $f_id);
+			$graph_data = $new_graph_data;
 		}
 	}
 
 	/**
-	 * Get options for graph
+	 * Get the start date for a date x-axis when include_zero is set
 	 *
-	 * @since 2.0
-	 *
-	 * @param array $options
-	 * @param object $field
-	 * @param array $args
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @param array $graph_data
+	 * @return string
 	 */
-	private static function get_graph_options( &$options, $field, $args ) {
-		// Set up defaults
-		$options = array( 'width' => $args['width'], 'height' => $args['height'], 'legend' => 'none' );
-
-		if ( $args['colors'] ) {
-			$options['colors'] = $args['colors'];
-		}
-
-		if ( $args['title'] ) {
-			$options['title'] = $args['title'];
+	private static function get_start_date_for_x_axis_date_include_zero_graph( $atts, $graph_data ) {
+		if ( isset( $atts['x_start'] ) && $atts['x_start'] ) {
+			$start_date = $atts['x_start'];
 		} else {
-			$options['title'] = preg_replace("/&#?[a-z0-9]{2,8};/i", "", FrmAppHelper::truncate($field->name, $args['truncate'], 0));
+			$first_row = reset( $graph_data );
+			$start_date = $first_row[0];
 		}
 
-		if ( $args['title_size'] ) {
-			$options['titleTextStyle']['fontSize'] = $args['title_size'];
-		}
-
-		if ( $args['title_font'] ) {
-			$options['titleTextStyle']['fontName'] = $args['title_font'];
-		}
-
-		if ( $args['show_key'] ) {
-			// Make sure show_key isn't too small
-			if ( $args['show_key'] < 5 ) {
-				$args['show_key'] = 10;
-			}
-			$options['legend'] = array( 'position' => 'right', 'textStyle' => array( 'fontSize' => $args['show_key'] ) );
-		}
-
-		if ( $args['x_field'] ) {
-			$options['hAxis'] = array( 'title' => $args['x_field']->name);
-		}
+		return $start_date;
 	}
 
-
 	/**
-	 * Add to queries when x axis is set
+	 * Get the end date for a date x-axis when include_zero is set
 	 *
-	 * @since 2.0
+	 * @param $atts
+	 * @param $graph_data
+	 * @return mixed
 	 */
-	private static function add_to_x_axis_queries( &$query, &$x_query, &$and_query, $args ) {
-		global $wpdb;
-
-		/// If start date is set
-		if ( $args['start_date'] ) {
-			$start_date = $wpdb->prepare('%s', date('Y-m-d', strtotime( $args['start_date'] ) ) );
-
-			self::add_start_end_date_where( '>', $start_date, $args, $x_query );
+	private static function get_end_date_for_x_axis_date_include_zero_graph( $atts, $graph_data ) {
+		if ( isset( $atts['x_end'] ) && $atts['x_end'] ) {
+			$end_date = $atts['x_end'];
+		} else {
+			$end_date = end( $graph_data )[0];
 		}
 
-		// If end date is set
-		if ( $args['end_date'] ) {
-			$end_date = $wpdb->prepare('%s', date('Y-m-d 23:59:59', strtotime( $args['end_date'] )));
-
-			self::add_start_end_date_where( '<', $end_date, $args, $x_query );
-		}
-
-		//If user_id is set
-		if ( $args['user_id'] !== false ) {
-			$query .= $wpdb->prepare(' AND user_id=%d', $args['user_id']);
-			$x_query .= $wpdb->prepare(' AND user_id=%d', $args['user_id']);
-			$and_query .= $wpdb->prepare(' AND user_id=%d', $args['user_id']);
-		}
-
-		//If entry_ids is set
-		if ( $args['entry_ids'] ) {
-			$query .= " AND e.id in (" . implode( ',', $args['entry_ids'] ) . ")";
-			$x_query .= " AND e.id in (" . implode( ',', $args['entry_ids'] ) . ")";
-			$and_query .= " AND e.id in (" . implode( ',', $args['entry_ids'] ) . ")";
-		}
-
-		// Don't include drafts
-		$query .= ' AND e.is_draft=0';
-		$x_query .= ' AND e.is_draft=0';
-		$and_query .= ' AND e.is_draft=0';
+		return $end_date;
 	}
 
 	/**
-	 * Add start_date/end_date to x_axis WHERE query
+	 * Get all dates for a given start and end date
 	 *
-	 * @since 2.0.12
+	 * @since 2.02.05
+	 * @param string $start_date
+	 * @param string $end_date
+	 * @param string $group_by
+	 * @return array
+	 */
+	private static function get_all_dates_for_period( $start_date, $end_date, $group_by ) {
+		$start_timestamp = strtotime( $start_date );
+		$end_timestamp = strtotime( $end_date ) + 86399;
+		$all_dates = array();
+
+		if ( $group_by == 'month' ) {
+			for ( $d = $start_timestamp; $d <= $end_timestamp; $d += 60 * 60 * 24 * 25 ) {
+				self::add_formatted_date_to_array( 'F Y', $d, $all_dates );
+			}
+		} else if ( $group_by == 'quarter' ) {
+			for ( $d = $start_timestamp; $d <= $end_timestamp; $d += 60 * 60 * 24 * 80 ) {
+				self::add_formatted_date_to_array( 'quarter', $d, $all_dates );
+			}
+		} else if ( $group_by == 'year' ) {
+			for ( $d = $start_timestamp; $d <= $end_timestamp; $d += 60 * 60 * 24 * 364 ) {
+				self::add_formatted_date_to_array( 'Y', $d, $all_dates );
+			}
+		} else {
+			$date_format = get_option('date_format');
+			for ( $d = $start_timestamp; $d <= $end_timestamp; $d += 60*60*24 ) {
+				$all_dates[] = date( $date_format, $d );
+			}
+		}
+
+		return $all_dates;
+	}
+
+	/**
+	 * Add a formatted date to an array
 	 *
-	 * @param string $operator
+	 * @since 2.02.05
+	 * @param string $format
 	 * @param string $date
-	 * @param array $args
-	 * @param string $x_query - pass by reference
-	 *
-	 * TODO: Check if it's more efficient to add to the $query and $and_query at this time as well
+	 * @param array $all_dates
 	 */
-	private static function add_start_end_date_where( $operator, $date, $args, &$x_query ){
-		if ( $args['x_field'] ) {
-			if ( $args['x_field']->type == 'date' ) {
-				// If the x axis is a date field, make sure the dates comes after start_date
-				$x_query .= ' AND meta_value ' . $operator . '=' . $date;
+	private static function add_formatted_date_to_array( $format, $date, &$all_dates ) {
+		if ( 'quarter' == $format ) {
+			$date = self::convert_date_to_quarter( $date );
+		} else {
+			$date = date( $format, $date );
+		}
+
+		if ( ! in_array( $date , $all_dates ) ) {
+			$all_dates[] = $date;
+		}
+	}
+
+	/**
+	 * Get the data for an x-axis graph
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @return array
+	 */
+	private static function get_data_for_x_axis_graph( $atts ) {
+		self::prepare_atts_for_x_axis_graph( $atts );
+
+		if ( ! self::can_continue_with_x_axis_graph( $atts ) ) {
+			return array();
+		}
+
+		$x_axis_data = self::get_associative_values_for_x_axis( $atts['x_axis_field'], $atts );
+
+		if ( empty( $x_axis_data ) ) {
+			return array();
+		}
+
+		self::order_x_axis_values( $atts, $x_axis_data );
+
+		$field_data = self::get_associative_values_for_fields( $atts );
+
+		$graph_data = self::combine_data_by_id( $x_axis_data, $field_data, $atts );
+
+		self::maybe_add_zero_value_dates( $atts, $graph_data );
+
+		self::add_first_row_to_graph_data( $atts, $graph_data );
+
+		self::add_user_defined_column_colors( $atts, $graph_data );
+
+		return $graph_data;
+	}
+
+	/**
+	 * Prepare the $atts array for an x-axis graph
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 */
+	private static function prepare_atts_for_x_axis_graph( &$atts ) {
+		$atts['x_axis_field'] = self::get_x_axis_field( $atts['x_axis'] );
+		if ( ! $atts['x_axis_field'] ) {
+			return;
+		}
+
+		$atts['form_id'] = $atts['fields'][ 0 ]->form_id;
+
+		self::maybe_add_x_start_and_x_end( $atts );
+
+		self::check_field_filters( $atts );
+	}
+
+	/**
+	 * Add x_start and x_end if start_date and end_date are set
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 */
+	private static function maybe_add_x_start_and_x_end( &$atts ) {
+		if ( self::is_date_field( $atts['x_axis_field'] ) && ! empty( $atts['filters'] ) ) {
+			// copy date field filters to x_start and x_end
+			foreach ( $atts['filters'] as $filter_key => $filter_value ) {
+				if ( strpos( $filter_key, $atts['x_axis_field']->id . '_greater_than' ) !== false ||
+					strpos( $filter_key, $atts['x_axis_field']->field_key . '_greater_than' ) !== false
+				) {
+					$atts['x_start'] = $filter_value;
+				} else if ( strpos( $filter_key, $atts['x_axis_field']->id . '_less_than' ) !== false ||
+					strpos( $filter_key, $atts['x_axis_field']->field_key . '_less_than' ) !== false
+				) {
+					$atts['x_end'] = $filter_value;
+				}
+			}
+		} else if ( self::is_created_at_or_updated_at( $atts['x_axis_field'] ) ) {
+			// copy created_at filters to x_start and x_end
+			if ( isset( $atts['created_at_greater_than'] ) ) {
+				$atts['x_start'] = $atts['created_at_greater_than'];
+			}
+
+			if ( isset( $atts['created_at_less_than'] ) ) {
+				$atts['x_end'] = $atts['created_at_less_than'];
+			}
+		}
+	}
+
+
+	/**
+	 * Check if the necessary atts are present to continue with an x-axis graph
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @return bool
+	 */
+	private static function can_continue_with_x_axis_graph( $atts ) {
+		$continue = true;
+
+		if ( ! $atts['x_axis_field'] ) {
+			// If no x-axis field
+			$continue = false;
+		} else if ( ! empty( $atts['filters'] ) && empty( $atts['entry_ids'] ) ) {
+			// If there are field filters and entry IDs is empty, stop now
+			$continue = false;
+		}
+
+		return $continue;
+	}
+
+	/**
+	 * Order x-axis values
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @param array $x_axis_data
+	 */
+	private static function order_x_axis_values( $atts, &$x_axis_data ) {
+		if ( self::is_created_at_or_updated_at( $atts['x_axis'] ) || self::is_date_field( $atts['x_axis_field'] ) ) {
+			usort( $x_axis_data, 'self::date_compare' );
+		} else if ( is_object( $atts['x_axis_field'] ) && $atts['x_axis_field']->type == 'number' ) {
+			usort( $x_axis_data, 'self::number_compare' );
+		}
+	}
+
+	/**
+	 * Compare two dates
+	 *
+	 * @since 2.02.05
+	 * @param object $a
+	 * @param object $b
+	 * @return int
+	 */
+	private static function date_compare( $a, $b ) {
+		$t1 = strtotime( $a->meta_value);
+		$t2 = strtotime( $b->meta_value );
+		return $t1 - $t2;
+	}
+
+	/**
+	 * Compare two numbers as floats
+	 *
+	 * @param 2.02.05
+	 * @param object $a
+	 * @param object $b
+	 * @return float
+	 */
+	private static function number_compare( $a, $b ) {
+		$n1 = (float) $a->meta_value;
+		$n2 = (float) $b->meta_value;
+		return $n1 - $n2;
+	}
+
+	/**
+	 * Check if string value is created_at or updated_at
+	 *
+	 * @since 2.02.05
+	 * @param string|object $value
+	 * @return bool
+	 */
+	private static function is_created_at_or_updated_at( $value ) {
+		return ( is_string( $value )  && in_array( $value, array( 'created_at', 'updated_at' ) ) );
+	}
+
+	/**
+	 * Check if a variable is an object and has a type of date
+	 *
+	 * @since 2.02.05
+	 * @param mixed $value
+	 * @return bool
+	 */
+	private static function is_date_field( $value ) {
+		return ( is_object( $value ) && $value->type == 'date' );
+	}
+
+	/**
+	 * Get the x axis field object
+	 *
+	 * @since 2.02.05
+	 * @param string $x_axis
+	 * @return mixed
+	 */
+	private static function get_x_axis_field( $x_axis ) {
+		if ( self::is_created_at_or_updated_at( $x_axis ) ) {
+			$x_axis_field = $x_axis;
+		} else {
+			$x_axis_field = FrmField::getOne( $x_axis );
+		}
+
+		return $x_axis_field;
+	}
+
+	/**
+	 * Get associative array values for a specific field
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @return array
+	 */
+	private static function get_associative_values_for_fields( $atts ) {
+		$field_data = array();
+		foreach ( $atts['fields'] as $field ) {
+			$field_data[] = FrmProEntryMeta::get_associative_array_values_for_field( $field, $atts );
+		}
+
+		return $field_data;
+	}
+
+	/**
+	 * Combine x and y axis data by ID
+	 *
+	 * @since 2.02.05
+	 * @param array $x_axis_data
+	 * @param array $field_data
+	 * @param array $atts
+	 * @return array
+	 */
+	private static function combine_data_by_id( $x_axis_data, $field_data, $atts ) {
+		$graph_data = array();
+		$data_counts = array();
+
+		foreach ( $x_axis_data as $x_data ) {
+			$entry_id = $x_data->id;
+			$x_value = self::get_x_axis_displayed_value( $x_data->meta_value, $atts );
+
+			if ( $x_value === '' ) {
+				continue;
+			}
+
+			if ( isset( $graph_data[ $x_value ] ) ) {
+				$data_counts[ $x_value ]++;
+				self::update_existing_row_of_graph_data( $entry_id, $field_data, $graph_data[ $x_value ], $data_counts[ $x_value ], $atts );
 			} else {
-				// If the x axis is NOT a date field, filter by creation date
-				$x_query .= ' and e.created_at' . $operator . '=' . $date;
+				$data_counts[ $x_value ] = 1;
+				$graph_data[ $x_value ] = self::generate_new_row_of_graph_data( $entry_id, $x_value, $field_data, $atts );
+			}
+
+		}
+
+		$graph_data = array_values( $graph_data );
+
+		return $graph_data;
+	}
+
+	/**
+	 * Add the first row of data to a graph
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @param array $graph_data
+	 */
+	private static function add_first_row_to_graph_data( $atts, &$graph_data ) {
+		if ( $atts['form'] ) {
+			$first_row = self::get_first_row_labels_for_form_graph();
+		} else if ( $atts['x_axis_field'] && ! empty( $atts['fields']) ) {
+			$first_row = self::get_first_row_labels_for_x_axis_graph( $atts );
+		}
+
+		array_unshift( $graph_data, $first_row );
+	}
+
+	/**
+	 * Get the first row of labels for x-axis graph
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @return array
+	 */
+	private static function get_first_row_labels_for_x_axis_graph( $atts ) {
+		if ( 'created_at' === $atts['x_axis_field'] ) {
+			$x_label = __( 'Creation Date', 'formidable' );
+		} else if ( 'updated_at' === $atts['x_axis_field'] ) {
+			$x_label = __( 'Updated At', 'formidable' );
+		} else if ( is_object( $atts['x_axis_field'] ) ) {
+			$x_label = $atts['x_axis_field']->name;
+		} else {
+			$x_label = __( 'Invalid x-axis', 'formidable' );
+		}
+
+		$first_row = array( $x_label );
+		$count = 0;
+		$tooltip_label = isset( $atts['tooltip_label'] ) ? explode( ',', $atts['tooltip_label'] ) : array();
+		foreach ( $atts['fields'] as $field ) {
+			if ( isset( $tooltip_label[ $count ] ) && ! empty( $tooltip_label[ $count ] ) ) {
+				$first_row[] = $tooltip_label[ $count ];
+			} else {
+				$first_row[] = $field->name;
+			}
+
+			$count++;
+		}
+
+		return $first_row;
+	}
+
+	/**
+	 * Get the first row of labels for a form graph
+	 *
+	 * @since 2.02.05
+	 * @return array
+	 */
+	private static function get_first_row_labels_for_form_graph() {
+		$x_label = __( 'Creation Date', 'formidable' );
+		return array( $x_label, __( 'Submissions', 'formidable' ) );
+	}
+
+	/**
+	 * Create a new row of graph data
+	 *
+	 * @since 2.02.05
+	 * @param int $entry_id
+	 * @param string $x_value
+	 * @param array $all_field_data
+	 * @param array $atts
+	 * @return array
+	 */
+	private static function generate_new_row_of_graph_data( $entry_id, $x_value, $all_field_data, $atts ) {
+		self::adjust_x_axis_value_type( $atts, $x_value );
+
+		$new_row = array( $x_value );
+
+		foreach ( $all_field_data as $single_field_data ) {
+
+			if ( isset( $single_field_data[ $entry_id ] ) ) {
+				if ( $atts['data_type'] == 'total' || $atts['data_type'] == 'average' ) {
+					if ( is_numeric( $single_field_data[ $entry_id ]->meta_value ) ) {
+						$new_row[] = (float) $single_field_data[ $entry_id ]->meta_value;
+					} else {
+						$new_row[] = 0;
+					}
+				} else {
+					$new_row[] = 1;
+				}
+			} else {
+				$new_row[] = 0;
+			}
+		}
+
+		return $new_row;
+	}
+
+	/**
+	 * Convert number field values to float for x-axis
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @param string $x_value
+	 */
+	private static function adjust_x_axis_value_type( $atts, &$x_value ) {
+		if ( is_object( $atts['x_axis_field'] ) && $atts['x_axis_field']->type == 'number' ) {
+			$x_value = (float) $x_value;
+		}
+	}
+
+
+	/**
+	 * Update an existing row of graph data
+	 *
+	 * @since 2.02.05
+	 * @param int $entry_id
+	 * @param array $all_field_data
+	 * @param array $current_data
+	 * @param array $data_count
+	 * @param array $atts
+	 */
+	private static function update_existing_row_of_graph_data( $entry_id, $all_field_data, &$current_data, $data_count, $atts ) {
+		$count = 0;
+		foreach ( $all_field_data as $single_field_data ) {
+			$count++;
+
+			if ( isset( $single_field_data[ $entry_id ] ) ) {
+				if ( $atts['data_type'] == 'total' ) {
+					if ( is_numeric( $single_field_data[ $entry_id ]->meta_value ) ) {
+						$current_data[ $count ] += $single_field_data[ $entry_id ]->meta_value;
+					}
+				} else if ( $atts['data_type'] == 'average' ) {
+					if ( is_numeric( $single_field_data[ $entry_id ]->meta_value ) ) {
+						$current_data[ $count ] = (
+							( ( $current_data[ $count ] * ( $data_count -1 ) ) + $single_field_data[ $entry_id ]->meta_value )/
+						$data_count );
+					}
+				} else {
+					$current_data[ $count ]++;
+				}
+			}
+
+		}
+	}
+
+	/**
+	 * Get the associative values for the x-axis field
+	 *
+	 * @since 2.02.05
+	 * @param string|object $x_axis_field
+	 * @param array $atts
+	 * @return array
+	 */
+	private static function get_associative_values_for_x_axis( $x_axis_field, $atts ) {
+		if ( ! $x_axis_field ) {
+			$x_axis_data = array();
+		} else if ( self::is_created_at_or_updated_at( $x_axis_field ) ) {
+			$query_args = self::package_filtering_arguments_for_query( $atts );
+			$x_axis_data = FrmProEntryMeta::get_associative_array_values_for_frm_items_column( $x_axis_field, $query_args );
+		} else {
+			$query_args = self::package_filtering_arguments_for_query( $atts );
+			$x_axis_data = FrmProEntryMeta::get_associative_array_values_for_field( $x_axis_field, $query_args );
+		}
+
+		return $x_axis_data;
+	}
+
+	/**
+	 * Get the displayed x-axis value
+	 *
+	 * @since 2.02.05
+	 * @param string $x_value
+	 * @param array $atts
+	 * @return string
+	 */
+	private static function get_x_axis_displayed_value( $x_value, $atts ) {
+		self::convert_db_date_to_localized_date( $atts, $x_value );
+
+		if ( isset( $atts['group_by'] ) ) {
+			if ( ! self::is_valid_date( $x_value ) ) {
+				return '';
+			}
+
+			if ( $atts['group_by'] == 'month' ) {
+				$x_value = date( 'F Y', strtotime( $x_value ) );
+
+			} else if ( $atts['group_by'] == 'quarter' ) {
+				$x_value = self::convert_date_to_quarter( $x_value );
+
+			} else if ( $atts['group_by'] == 'year' ) {
+				$x_value = date( 'Y', strtotime( $x_value ) );
+			} else {
+				$x_value = self::get_displayed_value( $atts['x_axis_field'], $x_value );
 			}
 		} else {
-			// x_axis is created_at or updated_at
-			$x_query .= ' and e.' . $args['x_axis'] . $operator . '=' . $date;
+			$x_value = self::get_displayed_value( $atts['x_axis_field'], $x_value );
 		}
+
+		return $x_value;
+	}
+
+	/**
+	 * Convert a creation date or update date to the localized date
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @param string $x_value
+	 */
+	private static function convert_db_date_to_localized_date( $atts, &$x_value ) {
+		if ( self::is_created_at_or_updated_at( $atts['x_axis'] ) ) {
+			$x_value = FrmAppHelper::get_localized_date( 'Y-m-d H:i:s', $x_value );
+		}
+	}
+
+	/**
+	 * Check if a value is a valid date
+	 *
+	 * @since 2.02.05
+	 * @param string $value
+	 * @return bool
+	 */
+	private static function is_valid_date( $value ) {
+		return ( date( 'Y', strtotime( $value ) ) > 0 );
+	}
+
+	/**
+	 * Convert a date to the correct quarter string
+	 *
+	 * @since 2.02.05
+	 * @param string $date
+	 * @return string
+	 */
+	private static function convert_date_to_quarter( $date ) {
+		$value = date( 'Y-m-d', strtotime( $date ) );
+
+		if ( preg_match('/-(01|02|03)-/', $value ) ) {
+			$value = __( 'Q1', 'formidable' ) . ' ' . date('Y', strtotime($value));
+		} else if ( preg_match('/-(04|05|06)-/', $value) ) {
+			$value = __( 'Q2', 'formidable' ) . ' ' . date('Y', strtotime($value));
+		} else if ( preg_match('/-(07|08|09)-/', $value) ) {
+			$value = __( 'Q3', 'formidable' ) . ' ' . date('Y', strtotime($value));
+		} else if ( preg_match('/-(10|11|12)-/', $value) ) {
+			$value = __( 'Q4', 'formidable' ) . ' ' . date('Y', strtotime($value));
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Get the displayed value for a given field and meta value
+	 *
+	 * @since 2.02.05
+	 * @param string|object $field
+	 * @param string $value
+	 * @return string|int
+	 */
+	private static function get_displayed_value( $field, $value ) {
+		if ( self::is_created_at_or_updated_at( $field ) ) {
+
+			$displayed_value = self::convert_date_for_graph_display( $value );
+
+		} else if ( is_object( $field ) && ! is_array( $value ) ) {
+
+			if ( $field->type == 'date' ) {
+				$displayed_value = self::convert_date_for_graph_display( $value );
+			} else if ( $field->field_options['separate_value'] || FrmField::is_option_true( $field, 'other' ) ) {
+				$displayed_value = self::get_option_label_for_value( $field, $value );
+			} else if ( $field->type == 'user_id' ) {
+				$displayed_value = FrmProFieldsHelper::get_display_name( $value, 'display_name' );
+			} else if ( $field->type == 'data' && $field->field_options['form_select'] != 'taxonomy' ) {
+				$displayed_value = FrmProFieldsHelper::get_data_display_value( $value, array(), $field );
+			} else if ( FrmField::is_option_true_in_array( $field->field_options, 'post_field' ) && $field->field_options['post_field'] == 'post_category' && $field->field_options['taxonomy'] ) {
+				$displayed_value = FrmProPost::get_taxonomy_term_name_from_id( $value, $field->field_options['taxonomy'] );
+			} else if ( is_numeric( $value ) ) {
+				$displayed_value = $value;
+			} else {
+				$displayed_value = ucfirst( $value );
+			}
+
+		} else {
+			$displayed_value = $value;
+		}
+
+		$displayed_value = apply_filters( 'frm_graph_value', $displayed_value, $field );
+
+		if ( is_array( $displayed_value ) ) {
+			$displayed_value = reset( $displayed_value );
+		}
+
+		return $displayed_value;
+	}
+
+	/**
+	 * Convert a date to the WordPress format
+	 *
+	 * @since 2.02.05
+	 * @param string $value
+	 * @return string
+	 */
+	private static function convert_date_for_graph_display( $value ) {
+		if ( self::is_valid_date( $value ) ) {
+			$date_format = get_option('date_format');
+			$value = date( $date_format, strtotime( $value ) );
+		} else {
+			$value = '';
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Get the option label for a given value
+	 *
+	 * @since 2.02.05
+	 * @param object $field
+	 * @param string
+	 * @return string
+	 */
+	private static function get_option_label_for_value( $field, $value ) {
+		$option_label = $value;
+
+		foreach ( $field->options as $opt_key => $opt ) {
+			if ( ! $opt ) {
+				continue;
+			}
+
+			if ( $value === $opt ) {
+				$option_label = $opt;
+				break;
+			} else if ( is_array( $opt ) && $value == $opt['value']  ) {
+				$option_label = $opt['label'];
+				break;
+			} else if ( FrmFieldsHelper::is_other_opt( $opt_key ) ) {
+				if ( FrmField::is_field_with_multiple_values( $field ) ) {
+					if ( $opt_key == $value ) {
+						$option_label = $opt;
+						break;
+					}
+				} else {
+					$option_label = $opt;
+				}
+			}
+		}
+
+		return $option_label;
 	}
 
 	/**
@@ -807,720 +1973,21 @@ class FrmProGraphsController {
 	 *
 	 * @since 2.0
 	 *
-	 * @param array $inputs
 	 * @param object $field
-	 * @param array $args
-	 * @return array $inputs - cleaned inputs array
+	 * @param array $atts
+	 * @param array $field_values
 	 */
-	private static function clean_inputs( &$inputs, $field, $args, $x_entries = array() ) {
-		if ( ! $inputs ) {
-			return false;
-		}
-
-		//Break out any inner arrays (for checkbox or multi-select fields) and add them to the end of the $inputs array
-		if ( ! $args['x_axis'] && FrmField::is_field_with_multiple_values( $field ) ) {
-			$count = 0;
-			foreach ( $inputs as $k => $i ) {
-				$i = maybe_unserialize($i);
-				if ( ! is_array( $i ) ) {
-					unset($k, $i);
-					continue;
-				}
-
-				unset($inputs[$k]);
-				$count++;
-				foreach ( $i as $i_key => $item ) {
-					// If this is an "other" option, keep key
-					if ( strpos( $i_key, 'other' ) !== false ) {
-						$inputs[] = $i_key;
-					} else {
-						$inputs[] = $item;
-					}
-					unset($item, $i_key);
-				}
-			}
-			unset( $k, $i, $count);
-		}
-
-		if ( $x_entries ) {
-			// Get rid of inputs if there is no match in x_inputs
-			foreach ( $inputs as $key => $input ) {
-				if ( ! in_array ( $input['item_id'], $x_entries ) ) {
-					unset( $inputs[$key] );
-				}
-			}
-			unset( $key, $input );
-		}
-
-		//Strip slashes from inputs
-		$inputs = stripslashes_deep($inputs);
-
-		return $inputs;
-	}
-
-	/**
-	 * Modify post values (only applies to x-axis graphs)
-	 *
-	 * @since 2.0
-	 *
-	 * @param array $inputs
-	 * @param array $field_options
-	 * @param object $field
-	 * @param array $form_posts - posts
-	 * @param array $args
-	 */
-	private static function mod_post_inputs( &$inputs, &$field_options, $field, $form_posts, $args ) {
-		if ( ! $form_posts ) {
+	private static function clean_field_values( $field, $atts, &$field_values ) {
+		if ( ! $field_values ) {
 			return;
 		}
 
-		//Declare $field_options variable.
-		$field_options = $field->options;
-
-		//if ( $skip_posts_code ) {return}//TODO: Check if this is necessary
-
-		// If field is not a post field, return
-		if ( isset( $field->field_options['post_field']) && $field->field_options['post_field'] != '' ) {
-			$post_field_type = $field->field_options['post_field'];
-		} else {
-			return;
-		}
-		global $wpdb;
-
-		// If category field
-		if ( $post_field_type == 'post_category' ) {
-			$field_options = FrmProFieldsHelper::get_category_options( $field );
-
-			// If field is a custom field
-		} else if ( $post_field_type == 'post_custom' && $field->field_options['custom_field'] != '' ) {
-			foreach ( $form_posts as $form_post ) {
-				$meta_value = get_post_meta( $form_post->post_id, $field->field_options['custom_field'], true );
-				if ( $meta_value) {
-					if ( $args['x_axis'] ) {
-						$inputs[] = array( 'meta_value' => $meta_value, 'item_id' => $form_post->id);
-					} else {
-						$inputs[] = $meta_value;
-					}
-				}
-			}
-			// If regular post field
-		} else{
-			if ( $post_field_type == 'post_status') {
-				$field_options = FrmProFieldsHelper::get_status_options( $field );
-			}
-			foreach ( $form_posts as $form_post ) {
-				$post_value = FrmDb::get_var( $wpdb->posts, array( 'ID' => $form_post->post_id), $post_field_type );
-				if ( $post_value ) {
-					if ( $args['x_axis'] ) {
-						$inputs[] = array( 'meta_value' => $post_value, 'item_id' => $form_post->id);
-					} else {
-						$inputs[] = $post_value;
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Modify inputs for x-axis
-	 * TODO: Clean this function
-	 *
-	 * @since 2.0
-	 *
-	 * @param array $x_inputs - x inputs
-	 * @param array $inputs
-	 * @param array $f_values - additional field values
-	 * @param array $args
-	 */
-	private static function mod_x_inputs( &$x_inputs, &$inputs, &$f_values, $args ) {
-		if ( $x_inputs ) {
-			$x_temp = array();
-			foreach ( $x_inputs as $x_input ) {
-				if ( ! $x_input ) {
-					continue;
-				}
-
-				if ( $args['x_field'] ) {
-					$x_temp[$x_input['item_id']] = $x_input['meta_value'];
-				} else {
-					$x_temp[$x_input['id']] = $x_input[$args['x_axis']];
-				}
-			}
-			$x_inputs = apply_filters('frm_graph_value', $x_temp, ($args['x_field'] ? $args['x_field'] : $args['x_axis']), $args);
-			unset($x_temp, $x_input);
+		// Flatten multi-dimensional array
+		if ( count( $atts['fields'] ) == 1 && FrmField::is_field_with_multiple_values( $field ) ) {
+			FrmProStatisticsController::flatten_multi_dimensional_arrays_for_stats( $field, true, $field_values );
 		}
 
-		if ( $args['x_axis'] ){
-			$y_temp = array();
-			foreach ( $inputs as $input ) {
-				$y_temp[$input['item_id']] = $input['meta_value'];
-			}
-			foreach ( $args['ids'] as $f_id ) {
-				if ( ! isset( $f_values[ $f_id ] ) ) {
-					$f_values[$f_id] = array();
-				}
-				$f_values[$f_id][key($y_temp)] = 0;
-				unset($f_id);
-			}
-			$inputs = $y_temp;
-			unset($y_temp, $input);
-		}
-	}
-
-	/**
-	 * Format additional field inputs
-	 *
-	 * @since 2.0
-	 *
-	 * @param array $f_inputs
-	 * @param array $f_values
-	 * @param array $args
-	 */
-	private static function format_f_inputs( &$f_inputs, &$f_values, $args ) {
-		if ( ! $f_inputs ) {
-			return;
-		}
-		foreach ( $f_inputs as $f_id => $f ) {
-			$temp = array();
-			foreach ( $f as $input ) {
-				if ( is_array( $input ) ){
-					$temp[$input['item_id']] = $input['meta_value'];
-
-					foreach ( $args['ids'] as $d ) {
-						if ( ! isset( $f_values[ $d ][ $input['item_id'] ] ) ) {
-							$f_values[$d][$input['item_id']] = 0;
-						}
-
-						unset($d);
-					}
-				} else {
-					$temp[] = $input;
-				}
-				unset($input);
-			}
-
-			$f_inputs[$f_id] = apply_filters('frm_graph_value', $temp, $args['fields'][$f_id], $args);
-
-			unset($temp, $input, $f);
-		}
-	}
-
-	/**
-	 * Get values for user ID graph
-	 *
-	 * @since 2.0
-	 *
-	 * @param array $values
-	 * @param array $labels
-	 * @param array $tooltips
-	 * @param boolean $pie - boolean for pie graph
-	 * @param array $temp_values - temporary values
-	 * @param object $field
-	 */
-	private static function get_user_id_values( &$values, &$labels, &$tooltips, &$pie, $temp_values, $field ) {
-		global $wpdb;
-
-		// Get form options
-		$form = FrmDb::get_row( $wpdb->prefix .'frm_forms', array( 'id' => $field->form_id) );
-		$form_options = maybe_unserialize( $form->options );
-
-		// Remove deleted users from values and show display name instead of user ID number
-		foreach ( $temp_values as $user_id => $count ) {
-			$user_info = get_userdata( $user_id );
-			if ( ! $user_info ) {
-				unset( $temp_values[$user_id] );
-				continue;
-			}
-			$labels[] = ($user_info) ? $user_info->display_name : __( 'Deleted User', 'formidable' );
-			$values[] = $count;
-		}
-
-		// If only one response per user, do a pie chart of users who have submitted the form
-		if ( isset( $form_options['single_entry'] ) && $form_options['single_entry'] && isset( $form_options['single_entry_type'] ) && $form_options['single_entry_type'] == 'user' ) {
-
-			// Get number of users on site
-			$total_users = count( get_users() );
-
-			// Get number of users that have completed entries
-			$id_count = count( $values );
-
-			// Get the difference
-			$not_completed = (int) $total_users - (int) $id_count;
-			$labels = array( __( 'Completed', 'formidable' ), __( 'Not Completed', 'formidable' ) );
-			$temp_values = array( $id_count, $not_completed );
-			$pie = true;
-
-		} else {
-			if ( count( $labels ) < 10 ) {
-				$pie = true;
-			}
-		}
-		$values = $temp_values;
-	}
-
-	/**
-	 * Get final x-axis values
-	 * TODO: Clean this up, try to think of a cleaner way to get these values
-	 *
-	 * @since 2.0
-	 *
-	 * @param array $values
-	 * @param array $f_values - additional field values
-	 * @param array $labels
-	 * @param array $tooltips
-	 * @param array $inputs
-	 * @param array $x_inputs - x inputs
-	 * @param array $f_inputs - f inputs
-	 * @param array $args - arguments
-	 */
-	private static function get_final_x_axis_values( &$values, &$f_values, &$labels, &$tooltips, $inputs, $x_inputs, $f_inputs, $args ){
-		if ( ! isset( $x_inputs ) || ! $x_inputs ) {
-			return;
-		}
-		$calc_array = array();
-
-		//TODO: CHECK IF other option works with x axis
-		foreach ( $inputs as $entry_id => $in ) {
-			$entry_id = (int) $entry_id;
-			if ( ! isset( $values[$entry_id] ) ) {
-				$values[$entry_id] = 0;
-			}
-
-			$labels[$entry_id] = ( isset( $x_inputs[$entry_id] ) ) ? $x_inputs[$entry_id] : '';
-
-			if ( ! isset( $calc_array[ $entry_id ] ) ) {
-				$calc_array[$entry_id] = array( 'count' => 0);
-			}
-
-			if ( $args['data_type'] == 'total' || $args['data_type'] == 'average' ) {
-				$values[$entry_id] += (float) $in;
-				$calc_array[$entry_id]['total'] = $values[$entry_id];
-				$calc_array[$entry_id]['count']++;
-			} else {
-				$values[$entry_id]++;
-			}
-
-			unset( $entry_id, $in );
-		}
-
-		//TODO: Does this even work?
-		if ( $args['data_type'] == 'average' ) {
-			foreach ( $calc_array as $entry_id => $calc ) {
-				$values[$entry_id] = ($calc['total'] / $calc['count']);
-				unset( $entry_id, $calc );
-			}
-		}
-
-		$calc_array = array();
-		foreach ( $f_inputs as $f_id => $f ) {
-			if ( ! isset( $calc_array[$f_id] ) ) {
-				$calc_array[$f_id] = array();
-			}
-
-			foreach ( $f as $entry_id => $in ) {
-				$entry_id = (int) $entry_id;
-				if ( ! isset( $labels[ $entry_id ] ) ) {
-					$labels[$entry_id] = (isset($x_inputs[$entry_id])) ? $x_inputs[$entry_id] : '';
-					$values[$entry_id] = 0;
-				}
-
-				if ( ! isset( $calc_array[ $f_id ][ $entry_id ] ) ) {
-					$calc_array[$f_id][$entry_id] = array( 'count' => 0);
-				}
-
-				if ( ! isset( $f_values[ $f_id ][ $entry_id ] ) ) {
-					$f_values[$f_id][$entry_id] = 0;
-				}
-
-				if ( $args['data_type'] == 'total' || $args['data_type'] == 'average' ) {
-					$f_values[$f_id][$entry_id] += (float) $in;
-					$calc_array[$f_id][$entry_id]['total'] = $f_values[$f_id][$entry_id];
-					$calc_array[$f_id][$entry_id]['count']++;
-				}else{
-					$f_values[$f_id][$entry_id]++;
-				}
-
-				unset( $entry_id, $in );
-			}
-
-			unset( $f_id, $f );
-		}
-
-		if ( $args['data_type'] == 'average' ) {
-			foreach ( $calc_array as $f_id => $calc ) {
-				foreach ( $calc as $entry_id => $c ) {
-					$f_values[$f_id][$entry_id] = ($c['total'] / $c['count']);
-					unset( $entry_id, $c );
-				}
-				unset( $calc, $f_id );
-			}
-		}
-		unset($calc_array);
-
-		//TODO: Is this duplicate code?
-		$used_vals = $calc_array = array();
-		foreach ( $labels as $l_key => $label ) {
-			if ( empty( $label ) && ( ! empty( $start_date ) || ! empty( $end_date ) ) ) {
-				unset( $values[ $l_key ], $labels[ $l_key ] );
-				if ( isset( $tooltips[ $l_key ] ) ) {
-					unset( $tooltips[ $l_key ] );
-				}
-				continue;
-			}
-
-			if ( in_array( $args['x_axis'], array( 'created_at', 'updated_at' ) ) ) {
-				if ( $args['type'] == 'pie' ) {
-					$labels[$l_key] = $label = $inputs[$l_key];
-				} else {
-					$labels[$l_key] = $label = date('Y-m-d', strtotime($label));
-				}
-			}
-
-			if ( isset( $used_vals[ $label ] ) ) {
-				$values[ $l_key ] += $values[ $used_vals[ $label ] ];
-				unset( $values[ $used_vals[ $label ] ] );
-
-				foreach ( $args['ids'] as $f_id ) {
-					if ( ! isset($f_values[ $f_id ][ $l_key ]) ) {
-						$f_values[ $f_id ][ $l_key ] = 0;
-					}
-					if ( ! isset( $f_values[ $f_id ][ $used_vals[ $label ] ] ) ) {
-						$f_values[ $f_id ][ $used_vals[ $label ] ] = 0;
-					}
-
-					$f_values[ $f_id ][ $l_key ] += $f_values[ $f_id ][ $used_vals[ $label ] ];
-					unset( $f_values[ $f_id ][ $used_vals[ $label ] ], $f_id );
-				}
-
-				unset( $labels[ $used_vals[ $label ] ] );
-			}
-			$used_vals[$label] = $l_key;
-
-			if ( $args['data_type'] == 'average' ) {
-				if ( ! isset( $calc_array[ $label ] ) ) {
-					$calc_array[ $label ] = 0;
-				}
-				$calc_array[ $label ] ++;
-			}
-
-			unset( $label, $l_key);
-		}
-
-		if ( ! empty( $calc_array ) ) {
-			foreach ( $calc_array as $label => $calc ) {
-				if ( isset( $used_vals[ $label ] ) ) {
-					$values[ $used_vals[ $label ] ] = ( $values[ $used_vals[ $label ] ] / $calc);
-
-					foreach ( $args['ids'] as $f_id ) {
-						$f_values[ $f_id ][ $used_vals[ $label ] ] = ( $f_values[ $f_id ][ $used_vals[ $label ] ] / $calc );
-						unset($f_id);
-					}
-				}
-
-				unset( $label, $calc );
-			}
-		}
-	}
-
-	/**
-	 * Combine dates when using created-at, updated-at, or date field on x-axis
-	 *
-	 * @since 2.0
-	 *
-	 * @param boolean $combine_dates - will be true if combining dates
-	 * @param array $values
-	 * @param array $labels
-	 * @param array $tooltips
-	 * @param array $f_values - additional field values
-	 * @param array $args - arguments
-	 */
-	private static function combine_dates( &$combine_dates, &$values, &$labels, &$tooltips, &$f_values, $args ){
-		if ( (isset( $args['x_field']) && $args['x_field'] && $args['x_field']->type == 'date') || in_array( $args['x_axis'], array( 'created_at', 'updated_at' ) ) ) {
-			$combine_dates = apply_filters('frm_combine_dates', true, $args['x_field']);
-		}
-		if ( $combine_dates === false ) {
-			return;
-		}
-
-		if ( $args['include_zero'] ) {
-			$start_timestamp = empty( $args['start_date'] ) ? strtotime( '-1 month') : strtotime( $args['start_date'] );
-			$end_timestamp = empty( $args['end_date'] ) ? time() : strtotime( $args['end_date'] );
-			$dates_array = array();
-
-			// Get the dates array
-			for($e = $start_timestamp; $e <= $end_timestamp; $e += 60*60*24)
-				$dates_array[] = date('Y-m-d', $e);
-
-			unset($e);
-
-			// Add the zero count days
-			foreach ( $dates_array as $date_str ) {
-				if ( ! in_array($date_str, $labels) ) {
-					$labels[$date_str] = $date_str;
-					$values[$date_str] = 0;
-					foreach ( $args['ids'] as $f_id ) {
-						if ( ! isset( $f_values[ $f_id ][ $date_str ] ) ) {
-							$f_values[$f_id][$date_str] = 0;
-						}
-					}
-				}
-			}
-
-			unset($dates_array, $start_timestamp, $end_timestamp);
-		}
-
-		asort($labels);
-
-		foreach ( $labels as $l_key => $l ) {
-			if ( ( ( isset( $args['x_field'] ) && $args['x_field'] && $args['x_field']->type == 'date') || in_array( $args['x_axis'], array( 'created_at', 'updated_at') ) ) && ! $args['group_by'] ) {
-				if ( $args['type'] != 'pie' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $l) ) {
-					$frmpro_settings = new FrmProSettings();
-					$labels[$l_key] = FrmProAppHelper::convert_date($l, 'Y-m-d', $frmpro_settings->date_format);
-				}
-			}
-			unset( $l_key, $l );
-		}
-
-		$values = FrmProAppHelper::sort_by_array($values, array_keys($labels));
-		$tooltips = FrmProAppHelper::sort_by_array($tooltips, array_keys($labels));
-
-		foreach ( $args['ids'] as $f_id ) {
-			$f_values[$f_id] = FrmProAppHelper::sort_by_array($f_values[$f_id], array_keys($labels));
-			$f_values[$f_id] = FrmProAppHelper::reset_keys($f_values[$f_id]);
-			ksort($f_values[$f_id]);
-			unset($f_id);
-		}
-	}
-
-	/**
-	 * Group entries by month or quarter
-	 *
-	 * @since 2.0
-	 *
-	 * @param array $values
-	 * @param array $f_values - additional field values
-	 * @param array $labels
-	 * @param array $tooltips
-	 * @param array $args - arguments
-	 */
-	private static function graph_by_period( &$values, &$f_values, &$labels, &$tooltips, $args ) {
-		if ( ! isset( $args['group_by'] ) || ! in_array( $args['group_by'], array( 'month','quarter' ) ) ) {
-			return;
-		}
-
-		$labels = FrmProAppHelper::reset_keys( $labels );
-		$values = FrmProAppHelper::reset_keys( $values );
-
-		// Loop through labels and change labels to month or quarter
-		foreach ( $labels as $key => $label ) {
-			if ( $args['group_by'] == 'month' ) {
-				$labels[$key] = date( 'F Y', strtotime( $label ) );
-			} else if ( $args['group_by'] == 'quarter' ) {
-				//Convert date to Y-m-d format
-				$label = date( 'Y-m-d', strtotime( $label ) );
-				if ( preg_match('/-(01|02|03)-/', $label) ) {
-					$labels[$key] = 'Q1 ' . date('Y', strtotime($label));
-				} else if ( preg_match('/-(04|05|06)-/', $label) ) {
-					$labels[$key] = 'Q2 ' . date('Y', strtotime($label));
-				} else if ( preg_match('/-(07|08|09)-/', $label) ) {
-					$labels[$key] = 'Q3 ' . date('Y', strtotime($label));
-				} else if ( preg_match('/-(10|11|12)-/', $label) ) {
-					$labels[$key] = 'Q4 ' . date('Y', strtotime($label));
-				}
-			}
-		}
-
-		// Combine identical labels and values
-		$count = count( $labels ) - 1;
-		for ( $i=0; $i<$count; $i++ ) {
-			if ( $labels[$i] == $labels[$i+1] ) {
-				unset($labels[$i]);
-				$values[$i+1] = $values[$i] + $values[$i+1];
-				unset($values[$i]);
-
-				//Group additional field values
-				foreach ( $args['ids'] as $field_id ) {
-					$f_values[$field_id][$i+1] = $f_values[$field_id][$i] + $f_values[$field_id][$i+1];
-					unset( $f_values[$field_id][$i], $field_id );
-				}
-			}
-		}
-
-		// Reset keys for additional field values
-		foreach ( $args['ids'] as $field_id ) {
-			$f_values[$field_id] = FrmProAppHelper::reset_keys( $f_values[$field_id] );
-		}
-	}
-
-	/**
-	 * Get values, labels, and tooltips for graph when multiple fields are graphed and no x axis is set
-	 *
-	 * @since 2.0
-	 *
-	 * @param array $values pass by reference
-	 * @param array $labels pass by reference
-	 * @param array $tooltips pass by reference
-	 * @param array $args
-	 */
-	private static function get_multiple_id_values( &$values, &$labels, &$tooltips, $args ) {
-		$type = $args['data_type'] ? $args['data_type'] : 'count';
-
-		// Set up arguments for stats shortcode
-		$stats_args = array( 'type' => $type );
-		if ( $args['start_date'] ) {
-			if ( $args['end_date'] ) {
-				$stats_args[] = $args['start_date'] . '<created_at<' . $args['end_date'];
-			} else {
-				$stats_args[] = 'created_at>' . $args['start_date'];
-			}
-		}
-		if ( $args['user_id'] !== false ) {
-			$stats_args['user_id'] = $args['user_id'];
-		}
-		if ( $args['entry_ids'] ) {
-			// frm-stats only accepts one entry ID at the moment
-			$stats_args['entry_id'] = reset( $args['entry_ids'] );
-		}
-
-		//Get count/total for each field
-		$count = 0;
-		foreach ( $args['fields'] as $f_id => $f_data ) {
-			$stats_args['id'] = $f_id;
-			$values[] = FrmProStatisticsController::stats_shortcode( $stats_args );
-			$labels[] = isset( $args['tooltip_label'][$count] ) ? $args['tooltip_label'][$count] : $f_data->name;
-			$count++;
-			unset( $f_id, $f_data );
-		}
-
-		//Make tooltips match labels
-		$tooltips = $labels;
-	}
-
-	/**
-	 * Get values for x-axis graph
-	 *
-	 * @since 2.0
-	 *
-	 * @param array $values
-	 * @param array $f_values - values if multiple fields are graphed
-	 * @param array $labels
-	 * @param array $tooltips
-	 * @param array $x_inputs - inputs for x-axis
-	 * @param object $field
-	 * @param array $args
-	 */
-	private static function get_x_axis_values( &$values, &$f_values, &$labels, &$tooltips, &$x_inputs, $field, $args ){
-		// Get form posts. This will return empty if the form does not create posts.
-		$form_posts = self::get_form_posts( $field, $args );
-
-		// Get all inputs
-		$inputs = $f_inputs = $x_inputs = $f_values = array();
-		self::get_x_axis_inputs( $inputs, $f_inputs, $x_inputs, $field, $args );
-
-		// There is no data, so don't graph
-		if ( ! $inputs || ! $x_inputs ) {
-			return;
-		}
-
-		// Modify post inputs
-		$field_options = '';
-		if ( ! $args['atts'] ) {
-			self::mod_post_inputs( $inputs, $field_options, $field, $form_posts, $args );
-		}
-
-		// Modify x inputs and set up f_values - TODO: what does this really dO?
-		self::mod_x_inputs( $x_inputs, $inputs, $f_values, $args );
-
-		// Format f_inputs
-		self::format_f_inputs( $f_inputs, $f_values, $args );
-
-		// Get final x_axis values
-		self::get_final_x_axis_values( $values, $f_values, $labels, $tooltips, $inputs, $x_inputs, $f_inputs, $args );
-	}
-
-	/**
-	 * Get values for graph with only one field and no x-axis
-	 *
-	 * @since 2.0
-	 *
-	 * @param array $values
-	 * @param array $labels
-	 * @param array $tooltips
-	 * @param boolean $pie - for pie graph
-	 * @param object $field
-	 * @param array $args
-	 */
-	private static function get_count_values( &$values, &$labels, &$tooltips, &$pie, $field, $args ) {
-		// Get all inputs for this field
-		$inputs = self::get_generic_inputs( $field, $args );
-
-		if ( ! $inputs ) {
-			return;
-		}
-
-		// Get counts for each value
-		$temp_values = array_count_values( array_map( 'strtolower', $inputs ) );
-
-		// Get displayed values ( for DFE, separate values, or Other val )
-		if ( $field->type == 'data' || $field->field_options['separate_value'] || FrmField::is_option_true( $field, 'other' ) ) {
-			self::get_displayed_values( $temp_values, $field );
-		} else if ( $field->type == 'user_id' ) {
-			self::get_user_id_values($values, $labels, $tooltips, $pie, $temp_values, $field );
-			return;
-		}
-
-		// Sort values by order of field options
-		if ( $args['x_order'] == 'field_opts' && in_array( $field->type, array( 'radio', 'checkbox', 'select', 'data' ) ) ) {
-			self::field_opt_order_vals( $temp_values, $field );
-
-			// Sort by descending count if x_order is set to 'desc'
-		} else if ( $args['x_order'] == 'desc' ) {
-			arsort( $temp_values );
-
-			// Sort alphabetically by default
-		} else {
-			ksort( $temp_values );
-		}
-
-		// Get slice of array
-		if ( $args['limit'] ) {
-			$temp_values = array_slice( $temp_values, 0, $args['limit'] );
-		}
-
-		// Capitalize the first letter of each value
-		foreach ( $temp_values as $val => $count ) {
-			$new_val = ucwords( $val );
-			$labels[] = $new_val;
-			$values[] = $count;
-		}
-	}
-
-	/**
-	 * Get inputs for graph (when no x-axis is set and only one field is graphed)
-	 *
-	 * @since 2.0
-	 *
-	 * @param object $field
-	 * @param array $args
-	 * @return array $inputs all values for field
-	 */
-	private static function get_generic_inputs( $field, $args ) {
-		$pass_args = array( 'entry_ids', 'user_id', 'start_date', 'end_date' );
-		$meta_args = array();
-		foreach ( $pass_args as $arg_key ) {
-			if ( $args[ $arg_key ] !== false && $args[ $arg_key ] !== '' ) {
-				$meta_args[ $arg_key ] = $args[ $arg_key ];
-			}
-		}
-		unset( $arg_key, $pass_args );
-
-		// Get the metas
-		$inputs = FrmProEntryMeta::get_all_metas_for_field( $field, $meta_args );
-
-		// Clean up multi-dimensional array
-		self::clean_inputs( $inputs, $field, $args );
-
-		return $inputs;
+		$field_values = stripslashes_deep( $field_values );
 	}
 
 	/**
@@ -1528,296 +1995,222 @@ class FrmProGraphsController {
 	 *
 	 * @since 2.0
 	 *
-	 * @param array $temp_values
 	 * @param object $field
+	 * @param array $count_values
 	 */
-	private static function field_opt_order_vals( &$temp_values, $field ) {
-		$reorder_vals = array();
+	private static function sort_data_by_field_options( $field, &$count_values ) {
+		$ordered_values = array();
 		foreach ( $field->options as $opt ) {
 			if ( ! $opt ) {
 				continue;
 			}
+
 			if ( is_array( $opt ) ) {
 				if ( ! isset( $opt['label'] ) || ! $opt['label'] ) {
 					continue;
 				}
-				$opt = strtolower( $opt['label'] );
-			} else {
-				$opt = strtolower( $opt );
+				$opt = $opt['label'];
 			}
-			if ( ! isset( $temp_values[$opt] ) ) {
-				continue;
+
+			if ( isset( $count_values[ $opt ] ) ) {
+				$ordered_values[ $opt ] = $count_values[ $opt ];
 			}
-			$reorder_vals[$opt] = $temp_values[$opt];
 		}
-		$temp_values = $reorder_vals;
+
+		$count_values = $ordered_values;
 	}
 
 	/**
-	 * Get displayed values for separate values, data from entries, and other option.
-	 * Capitalizes first letter of each option
+	 * Only add column colors if colors is defined by the user
 	 *
-	 * @since 2.0
-	 *
-	 * @param array $temp_values
-	 * @param object $field
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @param array $graph_data
 	 */
-	private static function get_displayed_values( &$temp_values, $field ) {
-		$temp_array = array();
-
-		// If data from entries field
-		if ( $field->type == 'data' ) {
-
-			// Get DFE text
-			foreach ( $temp_values as $entry_id => $total ) {
-				$linked_field = $field->field_options['form_select'];
-				$text_val = FrmProEntriesController::get_field_value_shortcode( array( 'field_id' => $linked_field, 'entry_id' => $entry_id));
-				$temp_array[$text_val] = $total;
-				unset( $entry_id, $total, $linked_field, $text_val );
-			}
-		} else {
-			$other_label = false;
-			foreach ( $field->options as $opt_key => $opt ) {
-				if ( ! $opt ) {
-					continue;
-				}
-				// If field option is "other" option
-				if ( FrmFieldsHelper::is_other_opt( $opt_key ) ) {
-
-					// For radio button field, combine all extra counts/totals into one "Other" count/total
-					if ( $field->type == 'radio' || $field->type == 'select' ) {
-						$other_label = strtolower( $opt );
-						continue;
-
-						// For checkbox fields, set value and label
-					} else {
-						$opt_value = strtolower( $opt_key );
-						$opt_label = strtolower( $opt );
-					}
-
-					// If using separate values
-				} else if ( is_array( $opt) ) {
-					$opt_label = strtolower( $opt['label'] );
-					$opt_value = strtolower( $opt['value'] );
-					if ( ! $opt_value || ! $opt_label ) {
-						continue;
-					}
-				} else {
-					$opt_label = $opt_value = strtolower( $opt );
-				}
-
-				// Set displayed value total in new array, unset original value in old array
-				if ( isset( $temp_values[$opt_value] ) ) {
-					$temp_array[$opt_label] = $temp_values[$opt_value];
-					unset( $temp_values[$opt_value] );
-				}
-				unset( $opt_key, $opt, $opt_label, $opt_value );
-			}
-			// Applies to radio buttons only (with other option)
-			// Combines all extra counts/totals into one "Other" count/total
-			if ( $other_label ) {
-				$temp_array[$other_label] = array_sum( $temp_values );
-			}
+	private static function add_user_defined_column_colors( $atts, &$graph_data ) {
+		if ( $atts['colors'] !== self::get_default_colors() ) {
+			self::apply_column_colors( $atts, $graph_data );
 		}
-
-		// Copy new array
-		$temp_values = $temp_array;
 	}
 
+	/**
+	 * If colors is not empty, apply a different color to each bar
+	 *
+	 * @since 2.02.05
+	 * @param array $atts
+	 * @param array $graph_data
+	 */
+	private static function apply_column_colors( $atts, &$graph_data ) {
+		if ( ! empty( $atts['colors'] ) && in_array( $atts['type'], array( 'column', 'bar', 'hbar', 'scatter' ) ) ) {
+
+			$colors = explode( ',', $atts['colors'] );
+			$color_upper_limit = count( $colors ) - 1;
+			$count = -1;
+
+			foreach ( $graph_data as $key => $item ) {
+				if ( $count < 0 ) {
+					$graph_data[ $key ][] = array( 'role' => 'style' );
+				} else {
+					$graph_data[ $key ][] = $colors[ $count ];
+				}
+
+				if ( $count < $color_upper_limit ) {
+					$count++;
+				} else {
+					$count = 0;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Show the graphs on the form's Reports page
+	 *
+	 * @since 2.02.05
+	 */
 	public static function show_reports() {
+		global $wpdb;
+
 		add_filter( 'frm_form_stop_action_reports', '__return_true' );
 		FrmAppHelper::permission_check( 'frm_view_reports' );
 
-		global $wpdb;
-
-		$form = false;
-		if ( isset($_REQUEST['form'] ) ) {
-			$form = FrmForm::getOne($_REQUEST['form']);
-		}
+		$form = self::get_form_for_reports();
 
 		if ( ! $form ) {
 			require(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-statistics/select.php');
 			return;
 		}
 
+		$fields = self::get_fields_for_reports( $form->id );
+
+		$data = self::generate_graphs_for_reports( $form, $fields );
+
+		$entries = FrmDb::get_col( 'frm_items', array( 'form_id' => $form->id ), 'created_at' );
+
+		include( FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-statistics/show.php' );
+	}
+
+	/**
+	 * Get the form for the reports
+	 *
+	 * @since 2.02.05
+	 * @return bool|object
+	 */
+	private static function get_form_for_reports() {
+		$form = false;
+		if ( isset( $_REQUEST['form'] ) ) {
+			$form = FrmForm::getOne( $_REQUEST['form'] );
+		}
+
+		return $form;
+	}
+
+	/**
+	 * Get all fields for the reports page
+	 *
+	 * @since 2.02.05
+	 * @param int $form_id
+	 * @return mixed
+	 */
+	private static function get_fields_for_reports( $form_id ) {
 		$exclude_types = FrmField::no_save_fields();
-		$exclude_types = array_merge($exclude_types, array(
+		$exclude_types = array_merge( $exclude_types, array(
 			'rte', 'textarea', 'file', 'grid',
 			'signature', 'form', 'table',
 		) );
 
-		$fields = FrmField::getAll( array( 'fi.form_id' => (int) $form->id, 'fi.type not' => $exclude_types), 'field_order');
+		return FrmField::getAll( array( 'fi.form_id' => $form_id, 'fi.type not' => $exclude_types ), 'field_order' );
+	}
 
-		$js = '';
+	/**
+	 * Generate the graphs for the Reports page
+	 *
+	 * @since 2.02.05
+	 * @param object $form
+	 * @param array $fields
+	 * @return array
+	 */
+	private static function generate_graphs_for_reports( $form, $fields ) {
 		$data = array();
-		$colors = '#21759B,#EF8C08,#C6C6C6';
 
-		$data['time'] = self::get_daily_entries($form, array(
-			'is3d' => true, 'colors' => $colors, 'bg_color' => 'transparent',
-		));
-		$data['month'] = self::get_daily_entries($form, array(
-			'is3d' => true, 'colors' => $colors, 'bg_color' => 'transparent',
+		$common_atts = array(
+			'form' => $form->id,
+			'type' => 'line',
+			'bg_color' => 'transparent',
 			'width' => '100%',
-		), 'MONTH');
+			'y_min' => 0,
+		);
+
+		$atts = $common_atts + array( 'title' => __( 'Daily Entries', 'formidable' ), 'created_at_greater_than' => '-1 month' );
+
+		$data['time'] = self::graph_shortcode( $atts );
+
+		$atts = $common_atts + array(
+				'created_at_greater_than' => '-1 year',
+				'created_at_less_than' => '+1 month',
+				'group_by' => 'month',
+				'title' => __( 'Monthly Entries', 'formidable' ),
+			);
+		$data['month'] = self::graph_shortcode( $atts );
+
+		self::add_field_graphs_for_reports( $fields, $data );
+
+		return $data;
+	}
+
+	/**
+	 * Add all the field graphs for the reports page
+	 *
+	 * @since 2.02.05
+	 * @param array $fields
+	 * @param array $data
+	 */
+	private static function add_field_graphs_for_reports( $fields, &$data ) {
+		$atts = array(
+			'is3d' => true,
+			'y_min' => 0,
+			'width' => 650,
+			'bg_color' => 'transparent',
+		);
 
 		foreach ( $fields as $field ) {
+			$atts['id'] = $field->id;
 
-			$this_data = self::graph_shortcode( array(
-				'id' => $field->id, 'field' => $field, 'is3d' => true, 'min' => 0,
-				'colors' => $colors, 'width' => 650, 'bg_color' => 'transparent',
-			));
-
-			if ( strpos($this_data, 'frm_no_data_graph') === false ) {
-				$data[$field->id] = $this_data;
-			}
-
-			unset($field, $this_data);
-		}
-
-		$entries = FrmDb::get_col( $wpdb->prefix .'frm_items', array( 'form_id' => $form->id), 'created_at' );
-
-		// trigger the scripts to load
-		global $frm_vars;
-		$frm_vars['forms_loaded'][] = true;
-
-		include(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-statistics/show.php');
-	}
-
-	private static function get_daily_entries( $form, $opts = array(), $type = 'DATE' ) {
-		global $wpdb;
-
-		$options = array();
-		if ( isset( $opts['colors'] ) ) {
-			$options['colors'] = explode(',', $opts['colors']);
-		}
-
-		if ( isset( $opts['bg_color'] ) ) {
-			$options['backgroundColor'] = $opts['bg_color'];
-		}
-
-		$type = strtoupper($type);
-		$end_timestamp = time();
-
-		//Chart for Entries Submitted
-		if ( $type == 'HOUR' ) {
-			$start_timestamp = strtotime('-48 hours');
-			$title = __( 'Hourly Entries', 'formidable' );
-		} else if ( $type == 'MONTH' ) {
-			$start_timestamp = strtotime('-1 year');
-			$end_timestamp = strtotime( '+1 month');
-			$title = __( 'Monthly Entries', 'formidable' );
-		} else if ( $type == 'YEAR' ) {
-			$start_timestamp = strtotime('-10 years');
-			$title = __( 'Yearly Entries', 'formidable' );
-		} else {
-			$start_timestamp = strtotime('-1 month');
-			$title = __( 'Daily Entries', 'formidable' );
-		}
-
-		$query = array(
-			'form_id' => $form->id,
-			'is_draft' => 0,
-		);
-		$args = array();
-		if ( $type == 'HOUR' ) {
-			$field = 'created_at';
-			$query['created_at >'] = date( 'Y-m-d H', $start_timestamp ) . ':00:00';
-		} else {
-			$field = 'DATE(created_at)';
-			$query['created_at >'] = date( 'Y-m-d', $start_timestamp ) . ' 00:00:00';
-			$args['group_by'] = $type . '(created_at)';
-		}
-
-		$entries_array = FrmDb::get_results( 'frm_items', $query, $field .' as endate, COUNT(*) as encount', $args );
-
-		$temp_array = $counts_array = $dates_array = array();
-
-		// Refactor Array for use later on
-		foreach ( $entries_array as $e ) {
-			$e_key = $e->endate;
-			if ( $type == 'HOUR' ) {
-				$e_key = date('Y-m-d H', strtotime($e->endate)) .':00:00';
-			} else if ( $type == 'MONTH' ) {
-				$e_key = date('Y-m', strtotime($e->endate)) .'-01';
-			} else if ( $type == 'YEAR' ) {
-				$e_key = date('Y', strtotime($e->endate)) .'-01-01';
-			}
-			$temp_array[ $e_key ] = $e->encount;
-		}
-
-		// Get the dates array
-		if ( $type == 'HOUR' ) {
-			for ( $e = $start_timestamp; $e <= $end_timestamp; $e += 60*60 ) {
-				if ( ! in_array(date('Y-m-d H', $e) .':00:00' , $dates_array) ) {
-					$dates_array[] = date('Y-m-d H', $e) .':00:00';
-				}
-			}
-
-			$date_format = get_option('time_format');
-		} else if ( $type == 'MONTH' ) {
-			for ( $e = $start_timestamp; $e <= $end_timestamp; $e += 60*60*24*25 ) {
-				if ( ! in_array(date('Y-m', $e) .'-01', $dates_array) ) {
-					$dates_array[] = date('Y-m', $e) .'-01';
-				}
-			}
-
-			$date_format = 'F Y';
-		} else if ( $type == 'YEAR' ) {
-			for ( $e = $start_timestamp; $e <= $end_timestamp; $e += 60*60*24*364 ) {
-				if ( ! in_array( date('Y', $e) .'-01-01', $dates_array ) ) {
-					$dates_array[] = date('Y', $e) .'-01-01';
-				}
-			}
-
-			$date_format = 'Y';
-		} else {
-			for ( $e = $start_timestamp; $e <= $end_timestamp; $e += 60*60*24 ) {
-				$dates_array[] = date( 'Y-m-d', $e );
-			}
-
-			$date_format = get_option('date_format');
-		}
-
-		if ( empty($dates_array) ) {
-			return;
-		}
-
-		// Make sure counts array is in order and includes zero click days
-		foreach ( $dates_array as $date_str ) {
-			if ( isset( $temp_array[ $date_str ] ) ) {
-				$counts_array[ $date_str ] = $temp_array[ $date_str ];
+			if ( $field->type == 'user_id' ) {
+				$atts['type'] = 'pie';
 			} else {
-				$counts_array[ $date_str ] = 0;
+				$atts['type'] = 'column';
+			}
+
+			$this_data = self::graph_shortcode( $atts );
+
+			if ( strpos( $this_data, 'frm_no_data_graph' ) === false ) {
+				$data[ $field->id ] = $this_data;
 			}
 		}
-
-		$rows = array();
-		$max = 3;
-		foreach ( $counts_array as $date => $count ) {
-			$rows[] = array( date_i18n($date_format, strtotime($date)), (int) $count );
-			if ( (int) $count > $max ) {
-				$max = $count + 1;
-			}
-			unset( $date, $count );
-		}
-
-		$options['title'] = $title;
-		$options['legend'] = 'none';
-		$cols = array( 'xaxis' => array( 'type' => 'string'), __( 'Count', 'formidable' ) => array( 'type' => 'number'));
-
-		$options['vAxis'] = array( 'maxValue' => $max, 'minValue' => 0);
-		$options['hAxis'] = array( 'slantedText' => true, 'slantedTextAngle' => 20);
-
-		$height = 400;
-		$width = '100%';
-
-		$options['height'] = $height;
-		$options['width'] = $width;
-
-		$graph = self::convert_to_google($rows, $cols, $options, 'line');
-
-		$html = '<div id="chart_'. $graph['graph_id'] .'" style="height:'. $height .';width:'. $width .'"></div>';
-
-		return $html;
 	}
+
+	/**
+	 * Apply deprecated filters
+	 * @since 2.02.05
+	 */
+	private static function apply_deprecated_filters() {
+		$placeholder = array();
+
+		apply_filters( 'frm_graph_values', $placeholder );
+		if ( has_filter( 'frm_graph_values' ) ) {
+			_deprecated_function( 'The frm_graph_values filter', '2.02.05', 'the frm_graph_data filter' );
+		}
+
+		apply_filters( 'frm_graph_labels', $placeholder );
+		if ( has_filter( 'frm_graph_labels' ) ) {
+			_deprecated_function( 'The frm_graph_labels filter', '2.02.05', 'the frm_graph_data filter' );
+		}
+
+		apply_filters( 'frm_final_graph_values', $placeholder );
+		if ( has_filter( 'frm_final_graph_values' ) ) {
+			_deprecated_function( 'The frm_final_graph_values filter', '2.02.05', 'the frm_graph_data filter' );
+		}
+	}
+
 }

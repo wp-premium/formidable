@@ -66,7 +66,7 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 			$fields['state']['options'] = FrmFieldsHelper::get_us_states();
 		} else if ( $field['address_type'] != 'generic' ) {
 			$fields['country'] = array(
-				'type' => 'select', 'classes' => '', 'label' => 0,
+				'type' => 'select', 'classes' => '', 'label' => 1,
 				'options' => FrmFieldsHelper::get_countries(),
 				'atts' => array( 'x-autocompletetype' => 'country-name', 'autocompletetype' => 'country-name' ),
 			);
@@ -163,6 +163,7 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 			'city'  => __( 'City', 'formidable' ),
 			'state' => __( 'State/Province', 'formidable' ),
 			'zip'   => __( 'Zip/Postal', 'formidable' ),
+			'country' => __( 'Country', 'formidable' ),
 		);
 		return $options;
 	}

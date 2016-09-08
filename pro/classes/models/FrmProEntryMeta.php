@@ -256,7 +256,7 @@ class FrmProEntryMeta{
 			if ( isset( $_POST['item_meta'][ $field->id ] ) && ! empty( $_POST['item_meta'][ $field->id ] ) ) {
 				$posted_values = $_POST['item_meta'][ $field->id ];
 				foreach ( $posted_values as $k => $values ) {
-					if ( ! empty( $k ) && in_array( $k, array( 'form', 'id' ) ) ) {
+					if ( ! empty( $k ) && in_array( $k, array( 'form', 'row_ids' ) ) ) {
 						continue;
 					}
 
@@ -524,46 +524,48 @@ class FrmProEntryMeta{
     public static function get_all_metas_for_field( $field, $args = array() ) {
         global $wpdb;
 
-		$query = array();
+		$where = array(
+			'e.form_id' => $field->form_id,
+			'e.is_draft' => 0,
+		);
 
 		if ( ! FrmField::is_option_true( $field, 'post_field' ) ) {
 			// If field is not a post field
 			$get_field = 'em.meta_value';
 			$get_table = $wpdb->prefix .'frm_item_metas em INNER JOIN '. $wpdb->prefix .'frm_items e ON (e.id=em.item_id)';
+			$where['em.field_id'] = $field->id;
 
-			$query['em.field_id'] = $field->id;
         } else if ( $field->field_options['post_field'] == 'post_custom' ) {
 			// If field is a custom field
 			$get_field = 'pm.meta_value';
 			$get_table = $wpdb->postmeta . ' pm INNER JOIN ' . $wpdb->prefix . 'frm_items e ON pm.post_id=e.post_id';
+			$where['pm.meta_key'] = $field->field_options['custom_field'];
 
-			$query['pm.meta_key'] = $field->field_options['custom_field'];
-
-            // Make sure to only get post metas that are linked to this form
-			$query['e.form_id'] = $field->form_id;
 		} else if ( $field->field_options['post_field'] != 'post_category' ) {
 			// If field is a non-category post field
 			$get_field = 'p.' . sanitize_title( $field->field_options['post_field'] );
 			$get_table = $wpdb->posts . ' p INNER JOIN ' . $wpdb->prefix . 'frm_items e ON p.ID=e.post_id';
 
-            // Make sure to only get post metas that are linked to this form
-			$query['e.form_id'] = $field->form_id;
         } else {
 			// If field is a category field
-            //TODO: Make this work
-            return array();
-            //$field_options = FrmProFieldsHelper::get_category_options( $field );
+			$post_ids = self::get_all_post_ids_for_form( $field->form_id, $args );
+
+			$get_field = 'terms.term_id';
+			$get_table = $wpdb->terms . ' AS terms INNER JOIN ' . $wpdb->term_taxonomy . '  AS tt ON tt.term_id = terms.term_id INNER JOIN ' . $wpdb->term_relationships . ' AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id';
+			$where = array( 'tt.taxonomy' => $field->field_options['taxonomy'], 'tr.object_id' => $post_ids );
+
+			if ( $field->field_options['exclude_cat'] ) {
+				$where['terms.term_id NOT'] = $field->field_options['exclude_cat'];
+			}
+
+			$args = array();
         }
 
-		$query['e.is_draft'] = 0;
-
-        // Add queries for additional args
-        self::add_meta_query( $query, $args );
-
+		self::add_to_where_query( $args, $where );
 		$query_args = self::setup_args_for_frmdb_query( $args );
 
         // Get the metas
-		$metas = FrmDb::get_col( $get_table, $query, $get_field, $query_args );
+		$metas = FrmDb::get_col( $get_table, $where, $get_field, $query_args );
 
         // Maybe unserialize
         foreach ( $metas as $k => $v ) {
@@ -576,6 +578,101 @@ class FrmProEntryMeta{
 
         return $metas;
     }
+
+	/**
+	 * Get all post IDs for form
+	 *
+	 * @since 2.02.06
+	 * @param int $form_id
+	 * @param array $args
+	 * @return mixed
+	 */
+    private static function get_all_post_ids_for_form( $form_id, $args ) {
+		$where = array(
+			'e.form_id' => $form_id,
+			'e.is_draft' => 0,
+		);
+
+		self::add_to_where_query( $args, $where );
+
+		$query_args = self::setup_args_for_frmdb_query( $args );
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'frm_items e';
+
+		return FrmDb::get_col( $table, $where, 'e.post_id', $query_args );
+	}
+
+	/**
+	 * Get the associative array values for a single field
+	 *
+	 * @since 2.02.05
+	 * @param object $field
+	 * @param array $atts
+	 * @return array
+	 */
+	public static function get_associative_array_values_for_field( $field, $atts ) {
+		global $wpdb;
+
+		$get_column = 'e.id,';
+
+		$where = array(
+			'e.form_id' => $field->form_id,
+			'e.is_draft' => 0,
+		);
+
+		if ( ! FrmField::is_option_true( $field, 'post_field' ) ) {
+			// If field is not a post field
+			$get_column .= 'em.meta_value as meta_value';
+			$get_table = $wpdb->prefix . 'frm_item_metas em INNER JOIN ' . $wpdb->prefix . 'frm_items e ON (e.id=em.item_id)';
+			$where[ 'em.field_id' ] = $field->id;
+
+		} else if ( $field->field_options[ 'post_field' ] === 'post_custom' ) {
+			// If field is a custom field
+			$get_column .= 'pm.meta_value as meta_value';
+			$get_table = $wpdb->postmeta . ' pm INNER JOIN ' . $wpdb->prefix . 'frm_items e ON pm.post_id=e.post_id';
+			$where[ 'pm.meta_key' ] = $field->field_options[ 'custom_field' ];
+
+		} else if ( $field->field_options[ 'post_field' ] !== 'post_category' ) {
+			// If field is a non-category post field
+			$get_column .= 'p.' . sanitize_title( $field->field_options[ 'post_field' ] ) . ' as meta_value';
+			$get_table = $wpdb->posts . ' p INNER JOIN ' . $wpdb->prefix . 'frm_items e ON p.ID=e.post_id';
+
+		} else {
+			// If field is a category field
+			//TODO: Make this work
+			return array();
+		}
+
+		// Add filtering attributes
+		self::add_to_where_query( $atts, $where );
+
+		return FrmDb::get_associative_array_results( $get_column, $get_table, $where );
+	}
+
+	/**
+	 * Get the associative array values for a column in the frm_items table
+	 *
+	 * @since 2.02.05
+	 * @param string $column
+	 * @param array $atts
+	 * @return array
+	 */
+	public static function get_associative_array_values_for_frm_items_column( $column, $atts ) {
+		global $wpdb;
+
+		$columns = 'e.id,e.' . $column . ' as meta_value';
+		$table = $wpdb->prefix . 'frm_items e';
+		$where = array(
+			'e.form_id' => $atts['form_id'],
+			'e.is_draft' => 0,
+		);
+
+		// Add filtering attributes
+		self::add_to_where_query( $atts, $where );
+
+		return FrmDb::get_associative_array_results( $columns, $table, $where );
+	}
 
 	/**
 	 * Get all entry IDs for a specific field and value
@@ -594,15 +691,12 @@ class FrmProEntryMeta{
 			'e.is_draft' => 0
 		);
 
-		$operator = '';
-		if ( isset( $args['comparison_type'] ) && 'like' == $args['comparison_type'] ) {
-			$operator = ' LIKE';
-		}
+		$operator = self::get_operator_for_query( $args );
 
 		if ( ! FrmField::is_option_true( $field, 'post_field' ) ) {
 			// If field is not a post field
 			$get_field = 'em.item_id';
-			$get_table = $wpdb->prefix .'frm_item_metas em INNER JOIN '. $wpdb->prefix .'frm_items e ON (e.id=em.item_id)';
+			$get_table = $wpdb->prefix .'frm_item_metas em INNER JOIN ' . $wpdb->prefix . 'frm_items e ON (e.id=em.item_id)';
 
 			$where['em.field_id'] = $field->id;
 			$where['em.meta_value' . $operator ] = $value;
@@ -628,39 +722,63 @@ class FrmProEntryMeta{
 			return array();
 		}
 
-		self::add_meta_query( $where, $args );
+		self::add_to_where_query( $args, $where );
 
 		return FrmDb::get_col( $get_table, $where, $get_field );
 	}
 
-    private static function add_meta_query( &$query, $args ) {
+	/**
+	 * Get the operator from the given comparison type
+	 *
+	 * @since 2.02.05
+	 * @param $args
+	 * @return string
+	 */
+	private static function get_operator_for_query( $args ) {
+		$operator = '';
+		if ( isset( $args['comparison_type'] ) ) {
+			if ( 'like' == $args['comparison_type'] ) {
+				$operator = ' LIKE';
+			}
+		}
+
+		return $operator;
+	}
+
+	/**
+	 * Add entry_ids, user_id, start_date, end_date, and is_draft arguments to WHERE query
+	 *
+	 * @param $args
+	 * @param $where
+	 */
+    private static function add_to_where_query( $args, &$where ) {
 
         // If entry IDs is set
         if ( isset( $args['entry_ids'] ) ) {
-            $query['e.id'] = $args['entry_ids'];
+            $where['e.id'] = $args['entry_ids'];
         }
 
         // If user ID is set
         if ( isset( $args['user_id'] ) ) {
-            $query['e.user_id'] = $args['user_id'];
+            $where['e.user_id'] = $args['user_id'];
         }
 
         // If start date is set
         if ( isset( $args['start_date'] ) ) {
-            $query['e.created_at >'] = date( 'Y-m-d', strtotime( $args['start_date'] ) );
+            $where['e.created_at >'] = date( 'Y-m-d 00:00:00', strtotime( $args['start_date'] ) );
         }
 
         // If end date is set
         if ( isset( $args['end_date'] ) ) {
-            $query['e.created_at <'] = date( 'Y-m-d 23:59:59', strtotime( $args['end_date'] ) );
+            $where['e.created_at <'] = date( 'Y-m-d 23:59:59', strtotime( $args['end_date'] ) );
         }
 
 		// If is_draft is set
 		if ( isset( $args['is_draft'] ) ) {
 			if ( 'both' === $args['is_draft'] ) {
-				unset( $query['e.is_draft'] );
+				unset( $where['e.is_draft'] );
 			} else {
-				$query['e.is_draft'] = $args['is_draft'];
+				$where['e.is_draft'] = $args['is_draft'];
 			}
 		}
     }

@@ -20,7 +20,7 @@
                 continue;
             }
 
-            $total = FrmProFieldsHelper::get_field_stats($field->id, 'count');
+            $total = FrmProStatisticsController::stats_shortcode( array( 'id' => $field->id, 'type' => 'count' ) );
             if ( ! $total ) {
                 continue;
             }
@@ -28,11 +28,11 @@
             <div style="margin-top:25px;" class="pg_<?php echo esc_attr( $class ) ?>">
             <div class="alignleft"><?php echo $data[ $field->id ] ?></div>
             <div style="padding:10px; margin-top:40px;">
-                <p><?php _e( 'Response Count', 'formidable' ) ?>: <?php echo FrmProFieldsHelper::get_field_stats($field->id, 'count'); ?></p>
+                <p><?php _e( 'Response Count', 'formidable' ) ?>: <?php echo $total ?></p>
             <?php if ( in_array( $field->type, array( 'number', 'hidden' ) ) ) { ?>
             <p><?php _e( 'Total', 'formidable' ) ?>: <?php echo esc_html( $total ); ?></p>
-            <p><?php _e( 'Average', 'formidable' ) ?>: <?php echo FrmProFieldsHelper::get_field_stats($field->id, 'average'); ?></p>
-            <p><?php _e( 'Median', 'formidable' ) ?>: <?php echo FrmProFieldsHelper::get_field_stats($field->id, 'median'); ?></p>
+            <p><?php _e( 'Average', 'formidable' ) ?>: <?php echo FrmProStatisticsController::stats_shortcode( array( 'id' => $field->id, 'type' => 'average' ) ); ?></p>
+            <p><?php _e( 'Median', 'formidable' ) ?>: <?php echo FrmProStatisticsController::stats_shortcode( array( 'id' => $field->id, 'type' => 'median' ) ); ?></p>
             <?php } else if ( $field->type == 'user_id' ) {
                 $user_ids = FrmDb::get_col( $wpdb->users, array(), 'ID', 'display_name ASC' );
                 $submitted_user_ids = FrmEntryMeta::get_entry_metas_for_field($field->id, '', '', array( 'unique' => true));

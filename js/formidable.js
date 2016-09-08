@@ -376,7 +376,7 @@ function frmFrontFormJS(){
 		var field_id = nameParts[0];
 		var isRepeating = false;
 
-		if ( nameParts.length === 1 || nameParts[1] == '[form' || nameParts[1] == '[id' ) {
+		if ( nameParts.length === 1 || nameParts[1] == '[form' || nameParts[1] == '[row_ids' ) {
 			return field_id;
 		}
 
@@ -452,12 +452,12 @@ function frmFrontFormJS(){
 			return;
 		}
 
-		var childFieldDivs = getAllFieldDivs( depFieldArgs, triggerFieldRepeatArgs );
+		var childFieldDivIds = getAllFieldDivIds( depFieldArgs, triggerFieldRepeatArgs );
 
-		var childFieldNum = childFieldDivs.length;
+		var childFieldNum = childFieldDivIds.length;
 		for ( var i = 0; i<childFieldNum; i++ ) {
-			depFieldArgs.containerId = childFieldDivs[i];
-			addRepeatRow( depFieldArgs, childFieldDivs[i] );
+			depFieldArgs.containerId = childFieldDivIds[i];
+			addRepeatRow( depFieldArgs, childFieldDivIds[i] );
 			hideOrShowSingleField( depFieldArgs );
 		}
 	}
@@ -474,7 +474,7 @@ function frmFrontFormJS(){
 	 * @param {string} depFieldArgs.inEmbedForm
 	 * @returns {Array}
      */
-	function getAllFieldDivs( depFieldArgs, triggerFieldArgs ) {
+	function getAllFieldDivIds( depFieldArgs, triggerFieldArgs ) {
 		var childFieldDivs = [];
 
 		if ( depFieldArgs.isRepeating ) {
@@ -485,11 +485,7 @@ function frmFrontFormJS(){
 				childFieldDivs.push( container );
 			} else {
 				// If trigger field is not repeating/embedded, get all repeating/embedded field divs
-				if ( depFieldArgs.inEmbedForm !== '0' ) {
-					childFieldDivs = getEmbeddedFieldDivs( depFieldArgs );
-				} else {
-					childFieldDivs = getAllRepeatingFieldDivs(depFieldArgs);
-				}
+				childFieldDivs = getAllRepeatingFieldDivIds(depFieldArgs);
 			}
 		} else {
 			childFieldDivs.push( 'frm_field_' + depFieldArgs.fieldId + '_container' );
@@ -499,45 +495,39 @@ function frmFrontFormJS(){
 	}
 
 	/**
-	 * Get the field div for an embedded field
-	 *
-	 * @param {Object} depFieldArgs
-	 * @param {string} depFieldArgs.fieldId
-	 * @returns {Array}
-	 */
-	function getEmbeddedFieldDivs( depFieldArgs ) {
-		var containerFieldId = getContainerFieldId( depFieldArgs );
-		var fieldDiv = 'frm_field_' + depFieldArgs.fieldId + '-' + containerFieldId + '-';
-
-		var childFieldDivs = [ fieldDiv + '0_container' ];
-
-		return childFieldDivs;
-
-	}
-
-	/**
 	 * Get all instances of a repeating field
 	 *
 	 * @since 2.01.0
 	 * @param {Object} depFieldArgs
 	 * @param {string} depFieldArgs.fieldId
      */
-	function getAllRepeatingFieldDivs( depFieldArgs ) {
+	function getAllRepeatingFieldDivIds( depFieldArgs ) {
 		var childFieldDivs = [];
 		var containerFieldId = getContainerFieldId( depFieldArgs );
 
 		// TODO: what if section is inside embedded form?
 
-		// Check if we're on the current page
-		var sectionOnPage = document.getElementById( 'frm_field_' + containerFieldId + '_container' );
-		if ( sectionOnPage !== null ) {
-			// On the current page
-			var childFields = document.querySelectorAll( '.frm_field_' + depFieldArgs.fieldId + '_container' );
-			for ( var i = 0, l=childFields.length; i<l; i++ ) {
-				childFieldDivs.push( childFields[i].id );
-			}
+		if ( isFieldDivOnPage( 'frm_field_' + containerFieldId + '_container' ) ) {
+			childFieldDivs = getRepeatingFieldDivIdsOnCurrentPage( depFieldArgs.fieldId );
 		} else {
-			childFieldDivs = getRepeatingFieldDivsAcrossPage( depFieldArgs );
+			childFieldDivs = getRepeatingFieldDivIdsAcrossPage( depFieldArgs );
+		}
+
+		return childFieldDivs;
+	}
+
+	/**
+	 * Get all repeating field divs on the current page
+	 *
+	 * @since 2.02.06
+	 * @param string fieldId
+	 * @returns {Array}
+     */
+	function getRepeatingFieldDivIdsOnCurrentPage( fieldId ) {
+		var childFieldDivs = [];
+		var childFields = document.querySelectorAll( '.frm_field_' + fieldId + '_container' );
+		for ( var i = 0, l=childFields.length; i<l; i++ ) {
+			childFieldDivs.push( childFields[i].id );
 		}
 
 		return childFieldDivs;
@@ -548,32 +538,23 @@ function frmFrontFormJS(){
 	 *
 	 * @param {Object} depFieldArgs
 	 * @param {string} depFieldArgs.fieldId
-	 * @param {string} depFieldArgs.inSectionKey
 	 * @returns {Array}
-	 * TODO: Maybe improve this by inserting hidden fields for each field in a repeating section, even if section is on pg 2
 	 */
-	function getRepeatingFieldDivsAcrossPage( depFieldArgs ) {
+	function getRepeatingFieldDivIdsAcrossPage( depFieldArgs ) {
 		var childFieldDivs = [];
 		var containerFieldId = getContainerFieldId( depFieldArgs );
 		var fieldDiv = 'frm_field_' + depFieldArgs.fieldId + '-' + containerFieldId + '-';
 
-		var allRows = document.querySelectorAll( '[id^="field_' + depFieldArgs.inSectionKey + '-rowid-"]' );
+		var allRows = document.querySelectorAll( '[name="item_meta[' + containerFieldId + '][row_ids][]"]' );
 
-		// If no rows have been added to the repeating section yet, assume just one row
-		if ( allRows.length < 1 ) {
+        for ( var i = 0, l = allRows.length; i<l; i++ ) {
+            if ( allRows[i].value !== '' ) {
+                childFieldDivs.push(fieldDiv + allRows[i].value + '_container');
+            }
+        }
+
+        if ( childFieldDivs.length < 1 ) {
 			childFieldDivs.push( fieldDiv + '0_container' );
-			return childFieldDivs;
-		}
-
-		var currentIdParts = [];
-		for ( var i = 0, l = allRows.length; i<l; i++ ) {
-			currentIdParts = allRows[i].id.split( '-' );
-
-			if ( currentIdParts.length != 3 ) {
-				continue;
-			}
-
-			childFieldDivs.push(fieldDiv + currentIdParts[2] + '_container');
 		}
 
 		return childFieldDivs;
@@ -875,8 +856,8 @@ function frmFrontFormJS(){
 					return false;
 				}
 
-				d = prepareValueForLikeComparison( d );
-				c = prepareValueForLikeComparison( c );
+				c = prepareLogicValueForLikeComparison( c );
+				d = prepareEnteredValueForLikeComparison( c, d );
 
 				return d.indexOf( c ) != -1;
 			},
@@ -886,8 +867,8 @@ function frmFrontFormJS(){
 					return true;
 				}
 
-				d = prepareValueForLikeComparison( d );
-				c = prepareValueForLikeComparison( c );
+				c = prepareLogicValueForLikeComparison( c );
+				d = prepareEnteredValueForLikeComparison( c, d );
 
 				return d.indexOf( c ) == -1;
 			}
@@ -925,6 +906,26 @@ function frmFrontFormJS(){
 		return b;
 	}
 
+	function prepareLogicValueForLikeComparison( val ) {
+		return prepareValueForLikeComparison( val );
+	}
+
+	function prepareEnteredValueForLikeComparison( logicValue, enteredValue ) {
+		enteredValue = prepareValueForLikeComparison( enteredValue );
+
+		var currentValue = '';
+		if ( jQuery.isArray(enteredValue) ) {
+			for ( var i = 0, l = enteredValue.length; i<l; i++ ) {
+				currentValue = enteredValue[i].toLowerCase();
+				if ( currentValue.indexOf( logicValue ) > -1 ) {
+					enteredValue = logicValue;
+					break;
+				}
+			}
+		 }
+
+		return enteredValue;
+	}
 
 	function prepareValueForLikeComparison( val ) {
 		if ( typeof val === 'string' ) {
@@ -1088,7 +1089,8 @@ function frmFrontFormJS(){
 		var name = '';
 		if ( depFieldArgs.isRepeating ) {
 			//item_meta[section-id][row-id][field-id]
-			name = 'item_meta[' + depFieldArgs.inSection +'][' + depFieldArgs.repeatRow + '][' + depFieldArgs.fieldId + ']';
+			var containerFieldId = getContainerFieldId( depFieldArgs );
+			name = 'item_meta[' + containerFieldId +'][' + depFieldArgs.repeatRow + '][' + depFieldArgs.fieldId + ']';
 		} else {
 			// item_meta[field-id]
 			name = 'item_meta[' + depFieldArgs.fieldId + ']';
@@ -2449,10 +2451,10 @@ function frmFrontFormJS(){
 	}
 
 	function getCallForField( field, all_calcs ) {
-		if ( field.thisField.type == 'checkbox' || field.thisField.type == 'select' ) {
-			field.thisFieldCall = field.thisFieldCall +':checked,select'+ all_calcs.fieldKeys[field.thisFieldId] +' option:selected,'+ field.thisFieldCall+'[type=hidden]';
-		} else if ( field.thisField.type == 'radio' || field.thisField.type == 'scale' ) {
-			field.thisFieldCall = field.thisFieldCall +':checked,'+ field.thisFieldCall +'[type=hidden]';
+		if ( field.thisField.type == 'checkbox' || field.thisField.type == 'radio' || field.thisField.type == 'scale' ) {
+			field.thisFieldCall = field.thisFieldCall +':checked,'+ field.thisFieldCall+'[type=hidden]';
+		} else if ( field.thisField.type == 'select' || field.thisField.type == 'time' ) {
+			field.thisFieldCall = 'select'+ all_calcs.fieldKeys[field.thisFieldId] +' option:selected,'+ field.thisFieldCall+'[type=hidden]';
 		} else if ( field.thisField.type == 'textarea' ) {
 			field.thisFieldCall = field.thisFieldCall + ',textarea'+ all_calcs.fieldKeys[field.thisFieldId];
 		}
@@ -3252,19 +3254,15 @@ function frmFrontFormJS(){
 
     /* Google Tables */
 
-	function prepareGraphTypes( graphs, graphType ) {
+	function generateGoogleTables( graphs, graphType ) {
 		for ( var num = 0; num < graphs.length; num++ ) {
-			prepareGraphs( graphs[num], graphType );
+			generateSingleGoogleTable( graphs[num], graphType );
 		}
 	}
 
-	function prepareGraphs( opts, type ) {
+	function generateSingleGoogleTable( opts, type ) {
 		google.load('visualization', '1.0', {'packages':[type], 'callback': function(){
-			if ( type == 'table' ) {
-				compileGoogleTable( opts );
-			} else {
-				compileGraph( opts );
-			}
+			compileGoogleTable( opts );
 		}});
 	}
 
@@ -3370,93 +3368,57 @@ function frmFrontFormJS(){
         chart.draw( data, opts.graphOpts );
     }
 
-    function getGraphType(field){
-        var type = 'string';
-        if ( field.type == 'number' ){
-            type = 'number';
-        } else if ( field.type == 'checkbox' || field.type == 'select' ) {
-            var optCount = field.options.length;
-            if ( field.type == 'select' && field.options[0] === '' ) {
-                if ( field.field_options.post_field == 'post_status' ) {
-                    optCount = 3;
-                } else {
-                    optCount = optCount - 1;
-                }
-            }
-            if ( optCount == 1 ) {
-                type = 'boolean';
-            }
-        }
-        return type;
-    }
+	/** Google Graphs **/
 
-    function compileGraph(opts){
-        var data = new google.visualization.DataTable();
-        var useSepCol = false;
-		var useTooltip = false;
+	function generateGoogleGraphs( graphs ) {
+		for ( var i = 0, l=graphs.length; i < l; i++ ) {
+			generateSingleGoogleGraph( graphs[i] );
+		}
+	}
 
-        // add the rows
-        var rowCount = opts.rows.length;
-        if ( rowCount > 0 ) {
-            if ( opts.type == 'table' ) {
-                useSepCol = true;
-                var lastRow = opts.rows[rowCount - 1];
-                var count = lastRow[0] + 1;
-                data.addRows(count);
+	function generateSingleGoogleGraph( graphData ) {
+		google.load('visualization', '1.0', {'packages':[ graphData.package ], 'callback': function() {
+			compileGoogleGraph( graphData );
+		} } );
+	}
 
-                for ( var r = 0, len = rowCount; r < len; r++ ) {
-                    data.setCell( opts.rows[r] ); //data.setCell(0, 0, 'Mike');
-                }
-            }else{
-                var firstRow = opts.rows[0];
-                if ( typeof firstRow.tooltip != 'undefined' ) {
-                    useSepCol = true;
-					useTooltip = true;
+	function compileGoogleGraph( graphData ) {
+		var data = new google.visualization.DataTable();
+		data = google.visualization.arrayToDataTable(graphData.data);
 
-					// reset the tooltip key to numeric
-					for ( var row = 0, rc = rowCount; row < rc; row++ ) {
-						var tooltip = opts.rows[row].tooltip;
-						delete opts.rows[row].tooltip;
+		var chartDiv = document.getElementById('chart_'+ graphData.graph_id);
+		if ( chartDiv === null ) {
+			return;
+		}
 
-						var rowArray = Object.keys(opts.rows[row]).map( function(k){
-							return opts.rows[row][k];
-						} );
+		var type = (graphData.type.charAt(0).toUpperCase() + graphData.type.slice(1));
+		if ( type !== 'Histogram' && type !== 'Table' ) {
+			type += 'Chart';
+		}
 
-						opts.rows[row] = rowArray;
-						opts.rows[row].push(tooltip);
-					}
-                }
-            }
-        }
+		var chart = new google.visualization[type]( chartDiv );
+		chart.draw(data, graphData.options);
+	}
 
-        // add the columns
-        var colCount = opts.cols.length;
-        if ( useSepCol ) {
-            if ( colCount > 0 ) {
-                for ( var i = 0, l = colCount; i < l; i++ ) {
-                    var col = opts.cols[i];
-                    data.addColumn(col.type, col.name);
-                }
-            }
-			if ( useTooltip ) {
-				data.addColumn({type:'string',role:'tooltip'});
-				data.addRows(opts.rows);
+	function getGraphType(field){
+		var type = 'string';
+		if ( field.type == 'number' ){
+			type = 'number';
+		} else if ( field.type == 'checkbox' || field.type == 'select' ) {
+			var optCount = field.options.length;
+			if ( field.type == 'select' && field.options[0] === '' ) {
+				if ( field.field_options.post_field == 'post_status' ) {
+					optCount = 3;
+				} else {
+					optCount = optCount - 1;
+				}
 			}
-        } else {
-            var graphData = [];
-            graphData[0] = [];
-            for ( var c = 0, cur = colCount; c < cur; c++ ) {
-                graphData[0].push(opts.cols[c].name);
-            }
-            graphData = graphData.concat(opts.rows);
-            data = google.visualization.arrayToDataTable(graphData);
-        }
-
-        var type = (opts.type.charAt(0).toUpperCase() + opts.type.slice(1)) + 'Chart';
-        var chart = new google.visualization[type](document.getElementById('chart_'+ opts.graph_id));
-
-        chart.draw(data, opts.options);
-    }
+			if ( optCount == 1 ) {
+				type = 'boolean';
+			}
+		}
+		return type;
+	}
 	
 	/* Repeating Fields */
 	function removeRow(){
@@ -4121,7 +4083,11 @@ function frmFrontFormJS(){
 				var packages = Object.keys( graphs );
 				//google.load('visualization', '1.0', {'packages':packages});
 				for ( var i = 0; i < packages.length; i++ ) {
-					prepareGraphTypes( graphs[ packages[i] ], packages[i] );
+					if ( packages[i] === 'graphs' ) {
+						generateGoogleGraphs( graphs[ packages[i] ] );
+					} else {
+						generateGoogleTables(graphs[packages[i]], packages[i]);
+					}
 				}
 			} else {
 				setTimeout( frmFrontForm.loadGoogle, 30 );
