@@ -88,11 +88,10 @@ if ( 'date' == $field['type'] ) {
 <input type="<?php echo ( $frm_settings->use_html || $field['type'] == 'password' ) ? esc_attr( $field['type'] ) : 'text'; ?>" id="<?php echo esc_attr( $html_id ) ?>" name="<?php echo esc_attr( $field_name ) ?>" value="<?php echo esc_attr( $field['value'] ) ?>" <?php do_action( 'frm_field_input_html', $field ) ?>/>
 <?php
 } else if ( $field['type'] == 'phone' ) {
-    $field['type'] = 'tel';
 ?>
-<input type="<?php echo ( $frm_settings->use_html ) ? esc_attr( $field['type'] ) : 'text'; ?>" id="<?php echo esc_attr( $html_id ) ?>" name="<?php echo esc_attr( $field_name ) ?>" value="<?php echo esc_attr( $field['value'] ) ?>" <?php do_action( 'frm_field_input_html', $field ) ?>/>
+<input type="<?php echo ( $frm_settings->use_html ) ? 'tel' : 'text'; ?>" id="<?php echo esc_attr( $html_id ) ?>" name="<?php echo esc_attr( $field_name ) ?>" value="<?php echo esc_attr( $field['value'] ) ?>" <?php do_action( 'frm_field_input_html', $field ) ?>/>
 <?php
-    $field['type'] = 'phone';
+
 } else if ($field['type'] == 'image' ) { ?>
 <input type="<?php echo ($frm_settings->use_html) ? 'url' : 'text'; ?>" id="<?php echo esc_attr( $html_id ) ?>" name="<?php echo esc_attr( $field_name ) ?>" value="<?php echo esc_attr( $field['value'] ) ?>" <?php do_action( 'frm_field_input_html', $field ) ?>/>
 <?php if ( $field['value'] ) {
@@ -158,22 +157,11 @@ if ( ! $field['size'] ) {
 <?php
 
 } else if ( $field['type'] == 'form' ) {
-    if ( ! is_numeric($field['form_select']) ) {
-        return;
-    }
-
-    if ( ! isset($errors) ) {
-        $errors = array();
-    }
-
-    FrmProFormsHelper::get_sub_form($field_name, $field, array(
-        'errors' => $errors, 'repeat' => 0,
-    ));
+    FrmProNestedFormsController::display_front_end_embedded_form( $field, $field_name, $errors );
 
 } else if ( 'divider' == $field['type'] ) {
-    FrmProFormsHelper::get_sub_form($field_name, $field, array(
-        'errors' => $errors, 'repeat' => 5,
-    ));
+    FrmProNestedFormsController::display_front_end_repeating_section( $field, $field_name, $errors );
+
 } else if ( 'lookup' == $field['type'] ) {
 	FrmProLookupFieldsController::get_front_end_lookup_field_html( $field, $field_name, $html_id );
 }

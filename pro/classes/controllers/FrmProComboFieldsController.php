@@ -34,10 +34,16 @@ class FrmProComboFieldsController {
 	public static function add_atts_to_input( $atts ) {
 		self::include_placeholder( $atts['field']['default_value'], $atts['key'] );
 
+		if ( isset( $atts['field']['default_value'][ $atts['key'] ] ) ) {
+			$atts['field']['default_value'] = $atts['field']['default_value'][ $atts['key'] ];
+		} else{
+			$atts['field']['default_value'] = '';
+		}
+
 		if ( isset( $atts['sub_field']['optional'] ) && $atts['sub_field']['optional'] ) {
 			add_filter( 'frm_field_classes', 'FrmProAddressesController::add_optional_class', 20, 2 );
 			do_action( 'frm_field_input_html', $atts['field'] );
-			remove_filter( 'frm_field_classes', 'FrmProAddressesController::add_optional_class', 20, 2 );
+			remove_filter( 'frm_field_classes', 'FrmProAddressesController::add_optional_class', 20 );
 		} else {
 			do_action( 'frm_field_input_html', $atts['field'] );
 		}

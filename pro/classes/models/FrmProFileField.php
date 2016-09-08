@@ -22,7 +22,7 @@ class FrmProFileField {
 			$file_size = self::get_max_file_size( $field['size'] );
 
 			$frm_vars['dropzone_loaded'][ $the_id ] = array(
-				'maxFilesize' => round( $file_size ),
+				'maxFilesize' => round( $file_size, 2 ),
 				'maxFiles'    => $max,
 				//'acceptedFiles' => '', //cover this in the php to minimize differences in mime types
 				'htmlID'      => $the_id,
@@ -459,7 +459,7 @@ class FrmProFileField {
 	 * Prevent attachments from using valuable top-level slug names
 	 */
 	public static function change_attachment_slug( $data ) {
-		$data['post_name'] = 'frm-' . $data['post_name'];
+		$data['post_name'] = sanitize_title( 'frm-' . $data['post_name'] );
 		return $data;
 	}
 
