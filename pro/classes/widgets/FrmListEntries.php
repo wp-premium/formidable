@@ -132,7 +132,7 @@ class FrmListEntries extends WP_Widget {
                 echo esc_html( $cat );
 
                 if ( isset($instance['cat_count']) && (int) $instance['cat_count'] == 1 ) {
-                    echo ' ('. FrmProFieldsHelper::get_field_stats($instance['cat_id'], 'count', false, $cat) .')';
+					echo ' ('. FrmProStatisticsController::stats_shortcode( array( 'id' => $instance['cat_id'], 'type' => 'count', 'value' => $cat ) ) .')';
                 }
 
                 if ( isset($instance['cat_name']) && (int) $instance['cat_name'] == 1 ) {

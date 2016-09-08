@@ -119,26 +119,37 @@ class FrmProEntryMetaHelper{
         } else {
 			$value = FrmEntryMeta::get_meta_value( $entry, $field->id );
 
-            if ( ( 'tag' == $field->type || (isset($field->field_options['post_field']) && $field->field_options['post_field'] == 'post_category') ) && !empty($value) ) {
-                $value = maybe_unserialize($value);
-
-                $new_value = array();
-                foreach ( (array) $value as $tax_id ) {
-                    if ( is_numeric($tax_id) ) {
-                        $cat = get_term( $tax_id, $field->field_options['taxonomy'] );
-                        $new_value[] = ($cat) ? $cat->name : $tax_id;
-                        unset($cat);
-                    } else {
-                        $new_value[] = $tax_id;
-                    }
-                }
-
-                $value = $new_value;
-            }
+			self::convert_non_post_taxonomy_ids_to_names( $field, $atts, $value );
         }
 
         return $value;
     }
+
+	/**
+	 * Convert taxonomy IDs to taxonomy names if field is a category field and no post is connected to entry
+	 *
+	 * @since 2.02.05
+	 *
+	 * @param object $field
+	 * @param array $atts
+	 * @param string|array $value
+	 */
+	private static function convert_non_post_taxonomy_ids_to_names( $field, $atts, &$value ) {
+		if ( isset( $field->field_options['post_field'] ) && $field->field_options['post_field'] == 'post_category' && ! empty( $value ) && $atts['truncate'] ) {
+			$value = maybe_unserialize( $value );
+
+			$new_value = array();
+			foreach ( (array) $value as $tax_id ) {
+				if ( is_numeric( $tax_id ) ) {
+					$new_value[] = FrmProPost::get_taxonomy_term_name_from_id( $tax_id, $field->field_options['taxonomy'] );
+				} else {
+					$new_value[] = $tax_id;
+				}
+			}
+
+			$value = $new_value;
+		}
+	}
 
 	public static function get_post_value( $post_id, $post_field, $custom_field, $atts ) {
         if ( ! $post_id ) {

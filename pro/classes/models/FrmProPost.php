@@ -306,21 +306,34 @@ class FrmProPost {
 							continue;
 						}
 
-						$term = get_term($val, $fields[$taxonomy['field_id']]->field_options['taxonomy']);
-
-						if ( $term && ! isset($term->errors) ) {
-							$new_value[$val] = $term->name;
-						} else {
-							$new_value[$val] = $val;
-						}
-
-						unset($term);
+						$new_value[ $val ] = self::get_taxonomy_term_name_from_id( $val, $fields[$taxonomy['field_id']]->field_options['taxonomy'] );
 					}
 
 					self::fill_taxonomies($new_post['taxonomies'], $tax_type, $new_value);
 				}
 			}
 		}
+	}
+
+	/**
+	 * Get the taxonomy name from the ID
+	 * If no term is retrieved, the ID will be returned
+	 *
+	 * @since 2.02.06
+	 * @param int|string $term_id
+	 * @param string $taxonomy
+	 * @return string
+	 */
+	public static function get_taxonomy_term_name_from_id( $term_id, $taxonomy ) {
+		$term = get_term( $term_id, $taxonomy );
+
+		if ( $term && ! isset( $term->errors ) ) {
+			$value = $term->name;
+		} else {
+			$value = $term_id;
+		}
+
+		return $value;
 	}
 
 	private static function populate_from_custom_code( &$new_post ) {
@@ -382,9 +395,9 @@ class FrmProPost {
 			}
         }
 
-        if ( isset($post['post_date']) && ! empty($post['post_date']) && ( ! isset($post['post_date_gmt']) || $post['post_date_gmt'] == '0000-00-00 00:00:00' ) ) {
-            // set post date gmt if post date is set
-            $post['post_date_gmt'] = get_gmt_from_date($post['post_date']);
+		if ( isset( $post['post_date'] ) && ! empty( $post['post_date'] ) ) {
+			// set post date gmt if post date is set
+			$post['post_date_gmt'] = get_gmt_from_date( $post['post_date'] );
 		}
     }
 	
