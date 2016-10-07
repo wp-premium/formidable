@@ -68,6 +68,7 @@ class FrmProEntriesController{
 				$keep_scripts = array(
 					'recaptcha-api', 'jquery-frm-rating', 'jquery-chosen',
 					'google_jsapi', 'dropzone',
+					'jquery-maskedinput',
 					'flashcanvas', 'jquery-signaturepad', 'frm-signature', // Remove these after add-on update
 				);
 				$keep_styles = array( 'dashicons', 'jquery-theme' );
@@ -2328,7 +2329,7 @@ class FrmProEntriesController{
 		$link .= '<span class="frm_edit_link_container">';
 		$link .= '<a href="#" class="frm_inplace_edit frm_edit_link ' . esc_attr( $atts['class'] ) . '" id="' . esc_attr( $atts['html_id'] ) . '" title="' . esc_attr( $atts['title'] ) . '"';
 		foreach ( $data as $name => $label ) {
-			$link .= ' data-' . sanitize_title( $name ) . '="' . esc_attr( $label ) .'"';
+            $link .= ' data-' . str_replace( '_', '', sanitize_title( $name ) ) . '="' . esc_attr( $label ) .'"';
 		}
 		$link .= '>' . wp_kses_post( $atts['label'] ) . "</a>\n";
 		$link .= '</span>';
@@ -2688,9 +2689,9 @@ class FrmProEntriesController{
             }
 			$response['errors'] = $obj;
 
-			$frm_settings = FrmAppHelper::get_settings();
+			$invalid_msg = FrmFormsHelper::get_invalid_error_message( array( 'form' => $form ) );
 			$response['error_message'] = FrmFormsHelper::get_success_message( array(
-				'message' => $frm_settings->invalid_msg, 'form' => $form,
+				'message' => $invalid_msg, 'form' => $form,
 				'entry_id' => 0, 'class' => 'frm_error_style',
 			) );
         }

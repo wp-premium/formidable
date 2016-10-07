@@ -24,7 +24,7 @@ class FrmForm {
             'created_at'    => isset($values['created_at']) ? $values['created_at'] : current_time('mysql', 1),
         );
 
-        $options = array();
+		$options = isset( $values['options'] ) ? (array) $values['options'] : array();
 		FrmFormsHelper::fill_form_options( $options, $values );
 
         $options['before_html'] = isset($values['options']['before_html']) ? $values['options']['before_html'] : FrmFormsHelper::get_default_html('before');
@@ -171,7 +171,7 @@ class FrmForm {
             return $new_values;
         }
 
-        $options = array();
+		$options = isset( $values['options'] ) ? (array) $values['options'] : array();
 		FrmFormsHelper::fill_form_options( $options, $values );
 
         $options['custom_style'] = isset($values['options']['custom_style']) ? $values['options']['custom_style'] : 0;
@@ -225,7 +225,8 @@ class FrmForm {
                 continue;
             }
 
-			if ( isset( $values['options'] ) || isset( $values['field_options'][ 'custom_html_' . $field_id ] ) ) {
+			$is_settings_page = ( isset( $values['options'] ) || isset( $values['field_options'][ 'custom_html_' . $field_id ] ) );
+			if ( $is_settings_page ) {
                 //updating the settings page
 				if ( isset( $values['field_options'][ 'custom_html_' . $field_id ] ) ) {
 					$field->field_options['custom_html'] = isset( $values['field_options'][ 'custom_html_' . $field_id ] ) ? $values['field_options'][ 'custom_html_' . $field_id ] : ( isset( $field->field_options['custom_html'] ) ? $field->field_options['custom_html'] : FrmFieldsHelper::get_default_html( $field->type ) );
@@ -241,7 +242,7 @@ class FrmForm {
                 }
             }
 
-			if ( ( isset( $values['options'] ) || isset( $values['field_options'][ 'custom_html_' . $field_id ] ) ) && ! defined( 'WP_IMPORTING' ) ) {
+			if ( $is_settings_page && ! defined( 'WP_IMPORTING' ) ) {
                 continue;
             }
 
@@ -269,6 +270,7 @@ class FrmForm {
 
             FrmField::delete_form_transient($field->form_id);
         }
+		self::clear_form_cache();
 
         return $values;
     }
@@ -290,13 +292,14 @@ class FrmForm {
         global $wpdb;
 
         if ( is_array($id) ) {
-			$where = array( 'id' => $id );
+			$where = array( 'id' => $id, 'parent_form_id' => $id, 'or' => 1 );
 			FrmDb::get_where_clause_and_values( $where );
 			array_unshift( $where['values'], $status );
 
 			$query_results = $wpdb->query( $wpdb->prepare( 'UPDATE ' . $wpdb->prefix . 'frm_forms SET status = %s ' . $where['where'], $where['values'] ) );
         } else {
 			$query_results = $wpdb->update( $wpdb->prefix . 'frm_forms', array( 'status' => $status ), array( 'id' => $id ) );
+			$wpdb->update( $wpdb->prefix . 'frm_forms', array( 'status' => $status ), array( 'parent_form_id' => $id ) );
         }
 
         if ( $query_results ) {
@@ -327,6 +330,12 @@ class FrmForm {
 			$wpdb->prefix . 'frm_forms',
 			array( 'status' => 'trash', 'options' => serialize( $options ) ),
 			array( 'id' => $id )
+        );
+
+        $wpdb->update(
+			$wpdb->prefix . 'frm_forms',
+			array( 'status' => 'trash', 'options' => serialize( $options ) ),
+			array( 'parent_form_id' => $id )
         );
 
         if ( $query_results ) {
@@ -491,7 +500,7 @@ class FrmForm {
         $results = FrmDb::get_row( $table_name, $where );
 
         if ( isset($results->options) ) {
-            wp_cache_set($results->id, $results, 'frm_form');
+			FrmAppHelper::set_cache( $results->id, $results, 'frm_form' );
             $results->options = maybe_unserialize($results->options);
         }
         return stripslashes_deep($results);
@@ -513,7 +522,7 @@ class FrmForm {
 
 		if ( $results ) {
 			foreach ( $results as $result ) {
-				wp_cache_set( $result->id, $result, 'frm_form' );
+				FrmAppHelper::set_cache( $result->id, $result, 'frm_form' );
 				$result->options = maybe_unserialize( $result->options );
 			}
 		}
@@ -550,7 +559,7 @@ class FrmForm {
 
     	$cache_key = 'frm_form_counts';
 
-    	$counts = wp_cache_get( $cache_key, 'counts' );
+    	$counts = wp_cache_get( $cache_key, 'frm_form' );
     	if ( false !== $counts ) {
     	    return $counts;
     	}
@@ -579,7 +588,7 @@ class FrmForm {
     	}
 
     	$counts = (object) $counts;
-    	wp_cache_set( $cache_key, $counts, 'counts' );
+		FrmAppHelper::set_cache( $cache_key, $counts, 'frm_form' );
 
     	return $counts;
     }

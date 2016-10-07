@@ -5,8 +5,7 @@ class FrmAddonsController {
 	public static function menu() {
 		add_submenu_page( 'formidable', 'Formidable | ' . __( 'AddOns', 'formidable' ), __( 'AddOns', 'formidable' ), 'frm_view_forms', 'formidable-addons', 'FrmAddonsController::list_addons' );
 
-		$affiliate = FrmAppHelper::get_affiliate();
-		if ( ! empty( $affiliate ) && ! FrmAppHelper::pro_is_installed() ) {
+		if ( ! FrmAppHelper::pro_is_installed() ) {
 			add_submenu_page( 'formidable', 'Formidable | ' . __( 'Upgrade to Pro', 'formidable' ), __( 'Upgrade to Pro', 'formidable' ), 'frm_view_forms', 'formidable-pro-upgrade', 'FrmAddonsController::upgrade_to_pro' );
 		}
 	}
@@ -132,9 +131,24 @@ class FrmAddonsController {
 
 	public static function upgrade_to_pro() {
 		$addons = self::get_ordered_addons();
-		$pro = $addons[0];
-		$price_id = 0;
+		$pro_pricing = array();
+		self::prepare_pro_info( $addons[0], $pro_pricing );
 
 		include( FrmAppHelper::plugin_path() . '/classes/views/addons/upgrade_to_pro.php' );
+	}
+
+	private static function prepare_pro_info( $pro, &$pro_pricing ) {
+		$pro_pricing = array(
+			'personal' => array( 'id' => 5, 'price' => '49.00', 'name' => 'Personal' ),
+			'professional' => array( 'id' => 6, 'price' => '99.00', 'name' => 'Professional' ),
+			'smallbusiness' => array( 'id' => 3, 'price' => '199.00', 'name' => 'Small Business' ),
+			'enterprise' => array( 'id' => 4, 'price' => '399.00', 'name' => 'Enterprise' ),
+		);
+
+		foreach ( $pro['pricing'] as $name => $price ) {
+			if ( isset( $pro_pricing[ $name ] ) ) {
+				$pro_pricing[ $name ]['price'] = $price;
+			}
+		}
 	}
 }

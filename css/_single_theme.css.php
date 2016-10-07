@@ -164,10 +164,12 @@ if ( ! isset( $center_form ) ) {
 
 .<?php echo esc_html( $style_class ) ?> .frm_trigger.active .frm_icon_font.frm_arrow_icon:before{
 	content:"\e<?php echo esc_html( isset( $arrow_icons[ $collapse_icon ] ) ? $arrow_icons[ $collapse_icon ]['-'] : $arrow_icons[1]['-'] ) ?>";
+	color:#<?php echo esc_html( $section_color . $important ) ?>;
 }
 
 .<?php echo esc_html( $style_class ) ?> .frm_trigger .frm_icon_font.frm_arrow_icon:before{
 	content:"\e<?php echo esc_html( isset( $arrow_icons[ $collapse_icon ] ) ? $arrow_icons[ $collapse_icon ]['+'] : $arrow_icons[1]['+'] ) ?>";
+	color:#<?php echo esc_html( $section_color . $important ) ?>;
 }
 
 .<?php echo esc_html( $style_class ) ?> .form-field{
@@ -729,7 +731,6 @@ if ( ! $submit_style ) { ?>
     background-color:transparent<?php echo esc_html( $important ) ?>;
     border:none<?php echo esc_html( $important ) ?>;
     display:inline<?php echo esc_html( $important ) ?>;
-    width:auto<?php echo esc_html( $important ) ?>;
 	padding:0<?php echo esc_html( $important ) ?>;
 }
 

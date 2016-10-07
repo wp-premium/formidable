@@ -236,9 +236,11 @@ class FrmProDb{
 			$view_options[ 'where_val' ] = array();
 		}
 
-		$view_options[ 'where' ][] = 'id';
-		$view_options[ 'where_is' ][] = '=';
-		$view_options[ 'where_val' ][] = '[get param=entry old_filter=1]';
+		if ( ! in_array( 'id', $view_options[ 'where' ] ) ) {
+			$view_options[ 'where' ][] = 'id';
+			$view_options[ 'where_is' ][] = '=';
+			$view_options[ 'where_val' ][] = '[get param=entry old_filter=1]';
+		}
 	}
 
 	/**

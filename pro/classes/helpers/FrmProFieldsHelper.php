@@ -1173,6 +1173,7 @@ class FrmProFieldsHelper{
 	}
 
 	public static function get_category_options( $field ) {
+		// TODO: Dynamic fields get categories here - maybe combine with FrmProPost::get_category_dropdown()?
 		if ( is_object( $field ) ) {
 			$field = (array) $field;
 			$field = array_merge( $field, $field['field_options'] );
@@ -3216,9 +3217,9 @@ DEFAULT_HTML;
             return FrmAppHelper::truncate($replace_with, (int) $atts['truncate'], 3, $more_link_text);
         }
 
-        $replace_with = wp_specialchars_decode(strip_tags($replace_with), ENT_QUOTES);
-		$part_one = FrmAppHelper::mb_function( array( 'mb_substr', 'substr' ), array( $replace_with, 0, (int) $atts['truncate'] ) );
-		$part_two = FrmAppHelper::mb_function( array( 'mb_substr', 'substr' ), array( $replace_with, (int) $atts['truncate'] ) );
+		$clean_text = wp_strip_all_tags( $replace_with );
+		$part_one = FrmAppHelper::truncate( $clean_text, (int) $atts['truncate'], 3, '' );
+		$part_two = str_replace( $part_one, '', $clean_text );
 
         if ( ! empty($part_two) ) {
             $replace_with = $part_one .'<a href="#" onclick="jQuery(this).next().css(\'display\', \'inline\');jQuery(this).css(\'display\', \'none\');return false;" class="frm_text_exposed_show"> '. $more_link_text .'</a><span style="display:none;">'. $part_two .'</span>';
