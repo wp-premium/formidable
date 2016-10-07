@@ -866,7 +866,7 @@ class FrmProLookupFieldsController{
 
 		// TODO: Maybe add current user filter here, or maybe add it in final call
 		if ( self::need_to_filter_values_for_current_user( $child_field->field_options ) ) {
-			$args['e.user_id'] = get_current_user_id();
+			$args['user_id'] = get_current_user_id();
 		}
 
 		foreach ( $parent_field_ids as $i => $p_field_id ) {
@@ -972,10 +972,6 @@ class FrmProLookupFieldsController{
 			if ( is_array( $meta_val ) ) {
 				$final_values = array_merge( $final_values, $meta_val );
 			} else {
-				if ( ! is_numeric( $meta_val ) ) {
-					$meta_val = ucfirst( $meta_val );
-				}
-
 				$final_values[] = $meta_val;
 			}
 		}
@@ -1008,9 +1004,12 @@ class FrmProLookupFieldsController{
 		if ( $order == 'no_order' ) {
 			// do nothing
 		} else if ( $order == 'ascending' ) {
-			sort( $final_values );
+			natcasesort( $final_values );
+			$final_values = array_values( $final_values );
 		} else if ( $order == 'descending' ) {
-			rsort( $final_values );
+			natcasesort( $final_values );
+			$final_values = array_reverse( $final_values );
+			$final_values = array_values( $final_values );
 		}
 	}
 

@@ -296,7 +296,7 @@ class FrmEntry {
 
         $entry->metas = array();
 
-		$include_key = apply_filters( 'frm_include_meta_keys', false );
+		$include_key = apply_filters( 'frm_include_meta_keys', false, array( 'form_id' => $entry->form_id ) );
         foreach ( $metas as $meta_val ) {
             if ( $meta_val->item_id == $entry->id ) {
 				$entry->metas[ $meta_val->field_id ] = maybe_unserialize( $meta_val->meta_value );
@@ -317,7 +317,7 @@ class FrmEntry {
         }
         unset($metas);
 
-        wp_cache_set( $entry->id, $entry, 'frm_entry');
+		FrmAppHelper::set_cache( $entry->id, $entry, 'frm_entry' );
 
         return $entry;
     }
@@ -374,9 +374,7 @@ class FrmEntry {
             $entries = $wpdb->get_results($query, OBJECT_K);
             unset($query);
 
-			if ( ! FrmAppHelper::prevent_caching() ) {
-				wp_cache_set( $cache_key, $entries, 'frm_entry', 300 );
-			}
+			FrmAppHelper::set_cache( $cache_key, $entries, 'frm_entry' );
         }
 
         if ( ! $meta || ! $entries ) {
@@ -419,7 +417,7 @@ class FrmEntry {
 
 		if ( ! FrmAppHelper::prevent_caching() ) {
 			foreach ( $entries as $entry ) {
-				wp_cache_set( $entry->id, $entry, 'frm_entry' );
+				FrmAppHelper::set_cache( $entry->id, $entry, 'frm_entry' );
 				unset( $entry );
 			}
 		}

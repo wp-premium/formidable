@@ -11,7 +11,10 @@ class FrmProFormActionsController{
     }
 
     public static function email_action_control($settings) {
-		$settings['event'] = array_unique( array_merge( $settings['event'], array( 'draft', 'create', 'update', 'delete' ) ) );
+		$settings['event'] = array_unique(
+			array_merge( $settings['event'],
+			array( 'draft', 'create', 'update', 'delete', 'import' )
+		) );
 	    $settings['priority'] = 41;
 
 	    return $settings;

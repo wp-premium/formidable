@@ -2,6 +2,10 @@
 
 class FrmProFileField {
 
+	/**
+	 * @param array $field (no array for field options)
+	 * @param array $atts
+	 */
 	public static function setup_dropzone( $field, $atts ) {
 		global $frm_vars;
 
@@ -31,10 +35,16 @@ class FrmProFileField {
 				'formID'      => $field['form_id'],
 				'fieldName'   => $atts['field_name'],
 				'mockFiles'   => array(),
-				'cancel'      => __( 'Cancel upload', 'formidable' ),
-				'cancelConfirm' => __( 'Are you sure you want to cancel this upload?', 'formidable' ),
-				'remove'      => __( 'Remove file', 'formidable' ),
-				'maxFilesExceeded' => __( 'You can not upload any more files.', 'formidable' ),
+				'defaultMessage' => __( 'Drop files here to upload', 'formidable' ),
+				'fallbackMessage' => __( 'Your browser does not support drag and drop file uploads.', 'formidable' ),
+				'fallbackText' => __( 'Please use the fallback form below to upload your files like in the olden days.', 'formidable' ),
+				'fileTooBig' => sprintf( __( 'That file is too big. It must be less than %sMB.', 'formidable' ), '{{maxFilesize}}' ),
+				'invalidFileType'  => self::get_invalid_file_type_message( $field['name'], $field['invalid'] ),
+				'responseError'    => sprintf( __( 'Server responded with %s code.', 'formidable' ), '{{statusCode}}' ),
+				'cancel'           => __( 'Cancel upload', 'formidable' ),
+				'cancelConfirm'    => __( 'Are you sure you want to cancel this upload?', 'formidable' ),
+				'remove'           => __( 'Remove file', 'formidable' ),
+				'maxFilesExceeded' => sprintf( __( 'You have uploaded too many files. You may only include %d file(s).', 'formidable' ), $max ),
 			);
 
 			if ( strpos( $the_id, '-i' ) ) {
@@ -185,7 +195,7 @@ class FrmProFileField {
 
 			// check allowed file size
 			if ( ! empty( $file_uploads['error'] ) && in_array( 1, (array) $file_uploads['error'] ) ) {
-				$errors[ 'field' . $field->temp_id ] = __( 'This file is too big', 'formidable' );
+				$errors[ 'field' . $field->temp_id ] = __( 'That file is too big. It must be less than %sMB.', 'formidable' );
 			}
 
 			if ( empty( $name ) ) {
@@ -196,7 +206,7 @@ class FrmProFileField {
 			$this_file_size = $this_file_size / 1000000; // compare in MB
 
 			if ( $this_file_size > $size_limit ) {
-				$errors[ 'field' . $field->temp_id ] = sprintf( __( 'That file is too big. It must be less than %dMB.', 'formidable' ), $size_limit );
+				$errors[ 'field' . $field->temp_id ] = sprintf( __( 'That file is too big. It must be less than %sMB.', 'formidable' ), $size_limit );
 			}
 
 			unset( $name );
@@ -273,7 +283,7 @@ class FrmProFileField {
 		}
 
         if ( isset( $file_type ) && ! $file_type['ext'] ) {
-            $errors[ 'field' . $field->temp_id ] = self::get_invalid_file_type_message( $field );
+            $errors[ 'field' . $field->temp_id ] = self::get_invalid_file_type_message( $field->name, $field->field_options['invalid'] );
         }
 	}
 
@@ -286,14 +296,19 @@ class FrmProFileField {
 		return $mimes;
 	}
 
-	private static function get_invalid_file_type_message( $field ) {
+	/**
+	 * @param string $field_name
+	 * @param string $field_invalid_msg
+	 * @return string
+	 */
+	private static function get_invalid_file_type_message( $field_name, $field_invalid_msg ) {
 		$default_invalid_messages = array( '' );
 		$default_invalid_messages[] = __( 'This field is invalid', 'formidable' );
-		$default_invalid_messages[] = $field->name . ' ' . __( 'is invalid', 'formidable' );
-		$is_default_message = in_array( $field->field_options['invalid'], $default_invalid_messages );
+		$default_invalid_messages[] = $field_name . ' ' . __( 'is invalid', 'formidable' );
+		$is_default_message = in_array( $field_invalid_msg, $default_invalid_messages );
 
 		$invalid_type = __( 'Sorry, this file type is not permitted.', 'formidable' );
-		$invalid_message = $is_default_message ? $invalid_type : $field->field_options['invalid'];
+		$invalid_message = $is_default_message ? $invalid_type : $field_invalid_msg;
 
 		return $invalid_message;
 	}

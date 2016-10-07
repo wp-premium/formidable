@@ -728,7 +728,7 @@ class FrmProGraphsController {
 	 */
 	private static function add_pie_graph_options( $type, $atts, &$options ) {
 		if ( $type === 'pie' ) {
-			self::convert_shortcode_att_to_bool_google_att( 'pie_hole', 'pieHole', $atts, $options );
+			self::convert_shortcode_att_to_google_att( 'pie_hole', 'pieHole', $atts, $options );
 		}
 	}
 
@@ -1317,7 +1317,8 @@ class FrmProGraphsController {
 		if ( isset( $atts['x_end'] ) && $atts['x_end'] ) {
 			$end_date = $atts['x_end'];
 		} else {
-			$end_date = end( $graph_data )[0];
+			$final_row = end( $graph_data );
+			$end_date = $final_row[0];
 		}
 
 		return $end_date;

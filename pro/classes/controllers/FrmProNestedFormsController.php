@@ -483,7 +483,8 @@ class FrmProNestedFormsController {
 			// Find the connection between here and where logic is packaged
 
 			if ( empty( $args['entry_id'] ) ) {
-				$values = FrmEntriesHelper::setup_new_vars( $args['fields'], $args['form'], false, $pass_args );
+				$just_created_entry = FrmFormsController::just_created_entry( $args['parent_field']['form_id'] );
+				$values = FrmEntriesHelper::setup_new_vars( $args['fields'], $args['form'], $just_created_entry, $pass_args );
 			} else {
 				$entry = FrmEntry::getOne( $args['entry_id'], true );
 				if ( $entry && $entry->form_id == $args['form']->id ) {
@@ -602,7 +603,7 @@ class FrmProNestedFormsController {
 	 * @param $args
 	 */
 	private static function add_hidden_repeat_row_id( $args ) {
-		echo '<input type="hidden" name="' . esc_attr( $args['field_name'] ) . '[row_ids][]" value="' . esc_attr( $args['i'] ) . '" />';
+		echo '<input type="hidden" name="item_meta[' . $args['parent_field']['id'] . '][row_ids][]" value="' . esc_attr( $args['i'] ) . '" />';
 	}
 
 	/**

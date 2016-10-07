@@ -36,20 +36,25 @@ if ( isset( $new_field->field_options['post_field'] ) && $new_field->field_optio
         $field_name = 'field_options[hide_opt_'. $current_field_id .']';
     }
 
-    $new_field = (array) $new_field;
-    $new_field['value'] = (isset($field) && isset($field['hide_opt'][$meta_name])) ? $field['hide_opt'][$meta_name] : '';
+    $temp_field = get_object_vars( $new_field );
+    foreach ( $new_field->field_options as $fkey => $fval ) {
+        $temp_field[ $fkey ] = $fval;
+    }
+    unset( $fkey, $fval );
 
-    $new_field['exclude_cat'] = (isset($new_field['field_options']['exclude_cat'])) ? $new_field['field_options']['exclude_cat'] : '';
+    $temp_field['value'] = ( isset( $field ) && isset( $field['hide_opt'][ $meta_name ] ) ) ? $field['hide_opt'][ $meta_name ] : '';
 
-    $cat_dropdown = FrmFieldsHelper::dropdown_categories( array(
-        'name' => $field_name .'[]',
-        'id' => $field_name,
-        'field' => $new_field,
-        'show_option_all' => ( ( $new_field['type'] == 'data' && ( ! isset($field_type) || ( isset($field_type) && $field_type == 'data' ) ) ) ? $anything : ' ' )
-    ) );
-    // Set first value in category dropdown to empty string instead of 0
-    $cat_dropdown = str_replace("value='0'", 'value=""', $cat_dropdown);
-    echo $cat_dropdown;
+    $pass_args = array(
+        'name' => $field_name,
+        'id' => 'placeholder_id',
+        'show_option_all' => ( ( $new_field->type == 'data' && ( ( isset($field_type) && $field_type == 'data' ) ) ) ? $anything : ' ' ),
+        'location' => $is_settings_page ? 'form_actions' : 'field_logic',
+    );
+
+    echo FrmProPost::get_category_dropdown( $temp_field, $pass_args );
+
+    unset( $temp_field );
+
 }else{
     if ( ! isset($field_name) ) {
         $field_name = 'field_options[hide_opt_'. $current_field_id .'][]';
