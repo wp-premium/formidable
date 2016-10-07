@@ -419,10 +419,11 @@ class FrmProEntryMetaHelper{
 		if ( strpos( $default_value, '[auto_id') !== false ) {
 			list( $prefix, $shortcode ) = explode( '[auto_id', $default_value );
 			list( $shortcode, $suffix ) = explode( ']', $shortcode );
+
+			$max = str_replace( $prefix, '', $max );
+			$max = str_replace( $suffix, '', $max );
 		}
 
-		$max = str_replace( $prefix, '', $max );
-		$max = str_replace( $suffix, '', $max );
 		$max = filter_var( $max, FILTER_SANITIZE_NUMBER_INT );
 
 		return $max;

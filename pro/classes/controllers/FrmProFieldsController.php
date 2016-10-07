@@ -121,9 +121,6 @@ class FrmProFieldsController{
             }
         }
 
-		global $frm_vars;
-		$frm_vars['readonly'] = 'disabled';
-
         $field_name .= '['. $field['id'] .']';
         $html_id = FrmFieldsHelper::get_html_id($field);
 
@@ -139,15 +136,13 @@ class FrmProFieldsController{
 	 */
 	private static function get_filename_for_field( $type ) {
 		$default = array( 'phone', 'tag', 'date', 'number', 'password', 'image' );
-		$has_file = array( 'data', 'file', 'form', 'end_divider', 'html', 'rte', 'time', 'hidden', 'user_id' );
+		$has_file = array( 'data', 'file', 'form', 'end_divider', 'html', 'rte', 'time', 'hidden', 'user_id', 'scale' );
 
 		$filename = '';
 		if ( in_array( $type, $has_file ) ) {
 			$filename = 'back-end/field-' . $type;
 		} elseif ( in_array( $type, $default ) ) {
 			$filename = 'back-end/field-default';
-		} elseif ( $type == 'scale' ) {
-			$filename = '10radio';
 		}
 
 		return $filename;
@@ -255,7 +250,6 @@ class FrmProFieldsController{
             'user_id'           => $no_vis_desc + array(
                 'default_value' => true,
                 'logic'         => false,
-                'unique'        => true,
             ),
             'hidden'            => $no_vis_desc + array(
                 'calc'          => true,
@@ -396,8 +390,8 @@ class FrmProFieldsController{
 
 			if ( ( isset( $frm_vars['readonly'] ) && $frm_vars['readonly'] == 'disabled' ) || ( current_user_can( 'frm_edit_entries' ) && FrmAppHelper::is_admin() ) ) {
 				//not read only
-				//}else if($field['type'] == 'select'){
-				//$add_html .= ' disabled="disabled" ';
+			}else if ( $field['type'] == 'select' ) {
+				$add_html .= ' disabled="disabled" ';
 			} else if ( in_array( $field[ 'type' ], array( 'radio', 'checkbox' ) ) ) {
 				$add_html .= ' disabled="disabled" ';
 			} else {

@@ -259,6 +259,7 @@ a.frm_save_draft{
     margin-right:5px;
 	width:auto;
 	border:none;
+	vertical-align:baseline;
 }
 
 .with_frm_style :invalid,
@@ -1034,7 +1035,6 @@ table.frmcal-calendar .frmcal-today .frmcal_date{
     -webkit-box-shadow:none;
     box-shadow:none !important;
     display:inline;
-    width:auto !important;
 	-moz-appearance:textfield;
 	padding:0;
 }
