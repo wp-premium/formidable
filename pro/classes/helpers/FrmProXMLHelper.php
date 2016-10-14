@@ -158,6 +158,9 @@ class FrmProXMLHelper{
             set_time_limit(0); //Remove time limit to execute this function
         }
 
+		$unmapped_fields = self::get_unmapped_fields( $field_ids );
+		$field_ids = array_filter( $field_ids );
+
         if ( $f = fopen($path, 'r') ) {
             unset($path);
             $row = 0;
@@ -181,7 +184,7 @@ class FrmProXMLHelper{
 
                 self::convert_db_cols( $values );
                 self::convert_timestamps($values);
-                self::save_or_edit_entry($values);
+				self::save_or_edit_entry( $values, $unmapped_fields );
 
                 unset($_POST, $values);
 
@@ -195,6 +198,15 @@ class FrmProXMLHelper{
             return $row;
         }
     }
+
+	private static function get_unmapped_fields( $field_ids ) {
+		$unmapped_fields = array();
+		$mapped_fields = array_filter( $field_ids );
+		if ( $field_ids != $mapped_fields ) {
+			$unmapped_fields = array_diff( $field_ids, $mapped_fields );
+		}
+		return $unmapped_fields;
+	}
 
     private static function csv_to_entry_value($key, $field_id, $data, &$values) {
         $data[$key] = isset($data[$key]) ? $data[$key] : '';
@@ -353,12 +365,14 @@ class FrmProXMLHelper{
     /**
      * Save the entry after checking if it should be created or updated
      */
-    private static function save_or_edit_entry($values) {
+	private static function save_or_edit_entry( $values, $unmapped_fields ) {
         $editing = false;
         if ( isset($values['id']) && $values['item_key'] ) {
-
-            //check for updating by entry ID
-            $editing = FrmDb::get_var( 'frm_items', array( 'form_id' => $values['form_id'], 'id' => $values['id']) );
+			//check for updating by entry ID
+			$editing = FrmDb::get_var( 'frm_items', array( 'form_id' => $values['form_id'], 'id' => $values['id'] ) );
+			if ( $editing ) {
+				//self::merge_old_entry( $unmapped_fields, $values );
+			}
         }
 
         if ( $editing ) {
@@ -367,6 +381,15 @@ class FrmProXMLHelper{
             FrmEntry::create($values);
         }
     }
+
+	private static function merge_old_entry( $unmapped_fields, &$values ) {
+		if ( $unmapped_fields ) {
+			$entry = FrmEntry::getOne( $values['id'], true );
+			if ( $entry ) {
+				$values['item_meta'] += $entry->metas;
+			}
+		}
+	}
 
     public static function get_file_id($value) {
         global $wpdb;

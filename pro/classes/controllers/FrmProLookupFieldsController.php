@@ -1001,14 +1001,11 @@ class FrmProLookupFieldsController{
 			return;
 		}
 
-		if ( $order == 'no_order' ) {
-			// do nothing
-		} else if ( $order == 'ascending' ) {
+		if ( $order == 'ascending' || $order == 'descending' ) {
 			natcasesort( $final_values );
-			$final_values = array_values( $final_values );
-		} else if ( $order == 'descending' ) {
-			natcasesort( $final_values );
-			$final_values = array_reverse( $final_values );
+			if ( $order == 'descending' ) {
+				$final_values = array_reverse( $final_values );
+			}
 			$final_values = array_values( $final_values );
 		}
 	}

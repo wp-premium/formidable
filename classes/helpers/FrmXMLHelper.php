@@ -81,7 +81,7 @@ class FrmXMLHelper {
 
 	public static function import_xml_terms( $terms, $imported ) {
         foreach ( $terms as $t ) {
-			if ( term_exists((string) $t->term_slug, (string) $t->term_taxonomy) ) {
+			if ( term_exists( (string) $t->term_slug, (string) $t->term_taxonomy ) ) {
 			    continue;
 			}
 
@@ -139,7 +139,7 @@ class FrmXMLHelper {
                 'editable'      => (int) $item->editable,
                 'status'        => (string) $item->status,
                 'parent_form_id' => isset($item->parent_form_id) ? (int) $item->parent_form_id : 0,
-                'created_at'    => date('Y-m-d H:i:s', strtotime((string) $item->created_at)),
+                'created_at'    => date( 'Y-m-d H:i:s', strtotime( (string) $item->created_at ) ),
             );
 
             $form['options'] = FrmAppHelper::maybe_json_decode($form['options']);
@@ -205,6 +205,8 @@ class FrmXMLHelper {
 
             // Send pre 2.0 form options through function that creates actions
             self::migrate_form_settings_to_actions( $form['options'], $form_id, $imported, $switch = true );
+
+			do_action( 'frm_after_import_form', $form_id, $form );
 
 		    unset($form, $item);
 		}
@@ -506,8 +508,8 @@ class FrmXMLHelper {
 				'post_id'       => (int) $item->post_id,
 				'post_parent'   => (int) $item->post_parent,
 				'menu_order'    => (int) $item->menu_order,
-				'post_content'  => FrmFieldsHelper::switch_field_ids((string) $item->content),
-				'post_excerpt'  => FrmFieldsHelper::switch_field_ids((string) $item->excerpt),
+				'post_content'  => FrmFieldsHelper::switch_field_ids( (string) $item->content ),
+				'post_excerpt'  => FrmFieldsHelper::switch_field_ids( (string) $item->excerpt ),
 				'is_sticky'     => (string) $item->is_sticky,
 				'comment_status' => (string) $item->comment_status,
 				'post_date'     => (string) $item->post_date,

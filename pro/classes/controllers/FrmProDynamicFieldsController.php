@@ -9,9 +9,10 @@ class FrmProDynamicFieldsController {
 	 * @param object $field
 	 * @param array $values
 	 */
-	public static function add_options_for_dynamic_field( $field, &$values ) {
+	public static function add_options_for_dynamic_field( $field, &$values, $atts = array() ) {
 		if ( self::is_field_independent( $values ) ) {
-			$values['options'] = self::get_independent_options( $values, $field );
+			$entry_id = isset( $atts['entry_id'] ) ? $atts['entry_id'] : 0;
+			$values['options'] = self::get_independent_options( $values, $field, $entry_id );
 		} else if ( is_numeric( $values['value'] ) ) {
 			$values['options'] = array();
 			if ( $field->field_options['data_type'] == 'select' ) {
@@ -85,13 +86,7 @@ class FrmProDynamicFieldsController {
 			FrmProEntryMetaHelper::meta_through_join( $values['hide_field'], $selected_field, $observed_field_val, false, $metas );
 
 		} else if ( $values['restrict'] && $user_ID ) {
-			$entry_user = $user_ID;
-			if ( $entry_id && FrmAppHelper::is_admin() ) {
-				$entry_user = FrmDb::get_var( 'frm_items', array( 'id' => $entry_id ), 'user_id' );
-				if ( ! $entry_user || empty( $entry_user ) ) {
-					$entry_user = $user_ID;
-				}
-			}
+			$entry_user = FrmProEntryMetaHelper::user_for_dynamic_opts( $user_ID, compact( 'entry_id', 'field' ) );
 
 			if ( isset( $selected_field->form_id ) ) {
 				$linked_where = array( 'form_id' => $selected_field->form_id, 'user_id' => $entry_user );

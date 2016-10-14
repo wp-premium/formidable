@@ -239,7 +239,7 @@ class FrmProForm{
             $editable = isset($values['editable']) ? $values['editable'] : 0;
             $updated = $wpdb->update( $wpdb->prefix .'frm_forms', array( 'logged_in' => $logged_in, 'editable' => $editable), array( 'id' => $id ) );
 			if ( $updated ) {
-				wp_cache_delete( $id, 'frm_form' );
+				FrmForm::clear_form_cache();
 				unset( $updated );
 			}
         }

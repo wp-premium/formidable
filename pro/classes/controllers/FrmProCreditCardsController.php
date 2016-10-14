@@ -54,10 +54,12 @@ class FrmProCreditCardsController extends FrmProComboFieldsController {
 			'month' => array(
 				'type' => 'select', 'classes' => 'frm_first frm_fourth frm_cc_exp_month',
 				'label' => 0, 'options' => range( 1, 12 ),
+				'placeholder' => __( 'Month', 'formidable' ),
 			),
 			'year'  => array(
 				'type' => 'select', 'classes' => 'frm_fourth frm_cc_exp_year',
 				'label' => 0, 'options' => range( date('Y'), date('Y') + 10 ),
+				'placeholder' => __( 'Year', 'formidable' ),
 			),
 			'cvc'  => array(
 				'type' => $html5_type, 'classes' => 'frm_half frm_cc_cvc', 'label' => 0,
