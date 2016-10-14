@@ -325,7 +325,7 @@ class FrmProEntryMetaHelper{
         $query[] = $sub_query;
 
         if ( $this_field && isset($this_field->field_options['restrict']) && $this_field->field_options['restrict'] ) {
-            $query['e.user_id'] = get_current_user_id();
+			$query['e.user_id'] = self::get_entry_id_for_dynamic_opts( array( 'field' => $this_field ) );
         }
 
         // the ids of all the entries that have been selected in the linked form
@@ -343,6 +343,35 @@ class FrmProEntryMetaHelper{
 			}
         }
     }
+
+	private static function get_entry_id_for_dynamic_opts( $atts ) {
+		$user_id = get_current_user_id();
+		$entry_id = 0;
+		if ( FrmAppHelper::is_admin() ) {
+			$entry_id = FrmAppHelper::get_param( 'id', 0, 'get', 'absint' );
+		} elseif ( FrmAppHelper::doing_ajax() ) {
+			$entry_id = FrmAppHelper::get_param( 'editing_entry', 0, 'get', 'absint' );
+		}
+		$atts['entry_id'] = $entry_id;
+		return self::user_for_dynamic_opts( $user_id, $atts );
+	}
+
+	public static function user_for_dynamic_opts( $user_id, $atts ) {
+		$entry_user = (array) $user_id;
+		if ( $atts['entry_id'] ) {
+			$entry_owner = FrmDb::get_var( 'frm_items', array( 'id' => $atts['entry_id'] ), 'user_id' );
+			if ( $entry_owner ) {
+				$entry_user[] = $entry_owner;
+			}
+		}
+
+		/**
+		 * Set the user id(s) for the limited dynamic field options
+		 * @since 2.2.8
+		 * @return array|int
+		 */
+		return apply_filters( 'frm_dynamic_field_user', $entry_user, $atts );
+	}
 
     public static function &value_exists($field_id, $value, $entry_id = false) {
         if ( is_object($field_id) ) {

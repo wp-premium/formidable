@@ -95,6 +95,11 @@ class FrmProFormsHelper{
 			return;
 		}
 
+		$load_dropzone = apply_filters( 'frm_load_dropzone', true );
+		if ( ! $load_dropzone ) {
+			return;
+		}
+
 		$js = array();
 		foreach ( $frm_vars['dropzone_loaded'] as $field_id => $options ) {
 			$js[] = $options;

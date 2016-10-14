@@ -213,35 +213,6 @@ class FrmProAppHelper{
     	return $output;
     }
 
-	public static function rewriting_on() {
-      $permalink_structure = get_option('permalink_structure');
-
-      return ( $permalink_structure && ! empty( $permalink_structure ) );
-    }
-
-	/*
-    public static function current_url() {
-		$page_url = 'http';
-		if ( is_ssl() ) {
-			$page_url .= 's';
-		}
-		$page_url .= '://' . FrmAppHelper::get_server_value( 'SERVER_NAME' );
-
-		$port = FrmAppHelper::get_server_value( 'SERVER_PORT' );
-		if ( $port != '80' ) {
-			$page_url .= ':' . $port;
-		}
-		$page_url .= FrmAppHelper::get_server_value( 'REQUEST_URI' );
-
-		return $page_url;
-    }
-
-    public static function get_permalink_pre_slug_uri(){
-      preg_match('#^([^%]*?)%#', get_option('permalink_structure'), $struct);
-      return $struct[1];
-    }
-	*/
-
 	public static function get_custom_post_types() {
         $custom_posts = get_post_types( array(), 'object');
         foreach ( array( 'revision', 'attachment', 'nav_menu_item') as $unset) {

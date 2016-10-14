@@ -31,6 +31,11 @@ class FrmProComboFieldsController {
 		}
 	}
 
+	public static function get_dropdown_label( $atts ) {
+		$default = isset( $atts['sub_field']['placeholder'] ) ? $atts['sub_field']['placeholder'] : ' ';
+		return apply_filters( 'frm_combo_dropdown_label', $default, $atts );
+	}
+
 	public static function add_atts_to_input( $atts ) {
 		self::include_placeholder( $atts['field']['default_value'], $atts['key'] );
 

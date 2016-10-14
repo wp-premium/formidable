@@ -10,6 +10,14 @@ class FrmProSettingsController{
         include(FrmAppHelper::plugin_path() .'/pro/classes/views/settings/license_box.php');
     }
 
+	public static function standalone_license_box() {
+		$edd_update = new FrmProEddController();
+		$show_creds_form = ( ! is_multisite() || is_super_admin() || ! get_site_option( $edd_update->pro_wpmu_store ) );
+		if ( $show_creds_form ) {
+			include(FrmAppHelper::plugin_path() .'/pro/classes/views/settings/standalone_license_box.php');
+		}
+	}
+
     public static function general_style_settings($frm_settings){
         include(FrmAppHelper::plugin_path() .'/pro/classes/views/settings/general_style.php');
     }
