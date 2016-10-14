@@ -230,7 +230,7 @@ class FrmProFormsController{
 
     public static function replace_content_shortcodes($content, $entry, $shortcodes) {
         remove_filter('frm_replace_content_shortcodes', 'FrmFormsController::replace_content_shortcodes', 20);
-        return FrmProFieldsHelper::replace_shortcodes($content, $entry, $shortcodes);
+		return FrmProContent::replace_shortcodes( $content, $entry, $shortcodes );
     }
 
     public static function conditional_options($options) {

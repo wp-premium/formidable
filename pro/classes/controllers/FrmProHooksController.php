@@ -2,6 +2,7 @@
 
 class FrmProHooksController{
     public static function load_hooks(){
+		add_filter( 'load_textdomain_mofile', 'FrmProAppController::load_translation', 10, 2 );
         add_action('init', 'FrmProAppController::create_taxonomies', 0 );
         add_action('frm_after_install', 'FrmProDb::upgrade');
         add_filter('wpmu_drop_tables', 'FrmProAppController::drop_tables');
@@ -11,10 +12,11 @@ class FrmProHooksController{
 
         add_action('genesis_init', 'FrmProAppController::load_genesis');
 
-        // Displays Controller
+        // Views
         add_action('init', 'FrmProDisplaysController::register_post_types', 0);
         add_action('before_delete_post', 'FrmProDisplaysController::before_delete_post');
         add_filter('the_content', 'FrmProDisplaysController::get_content', 8);
+		add_action( 'init', 'FrmProContent::add_rewrite_endpoint' );
 
         // Display Shortcodes
         add_shortcode('display-frm-data', 'FrmProDisplaysController::get_shortcode');
@@ -31,7 +33,7 @@ class FrmProHooksController{
         add_filter('frm_update_entry', 'FrmProEntriesController::check_draft_status', 10, 2);
         add_action('frm_after_create_entry', 'FrmProEntriesController::remove_draft_hooks', 1);
         add_action('frm_process_entry', 'FrmProEntriesController::process_update_entry', 10, 4);
-        add_filter('frm_prepare_data_before_db', 'FrmProEntryMeta::prepare_data_before_db', 10, 3);
+		add_filter( 'frm_prepare_data_before_db', 'FrmProEntryMeta::prepare_data_before_db', 10, 4 );
         add_action('frm_display_form_action', 'FrmProEntriesController::edit_update_form', 10, 5);
         add_action('frm_submit_button_action', 'FrmProEntriesController::ajax_submit_button');
         add_filter('frm_success_filter', 'FrmProEntriesController::get_confirmation_method', 10, 3);
@@ -59,7 +61,7 @@ class FrmProHooksController{
 
 		// File field
 		add_filter( 'frm_validate_file_field_entry', 'FrmProFileField::validate', 10, 4 );
-		add_filter( 'frm_prepare_data_before_db', 'FrmProFileField::prepare_data_before_db', 10, 3 );
+		add_filter( 'frm_prepare_data_before_db', 'FrmProFileField::prepare_data_before_db', 10, 4 );
 		add_action( 'frm_before_destroy_entry', 'FrmProFileField::delete_files_with_entry', 10, 2 );
 
         // Entry and Meta Helpers
@@ -423,8 +425,7 @@ class FrmProHooksController{
     }
 
     public static function load_view_hooks() {
-        // Fields Helper
-        add_filter('frm_display_entry_content', 'FrmProFieldsHelper::replace_shortcodes', 10, 7);
+		add_filter( 'frm_display_entry_content', 'FrmProContent::replace_shortcodes', 10, 7 );
 
 		// address
 		add_filter( 'frm_get_address_display_value', 'FrmProAddressesController::display_value' );

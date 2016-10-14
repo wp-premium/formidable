@@ -1,6 +1,6 @@
 <?php
 
-class FrmSettings{
+class FrmSettings {
     public $option_name = 'frm_options';
     public $menu;
     public $mu_menu;
@@ -147,7 +147,7 @@ class FrmSettings{
 
     private function fill_recaptcha_settings() {
         $privkey = '';
-        $re_lang = 'en';
+		$re_lang = '';
 
         if ( ! isset($this->pubkey) ) {
             // get the options from the database

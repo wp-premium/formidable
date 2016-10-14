@@ -87,16 +87,14 @@ class FrmProEntryMeta{
      * @return array|string $meta_value
      *
      */
-	public static function prepare_data_before_db( $meta_value, $field_id, $entry_id ) {
+	public static function prepare_data_before_db( $meta_value, $field_id, $entry_id, $atts ) {
 		// If confirmation field or 0 index, exit now
-		if ( ! is_numeric( $field_id ) || $field_id === 0 ) {
+		if ( ! $atts['field'] ) {
 			return $meta_value;
 		}
 
-		$field = FrmField::getOne($field_id);
-
-		if ( $field->type == 'tag' ) {
-			self::create_new_tags( $field, $entry_id, $meta_value );
+		if ( $atts['field']->type == 'tag' ) {
+			self::create_new_tags( $atts['field'], $entry_id, $meta_value );
 		}
 
 		return $meta_value;

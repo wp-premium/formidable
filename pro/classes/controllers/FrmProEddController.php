@@ -55,6 +55,7 @@ class FrmProEddController extends FrmAddon {
         delete_option( $this->pro_auth_store );
         delete_site_option( $this->pro_cred_store );
         delete_site_option( $this->pro_auth_store );
+		parent::clear_license();
 	}
 
 	public function set_active( $is_active ) {

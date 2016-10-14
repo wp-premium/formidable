@@ -70,7 +70,7 @@ class FrmProDisplaysController {
 
 		if ( isset( $_REQUEST['form'] ) && is_numeric( $_REQUEST['form'] ) && isset( $query->query_vars['post_type'] ) && self::$post_type == $query->query_vars['post_type'] ) {
 			$query->query_vars['meta_key'] = 'frm_form_id';
-			$query->query_vars['meta_value'] = (int)$_REQUEST['form'];
+			$query->query_vars['meta_value'] = absint( $_REQUEST['form'] );
 		}
 
 		return $query;
@@ -1496,7 +1496,12 @@ class FrmProDisplaysController {
 	 * @return string
 	 */
 	private static function get_detail_param( $view, $atts ) {
-		return FrmAppHelper::simple_get( $view->frm_param, 'sanitize_title', $atts['auto_id'] );
+		$entry_key = get_query_var( $view->frm_param );
+		if ( ! empty( $entry_key ) ) {
+			// for compatibility with features checking GET
+			$_GET[ $view->frm_param ] = $entry_key;
+		}
+		return $entry_key;
 	}
 
 	/**

@@ -323,17 +323,15 @@ class FrmProFileField {
      * @return array|string $meta_value
      *
      */
-	public static function prepare_data_before_db( $meta_value, $field_id, $entry_id ) {
+	public static function prepare_data_before_db( $meta_value, $field_id, $entry_id, $atts ) {
 		// If confirmation field or 0 index, exit now
-		if ( ! is_numeric( $field_id ) || $field_id === 0 ) {
+		if ( ! $atts['field'] ) {
 			return $meta_value;
 		}
 
-		$field = FrmField::getOne( $field_id );
-
-		if ( $field->type == 'file' ) {
+		if ( $atts['field']->type == 'file' ) {
 			// Upload files and get new meta value for file upload fields
-			$meta_value = self::prepare_file_upload_meta( $meta_value, $field, $entry_id );
+			$meta_value = self::prepare_file_upload_meta( $meta_value, $atts['field'], $entry_id );
 
 			if ( is_array( $meta_value ) ) {
 				$meta_value = array_map( 'intval', array_filter( $meta_value ) );

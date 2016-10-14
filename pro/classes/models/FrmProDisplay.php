@@ -237,20 +237,6 @@ class FrmProDisplay{
 			if ( $values['dyncontent'] == '' ) {
                 $errors[] = __( 'Dynamic Content cannot be blank', 'formidable' );
 			}
-
-			if ( ! FrmProAppHelper::rewriting_on() ) {
-				if ( $values['param'] == '' ) {
-					$errors[] = __( 'Parameter Name cannot be blank if content is dynamic', 'formidable' );
-				}
-
-				if ( $values['type'] == '' ) {
-					$errors[] = __( 'Parameter Value cannot be blank if content is dynamic', 'formidable' );
-				}
-			} else {
-				if ( $values['type'] == '' ) {
-					$errors[] = __( 'Detail Link cannot be blank if content is dynamic', 'formidable' );
-				}
-            }
         }
 
 		if ( isset( $values['options']['where'] ) ) {
