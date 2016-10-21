@@ -4,7 +4,10 @@ class FrmProHooksController{
     public static function load_hooks(){
 		add_filter( 'load_textdomain_mofile', 'FrmProAppController::load_translation', 10, 2 );
         add_action('init', 'FrmProAppController::create_taxonomies', 0 );
-        add_action('frm_after_install', 'FrmProDb::upgrade');
+
+		add_action( 'frm_before_install', 'FrmProDb::before_free_version_db_upgrade' );
+		add_action( 'frm_after_install', 'FrmProDb::upgrade' );
+
         add_filter('wpmu_drop_tables', 'FrmProAppController::drop_tables');
 
         add_shortcode('frm_set_get', 'FrmProAppController::set_get');
