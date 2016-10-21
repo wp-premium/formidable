@@ -52,6 +52,15 @@ class FrmProDb{
     }
 
 	/**
+	 * Make sure new endpoints are added before the free version upgrade happens
+	 *
+	 * @since 2.02.09
+	 */
+	public static function before_free_version_db_upgrade() {
+		FrmProContent::add_rewrite_endpoint();
+	}
+
+	/**
 	 * Delete orphaned entries from duplicated repeating section data
 	 */
     public static function migrate_to_37() {
