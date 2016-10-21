@@ -47,6 +47,8 @@ class FrmProFormsHelper{
 		if ( self::is_initial_load_for_at_least_one_form( $frm_vars ) ) {
 			// Check the logic on all dependent fields
 			if ( isset( $frm_vars['dep_logic_fields'] ) && ! empty( $frm_vars['dep_logic_fields'] ) ) {
+				// TODO: when this is missing and only Dynamic fields on page, problems happen.
+
 				echo 'var frmHide=' . json_encode( $frm_vars['dep_logic_fields'] ) . ';';
 				echo 'if(typeof __frmHideOrShowFields == "undefined"){__frmHideOrShowFields=frmHide;}';
 				echo 'else{__frmHideOrShowFields=jQuery.extend(__frmHideOrShowFields,frmHide);}';

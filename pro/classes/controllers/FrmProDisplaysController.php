@@ -1497,10 +1497,13 @@ class FrmProDisplaysController {
 	 */
 	private static function get_detail_param( $view, $atts ) {
 		$entry_key = get_query_var( $view->frm_param );
-		if ( ! empty( $entry_key ) ) {
+		if ( empty( $entry_key ) ) {
+			$entry_key = FrmAppHelper::simple_get( $view->frm_param, 'sanitize_title', $atts['auto_id'] );
+		} else {
 			// for compatibility with features checking GET
 			$_GET[ $view->frm_param ] = $entry_key;
 		}
+
 		return $entry_key;
 	}
 
