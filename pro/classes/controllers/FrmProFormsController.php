@@ -597,8 +597,7 @@ class FrmProFormsController{
 
 		$post_values = stripslashes_deep( $_POST );
 		if ( ! isset( $values['custom_style'] ) ) {
-			$frm_settings = FrmAppHelper::get_settings();
-			$values['custom_style'] = ( $post_values && isset( $post_values['options']['custom_style'] ) ) ? absint( $_POST['options']['custom_style'] ) : ( $frm_settings->load_style != 'none' );
+			$values['custom_style'] = FrmAppHelper::custom_style_value( $post_values );
 		}
 
 		foreach ( array( 'before', 'after', 'submit' ) as $h ) {
