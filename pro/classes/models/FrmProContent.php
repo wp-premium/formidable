@@ -179,7 +179,7 @@ class FrmProContent {
 	public static function get_pretty_url( $atts ) {
 		global $post;
 		$base_url = untrailingslashit( $post ? get_permalink( $post->ID ) : $_SERVER['REQUEST_URI'] );
-		if ( self::rewriting_on() ) {
+		if ( ! is_front_page() && self::rewriting_on() ) {
 			$url = $base_url . '/' . $atts['param'] . '/' . $atts['param_value'];
 		} else {
 			$url = esc_url_raw( add_query_arg( $atts['param'], $atts['param_value'], $base_url ) );
@@ -195,9 +195,31 @@ class FrmProContent {
 
 	public static function add_rewrite_endpoint() {
 		$rewrite_params = self::get_rewrite_params();
-		foreach ( $rewrite_params as $param ) {
-			add_rewrite_endpoint( $param, EP_PERMALINK | EP_PAGES );
+		if ( ! empty( $rewrite_params ) ) {
+			foreach ( $rewrite_params as $param ) {
+				add_rewrite_endpoint( $param, EP_PERMALINK | EP_PAGES );
+			}
+			add_action( 'request', 'FrmProContent::fix_home_page_query' );
 		}
+	}
+
+
+	/**
+	 * This is a workaround for a bug in WordPress Core
+	 * https://core.trac.wordpress.org/ticket/23867
+	 * @since 2.2.10
+	 */
+	public static function fix_home_page_query( $query ) {
+		$rewrite_params = self::get_rewrite_params();
+		$included_params = array_intersect( $rewrite_params, array_keys( $query ) );
+		if ( ! empty( $included_params ) ) {
+			foreach ( $included_params as $key ) {
+				$_GET[ $key ] = $query[ $key ];
+				unset( $query[ $key ] );
+			}
+		}
+
+		return $query;
 	}
 
 	/*

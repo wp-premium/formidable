@@ -23,7 +23,7 @@ class FrmProCopiesController{
 
 	public static function save_copied_form( $id, $values ) {
         global $blog_id, $wpdb;
-        if ( isset($values['options']['copy']) ) {
+        if ( isset( $values['options']['copy'] ) && $values['options']['copy'] ) {
             FrmProCopy::create( array( 'form_id' => $id, 'type' => 'form'));
         } else {
             $wpdb->delete(FrmProCopy::table_name(), array( 'type' => 'form', 'form_id' => $id, 'blog_id' => $blog_id));
@@ -59,5 +59,4 @@ class FrmProCopiesController{
 			unset( $copy );
         }
     }
-
 }
