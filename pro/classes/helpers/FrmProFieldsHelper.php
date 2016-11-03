@@ -424,180 +424,61 @@ class FrmProFieldsHelper{
     }
 
 	public static function setup_new_vars( $values, $field ) {
-        $values['use_key'] = false;
+		$values['entry_id'] = 0;
 
-        foreach ( self::get_default_field_opts($values, $field) as $opt => $default ) {
-            $values[$opt] = (isset($field->field_options[$opt]) && $field->field_options[$opt] != '') ? $field->field_options[$opt] : $default;
-            unset($opt, $default);
-        }
+		self::fill_field_options( $field, $values, false );
+		self::prepare_field_array( $field, $values );
 
-        $values['hide_field'] = (array) $values['hide_field'];
-        $values['hide_field_cond'] = (array) $values['hide_field_cond'];
-        $values['hide_opt'] = (array) $values['hide_opt'];
+		if ( $values['type'] == 'scale' ) {
+			$values['minnum'] = 1;
+			$values['maxnum'] = 10;
 
-		if ( $values['type'] == 'data' && in_array( $values['data_type'], array( 'select', 'radio', 'checkbox' ) ) && is_numeric( $values['form_select'] ) ) {
-            FrmProDynamicFieldsController::add_options_for_dynamic_field( $field, $values );
-		} else if ( $values['type'] == 'lookup' ) {
-			FrmProLookupFieldsController::maybe_get_initial_lookup_field_options( $values );
-		} else if ( $values['type'] == 'scale' ) {
-            $values['minnum'] = 1;
-            $values['maxnum'] = 10;
-		} else if ( $values['type'] == 'date' ) {
-            $values['value'] = FrmProAppHelper::maybe_convert_from_db_date($values['value'], 'Y-m-d');
-		} else if ( $values['type'] == 'time' ) {
-            $values['options'] = self::get_time_options($values);
-        } else if ( $values['type'] == 'user_id' && FrmAppHelper::is_admin() && current_user_can('frm_edit_entries') && ! FrmAppHelper::is_admin_page('formidable' ) ) {
-            if ( self::field_on_current_page($field) ) {
-                $user_ID = get_current_user_id();
-                $values['type'] = 'select';
-                $values['options'] = self::get_user_options();
-                $values['use_key'] = true;
-                $values['custom_html'] = FrmFieldsHelper::get_default_html('select');
+		} else if ( $values['type'] == 'user_id' || $values['original_type'] == 'user_id' ) {
+			$show_admin_field = FrmAppHelper::is_admin() && current_user_can('frm_edit_entries') && ! FrmAppHelper::is_admin_page('formidable' );
+			if ( $show_admin_field && self::field_on_current_page( $field ) ) {
+				$user_ID = get_current_user_id();
 				$values['value'] = ( $_POST && isset($_POST['item_meta'][ $field->id ] ) ) ? $_POST['item_meta'][ $field->id ] : $user_ID;
-            }
-		} else if ( ! empty( $values['options'] ) ) {
-			foreach ( $values['options'] as $val_key => $val_opt ) {
-				if ( is_array( $val_opt ) ) {
-					foreach ( $val_opt as $opt_key => $opt ) {
-                        $values['options'][$val_key][$opt_key] = self::get_default_value($opt, $field, false);
-                        unset( $opt_key, $opt );
-                    }
-                }else{
-                   $values['options'][$val_key] = self::get_default_value($val_opt, $field, false);
-                }
-				unset( $val_key, $val_opt );
-            }
-        }
+			}
+		}
 
-		if ( $values['post_field'] == 'post_category' ) {
-            $values['use_key'] = true;
-            $values['options'] = self::get_category_options($values);
-            if ( $values['type'] == 'data' && $values['data_type'] == 'select' && ( ! $values['multiple'] || $values['autocom'] ) ) {
-                // add a blank option
-                $values['options'] = array( '' => '') + (array) $values['options'];
-            }
-		} else if ( $values['post_field'] == 'post_status' ) {
-            $values['use_key'] = true;
-			$values['options'] = self::get_status_options( $field, $values['options'] );
-        }
+		self::prepare_post_fields( $field, $values );
+		self::filter_default_values( $field, $values );
+		self::add_field_javascript( $values );
 
+		return $values;
+	}
+
+	private static function filter_default_values( $field, &$values ) {
 		if ( is_array( $values['value'] ) ) {
 			foreach ( $values['value'] as $val_key => $val ) {
 				$values['value'][ $val_key ] = apply_filters( 'frm_filter_default_value', $val, $field, false );
 			}
 		} else if ( ! empty( $values['value'] ) ) {
-            $values['value'] = apply_filters('frm_filter_default_value', $values['value'], $field, false);
-        }
-
-        self::add_field_javascript( $values );
-
-        return $values;
-    }
-
-	/**
-	* Initialize the field array when a field is loaded independent of the rest of the form
-	*
-	* @param object $field_object
-	* @return array $args
-	*/
-	public static function initialize_array_field( $field_object, $args = array() ) {
-		$field_values = array( 'id', 'required', 'name', 'description', 'form_id', 'options', 'field_key', 'type' );
-		$field = array( 'value' => '' );
-		foreach ( $field_values as $field_value ) {
-			$field[ $field_value ] = $field_object->{$field_value};
+			$values['value'] = apply_filters( 'frm_filter_default_value', $values['value'], $field, false );
 		}
-
-		$field['original_type'] = $field['type'];
-		$field['type'] = apply_filters( 'frm_field_type', $field['type'], $field_object, '' );
-		$field['size'] = ( isset( $field_object->field_options['size'] ) && $field_object->field_options['size'] != '' ) ? $field_object->field_options['size'] : '';
-		$field['blank'] = $field_object->field_options['blank'];
-		$field['default_value'] = isset( $args['default_value'] ) ? $args['default_value'] : '';
-
-		if ( isset( $args['field_id'] ) ) {
-			// this might not be needed. Is field_id ever different from $field['id']?
-			$field['id'] = $args['field_id'];
-		}
-
-		return $field;
 	}
 
-	/**
-	* Add field-specific JavaScript to global $frm_vars
-	*
-	* @since 2.01.0
-	* @param array $values
-	*/
-	public static function add_field_javascript( $values ) {
-		self::setup_conditional_fields($values);
-		FrmProLookupFieldsController::setup_lookup_field_js( $values );
-	}
-
-    public static function setup_edit_vars( $values, $field, $entry_id = false ) {
-        $values['use_key'] = false;
+	public static function setup_edit_vars( $values, $field, $entry_id = 0 ) {
+		$values['entry_id'] = $entry_id;
 
 		self::fill_field_options( $field, $values );
+		self::prepare_field_array( $field, $values );
 
-        $values['hide_field'] = (array) $values['hide_field'];
-        $values['hide_field_cond'] = (array) $values['hide_field_cond'];
-        $values['hide_opt'] = (array) $values['hide_opt'];
-
-		if ( $values['type'] == 'lookup' ) {
-			FrmProLookupFieldsController::maybe_get_initial_lookup_field_options( $values );
-
-		} else if ( $values['type'] == 'data' && in_array($values['data_type'], array( 'select', 'radio', 'checkbox')) && is_numeric($values['form_select']) ) {
-			FrmProDynamicFieldsController::add_options_for_dynamic_field( $field, $values, compact( 'entry_id' ) );
-        } else if ( $values['type'] == 'date' || $values['original_type'] == 'date' ) {
-            $values['value'] = FrmProAppHelper::maybe_convert_from_db_date( $values['value'] );
-
-        } else if ( $values['type'] == 'hidden' && FrmAppHelper::is_admin() && current_user_can('administrator') && ! FrmAppHelper::is_admin_page('formidable' ) ) {
-            if ( self::field_on_current_page($field) ) {
-                $values['type'] = 'text';
-                $values['custom_html'] = FrmFieldsHelper::get_default_html('text');
-            }
-        } else if ( $values['type'] == 'time' ) {
-            $values['options'] = self::get_time_options($values);
-        } else if ( $values['type'] == 'user_id' && FrmAppHelper::is_admin() && current_user_can('frm_edit_entries') && ! FrmAppHelper::is_admin_page('formidable' ) ) {
-            if ( self::field_on_current_page($field) ) {
-                $values['type'] = 'select';
-                $values['options'] = self::get_user_options();
-                $values['use_key'] = true;
-                $values['custom_html'] = FrmFieldsHelper::get_default_html('select');
-            }
-		} else if ( $values['type'] == 'tag' ) {
+		if ( $values['type'] == 'tag' ) {
 			if ( empty( $values['value'] ) ) {
-                self::tags_to_list($values, $entry_id);
-            }
-        } else if ( ! empty($values['options']) && ( ! FrmAppHelper::is_admin() || ! FrmAppHelper::is_admin_page('formidable' ) ) ) {
-			foreach ( $values['options'] as $val_key => $val_opt ) {
-				if ( is_array( $val_opt ) ) {
-					foreach ( $val_opt as $opt_key => $opt ) {
-						$values['options'][ $val_key ][ $opt_key ] = self::get_default_value( $opt, $field, false );
-                        unset($opt_key, $opt);
-                    }
-                }else{
-                   $values['options'][$val_key] = self::get_default_value($val_opt, $field, false);
-                }
-                unset($val_key, $val_opt);
-            }
-        }
+				self::tags_to_list($values, $entry_id);
+			}
+		}
 
-		if ( $values['post_field'] == 'post_category' ) {
-            $values['use_key'] = true;
-            $values['options'] = self::get_category_options($values);
-            if ( $values['type'] == 'data' && $values['data_type'] == 'select' && ( ! $values['multiple'] || $values['autocom'] ) ) {
-                $values['options'] = array( '' => '') + (array) $values['options'];
-            }
-		} else if ( $values['post_field'] == 'post_status' ) {
-            $values['use_key'] = true;
-			$values['options'] = self::get_status_options( $field, $values['options'] );
-        }
+		self::maybe_show_hidden_field( $field, $values );
+		self::prepare_post_fields( $field, $values );
 
 		FrmProNestedFormsController::format_saved_values_for_hidden_nested_forms( $values );
 
-        self::add_field_javascript( $values );
+		self::add_field_javascript( $values );
 
-        return $values;
-    }
+		return $values;
+	}
 
 	/**
 	* Populate the options for a field when loaded (front and back-end)
@@ -606,14 +487,110 @@ class FrmProFieldsHelper{
 	* @param object $field
 	* @param array $values, pass by reference
 	*/
-	private static function fill_field_options( $field, &$values ) {
+	private static function fill_field_options( $field, &$values, $allow_blank = true ) {
+		$values['use_key'] = false;
+
 		foreach ( self::get_default_field_opts( $values, $field ) as $opt => $default ) {
-			if ( isset( $field->field_options[ $opt ] ) ) {
+			$use_value = isset( $field->field_options[ $opt ] ) && ( $field->field_options[ $opt ] != '' || $allow_blank );
+			if ( $use_value ) {
 				$values[ $opt ] = $field->field_options[ $opt ];
 			} else {
 				$values[ $opt ] = $default;
 			}
 		}
+	}
+
+	/**
+	* Used to setup fields for new and edit
+	*
+	* @since 2.2.10
+	*/
+	private static function prepare_field_array( $field, &$values ) {
+		$values['hide_field'] = (array) $values['hide_field'];
+		$values['hide_field_cond'] = (array) $values['hide_field_cond'];
+		$values['hide_opt'] = (array) $values['hide_opt'];
+		$values['name'] = self::get_default_value( $values['name'], $field, false );
+		self::prepare_field_types( $field, $values );
+	}
+
+	private static function prepare_field_types( $field, &$values ) {
+
+		if ( $values['type'] == 'data' && in_array( $values['data_type'], array( 'select', 'radio', 'checkbox' ) ) && is_numeric( $values['form_select'] ) ) {
+			FrmProDynamicFieldsController::add_options_for_dynamic_field( $field, $values, array( 'entry_id' => $values['entry_id'] ) );
+	
+		} elseif ( $values['type'] == 'time' ) {
+			$values['options'] = self::get_time_options( $values );
+		} elseif ( $values['type'] == 'date' || $values['original_type'] == 'date' ) {
+			$values['value'] = FrmProAppHelper::maybe_convert_from_db_date( $values['value'] );
+		} elseif ( $values['type'] == 'lookup' ) {
+			FrmProLookupFieldsController::maybe_get_initial_lookup_field_options( $values );
+		} elseif ( $values['type'] == 'user_id' ) {
+			self::prepare_user_id_field( $field, $values );
+		} elseif ( ! empty( $values['options'] ) ) {
+			$is_builder_page = FrmAppHelper::is_admin() && FrmAppHelper::is_admin_page('formidable' );
+			if ( ! $is_builder_page ) {
+				self::prepare_to_show_field_options( $field, $values );
+			}
+		}
+	}
+
+	private static function prepare_user_id_field( $field, &$values ) {
+		$show_admin_field = FrmAppHelper::is_admin() && current_user_can('frm_edit_entries') && ! FrmAppHelper::is_admin_page('formidable' );
+		if ( $show_admin_field && self::field_on_current_page( $field ) ) {
+			$values['type'] = 'select';
+			$values['options'] = self::get_user_options();
+			$values['use_key'] = true;
+			$values['custom_html'] = FrmFieldsHelper::get_default_html('select');
+		}
+	}
+
+	private static function prepare_post_fields( $field, &$values ) {		
+		if ( $values['post_field'] == 'post_category' ) {
+			$values['use_key'] = true;
+			$values['options'] = self::get_category_options( $values );
+			if ( $values['type'] == 'data' && $values['data_type'] == 'select' && ( ! $values['multiple'] || $values['autocom'] ) ) {
+				// add a blank option
+				$values['options'] = array( '' => '' ) + (array) $values['options'];
+			}
+		} else if ( $values['post_field'] == 'post_status' ) {
+			$values['use_key'] = true;
+			$values['options'] = self::get_status_options( $field, $values['options'] );
+		}
+	}
+
+	private static function prepare_to_show_field_options( $field, &$values ) {
+		foreach ( $values['options'] as $val_key => $val_opt ) {
+			if ( is_array( $val_opt ) ) {
+				foreach ( $val_opt as $opt_key => $opt ) {
+					$values['options'][ $val_key ][ $opt_key ] = self::get_default_value( $opt, $field, false );
+					unset( $opt_key, $opt );
+				}
+			} else {
+				$values['options'][ $val_key ] = self::get_default_value( $val_opt, $field, false );
+			}
+			unset( $val_key, $val_opt );
+		}
+	}
+
+	private static function maybe_show_hidden_field( $field, &$values ) {
+		if ( $values['type'] == 'hidden' ) {
+			$admin_edit = FrmAppHelper::is_admin() && current_user_can('administrator') && ! FrmAppHelper::is_admin_page('formidable' );
+			if ( $admin_edit && self::field_on_current_page( $field ) ) {
+				$values['type'] = 'text';
+				$values['custom_html'] = FrmFieldsHelper::get_default_html('text');
+			}
+		}
+	}
+
+	/**
+	 * Add field-specific JavaScript to global $frm_vars
+	 *
+	 * @since 2.01.0
+	 * @param array $values
+	 */
+	public static function add_field_javascript( $values ) {
+		self::setup_conditional_fields( $values );
+		FrmProLookupFieldsController::setup_lookup_field_js( $values );
 	}
 
     public static function tags_to_list(&$values, $entry_id) {
@@ -716,6 +693,33 @@ class FrmProFieldsHelper{
 		global $frm_input_masks;
 		$frm_input_masks[] = true;
 		return ' data-frmmask="'. esc_attr( preg_replace( '/\d/', '9', $format ) ) .'"';
+	}
+
+	/**
+	* Initialize the field array when a field is loaded independent of the rest of the form
+	*
+	* @param object $field_object
+	* @return array $args
+	*/
+	public static function initialize_array_field( $field_object, $args = array() ) {
+		$field_values = array( 'id', 'required', 'name', 'description', 'form_id', 'options', 'field_key', 'type' );
+		$field = array( 'value' => '' );
+		foreach ( $field_values as $field_value ) {
+			$field[ $field_value ] = $field_object->{$field_value};
+		}
+
+		$field['original_type'] = $field['type'];
+		$field['type'] = apply_filters( 'frm_field_type', $field['type'], $field_object, '' );
+		$field['size'] = ( isset( $field_object->field_options['size'] ) && $field_object->field_options['size'] != '' ) ? $field_object->field_options['size'] : '';
+		$field['blank'] = $field_object->field_options['blank'];
+		$field['default_value'] = isset( $args['default_value'] ) ? $args['default_value'] : '';
+
+		if ( isset( $args['field_id'] ) ) {
+			// this might not be needed. Is field_id ever different from $field['id']?
+			$field['id'] = $args['field_id'];
+		}
+
+		return $field;
 	}
 
 	/**
@@ -2834,7 +2838,7 @@ DEFAULT_HTML;
         $atts = wp_parse_args($atts, $defaults);
 
         if ( ! isset($atts['time_ago']) ) {
-			if ( strpos( $replace_with, ',' ) ) {
+			if ( ! is_array( $replace_with ) && strpos( $replace_with, ',' ) ) {
 				$replace_with = explode( ',', $replace_with );
 			}
 

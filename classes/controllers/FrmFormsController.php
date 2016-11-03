@@ -1046,13 +1046,8 @@ class FrmFormsController {
             $id = $key;
         }
 
-        // no form id or key set
-        if ( empty( $id ) ) {
-            return __( 'Please select a valid form', 'formidable' );
-        }
-
-        $form = FrmForm::getOne( $id );
-        if ( ! $form || $form->parent_form_id || $form->status == 'trash' ) {
+        $form = self::maybe_get_form_to_show( $id );
+        if ( ! $form ) {
             return __( 'Please select a valid form', 'formidable' );
         }
 
@@ -1083,6 +1078,19 @@ class FrmFormsController {
 
 		return $form;
     }
+
+	private static function maybe_get_form_to_show( $id ) {
+		$form = false;
+
+		if ( ! empty( $id ) ) { // no form id or key set
+			$form = FrmForm::getOne( $id );
+			if ( ! $form || $form->parent_form_id || $form->status == 'trash' ) {
+				$form = false;
+			}
+		}
+
+		return $form;
+	}
 
 	private static function is_viewable_draft_form( $form ) {
 		global $post;
@@ -1169,7 +1177,7 @@ class FrmFormsController {
             $class = 'frm_message';
         } else {
             $message = $frm_settings->failed_msg;
-            $class = 'frm_error_style';
+            $class = FrmFormsHelper::form_error_class();
         }
 
 		$message = FrmFormsHelper::get_success_message( array(
