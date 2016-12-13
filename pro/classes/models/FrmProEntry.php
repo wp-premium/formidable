@@ -87,7 +87,7 @@ class FrmProEntry{
         $form_fields = array_merge($section_fields, $form_fields);
 
         $new_values = $values;
-        unset($new_values['item_meta']);
+        unset( $new_values['item_meta'], $new_values['item_key'] );
 
         // allow for multiple embeded forms
         foreach ( $form_fields as $field ) {

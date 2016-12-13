@@ -25,7 +25,7 @@
 				FrmProAddressesController::include_sub_label( array(
 					'field' => $field, 'option_name' => $key . '_desc'
 				) );
-			}?>
+			} ?>
 		</div>
 	<?php } ?>
 </div>

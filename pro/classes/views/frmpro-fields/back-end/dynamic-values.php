@@ -16,4 +16,4 @@ if ( $display['calc'] ) {
 
 if ( $display['autopopulate'] ) {
 	FrmProLookupFieldsController::show_autopopulate_value_section_in_form_builder( $field );
-}?>
+} ?>
