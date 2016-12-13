@@ -1735,6 +1735,8 @@ class FrmProDisplaysController {
 			return;
 		}
 
+		$original_value = $where_val;
+
 		if ( $where_val == 'NOW' ) {
 			$where_val = current_time( 'mysql', 1 );
 		}
@@ -1748,7 +1750,9 @@ class FrmProDisplaysController {
 			}
 
 			// Convert date to GMT since that is the format in the DB
-			$where_val = get_gmt_from_date( $where_val );
+			if ( strpos( $original_value, 'hour' ) === false ) {
+				$where_val = get_gmt_from_date( $where_val );
+			}
 		}
 	}
 

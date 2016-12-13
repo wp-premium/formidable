@@ -10,7 +10,7 @@ class FrmAppHelper {
 	/**
 	 * @since 2.0
 	 */
-	public static $plug_version = '2.02.10';
+	public static $plug_version = '2.02.11';
 
     /**
      * @since 1.07.02
@@ -238,7 +238,7 @@ class FrmAppHelper {
 		if ( $src == 'get' ) {
             $value = isset( $_POST[ $param ] ) ? stripslashes_deep( $_POST[ $param ] ) : ( isset( $_GET[ $param ] ) ? stripslashes_deep( $_GET[ $param ] ) : $default );
             if ( ! isset( $_POST[ $param ] ) && isset( $_GET[ $param ] ) && ! is_array( $value ) ) {
-                $value = stripslashes_deep( htmlspecialchars_decode( urldecode( $_GET[ $param ] ) ) );
+                $value = stripslashes_deep( htmlspecialchars_decode( $_GET[ $param ] ) );
             }
 			self::sanitize_value( $sanitize, $value );
 		} else {
@@ -473,7 +473,7 @@ class FrmAppHelper {
 
 	public static function get_group_cached_keys( $group ) {
 		$cached = wp_cache_get( 'cached_keys', $group );
-		if ( ! $cached ) {
+		if ( ! $cached || ! is_array( $cached ) ) {
 			$cached = array();
 		}
 
@@ -1279,7 +1279,7 @@ class FrmAppHelper {
 	 * @param int|string $to in seconds
 	 * @return string $time_ago
 	 */
-	public static function human_time_diff( $from, $to = '' ) {
+	public static function human_time_diff( $from, $to = '', $levels = 1 ) {
 		if ( empty( $to ) ) {
 			$now = new DateTime;
 		} else {
@@ -1305,7 +1305,7 @@ class FrmAppHelper {
 			}
 		}
 
-		$levels_deep = apply_filters( 'frm_time_ago_levels', 1, compact( 'time_strings', 'from', 'to' ) );
+		$levels_deep = apply_filters( 'frm_time_ago_levels', $levels, compact( 'time_strings', 'from', 'to' ) );
 		$time_strings = array_slice( $time_strings, 0, $levels_deep );
 		$time_ago_string = $time_strings ? implode( ' ', $time_strings ) : '0 ' . __( 'seconds', 'formidable' );
 

@@ -59,10 +59,16 @@ function frmAdminBuildJS(){
 		if(typeof(show) == 'undefined'){
 			show = '';
 		}
+		var hide=deleteButton.data('hidelast');
+		if(typeof(hide) == 'undefined'){
+			hide = '';
+		}
 
 		if(show !== ''){
-			if ( deleteButton.closest('.frm_add_remove').find('.frm_remove_tag').length > 1 )
+			if ( deleteButton.closest('.frm_add_remove').find('.frm_remove_tag').length > 1 ) {
 				show = '';
+				hide = '';
+			}
 		}else if(id.indexOf('frm_logic_') === 0 && deleteButton.closest('.frm_logic_rows').find('.frm_logic_row').length<2){
 			show='#'+deleteButton.closest('td').children('.frm_add_logic_link').attr('id');
 		}else if(id.indexOf('frm_postmeta_') === 0){
@@ -84,8 +90,13 @@ function frmAdminBuildJS(){
 		var $fadeEle = jQuery(document.getElementById(id));
 		$fadeEle.fadeOut('slow', function(){
 			$fadeEle.remove();
-			if(show !== ''){
-				jQuery(show+' a,'+show).fadeIn('slow');
+
+			if ( hide !== '' ) {
+				jQuery( hide ).hide();
+			}
+
+			if ( show !== '' ) {
+				jQuery( show+' a,'+show ).fadeIn( 'slow' );
 			}
 
 			var action = jQuery(this).closest('.frm_form_action_settings');
@@ -1257,19 +1268,23 @@ function frmAdminBuildJS(){
 	}
 	
 	function showEmailRow(){
-		var action_key = jQuery(this).closest('.frm_form_action_settings').data('actionkey');
-		var email_row = '#frm_'+ jQuery(this).data('emailrow') +'_row';
-		jQuery('#frm_form_action_' + action_key + ' ' + email_row).fadeIn('slow');
+		var actionKey = jQuery(this).closest('.frm_form_action_settings').data('actionkey');
+		var rowType = this.getAttribute( 'data-emailrow' );
+
+		jQuery('#frm_form_action_' + actionKey + ' .frm_' + rowType + '_row').fadeIn('slow');
 		jQuery(this).fadeOut('slow');
 	}
 
 	function hideEmailRow(){
 		var action_box = jQuery(this).closest('.frm_form_action_settings');
-		var email_row = '#frm_'+ jQuery(this).data('emailrow') +'_row';
-		var email_button = '.frm_'+ jQuery(this).data('emailrow') +'_button';
-		jQuery(action_box).find(email_button).fadeIn('slow');
-		jQuery(action_box).find(email_row).fadeOut('slow', function(){
-			jQuery(action_box).find(email_row + ' input').val('');
+		var rowType = this.getAttribute( 'data-emailrow' );
+
+		var emailRowSelector = '.frm_'+ rowType +'_row';
+		var emailButtonSelector = '.frm_'+ rowType +'_button';
+
+		jQuery(action_box).find(emailButtonSelector).fadeIn('slow');
+		jQuery(action_box).find(emailRowSelector).fadeOut('slow', function(){
+			jQuery(action_box).find(emailRowSelector + ' input').val('');
 		});
 	}
 
@@ -2043,7 +2058,7 @@ function frmAdminBuildJS(){
         jQuery('.frm_multiselect').multiselect({
             templates: {ul:'<ul class="multiselect-container frm-dropdown-menu"></ul>'},
 			buttonContainer: '<div class="btn-group frm-btn-group" />',
-			nonSelectedText:frm_admin_js['default']
+			nonSelectedText:frm_admin_js['default']// TODO: should be noneSelectedText
         });
     }
 

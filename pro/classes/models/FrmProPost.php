@@ -528,25 +528,47 @@ class FrmProPost {
 		global $wpdb;
 
 		$field_ids = array();
-		foreach ( $action->post_content as $name => $value ) {
-			// Don't try to delete meta for the display ID since this is never a field ID
-			if ( $name == 'display_id' ) {
-				continue;
-			}
-
-			if ( is_numeric($value) ) {
-				$field_ids[] = $value;
-			} else if ( is_array( $value ) && isset( $value['field_id'] ) && is_numeric( $value['field_id'] ) ) {
-				$field_ids[] = $value['field_id'];
-			}
-			unset($name, $value);
-		}
+		self::filter_post_settings( $action->post_content );
+		self::get_post_field_ids_from_settings( $action->post_content, $field_ids );
 
 		if ( ! empty($field_ids) ) {
 			$where = array( 'item_id' => $entry->id, 'field_id' => $field_ids );
 			FrmDb::get_where_clause_and_values( $where );
 
 			$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . $wpdb->prefix . 'frm_item_metas' . $where['where'], $where['values'] ) );
+		}
+	}
+
+	/**
+	 * Don't try to delete meta for non-post field settings
+	 * @since 2.2.11
+	 */
+	private static function filter_post_settings( $settings ) {
+		$filtered = $settings;
+		foreach ( $settings as $name => $value ) {
+			if ( strpos( $name, 'post' ) !== 0 ) {
+				unset( $filtered[ $name ] );
+			}
+		}
+		$settings = $filtered;
+	}
+
+	/**
+	 * @since 2.2.11
+	 */
+	private static function get_post_field_ids_from_settings( $settings, &$field_ids ) {
+		foreach ( $settings as $name => $value ) {
+
+			if ( is_numeric( $value ) ) {
+				$field_ids[] = $value;
+			} else if ( is_array( $value ) ) {
+				if ( isset( $value['field_id'] ) && is_numeric( $value['field_id'] ) ) {
+					$field_ids[] = $value['field_id'];
+				} else {
+					self::get_post_field_ids_from_settings( $value, $field_ids );
+				}
+			}
+			unset( $name, $value );
 		}
 	}
 

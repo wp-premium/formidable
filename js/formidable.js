@@ -140,6 +140,7 @@ function frmFrontFormJS(){
 			maxFilesize: uploadFields[i].maxFilesize,
 			maxFiles: max,
 			uploadMultiple: uploadFields[i].uploadMultiple,
+			hiddenInputContainer:'#'+ form.attr('id'),
 			dictDefaultMessage: uploadFields[i].defaultMessage,
 			dictFallbackMessage: uploadFields[i].fallbackMessage,
 			dictFallbackText: uploadFields[i].fallbackText,
@@ -771,7 +772,7 @@ function frmFrontFormJS(){
 		}
 
 		if ( checkedVals.length === 0 ) {
-			checkedVals = '';
+			checkedVals = false;
 		}
 
 		return checkedVals;
@@ -1689,7 +1690,7 @@ function frmFrontFormJS(){
 				triggerChange(jQuery(childSelect), childFieldArgs.fieldKey);
 			}
 		} else {
-			addLoadingTextToLookup( childSelect );
+			disableLookup( childSelect );
 
 			// If all parents have values, check for updated options
 			jQuery.ajax({
@@ -1716,11 +1717,26 @@ function frmFrontFormJS(){
 		}
 	}
 
-	function addLoadingTextToLookup( childSelect ) {
-		if ( ! childSelect.value ) {
-			childSelect.options.length = 1;
-			childSelect.options[1] = new Option(frm_js.loading, '', false, false);
-		}
+	/**
+	 * Disable a Select Lookup field and add loading image
+	 *
+	 * @since 2.02.11
+	 * @param {object} childSelect
+	 */
+	function disableLookup( childSelect ) {
+		childSelect.className = childSelect.className + ' frm_loading_lookup';
+		childSelect.disabled = true;
+	}
+
+	/**
+	 * Enable a Select Lookup field and remove loading image
+	 *
+	 * @since 2.02.11
+	 * @param {object} childSelect
+	 */
+	function enableLookup( childSelect ) {
+		childSelect.disabled = false;
+		childSelect.className = childSelect.className.replace( ' frm_loading_lookup', '' );
 	}
 
 	/**
@@ -1750,6 +1766,8 @@ function frmFrontFormJS(){
 		setSelectLookupVal( childSelect, origVal );
 
 		maybeUpdateChosenOptions( childSelect );
+
+		enableLookup( childSelect );
 
 		// Trigger a change if the new value is different from the old value
 		if ( childSelect.value != origVal ) {
@@ -1816,6 +1834,8 @@ function frmFrontFormJS(){
 			currentValue = getValuesFromCheckboxInputs(inputs);
 		}
 
+		var defaultValue = jQuery( inputs[0] ).data( 'frmval' );
+
 		jQuery.ajax({
 			type:'POST',
 			url:frm_js.ajax_url,
@@ -1826,6 +1846,7 @@ function frmFrontFormJS(){
 				field_id:childFieldArgs.fieldId,
 				row_index:childFieldArgs.repeatRow,
 				current_value:currentValue,
+				default_value:defaultValue,
 				nonce:frm_js.nonce
 			},
 			success:function(newHtml){
@@ -1837,11 +1858,42 @@ function frmFrontFormJS(){
 					maybeHideRadioLookup( childFieldArgs, childDiv );
 				} else {
 					maybeShowRadioLookup( childFieldArgs, childDiv );
+					maybeSetDefaultCbRadioValue( childFieldArgs, inputs, defaultValue );
 				}
 
 				triggerChange( jQuery( inputs[0] ), childFieldArgs.fieldKey );
 			}
 		});
+	}
+
+	/**
+	 * Select the defatul value in a radio/checkbox field if no value is selected
+	 *
+	 * @since 2.02.11
+	 *
+	 * @param {Object} inputs
+	 * @param {Object} childFieldArgs
+	 * @param {string} childFieldArgs.inputType
+	 * @param {(string|Array)} defaultValue
+     */
+	function maybeSetDefaultCbRadioValue( childFieldArgs, inputs, defaultValue ) {
+		if ( defaultValue === undefined ) {
+			return;
+		}
+
+		var currentValue = false;
+		if ( childFieldArgs.inputType == 'radio' ) {
+			currentValue = getValueFromRadioInputs( inputs );
+		} else {
+			currentValue = getValuesFromCheckboxInputs(inputs);
+		}
+
+		if ( currentValue !== false || inputs.length < 1 ) {
+			return;
+		}
+
+		var inputName = inputs[0].name;
+		setCheckboxOrRadioDefaultValue( inputName, defaultValue )
 	}
 
 	/**
@@ -2591,10 +2643,21 @@ function frmFrontFormJS(){
 			return vals;
 		}
 
+		var count = 0;
+		var sep = '';
+
 		calcField.each(function(){
 			var thisVal = getOptionValue( field.thisField, this );
 			thisVal = thisVal.trim();
-			vals[field.valKey] += thisVal;
+
+			if ( count > 0 ) {
+				sep = ', ';
+			}
+
+			if ( thisVal !== '' ) {
+				vals[field.valKey] += sep + thisVal;
+				count++;
+			}
 		});
 
 		return vals;
@@ -3064,8 +3127,10 @@ function frmFrontFormJS(){
 
 					jQuery(object).find('.frm_ajax_loading').removeClass('frm_loading_now');
 					var formID = jQuery(object).find('input[name="form_id"]').val();
-					jQuery(object).closest( '#frm_form_'+ formID +'_container' ).replaceWith( response.content );
-					frmFrontForm.scrollMsg( formID );
+					jQuery(object).closest( '.frm_forms' ).replaceWith( response.content );
+					if ( frm_js.offset != -1 ) {
+						frmFrontForm.scrollMsg( formID, jQuery(object) );
+					}
 
 					if(typeof(frmThemeOverride_frmAfterSubmit) == 'function'){
 						var pageOrder = jQuery('input[name="frm_page_order_'+ formID +'"]').val();
@@ -3614,7 +3679,10 @@ function frmFrontFormJS(){
 				data:{action:'frm_entries_destroy', entry:entry_id, nonce:frm_js.nonce},
 				success:function(html){
 					if(html.replace(/^\s+|\s+$/g,'') == 'success'){
-						jQuery(document.getElementById(prefix+entry_id)).fadeOut('slow');
+						var container = jQuery(document.getElementById(prefix+entry_id));
+						container.fadeOut('slow', function(){
+							container.remove();
+						});
 						jQuery(document.getElementById('frm_delete_'+entry_id)).fadeOut('slow');
 					}else{
 						jQuery(document.getElementById('frm_delete_'+entry_id)).replaceWith(html);

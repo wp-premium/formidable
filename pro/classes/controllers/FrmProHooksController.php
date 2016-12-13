@@ -47,7 +47,7 @@ class FrmProHooksController{
 
         add_filter('frmpro_fields_replace_shortcodes', 'FrmProEntriesController::filter_shortcode_value', 10, 3);
         add_filter('frm_display_value_custom', 'FrmProEntriesController::filter_display_value', 1, 3);
-		add_filter( 'frm_display_value_atts', 'FrmProEntriesController::display_value_atts', 10, 2 );
+	    add_filter( 'frm_display_value_atts', 'FrmProEntriesController::display_value_atts', 10, 2 );
 
         add_action('frm_after_create_entry', 'FrmProEntriesController::maybe_set_cookie', 20, 2);
         add_filter('frm_setup_edit_entry_vars', 'FrmProEntriesController::setup_edit_vars');

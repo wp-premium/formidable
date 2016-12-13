@@ -277,6 +277,7 @@ class FrmProFormsController{
             'user_login'    => __( 'User Login', 'formidable' ),
             'user_email'    => __( 'Email', 'formidable' ),
             'avatar'        => __( 'Avatar', 'formidable' ),
+			'author_link'   => __( 'Author Link', 'formidable' ),
         );
 
         $options = array_merge($options, $user_fields);

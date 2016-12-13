@@ -260,12 +260,12 @@ class FrmProLookupFieldsController{
 		if ( in_array( $field_type, array( 'lookup', 'text', 'hidden' ) ) ) {
 			$form_fields = FrmField::get_all_for_form( $form_id );
 		} else {
-			$where = array(
-				'fi.form_id' => $form_id,
-				'type' => $field_type
-			);
+			$where = array( 'type' => $field_type );
+			$where[] = array( 'or' => 1, 'fi.form_id' => $form_id, 'fr.parent_form_id' => $form_id );
+
 			$form_fields = FrmField::getAll( $where );
 		}
+
 		return $form_fields;
 	}
 
@@ -309,19 +309,15 @@ class FrmProLookupFieldsController{
 		$select_field_text = __( '&mdash; Select Field &mdash;', 'formidable' );
 		echo '<option value="">' . esc_html( $select_field_text ) . '</option>';
 
+		$selected_value = empty( $field ) ? '' : $field['get_values_field'];
+
 		foreach ( $form_fields as $field_option ) {
 			if ( FrmField::is_no_save_field( $field_option->type ) ) {
 				continue;
 			}
 
-			if ( ! empty( $field ) && $field_option->id == $field['get_values_field'] ) {
-				$selected = ' selected="selected"';
-			} else {
-				$selected = '';
-			}
-
 			$field_name = FrmAppHelper::truncate( $field_option->name, 30 );
-			echo '<option value="' . esc_attr( $field_option->id ) . '"' . esc_attr( $selected ) . '>' . esc_html( $field_name ) . '</option>';
+			echo '<option value="' . esc_attr( $field_option->id ) . '"' . selected( $selected_value, $field_option->id ) . '>' . esc_html( $field_name ) . '</option>';
 		}
 	}
 
@@ -728,7 +724,8 @@ class FrmProLookupFieldsController{
 		);
 		$args = array(
 			'row_index' => FrmAppHelper::get_param( 'row_index', '', 'post', 'sanitize_text_field' ),
-			'current_value' => FrmAppHelper::get_param( 'current_value', '', 'post', 'sanitize_text_field' )
+			'current_value' => FrmAppHelper::get_param( 'current_value', '', 'post', 'sanitize_text_field' ),
+			'default_value' => FrmAppHelper::get_param( 'default_value', '', 'post', 'sanitize_text_field' ),
 		);
 
 		$child_field = FrmField::getOne( $field_id );
@@ -769,7 +766,7 @@ class FrmProLookupFieldsController{
 	 * @param array $final_values
 	 */
 	private static function show_dependent_cb_radio_lookup_options( $child_field, $args, $final_values ) {
-		$field = self::initialize_dependent_cb_radio_field_array( $child_field, $final_values );
+		$field = self::initialize_dependent_cb_radio_field_array( $child_field, $final_values, $args );
 
 		$saved_value_array = (array) $args['current_value'];
 
@@ -794,15 +791,17 @@ class FrmProLookupFieldsController{
 	 *
 	 * @param object $child_field
 	 * @param array $final_values
+	 * @param array $args
 	 * @return array $field
 	 */
-	private static function initialize_dependent_cb_radio_field_array( $child_field, $final_values ) {
+	private static function initialize_dependent_cb_radio_field_array( $child_field, $final_values, $args ) {
 		$field_options = $child_field->field_options;
 		$field = get_object_vars( $child_field ) + $field_options;
 		unset( $field['field_options'] );
 
 		$field['original_type'] = 'lookup';
 		$field['options'] = ( ! empty( $final_values ) ) ? $final_values : array( '' );
+		$field['default_value'] = $args['default_value'];
 
 		return $field;
 	}
@@ -931,7 +930,7 @@ class FrmProLookupFieldsController{
 			'entry_ids' => $entry_ids,
 		);
 
-		if ( FrmField::is_option_true_in_object( $child_field, 'get_most_recent_value' ) ){
+		if ( FrmField::is_option_true_in_object( $child_field, 'get_most_recent_value' ) ) {
 			$args['order_by'] = 'e.id DESC';
 			$args['limit'] = '1';
 		}

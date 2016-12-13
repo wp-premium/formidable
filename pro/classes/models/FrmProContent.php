@@ -312,7 +312,7 @@ class FrmProContent {
 			self::check_conditional_shortcode( $content, $args['entry']->{$args['tag']}, $atts, $args['tag'] );
 		} else {
 			if ( isset( $atts['time_ago'] ) ) {
-				$date = FrmAppHelper::human_time_diff( strtotime( $args['entry']->{$args['tag']} ) );
+				$date = FrmAppHelper::human_time_diff( strtotime( $args['entry']->{$args['tag']} ), '', absint( $atts['time_ago'] ) );
 			} else {
 				$date = FrmAppHelper::get_formatted_time( $args['entry']->{$args['tag']}, $atts['format'], $time_format );
 			}
@@ -487,6 +487,17 @@ class FrmProContent {
 					}
 				}
 				unset( $att_name );
+			}
+		} elseif ( $field && $field->type == 'time' ) {
+			$formatted_time = false;
+			foreach ( $conditions as $att_name ) {
+				if ( isset( $atts[ $att_name ] ) && $atts[ $att_name ] != '' && strtolower( $atts[ $att_name ] ) == 'now' ) {
+					$atts[ $att_name ] = FrmProAppHelper::get_date( 'H:i' );
+					if ( ! $formatted_time ) {
+						$replace_with = FrmProAppHelper::format_time( $replace_with, 'H:i' );
+						$formatted_time = true;
+					}
+				}
 			}
 		}
 
