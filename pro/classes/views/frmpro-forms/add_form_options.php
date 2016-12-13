@@ -113,7 +113,8 @@ if ( isset( $values['open_editable'] ) && empty( $values['open_editable'] ) ) {
 			</label>
 	    </td>
 	</tr>
-<?php } else { ?>
+<?php } else {
+	?>
 	<input type="hidden" value="0" name="options[protect_files]" />
 <?php } ?>
 
@@ -127,4 +128,5 @@ if ( is_multisite() ) {
         <input type="hidden" name="options[copy]" id="copy" value="1" />
     <?php
     }
-}
+} ?>
+</table>

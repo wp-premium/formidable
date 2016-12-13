@@ -536,8 +536,14 @@ class FrmProStatisticsController {
 		if ( strpos( $f, '_not_equal' ) !== false ) {
 			self::get_not_equal_filter_args( $f, $filter_args );
 
+		} else if ( strpos( $f, '_less_than_or_equal_to' ) !== false ) {
+			self::get_less_than_or_equal_to_filter_args( $f, $filter_args );
+
 		} else if ( strpos( $f, '_less_than' ) !== false ) {
 			self::get_less_than_filter_args( $f, $filter_args );
+
+		} else if ( strpos( $f, '_greater_than_or_equal_to' ) !== false ) {
+			self::get_greater_than_or_equal_to_filter_args( $f, $filter_args );
 
 		} else if ( strpos( $f, '_greater_than' ) !== false ) {
 			self::get_greater_than_filter_args( $f, $filter_args );
@@ -575,6 +581,18 @@ class FrmProStatisticsController {
 	}
 
 	/**
+	 * Get the filter arguments for a less_than_or_equal_to filter
+	 *
+	 * @since 2.02.11
+	 * @param string $f
+	 * @param array $filter_args
+	 */
+	private static function get_less_than_or_equal_to_filter_args( $f, &$filter_args ) {
+		$filter_args['field'] = str_replace( '_less_than_or_equal_to', '', $f );
+		$filter_args['operator'] = '<=';
+	}
+
+	/**
 	 * Get the filter arguments for a less_than filter
 	 *
 	 * @since 2.02.05
@@ -584,6 +602,18 @@ class FrmProStatisticsController {
 	private static function get_less_than_filter_args( $f, &$filter_args ) {
 		$filter_args['field'] = str_replace( '_less_than', '', $f );
 		$filter_args['operator'] = '<';
+	}
+
+	/**
+	 * Get the filter arguments for a greater_than_or_equal_to filter
+	 *
+	 * @since 2.02.11
+	 * @param string $f
+	 * @param array $filter_args
+	 */
+	private static function get_greater_than_or_equal_to_filter_args( $f, &$filter_args ) {
+		$filter_args['field'] = str_replace( '_greater_than_or_equal_to', '', $f );
+		$filter_args['operator'] = '>=';
 	}
 
 	/**
@@ -648,7 +678,8 @@ class FrmProStatisticsController {
 
 		if ( in_array( $filter_args['field'], array( 'created_at', 'updated_at' ) ) ) {
 			$filter_args['value'] = str_replace( array( '"', "'" ), "", $filter_args['value'] );
-			$filter_args['value'] = date( 'Y-m-d', strtotime( $filter_args['value'] ) );
+			$filter_args['value'] = date( 'Y-m-d H:i:s', strtotime( $filter_args['value'] ) );
+			$filter_args['value'] = get_gmt_from_date( $filter_args['value'] );
 		} else {
 			$filter_args['value'] = trim( trim( $filter_args['value'], "'" ), '"' );
 		}

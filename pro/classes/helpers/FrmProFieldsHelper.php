@@ -552,7 +552,7 @@ class FrmProFieldsHelper{
 				// add a blank option
 				$values['options'] = array( '' => '' ) + (array) $values['options'];
 			}
-		} else if ( $values['post_field'] == 'post_status' ) {
+		} else if ( $values['post_field'] == 'post_status' && ! in_array( $field->type, array( 'hidden', 'text' ) ) ) {
 			$values['use_key'] = true;
 			$values['options'] = self::get_status_options( $field, $values['options'] );
 		}
@@ -2457,6 +2457,8 @@ DEFAULT_HTML;
         if ( $user ) {
             if ( $user_info == 'avatar' ) {
                 $info = get_avatar( $user_id, $args['size'] );
+			} elseif ( $user_info == 'author_link' ) {
+				$info = get_author_posts_url( $user_id );
             } else {
                 $info = isset($user->$user_info) ? $user->$user_info : '';
             }
@@ -2720,13 +2722,14 @@ DEFAULT_HTML;
 	* @return string $img_html
 	*/
 	private static function get_file_display( $id, $atts ) {
-		if ( empty( $id ) ) {
+		if ( empty( $id ) || ! self::file_exists_by_id( $id ) ) {
 			return '';
 		}
 
 		$img_html = $image_url = '';
 		$image = wp_get_attachment_image_src( $id, $atts['size'], false );
 		$is_non_image = empty( $image );
+		// TODO: maybe use wp_attachment_is_image( $post_id );
 
 		if ( $atts['show_image'] ) {
 			$img_html = wp_get_attachment_image( $id, $atts['size'], $is_non_image );
@@ -2763,6 +2766,23 @@ DEFAULT_HTML;
 		$img_html = apply_filters( 'frm_image_html_array', $img_html, $atts );
 
 		return $img_html;
+	}
+
+	/**
+	 * Check if a file exists on the site
+	 *
+	 * @since 2.02.11
+	 * @param $id
+	 *
+	 * @return bool
+	 */
+	private static function file_exists_by_id( $id ) {
+		global $wpdb;
+
+		$query = $wpdb->prepare( 'SELECT post_type FROM ' . $wpdb->posts . ' WHERE ID=%d', $id );
+		$type = $wpdb->get_var( $query );
+
+		return ( $type === 'attachment' );
 	}
 
 	/**

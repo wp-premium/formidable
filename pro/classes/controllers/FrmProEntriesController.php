@@ -1386,6 +1386,7 @@ class FrmProEntriesController{
 			$atts['truncate'] = false;
 			$atts['html'] = true;
 		}
+
 		return $atts;
 	}
 
@@ -2493,16 +2494,10 @@ class FrmProEntriesController{
 		$atts['type'] = $field->type;
 		$atts['post_id'] = $entry->post_id;
 		$atts['entry_id'] = $entry->id;
-		if ( ! isset($atts['show_filename']) ) {
-			$atts['show_filename'] = false;
-		}
 
-		if ( $field->type == 'file' && ! isset( $atts['html'] ) ) {
-			// default to show the image instead of the url
-			$atts['html'] = 1;
-		}
+		self::add_frm_field_value_atts_for_file_upload_field( $field, $atts );
 
-		$tested_field_types = array( 'time' );
+		$tested_field_types = array( 'time', 'file' );
 
 		if ( in_array( $field->type, $tested_field_types ) || ! empty( $atts['format'] ) || ( isset($atts['show']) && ! empty($atts['show']) ) ) {
 
@@ -2520,6 +2515,40 @@ class FrmProEntriesController{
 		}
 
 		return $value;
+    }
+
+	/**
+	 * Add some default attributes for a file upload field in the frm-field-value shortcode
+	 *
+	 * @since 2.02.11
+	 *
+	 * @param object $field
+	 * @param array $atts
+	 */
+    private static function add_frm_field_value_atts_for_file_upload_field( $field, &$atts ) {
+	    if ( $field->type != 'file' ) {
+	    	return;
+	    }
+
+	    if ( ! isset( $atts['show_filename'] ) ) {
+		    $atts['show_filename'] = false;
+	    }
+
+	    if ( ! isset( $atts['size'] ) ) {
+		    $atts['size'] = 'thumbnail';
+	    }
+
+	    // Show the image by default, for reverse compatibility
+	    if ( ! isset( $atts['html'] ) ) {
+
+	    	if ( ! isset( $atts['show_image'] ) ) {
+			    $atts['show_image'] = 1;
+		    }
+
+		    if ( ! isset( $atts['add_link'] ) ) {
+			    $atts['add_link'] = 1;
+		    }
+	    }
     }
 
 	/**

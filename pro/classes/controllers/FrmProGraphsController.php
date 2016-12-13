@@ -1301,6 +1301,7 @@ class FrmProGraphsController {
 		} else {
 			$first_row = reset( $graph_data );
 			$start_date = $first_row[0];
+			$start_date = self::convert_formatted_date_to_y_m_d( $start_date );
 		}
 
 		return $start_date;
@@ -1319,6 +1320,7 @@ class FrmProGraphsController {
 		} else {
 			$final_row = end( $graph_data );
 			$end_date = $final_row[0];
+			$end_date = self::convert_formatted_date_to_y_m_d( $end_date );
 		}
 
 		return $end_date;
@@ -1930,6 +1932,19 @@ class FrmProGraphsController {
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Convert a date formatted in the WordPress settings date format to Y-m-d
+	 *
+	 * @since 2.02.11
+	 * @param string $date
+	 * @return string
+	 */
+	private static function convert_formatted_date_to_y_m_d( $date ) {
+		$date_format = get_option('date_format');
+		$date = DateTime::createFromFormat( $date_format, $date );
+		return $date->format( 'Y-m-d' );
 	}
 
 	/**

@@ -140,6 +140,10 @@ legend.frm_hidden{
     border:none;
 }
 
+.with_frm_style textarea{
+    height:auto;
+}
+
 .with_frm_style .auto_width #loginform input,
 .with_frm_style .auto_width input,
 .with_frm_style input.auto_width,
@@ -549,6 +553,13 @@ table.frmcal-calendar .frmcal-today .frmcal_date{
 .frm-loading-img{
     background:url(<?php echo FrmAppHelper::relative_plugin_url() ?>/images/ajax_loader.gif) no-repeat center center;
     padding:6px 12px;
+}
+
+select.frm_loading_lookup{
+    background-image: url(<?php echo FrmAppHelper::relative_plugin_url() ?>/images/ajax_loader.gif) !important;
+    background-position: 10px;
+    background-repeat: no-repeat;
+    color: transparent !important;
 }
 
 #ui-datepicker-div{
@@ -966,6 +977,12 @@ table.frmcal-calendar .frmcal-today .frmcal_date{
     margin-right:4%;
 }
 
+.frm_form_field .frm_checkbox,
+.frm_form_field .frm_radio{
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
 .frm_form_field.frm_three_col .frm_radio,
 .frm_form_field.frm_three_col .frm_checkbox{
     width:30%;
@@ -1033,6 +1050,7 @@ table.frmcal-calendar .frmcal-today .frmcal_date{
     font-weight:bold;
     -moz-box-shadow:none;
     -webkit-box-shadow:none;
+    width:auto !important;
     box-shadow:none !important;
     display:inline;
 	-moz-appearance:textfield;
@@ -1377,7 +1395,7 @@ html[xmlns] .frm_clearfix{
 
 .with_frm_style .chosen-container-multi .chosen-choices li.search-field input[type="text"]{
     margin:1px 0;
-    padding:0;
+    padding:0 !important;
     height:25px;
     outline:0;
     border:0 !important;

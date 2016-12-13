@@ -214,12 +214,20 @@ class FrmProAppHelper{
     }
 
 	public static function get_custom_post_types() {
-        $custom_posts = get_post_types( array(), 'object');
-        foreach ( array( 'revision', 'attachment', 'nav_menu_item') as $unset) {
-            unset($custom_posts[$unset]);
-        }
-        return $custom_posts;
-    }
+		$custom_posts = get_post_types( array(), 'object');
+		foreach ( array( 'revision', 'attachment', 'nav_menu_item' ) as $unset ) {
+			unset( $custom_posts[ $unset ] );
+		}
+
+		// alphebetize
+		ksort( $custom_posts );
+
+		// keep post and page first
+		$first_types = array( 'post' => $custom_posts['post'], 'page' => $custom_posts['page'] );
+		$custom_posts = $first_types + $custom_posts;
+
+		return $custom_posts;
+	}
 
 	public static function get_custom_taxonomy( $post_type, $field ) {
         $taxonomies = get_object_taxonomies($post_type);

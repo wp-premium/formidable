@@ -225,7 +225,7 @@ echo $custom_options;
         foreach ( $frm_vars['calc_fields'] as $result => $field ) {
 			$calc_rules['fieldsWithCalc'][ $field['field_id'] ] = $result;
             $calc = $field['calc'];
-			FrmProFieldsHelper::replace_non_standard_formidable_shortcodes( compact('field'), $calc );
+			FrmProFieldsHelper::replace_non_standard_formidable_shortcodes( array( 'field' => $field['field_id'] ), $calc );
             preg_match_all("/\[(.?)\b(.*?)(?:(\/))?\]/s", $calc, $matches, PREG_PATTERN_ORDER);
 
             $field_keys = $calc_fields = array();

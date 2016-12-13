@@ -9,16 +9,18 @@
                 <?php foreach ( $post_types as $post_key => $post_type ) {
                         if ( in_array($post_key, array( 'frm_display', 'frm_form_actions', 'frm_styles')) ) {
                             continue;
-                        } ?>
+                        }
+						$expected_post_key = sanitize_title_with_dashes( $post_type->label );
+						$hide_key = ( $post_type->_builtin || $expected_post_key == $post_key || $expected_post_key == $post_key . 's' )
+				?>
 					<option value="<?php echo esc_attr( $post_key ) ?>" <?php selected( $form_action->post_content['post_type'], $post_key ) ?>>
-						<?php echo esc_html( $post_type->label ) ?>
+						<?php echo esc_html( $post_type->label . ( $hide_key ? '' : ' (' . $post_key . ')' ) ); ?>
 					</option>
 <?php
                         unset($post_type);
                     }
 
                 unset($post_types);
-
                 ?>
             </select>
         </td>
@@ -181,7 +183,7 @@
                 <h3><?php _e( 'Custom Fields', 'formidable' ) ?> <span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php esc_attr_e( 'To set the featured image, use \'_thumbnail_id\' as the custom field name.', 'formidable' );
 ?>" ></span></h3>
 
-                <div id="postcustomstuff" <?php echo empty($form_action->post_content['post_custom_fields']) ? 'class="frm_hidden"' : ''; ?>>
+                <div id="postcustomstuff" class="frm_name_value<?php echo empty($form_action->post_content['post_custom_fields']) ? ' frm_hidden' : ''; ?>">
                 <table id="list-table">
                     <thead>
                     <tr>

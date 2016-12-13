@@ -476,9 +476,14 @@ class FrmProEntryMeta{
             $formated_date = FrmProAppHelper::convert_date($value, $frmpro_settings->date_format, 'Y-m-d');
 
             //check format before converting
-            if ( $value != date($frmpro_settings->date_format, strtotime($formated_date)) ) {
-                $errors['field'. $field->temp_id] = FrmFieldsHelper::get_error_msg($field, 'invalid');
-            }
+			if ( $value != date( $frmpro_settings->date_format, strtotime( $formated_date ) ) ) {
+				$allow_it = apply_filters( 'frm_allow_date_mismatch', false, array(
+					'date' => $value, 'formatted_date' => $formated_date,
+				) );
+				if ( ! $allow_it ) {
+					$errors[ 'field' . $field->temp_id ] = FrmFieldsHelper::get_error_msg( $field, 'invalid' );
+				}
+			}
 
             $value = $formated_date;
             unset($formated_date);
