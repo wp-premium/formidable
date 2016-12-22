@@ -152,7 +152,7 @@ class FrmProFieldsHelper{
 	 * @since 2.0.8
 	 */
 	private static function get_other_shortcode_values( $args ) {
-		$atts = shortcode_parse_atts( stripslashes( $args['matches'][3][ $args['match_key'] ] ) );
+		$atts = FrmShortcodeHelper::get_shortcode_attribute_array( stripslashes( $args['matches'][3][ $args['match_key'] ] ) );
 		if ( isset( $atts['return_array'] ) ) {
 			$args['allow_array'] = $atts['return_array'];
 		}
@@ -296,7 +296,7 @@ class FrmProFieldsHelper{
 			preg_match_all( '/\[(frm-field-value)\b(.*?)(?:(\/))?\]/s', $value, $matches, PREG_PATTERN_ORDER );
 
 			foreach ( $matches[0] as $short_key => $tag ) {
-				$atts = shortcode_parse_atts( $matches[2][ $short_key ] );
+				$atts = FrmShortcodeHelper::get_shortcode_attribute_array( $matches[2][ $short_key ] );
 				$atts['return_array'] = $return_array;
 
 				$value = FrmProEntriesController::get_field_value_shortcode( $atts );
@@ -2728,8 +2728,7 @@ DEFAULT_HTML;
 
 		$img_html = $image_url = '';
 		$image = wp_get_attachment_image_src( $id, $atts['size'], false );
-		$is_non_image = empty( $image );
-		// TODO: maybe use wp_attachment_is_image( $post_id );
+		$is_non_image = ! wp_attachment_is_image( $id );
 
 		if ( $atts['show_image'] ) {
 			$img_html = wp_get_attachment_image( $id, $atts['size'], $is_non_image );
