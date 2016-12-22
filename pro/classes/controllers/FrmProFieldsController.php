@@ -1250,13 +1250,14 @@ class FrmProFieldsController{
 		$response = FrmProFileField::ajax_upload();
 
 		if ( ! empty( $response['errors'] ) ) {
-			status_header(401);
+			$status = 401;
 			echo implode( ' ', $response['errors'] );
 		} else {
+			$status = 200;
 			echo json_encode( $response['media_ids'] );
 		}
 
-		wp_die();
+		wp_die( '', '', array( 'response' => $status ) );
 	}
 
 	public static function _logic_row(){

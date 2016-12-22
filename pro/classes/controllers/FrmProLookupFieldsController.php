@@ -1007,6 +1007,8 @@ class FrmProLookupFieldsController{
 			}
 			$final_values = array_values( $final_values );
 		}
+
+		$final_values = apply_filters( 'frm_order_lookup_options', $final_values, $order );
 	}
 
 	/**

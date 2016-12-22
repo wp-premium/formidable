@@ -126,7 +126,7 @@ class FrmProFormsController{
 
         if ( is_array($all_atts) ) {
             foreach ( $all_atts as $att => $val ) {
-                $_GET[$att] = urlencode($val);
+                $_GET[ $att ] = $val;
                 unset($att, $val);
             }
         }
@@ -177,7 +177,7 @@ class FrmProFormsController{
 
 		foreach ( $shortcodes[0] as $short_key => $tag ) {
             $replace_with = '';
-            $atts = shortcode_parse_atts( $shortcodes[3][$short_key] );
+            $atts = FrmShortcodeHelper::get_shortcode_attribute_array( $shortcodes[3][$short_key] );
 
 			switch ( $shortcodes[2][ $short_key ] ) {
                 case 'deletelink':
