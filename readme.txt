@@ -3,7 +3,7 @@ Contributors: sswells, srwells, jamie.wahlin
 Tags: contact form, custom form, form, form builder, forms, email, poll, survey, template, form creator, form manager,
 Requires at least: 3.8
 Tested up to: 4.7
-Stable tag: 2.02.11
+Stable tag: 2.02.12
 
 WordPress form builder for completely customizable forms with simple drag-and-drop interface. Offers unlimited email notifications and instant styling previews.
 
@@ -88,6 +88,16 @@ A. Try clearing your browser cache. As plugin modifications are made, frequent j
 [See more FAQs](http://formidablepro.com/formidable-faqs/ "Formidable Form FAQs")
 
 == Changelog ==
+= 2.02.12 =
+* Fixed: PHP 7.1 illegal string offset warnings addressed.
+* **Pro Version** *
+* New: Add frm_order_lookup_options hook to adjust the order of options in a Lookup field.
+* Fixed: JavaScript errors were occurring when illegal file type was uploaded and Woocommerce was active.
+* Fixed: Make sure PDF files display correctly with show_image=1 in WP 4.7.
+* Fixed: Scroll error when switching pages with Ajax submit.
+* Fixed: Make sure dependent autocomplete Lookup fields aren't disabled permanently.
+* Fixed: Make sure GET variables set in View shortcodes work correctly.
+
 = 2.02.11 =
 * New: Added frm_create_default_email_action hook to prevent default email action creation.
 * New: Added frm_inline_submit CSS Layout Class.

@@ -21,7 +21,7 @@ class FrmProContent {
 	public static function replace_single_shortcode( $shortcodes, $short_key, $tag, $entry, $display, $args, &$content ) {
 		$conditional = preg_match( '/^\[if/s', $shortcodes[0][ $short_key ] ) ? true : false;
 		$foreach = preg_match( '/^\[foreach/s', $shortcodes[0][ $short_key ] ) ? true : false;
-		$atts = shortcode_parse_atts( $shortcodes[3][ $short_key ] );
+		$atts = FrmShortcodeHelper::get_shortcode_attribute_array( $shortcodes[3][ $short_key ] );
 
 		$tag = FrmFieldsHelper::get_shortcode_tag( $shortcodes, $short_key, compact('conditional', 'foreach') );
 		if ( strpos( $tag, '-' ) ) {
@@ -125,7 +125,7 @@ class FrmProContent {
 		}
 
 		foreach ( $matches[0] as $short_key => $tag ) {
-			$atts = shortcode_parse_atts( $matches[2][ $short_key ] );
+			$atts = FrmShortcodeHelper::get_shortcode_attribute_array( $matches[2][ $short_key ] );
 			self::do_shortcode_event_date( $content, $atts, $matches, $short_key, array( 'event_date' => $date ) );
 		}
 		return $content;
@@ -615,9 +615,6 @@ class FrmProContent {
 	}
 
 	public static function atts_sanitize_url( $replace_with ) {
-		if ( seems_utf8( $replace_with ) ) {
-			$replace_with = utf8_uri_encode( $replace_with, 200 );
-		}
 		return urlencode( $replace_with );
 	}
 

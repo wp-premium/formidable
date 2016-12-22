@@ -844,7 +844,7 @@ class FrmProDisplaysController {
 		$user_id = FrmAppHelper::get_user_id_param( $atts['user_id'] );
 
 		if ( !empty( $atts['get'] ) ) {
-			$_GET[ $atts['get'] ] = urlencode( $atts['get_value'] );
+			$_GET[ $atts['get'] ] = $atts['get_value'];
 		}
 
 		$get_atts = $atts;
@@ -853,7 +853,7 @@ class FrmProDisplaysController {
 		}
 
 		foreach ( $get_atts as $att => $val ) {
-			$_GET[ $att ] = urlencode( $val );
+			$_GET[ $att ] = $val;
 			unset( $att, $val );
 		}
 
