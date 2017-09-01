@@ -14,10 +14,12 @@
         <div class="contextual-help-tabs">
         <ul class="frm-category-tabs">
 			<?php $a = FrmAppHelper::simple_get( 't', 'sanitize_title', 'general_settings' ); ?>
-        	<li <?php echo ($a == 'general_settings') ? 'class="tabs active"' : '' ?>><a href="#general_settings" class="frm_cursor_pointer"><?php _e( 'General', 'formidable' ) ?></a></li>
+        	<li <?php echo ( $a == 'general_settings' ) ? 'class="tabs active"' : '' ?>>
+				<a href="#general_settings" class="frm_cursor_pointer"><?php _e( 'General', 'formidable' ) ?></a>
+			</li>
 			<?php foreach ( $sections as $sec_name => $section ) { ?>
 				<li <?php echo ( $a == $sec_name . '_settings' ) ? 'class="tabs active"' : '' ?>>
-					<a href="#<?php echo esc_attr( $sec_name ) ?>_settings">
+					<a href="#<?php echo esc_attr( $sec_name ) ?>_settings" data-frmajax="<?php echo esc_attr( isset( $section['ajax'] ) ? $section['ajax'] : '' ) ?>">
 						<?php echo isset( $section['name'] ) ? $section['name'] : ucfirst( $sec_name ) ?>
 					</a>
 				</li>
@@ -82,6 +84,16 @@
 
 			<p><label class="frm_left_label"><?php _e( 'Secret Key', 'formidable' ) ?></label>
 			<input type="text" name="frm_privkey" id="frm_privkey" size="42" value="<?php echo esc_attr($frm_settings->privkey) ?>" placeholder="<?php esc_attr_e( 'Optional', 'formidable' ) ?>" /></p>
+
+		    <p><label class="frm_left_label"><?php _e( 'reCAPTCHA Type', 'formidable' ) ?></label>
+			<select name="frm_re_type" id="frm_re_type">
+				<option value="" <?php selected( $frm_settings->re_type, '' ) ?>>
+					<?php esc_html_e( 'Checkbox (V2)', 'formidable' ); ?>
+				</option>
+				<option value="invisible" <?php selected( $frm_settings->re_type, 'invisible' ) ?>>
+					<?php esc_html_e( 'Invisible', 'formidable' ); ?>
+				</option>
+            </select></p>
 
 		    <p><label class="frm_left_label"><?php _e( 'reCAPTCHA Language', 'formidable' ) ?></label>
 			<select name="frm_re_lang" id="frm_re_lang">
@@ -151,15 +163,11 @@
         <?php do_action('frm_settings_form', $frm_settings); ?>
 
         <?php if ( ! FrmAppHelper::pro_is_installed() ) { ?>
-        <div class="clear"></div>
-        <h3><?php _e( 'Miscellaneous', 'formidable' ) ?></h3>
-        <?php } ?>
-        <p><label class="frm_left_label"><?php _e( 'Admin menu label', 'formidable' ); ?></label>
-            <input type="text" name="frm_menu" id="frm_menu" value="<?php echo esc_attr($frm_settings->menu) ?>" />
-            <?php if ( is_multisite() && is_super_admin() ) { ?>
-            <label for="frm_mu_menu"><input type="checkbox" name="frm_mu_menu" id="frm_mu_menu" value="1" <?php checked($frm_settings->mu_menu, 1) ?> /> <?php _e( 'Use this menu name site-wide', 'formidable' ); ?></label>
-            <?php } ?>
-        </p>
+			<div class="clear"></div>
+			<h3><?php _e( 'Miscellaneous', 'formidable' ) ?></h3>
+			<input type="hidden" name="frm_menu" id="frm_menu" value="<?php echo esc_attr( $frm_settings->menu ) ?>" />
+			<input type="hidden" name="frm_mu_menu" id="frm_mu_menu" value="<?php echo esc_attr( $frm_settings->mu_menu ) ?>" />
+		<?php } ?>
 
         <p><label class="frm_left_label"><?php _e( 'Preview Page', 'formidable' ); ?></label>
         <?php FrmAppHelper::wp_pages_dropdown('frm-preview-page-id', $frm_settings->preview_page_id ) ?>
@@ -172,10 +180,17 @@
 			if ( $a == $sec_name . '_settings' ) { ?>
 <style type="text/css">.<?php echo esc_attr( $sec_name ) ?>_settings{display:block;}</style><?php } ?>
 			<div id="<?php echo esc_attr( $sec_name ) ?>_settings" class="<?php echo esc_attr( $sec_name ) ?>_settings tabs-panel <?php echo ( $a == $sec_name . '_settings' ) ? 'frm_block' : 'frm_hidden'; ?>"><?php
-				if ( isset( $section['class'] ) ) {
-					call_user_func( array( $section['class'], $section['function'] ) );
+				if ( isset( $section['ajax'] ) ) {
+					?>
+					<div class="frm_ajax_settings_tab frm_<?php echo esc_attr( $sec_name ) ?>_settings_ajax">
+						<span class="spinner"></span>
+					</div><?php
 				} else {
-					call_user_func( ( isset( $section['function'] ) ? $section['function'] : $section ) );
+					if ( isset( $section['class'] ) ) {
+						call_user_func( array( $section['class'], $section['function'] ) );
+					} else {
+						call_user_func( ( isset( $section['function'] ) ? $section['function'] : $section ) );
+					}
                 } ?>
             </div>
         <?php

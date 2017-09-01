@@ -45,12 +45,13 @@
         </select>
 </p>
 
-<!--
-    <td><?php _e( 'Pretty Permalinks', 'formidable' ); ?></td>
-    <td>
-        <label><input type="checkbox" value="1" id="frm_permalinks" name="frm_permalinks" <?php //checked($frmpro_settings->permalinks, 1) ?>>
-        <?php _e( 'Use pretty permalinks for entry detail links', 'formidable' ); ?></label>
-        <p class="description">If displaying your data on your site, would you like your permalinks to be pretty? <small>NOTE: This will not work if you are using the WordPress default permalinks.</small></p>
-    </td>
--->
-<input type="hidden" id="frm_permalinks" name="frm_permalinks" value="0" />
+<p>
+	<label class="frm_left_label"><?php _e( 'Admin menu label', 'formidable' ); ?></label>
+	<input type="text" name="frm_menu" id="frm_menu" value="<?php echo esc_attr( $frm_settings->menu ) ?>" />
+	<?php if ( is_multisite() && current_user_can( 'setup_network' ) ) { ?>
+		<label for="frm_mu_menu">
+			<input type="checkbox" name="frm_mu_menu" id="frm_mu_menu" value="1" <?php checked( $frm_settings->mu_menu, 1 ) ?> />
+			<?php _e( 'Use this menu name site-wide', 'formidable' ); ?>
+		</label>
+	<?php } ?>
+</p>

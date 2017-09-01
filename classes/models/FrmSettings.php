@@ -8,6 +8,7 @@ class FrmSettings {
     public $use_html;
     public $jquery_css;
     public $accordion_js;
+	public $fade_form;
 
     public $success_msg;
     public $blank_msg;
@@ -25,6 +26,7 @@ class FrmSettings {
     public $pubkey;
     public $privkey;
     public $re_lang;
+	public $re_type;
     public $re_msg;
 	public $re_multi;
 
@@ -76,12 +78,13 @@ class FrmSettings {
      */
 	public function default_options() {
         return array(
-            'menu'      => apply_filters( 'frm_default_menu', __( 'Forms', 'formidable' ) ),
+            'menu'      => apply_filters( 'frm_default_menu', 'Formidable' ),
             'mu_menu'   => 0,
             'preview_page_id' => 0,
             'use_html'  => true,
             'jquery_css' => false,
             'accordion_js' => false,
+			'fade_form' => false,
 
 			're_multi'  => 0,
 
@@ -168,11 +171,14 @@ class FrmSettings {
         if ( ! isset($this->re_lang) ) {
             $this->re_lang = $re_lang;
         }
+
+		if ( ! isset( $this->re_type ) ) {
+			$this->re_type = '';
+		}
     }
 
     public function validate( $params, $errors ) {
-        $errors = apply_filters( 'frm_validate_settings', $errors, $params );
-        return $errors;
+        return apply_filters( 'frm_validate_settings', $errors, $params );
     }
 
 	public function update( $params ) {
@@ -195,6 +201,7 @@ class FrmSettings {
 
         $this->pubkey = trim($params['frm_pubkey']);
         $this->privkey = $params['frm_privkey'];
+		$this->re_type = $params['frm_re_type'];
         $this->re_lang = $params['frm_re_lang'];
 		$this->re_multi = isset( $params['frm_re_multi'] ) ? $params['frm_re_multi'] : 0;
 
@@ -202,9 +209,9 @@ class FrmSettings {
         $this->preview_page_id = (int) $params['frm-preview-page-id'];
 
         $this->use_html = isset($params['frm_use_html']) ? $params['frm_use_html'] : 0;
-        //$this->custom_style = isset($params['frm_custom_style']) ? $params['frm_custom_style'] : 0;
 		$this->jquery_css = isset( $params['frm_jquery_css'] ) ? absint( $params['frm_jquery_css'] ) : 0;
 		$this->accordion_js = isset( $params['frm_accordion_js'] ) ? absint( $params['frm_accordion_js'] ) : 0;
+		$this->fade_form = isset( $params['frm_fade_form'] ) ? absint( $params['frm_fade_form'] ) : 0;
     }
 
 	private function update_roles( $params ) {

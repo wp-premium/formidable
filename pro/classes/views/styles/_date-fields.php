@@ -1,26 +1,6 @@
 <?php
 $jquery_themes = FrmStylesHelper::jquery_themes();
-
-$alt_img_name = array(
-    'ui-lightness'  => 'ui_light',
-    'ui-darkness'   => 'ui_dark',
-    'start'         => 'start_menu',
-    'redmond'       => 'windoze',
-    'vader'         => 'black_matte',
-    'mint-choc'     => 'mint_choco',
-);
-$theme_names = array_keys($jquery_themes);
-$theme_names = array_combine($theme_names, $theme_names);
-
-foreach ( $theme_names as $k => $v ) {
-	$theme_names[ $k ] = str_replace( '-', '_', $v );
-    unset($k, $v);
-}
-
-$alt_img_name = array_merge($theme_names, $alt_img_name);
-$alt_img_name['-1'] = '';
-unset($theme_names);
-
+$alt_img_name = FrmProStylesController::get_datepicker_names( $jquery_themes );
 ?>
 
 <div class="field-group clearfix frm-half frm-first-row">

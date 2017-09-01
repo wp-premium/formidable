@@ -317,17 +317,7 @@ class FrmProStatisticsController {
 				$stat = ( $total / $count );
 				break;
 			case 'median':
-				rsort( $meta_values );
-				$n = (int) ceil( $count / 2 ); // Middle of the array
-				if ( $count % 2 ) {
-					$stat = $meta_values[ $n - 1 ]; // If number is odd
-				} else {
-					$n2 = (int) floor( $count / 2 ); // Other middle of the array
-					$stat = ( $meta_values[ $n - 1 ] + $meta_values[ $n2 - 1 ] ) / 2;
-				}
-				$stat = maybe_unserialize( $stat );
-				if ( is_array( $stat ) )
-					$stat = 0;
+				$stat = self::calculate_median( $meta_values );
 				break;
 			case 'deviation':
 				$mean = ( $total / $count );
@@ -363,6 +353,34 @@ class FrmProStatisticsController {
 		}
 
 		return self::get_formatted_statistic( $atts, $stat );
+	}
+
+	/**
+	 * Calculate the median from an array of values
+	 *
+	 * @since 2.03.08
+	 *
+	 * @param array $meta_values
+	 *
+	 * @return float
+	 */
+	public static function calculate_median( $meta_values ) {
+		$count = count( $meta_values );
+		rsort( $meta_values );
+
+		$middle_index = (int) floor( $count / 2 );
+
+		if ( $count % 2 > 0 ) {
+			// Odd number of values
+			$median = (float) $meta_values[ $middle_index ];
+		} else {
+			// Even number of values, calculate avg of 2 medians
+			$low_middle  = $meta_values[ $middle_index - 1 ];
+			$high_middle = $meta_values[ $middle_index ];
+			$median      = (float) ( $low_middle + $high_middle ) / 2;
+		}
+
+		return $median;
 	}
 
 	/**
@@ -551,6 +569,9 @@ class FrmProStatisticsController {
 		} else if ( strpos( $f, '_contains' ) !== false ) {
 			self::get_contains_filter_args( $f, $filter_args );
 
+		} else if ( strpos( $f, '_does_not_contain' ) !== false ) {
+			self::get_does_not_contain_filter_args( $f, $filter_args );
+
 		} else if ( is_numeric( $f ) && $f <= 10 ) {
 			// If using <, >, <=, >=, !=. $f will count up for certain atts
 			self::get_filter_args_for_deprecated_field_filters( $filter_args );
@@ -638,6 +659,19 @@ class FrmProStatisticsController {
 	private static function get_contains_filter_args( $f, &$filter_args ) {
 		$filter_args['field'] = str_replace( '_contains', '', $f );
 		$filter_args['operator'] = 'LIKE';
+	}
+
+	/**
+	 * Get the filter arguments for a like filter
+	 *
+	 * @since 2.02.13
+	 * @param string $f
+	 * @param array $filter_args
+	 */
+	private static function get_does_not_contain_filter_args( $f, &$filter_args ) {
+		$filter_args['field'] = str_replace( '_does_not_contain', '', $f );
+		$filter_args['operator'] = 'NOT LIKE';
+		self::maybe_get_all_entry_ids_for_form( $filter_args );
 	}
 
 	/**
@@ -808,6 +842,7 @@ class FrmProStatisticsController {
 	 *
 	 * @since 2.02.06
 	 * @param object $field
+	 * @param array $atts
 	 * @param array $field_values
 	 */
 	private static function format_field_values( $field, $atts, &$field_values ) {

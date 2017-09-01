@@ -26,7 +26,7 @@
 	<?php }
 
 	if ( $sub_field['label'] ) {
-		FrmProAddressesController::include_sub_label( array(
+		FrmProComboFieldsController::include_sub_label( array(
 			'field' => $field, 'option_name' => $key . '_desc'
 		) );
 	}

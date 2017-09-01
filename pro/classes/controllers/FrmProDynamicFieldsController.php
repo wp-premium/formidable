@@ -162,5 +162,4 @@ class FrmProDynamicFieldsController {
 
 		return ( ! FrmField::is_multiple_select( $field ) || FrmField::is_option_true( $field, 'autocom' ) );
 	}
-
 }

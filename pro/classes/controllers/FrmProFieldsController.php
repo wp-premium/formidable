@@ -2,7 +2,7 @@
 
 class FrmProFieldsController{
 
-    public static function &show_normal_field($show, $field_type){
+    public static function show_normal_field( $show, $field_type ) {
         if ( in_array( $field_type, array( 'hidden', 'user_id', 'break', 'end_divider') ) ) {
             $show = false;
         }
@@ -38,7 +38,7 @@ class FrmProFieldsController{
 		$field_name = isset( $args['field_name'] ) ? $args['field_name'] : 'item_meta[' . $field['id'] . ']';
 		$html_id = FrmFieldsHelper::get_html_id( $field, isset( $args['field_plus_id'] ) ? $args['field_plus_id'] : '' );
 
-		FrmProFieldsHelper::set_field_js( $field, ( isset( $entry_id ) ? $entry_id : 0 ) );
+		FrmProFieldsHelper::set_field_js( $field );
 
 		include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/show-other.php' );
     }
@@ -124,9 +124,14 @@ class FrmProFieldsController{
         $field_name .= '['. $field['id'] .']';
         $html_id = FrmFieldsHelper::get_html_id($field);
 
-		$filename = self::get_filename_for_field( $field['type'] );
-		if ( ! empty( $filename ) ) {
-			include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/' . $filename . '.php' );
+		if ( $field['type'] == 'time' ) {
+			$field['value'] = $field['default_value'];
+			FrmProTimeField::show_time_field( $field, compact( 'html_id', 'field_name' ) );
+		} else {
+			$filename = self::get_filename_for_field( $field['type'] );
+			if ( ! empty( $filename ) ) {
+				include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/' . $filename . '.php' );
+			}
 		}
     }
 
@@ -136,7 +141,7 @@ class FrmProFieldsController{
 	 */
 	private static function get_filename_for_field( $type ) {
 		$default = array( 'phone', 'tag', 'date', 'number', 'password', 'image' );
-		$has_file = array( 'data', 'file', 'form', 'end_divider', 'html', 'rte', 'time', 'hidden', 'user_id', 'scale' );
+		$has_file = array( 'data', 'file', 'form', 'end_divider', 'html', 'rte', 'hidden', 'user_id', 'scale' );
 
 		$filename = '';
 		if ( in_array( $type, $has_file ) ) {
@@ -286,6 +291,7 @@ class FrmProFieldsController{
             ),
             'time'              => $size_unique + array(
                 'default_value' => true,
+				'invalid'       => true,
             ),
             'rte'               => $size_unique + array(
                 'default_blank' => false
@@ -458,7 +464,9 @@ class FrmProFieldsController{
 	 * @param string $add_html
 	 */
 	private static function add_pattern_attribute( $field, &$add_html ) {
-		if ( $field['type'] == 'phone' || ( $field['type'] == 'text' && FrmField::is_option_true_in_array( $field, 'format' ) ) ) {
+		$has_format = FrmField::is_option_true_in_array( $field, 'format' );
+		$format_field = $field['type'] == 'text' || ( $field['type'] == 'lookup' &&  $field['data_type'] == 'text' );
+		if ( $field['type'] == 'phone' || ( $has_format && $format_field ) ) {
 			$format = FrmEntryValidate::phone_format( $field );
 			$format = substr( $format, 2, -1 );
 			$add_html .= ' pattern="' . esc_attr( $format ) . '"';
@@ -487,6 +495,8 @@ class FrmProFieldsController{
             $class .= ' frm_date';
 		} else if ( $field['type'] == 'file' && FrmField::is_option_true( $field, 'multiple' ) ) {
             $class .= ' frm_multiple_file';
+        } elseif ( $field['type'] == 'time' && isset( $field['options']['H'] ) ) {
+        	$class .= ' auto_width frm_time_select';
         }
 
 		// Hide the "No files selected" text if files are selected
@@ -663,7 +673,7 @@ class FrmProFieldsController{
 	public static function show_conditional_logic_option( $field ) {
 		$form_fields = false;
 		if ( ! empty( $field['hide_field'] ) && is_array( $field['hide_field'] ) ) {
-			$form_id = ( isset( $values['id'] ) ? $values['id'] : $field['form_id'] );
+			$form_id = isset( $field['parent_form_id'] ) ? $field['parent_form_id'] : $field['form_id'];
 			$form_fields = FrmField::get_all_for_form( $form_id );
 		}
 		include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/logic.php' );
@@ -721,24 +731,31 @@ class FrmProFieldsController{
         wp_die();
     }
 
+	/**
+	 * Get the field value selector for field or action logic
+	 */
     public static function get_field_values(){
 		FrmAppHelper::permission_check('frm_view_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
-        $current_field_id = (int) $_POST['current_field'];
-        $new_field = FrmField::getOne( (int) $_POST['field_id'] );
+	    $selector_args = array(
+	    	'value' => '',
+	    );
 
-        $is_settings_page = ( $_POST['form_action'] == 'update_settings' ) ? true : false;
-        $anything = $is_settings_page ? '' : __( 'Anything', 'formidable' );
+	    $selector_args['html_name'] = sanitize_text_field( $_POST['name'] );
+	    if ( empty( $selector_args['html_name'] ) || $selector_args['html_name'] == 'undefined' ) {
+		    $selector_args['html_name'] = 'field_options[hide_opt_' . absint( $_POST['current_field'] ) . '][]';
+	    }
 
-        if ( ! empty($_POST['name']) && $_POST['name'] != 'undefined' ) {
-            $field_name = sanitize_text_field( $_POST['name'] );
-        }
-        if ( ! empty($_POST['t']) && $_POST['t'] != 'undefined' ) {
-            $field_type = sanitize_text_field( $_POST['t'] );
-        }
+	    if ( FrmAppHelper::get_param( 'form_action' ) == 'update_settings' ) {
+	    	$selector_args['source'] = 'form_actions';
+	    } else {
+		    $field_type = sanitize_text_field( $_POST['t'] );
+	    	$selector_args['source'] = ! empty( $field_type ) ? $field_type : 'unknown';
+	    }
 
-        require(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/field-values.php');
+	    FrmFieldsHelper::display_field_value_selector( absint( $_POST['field_id'] ), $selector_args );
+
         wp_die();
     }
 
@@ -902,7 +919,7 @@ class FrmProFieldsController{
 			wp_die();
 		}
 
-		$data_display_opts = apply_filters( 'frm_display_data_opts', array( 'html' => true ) );
+		$data_display_opts = apply_filters( 'frm_display_data_opts', array( 'html' => true, 'wpautop' => false ) );
 		$value = FrmFieldsHelper::get_display_value( $meta_value, $data_field, $data_display_opts );
 		if ( is_array( $value ) ) {
 			$value = implode( ', ', $value );
@@ -925,7 +942,10 @@ class FrmProFieldsController{
         $field_name = 'item_meta';
         FrmProFieldsHelper::get_html_id_from_container($field_name, $html_id, (array) $current, $hidden_field_id);
 
-		if ( FrmProFieldsHelper::is_field_visible_to_user( $current ) ) {
+		$on_current_page = FrmAppHelper::get_param( 'on_current_page', 'true', 'get', 'sanitize_text_field' );
+		$on_current_page = ( $on_current_page == 'true' );
+
+		if ( $on_current_page && FrmProFieldsHelper::is_field_visible_to_user( $current ) ) {
 			if ( $value && ! empty( $value ) ) {
 				echo apply_filters( 'frm_show_it', "<p class='frm_show_it'>" . $value . "</p>\n", $value, array( 'field' => $data_field, 'value' => $meta_value, 'entry_id' => $entry_id ) );
 			}
@@ -1105,7 +1125,7 @@ class FrmProFieldsController{
 
 		// Unset the field value if it isn't an option
 		if ( $field['value'] ) {
-			$field['value'] = (array) $field['value'];;
+			$field['value'] = (array) $field['value'];
 			foreach ( $field['value'] as $key => $field_val ) {
 				if ( ! array_key_exists( $field_val, $field['options'] ) ) {
 					unset( $field['value'][ $key ] );
@@ -1124,57 +1144,9 @@ class FrmProFieldsController{
 	}
 
 	public static function ajax_time_options(){
-        //check_ajax_referer( 'frm_ajax', 'nonce' );
-
-        $remove = array();
-        self::get_ajax_time_options($_POST, $remove);
-
-	    echo json_encode($remove);
-	    wp_die();
+		_deprecated_function( __FUNCTION__, '2.03', 'FrmProTimeFieldsController::ajax_time_options' );
+		FrmProTimeFieldsController::ajax_time_options();
 	}
-
-    private static function get_ajax_time_options($values, array &$remove) {
-        $time_key = str_replace('field_', '', $values['time_field']);
-	    $date_key = str_replace('field_', '', $values['date_field']);
-	    $values['date'] = FrmProAppHelper::maybe_convert_to_db_date($values['date'], 'Y-m-d');
-
-	    $date_entries = FrmEntryMeta::getEntryIds( array( 'fi.field_key' => $date_key, 'meta_value' => $values['date']));
-
-        $remove = apply_filters('frm_allowed_times', $remove, $values);
-
-        if ( ! $date_entries || empty($date_entries) ) {
-            return;
-        }
-
-        global $wpdb;
-
-        $query = array( 'fi.field_key' => $time_key, 'it.item_id' => $date_entries);
-		if ( isset( $values['entry_id'] ) && is_numeric( $values['entry_id'] ) ) {
-            $query['it.item_id !'] = $values['entry_id'];
-        }
-        $used_times = FrmDb::get_col( $wpdb->prefix .'frm_item_metas it LEFT JOIN '. $wpdb->prefix .'frm_fields fi ON (it.field_id = fi.id)', $query, 'meta_value');
-
-        if ( ! $used_times || empty($used_times) ) {
-            return;
-        }
-
-        $number_allowed = apply_filters('frm_allowed_time_count', 1, $time_key, $date_key);
-        $count = array();
-        foreach ( $used_times as $used ) {
-            if ( isset($remove[$used]) ) {
-                continue;
-            }
-
-            if ( ! isset($count[$used]) ) {
-                $count[$used] = 0;
-            }
-            $count[$used]++;
-
-            if ( (int) $count[$used] >= $number_allowed ) {
-                $remove[$used] = $used;
-            }
-        }
-    }
 
 	/**
 	 * Add an option at the top of the media library page
@@ -1222,9 +1194,10 @@ class FrmProFieldsController{
 
 		$old_uploads = get_posts( array(
 			'post_type' => 'attachment',
+			'posts_per_page' => 50,
 			'date_query' => array(
 				'column' => 'post_date_gmt',
-				'before' => '24 hours ago',
+				'before' => '3 hours ago',
 			),
 			'meta_query' => array(
 				array(
@@ -1247,9 +1220,11 @@ class FrmProFieldsController{
 	}
 
 	public static function ajax_upload() {
+		check_ajax_referer( 'frm_ajax', 'nonce' );
 		$response = FrmProFileField::ajax_upload();
 
 		if ( ! empty( $response['errors'] ) ) {
+			status_header(401);
 			$status = 401;
 			echo implode( ' ', $response['errors'] );
 		} else {
@@ -1273,6 +1248,10 @@ class FrmProFieldsController{
         $field = FrmFieldsHelper::setup_edit_vars($field);
 
 		$form_fields = FrmField::get_all_for_form( $form_id );
+
+		if ( $field['form_id'] != $form_id ) {
+			$field['parent_form_id'] = $form_id;
+		}
 
         if ( ! isset( $field['hide_field_cond'][ $meta_name ] ) ) {
             $field['hide_field_cond'][$meta_name] = '==';
@@ -1362,7 +1341,7 @@ class FrmProFieldsController{
 		$field_options = unserialize( $field_options );
 
 		// Update the in_section value
-		if ( $field_options['in_section'] != $section_id ) {
+		if ( ! isset( $field_options['in_section'] ) || $field_options['in_section'] != $section_id ) {
 			$field_options['in_section'] = $section_id;
 			$update_values['field_options'] = $field_options;
 		}
@@ -1441,20 +1420,6 @@ class FrmProFieldsController{
         // Prevent the function in the free version from completing
         wp_die();
     }
-
-	/**
-	 * Prepare a single field for duplication
-	 * Note: This should ONLY be used when the "Duplicate" button is clicked on a single field
-	 *
-	 * @since 2.0.25
-	 * @param array $field_values
-	 * @return array $field_values
-	 */
-	public static function prepare_single_field_for_duplication( $field_values ){
-		$field_values['field_options']['in_section'] = 0;
-
-		return $field_values;
-	}
 
 	/**
 	*
@@ -1561,6 +1526,7 @@ class FrmProFieldsController{
 			$field_value = self::get_saved_value( $entry, $field );
 
 		} else if ( FrmEntriesHelper::value_is_posted( $field, $args ) ) {
+			$field_value = '';
 			FrmEntriesHelper::get_posted_value( $field, $field_value, $args );
 
 		} else {
@@ -1586,4 +1552,12 @@ class FrmProFieldsController{
 		return FrmProEntryMetaHelper::get_post_or_meta_value( $entry, $field, $pass_args );
 	}
 
+	/**
+	 * @deprecated 2.03.10
+	 */
+	public static function prepare_single_field_for_duplication( $field_values ){
+		_deprecated_function( __FUNCTION__, '2.03.10', 'custom code' );
+
+		return $field_values;
+	}
 }

@@ -233,6 +233,17 @@
 .frm_dropzone.dz-clickable.frm_single_upload{
 	max-width: 200px;
 }
+
+.frm_form_field.frm_full .frm_dropzone.dz-clickable.frm_single_upload,
+.frm_form_field.frm_full_upload .frm_dropzone.dz-clickable.frm_single_upload{
+	max-width:100%;
+}
+
+.frm_form_field.frm_full .frm_dropzone.dz-clickable.frm_single_upload .dz-message,
+.frm_form_field.frm_full_upload .frm_dropzone.dz-clickable.frm_single_upload .dz-message{
+	margin: .5em 0 1em;
+}
+
 .frm_dropzone .dz-message{
 	display:none;
 	font-size:20px;
@@ -460,8 +471,6 @@
 }
 .frm_dropzone .dz-preview.dz-error .dz-error-message {
 	display: block;
-}
-.frm_dropzone .dz-preview.dz-error:hover .dz-error-message {
 	opacity: 1;
 	pointer-events: auto;
 }
@@ -499,7 +508,8 @@
 
 .frm_compact .frm_dropzone.dz-clickable{
 	min-height:60px;
-	padding:5px;
+	padding:0;
+	margin-top:0;
 	border:none;
 	background-color:transparent;
 }
@@ -586,4 +596,9 @@
 .frm_compact .frm_dropzone .dz-preview .dz-details .dz-filename span{
 	border:none;
 	background:transparent;
+}
+
+/* Prevent horizontal scroll on RTL sites */
+.frm-show-form .dz-hidden-input{
+	display:none;
 }

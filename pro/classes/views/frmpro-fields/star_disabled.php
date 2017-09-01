@@ -17,7 +17,11 @@ if ( in_array($name, $frm_vars['star_loaded']) ) {
 $frm_vars['star_loaded'][] = $name;
 
 $field->options = maybe_unserialize($field->options);
-$max = max($field->options);
+if ( is_array( $field->options ) ) {
+	$max = max($field->options);
+} else {
+	$max = 5;
+}
 
 $d = 0;
 if ( $stat != floor( $stat ) ) {

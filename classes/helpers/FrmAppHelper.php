@@ -4,13 +4,13 @@ if ( ! defined('ABSPATH') ) {
 }
 
 class FrmAppHelper {
-	public static $db_version = 35; //version of the database we are moving to
-	public static $pro_db_version = 37;
+	public static $db_version = 44; //version of the database we are moving to
+	public static $pro_db_version = 37; //deprecated
 
 	/**
 	 * @since 2.0
 	 */
-	public static $plug_version = '2.02.12';
+	public static $plug_version = '2.04.01';
 
     /**
      * @since 1.07.02
@@ -67,13 +67,6 @@ class FrmAppHelper {
 
 	public static function get_affiliate() {
 		return '';
-		$affiliate_id = apply_filters( 'frm_affiliate_link', get_option('frm_aff') );
-		$affiliate_id = strtolower( $affiliate_id );
-		$allowed_affiliates = array();
-		if ( ! in_array( $affiliate_id, $allowed_affiliates ) ) {
-			$affiliate_id = false;
-		}
-		return $affiliate_id;
 	}
 
     /**
@@ -864,7 +857,7 @@ class FrmAppHelper {
      * @return string The base Google APIS url for the current version of jQuery UI
      */
     public static function jquery_ui_base_url() {
-		$url = 'http' . ( is_ssl() ? 's' : '' ) . '://ajax.googleapis.com/ajax/libs/jqueryui/' . self::script_version('jquery-ui-core');
+		$url = 'http' . ( is_ssl() ? 's' : '' ) . '://ajax.googleapis.com/ajax/libs/jqueryui/' . self::script_version( 'jquery-ui-core', '1.11.4' );
         $url = apply_filters('frm_jquery_ui_base_url', $url);
         return $url;
     }
@@ -872,25 +865,24 @@ class FrmAppHelper {
     /**
      * @param string $handle
      */
-	public static function script_version( $handle ) {
-        global $wp_scripts;
-    	if ( ! $wp_scripts ) {
-    	    return false;
-    	}
+	public static function script_version( $handle, $default = 0 ) {
+		global $wp_scripts;
+		if ( ! $wp_scripts ) {
+			return $default;
+		}
 
-        $ver = 0;
+		$ver = $default;
+		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
+			return $ver;
+		}
 
-        if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
-            return $ver;
-        }
+		$query = $wp_scripts->registered[ $handle ];
+		if ( is_object( $query ) && ! empty( $query->ver ) ) {
+			$ver = $query->ver;
+		}
 
-        $query = $wp_scripts->registered[ $handle ];
-    	if ( is_object( $query ) ) {
-    	    $ver = $query->ver;
-    	}
-
-    	return $ver;
-    }
+		return $ver;
+	}
 
 	public static function js_redirect( $url ) {
 		return '<script type="text/javascript">window.location="' . esc_url_raw( $url ) . '"</script>';
@@ -963,7 +955,7 @@ class FrmAppHelper {
 				$alt_post_name = substr( $key, 0, 200 - ( strlen( $suffix ) + 1 ) ) . $suffix;
 				$key_check = FrmDb::get_var( $table_name, array( $column => $alt_post_name, 'ID !' => $id ), $column );
 				$suffix++;
-			} while ($key_check || is_numeric($key_check));
+			} while ( $key_check || is_numeric( $key_check ) );
 			$key = $alt_post_name;
         }
         return $key;
@@ -1148,7 +1140,7 @@ class FrmAppHelper {
 	 * @return boolean|int
 	 */
 	public static function custom_style_value( $post_values ) {
-		if ( $post_values && isset( $post_values['options']['custom_style'] ) ) {
+		if ( ! empty( $post_values ) && isset( $post_values['options']['custom_style'] ) ) {
 			$custom_style = absint( $post_values['options']['custom_style'] );
 		} else {
 			$frm_settings = FrmAppHelper::get_settings();
@@ -1752,6 +1744,8 @@ class FrmAppHelper {
 			'nonce'     => wp_create_nonce( 'frm_ajax' ),
 			'id'        => __( 'ID', 'formidable' ),
 			'no_results' => __( 'No results match', 'formidable' ),
+			'file_spam' => __( 'That file looks like Spam.', 'formidable' ),
+			'empty_fields' => __( 'Please complete the preceding required fields before uploading a file.', 'formidable' ),
 		) );
 
 		if ( $location == 'admin' ) {

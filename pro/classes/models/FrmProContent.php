@@ -8,7 +8,14 @@ class FrmProContent {
 		$args['show'] = $show;
 
 		foreach ( $shortcodes[0] as $short_key => $tag ) {
+			$previous_content = $content;
 			self::replace_single_shortcode( $shortcodes, $short_key, $tag, $entry, $display, $args, $content );
+
+			$has_run = ( $content !== $previous_content );
+			if ( $has_run ) {
+				$shortcodes[0][ $short_key ] = '';
+			}
+			unset( $previous_content );
 		}
 
 		if ( ! empty( $shortcodes[0] ) ) {
@@ -353,7 +360,11 @@ class FrmProContent {
 	 */
 	public static function do_shortcode_is_draft( &$content, $atts, $shortcodes, $short_key, $args ) {
 		if ( $args['conditional'] ) {
+			if ( empty( $atts ) ) {
+				$atts['equals'] = 1;
+			}
 			$atts['short_key'] = $shortcodes[0][ $short_key ];
+
 			self::check_conditional_shortcode( $content, $args['entry']->is_draft, $atts, 'is_draft' );
 		} else {
 			$content = str_replace( $shortcodes[0][ $short_key ], $args['entry']->is_draft, $content );
@@ -404,7 +415,7 @@ class FrmProContent {
 
 			$total_len = ( $end_pos + $end_pos_len ) - $start_pos;
 
-			if ( empty( $replace_with ) ) {
+			if ( $replace_with === ''    ) {
 				$content = substr_replace( $content, '', $start_pos, $total_len );
 			} else if ( 'foreach' == $condition ) {
 				$content_len = $end_pos - ( $start_pos + $start_pos_len );
@@ -477,22 +488,18 @@ class FrmProContent {
 			if ( isset( $atts['not_equal'] ) && $atts['not_equal'] == 'current' ) {
 				$atts['not_equal'] = get_current_user_id();
 			}
-		} else if ( ( in_array( $tag, array( 'created-at', 'created_at', 'updated-at', 'updated_at')) || ( $field && $field->type == 'date') ) ) {
-			foreach ( $conditions as $att_name ) {
-				if ( isset( $atts[ $att_name ] ) && $atts[ $att_name ] != '' && ! preg_match('/^\d{4}-\d{2}-\d{2}$/', trim( $atts[ $att_name ] ) ) ) {
-					if ( $atts[ $att_name ] == 'NOW' ) {
-						$atts[ $att_name ] = FrmProAppHelper::get_date( 'Y-m-d' );
-					} else {
-						$atts[ $att_name ] = date_i18n( 'Y-m-d', strtotime( $atts[ $att_name ] ) );
-					}
-				}
-				unset( $att_name );
-			}
+		} elseif ( self::is_timestamp_tag( $tag ) || ( $field && $field->type == 'date' ) ) {
+			self::prepare_date_for_eval( $conditions, $tag, $atts );
 		} elseif ( $field && $field->type == 'time' ) {
 			$formatted_time = false;
 			foreach ( $conditions as $att_name ) {
-				if ( isset( $atts[ $att_name ] ) && $atts[ $att_name ] != '' && strtolower( $atts[ $att_name ] ) == 'now' ) {
-					$atts[ $att_name ] = FrmProAppHelper::get_date( 'H:i' );
+				if ( isset( $atts[ $att_name ] ) && $atts[ $att_name ] != '' ) {
+					if ( strtolower( $atts[ $att_name ] ) == 'now' ) {
+						$atts[ $att_name ] = FrmProAppHelper::get_date( 'H:i' );
+					} else {
+						$atts[ $att_name ] = date( 'H:i', strtotime( $atts[ $att_name ] ) );
+					}
+
 					if ( ! $formatted_time ) {
 						$replace_with = FrmProAppHelper::format_time( $replace_with, 'H:i' );
 						$formatted_time = true;
@@ -506,6 +513,47 @@ class FrmProContent {
 		return $replace_with;
 	}
 
+	private static function is_timestamp_tag( $tag ) {
+		return preg_match( '/^(created[-|_]at|updated[-|_]at)$/', $tag );
+	}
+
+	private static function prepare_date_for_eval( $conditions, $tag, &$atts ) {
+		foreach ( $conditions as $att_name ) {
+			if ( isset( $atts[ $att_name ] ) && $atts[ $att_name ] != '' && ! preg_match('/^\d{4}-\d{2}-\d{2}$/', trim( $atts[ $att_name ] ) ) ) {
+				if ( self::is_timestamp_tag( $tag ) ) {
+					self::get_gmt_for_filter( $att_name, $atts[ $att_name ] );
+				} elseif ( $atts[ $att_name ] == 'NOW' ) {
+					$atts[ $att_name ] = FrmProAppHelper::get_date( 'Y-m-d' );
+				} else {
+					$atts[ $att_name ] = date( 'Y-m-d', strtotime( $atts[ $att_name ] ) );
+				}
+			}
+			unset( $att_name );
+		}
+	}
+
+	public static function get_gmt_for_filter( $compare, &$where_val ) {
+		$original_value = $where_val;
+
+		if ( $where_val == 'NOW' ) {
+			$where_val = current_time( 'mysql', 1 );
+		}
+
+		$compare = strtolower( $compare );
+		if ( strpos( $compare, 'like' ) === false ) {
+			$where_val = date( 'Y-m-d H:i:s', strtotime( $where_val ) );
+
+			// If using less than or equal to, set the time to the end of the day
+			if ( $compare == '<=' || $compare == 'less_than' ) {
+				$where_val = str_replace( '00:00:00', '23:59:59', $where_val );
+			}
+
+			// Convert date to GMT since that is the format in the DB
+			if ( strpos( $original_value, 'hour' ) === false ) {
+				$where_val = get_gmt_from_date( $where_val );
+			}
+		}
+	}
 
 	private static function eval_conditions( $conditions, $atts, &$replace_with, $field ) {
 		foreach ( $conditions as $condition ) {
@@ -537,7 +585,7 @@ class FrmProContent {
 			} else {
 				$replace_with = '';
 			}
-		} else if ( ( $atts['equals'] == '' && $replace_with == '' ) || ( $atts['equals'] == '0' && $replace_with == '0' ) ) {
+		} else if ( $atts['equals'] == '' && $replace_with == '' ) {
 			//if the field is blank, give it a value
 			$replace_with = true;
 		}
@@ -583,17 +631,21 @@ class FrmProContent {
 		}
 	}
 
-	private static function eval_less_than_condition( $atts, &$replace_with ) {
-		if ( $atts['less_than'] <= $replace_with ) {
-			$replace_with = '';
-		} else if ( $atts['less_than'] > 0 && $replace_with == '0' ) {
-			$replace_with = true;
+	private static function eval_less_than_condition( $atts, &$field_value ) {
+		if ( $field_value < $atts['less_than'] ) {
+			// Condition is true
+		} else {
+			// Condition is false
+			$field_value = '';
 		}
 	}
 
-	private static function eval_greater_than_condition( $atts, &$replace_with ) {
-		if ( $atts['greater_than'] >= $replace_with ) {
-			$replace_with = '';
+	private static function eval_greater_than_condition( $atts, &$field_value ) {
+		if ( $field_value > $atts['greater_than'] ) {
+			// Condition is true
+		} else {
+			// Condition is false
+			$field_value = '';
 		}
 	}
 
@@ -623,6 +675,10 @@ class FrmProContent {
 			$more_link_text = $atts['more_text'];
 		} else {
 			$more_link_text = isset( $atts['more_link_text'] ) ? $atts['more_link_text'] : '. . .';
+		}
+
+		if ( isset( $atts['no_link'] ) && $atts['no_link'] ) {
+			return FrmAppHelper::truncate( $replace_with, (int) $atts['truncate'], 3, $more_link_text );
 		}
 
 		// If we're on the listing page of a Dynamic View, use detail link for truncate link

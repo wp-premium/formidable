@@ -43,6 +43,10 @@ class FrmDb {
 
             /**** ADD/UPDATE DEFAULT TEMPLATES ****/
             FrmXMLController::add_default_templates();
+
+			if ( ! $old_db_version ) {
+				$this->maybe_create_contact_form();
+			}
         }
 
         do_action('frm_after_install');
@@ -78,7 +82,7 @@ class FrmDb {
 
         /* Create/Upgrade Fields Table */
 		$sql[] = 'CREATE TABLE ' . $this->fields . ' (
-                id int(11) NOT NULL auto_increment,
+				id BIGINT(20) NOT NULL auto_increment,
 				field_key varchar(100) default NULL,
                 name text default NULL,
                 description longtext default NULL,
@@ -115,17 +119,17 @@ class FrmDb {
 
         /* Create/Upgrade Items Table */
 		$sql[] = 'CREATE TABLE ' . $this->entries . ' (
-                id int(11) NOT NULL auto_increment,
+				id BIGINT(20) NOT NULL auto_increment,
 				item_key varchar(100) default NULL,
                 name varchar(255) default NULL,
                 description text default NULL,
                 ip text default NULL,
-                form_id int(11) default NULL,
-                post_id int(11) default NULL,
-                user_id int(11) default NULL,
-                parent_item_id int(11) default 0,
-                is_draft tinyint(1) default 0,
-                updated_by int(11) default NULL,
+				form_id BIGINT(20) default NULL,
+				post_id BIGINT(20) default NULL,
+				user_id BIGINT(20) default NULL,
+				parent_item_id BIGINT(20) default 0,
+				is_draft tinyint(1) default 0,
+				updated_by BIGINT(20) default NULL,
                 created_at datetime NOT NULL,
                 updated_at datetime NOT NULL,
                 PRIMARY KEY  (id),
@@ -138,10 +142,10 @@ class FrmDb {
 
         /* Create/Upgrade Meta Table */
 		$sql[] = 'CREATE TABLE ' . $this->entry_metas . ' (
-                id int(11) NOT NULL auto_increment,
-                meta_value longtext default NULL,
-                field_id int(11) NOT NULL,
-                item_id int(11) NOT NULL,
+				id BIGINT(20) NOT NULL auto_increment,
+				meta_value longtext default NULL,
+				field_id BIGINT(20) NOT NULL,
+				item_id BIGINT(20) NOT NULL,
                 created_at datetime NOT NULL,
                 PRIMARY KEY  (id),
                 KEY field_id (field_id),
@@ -158,6 +162,20 @@ class FrmDb {
             unset($q);
         }
     }
+
+	private function maybe_create_contact_form() {
+		$template_id = FrmForm::getIdByKey( 'contact' );
+		if ( $template_id ) {
+			$form_id = FrmForm::duplicate( $template_id, false, true );
+			if ( $form_id ) {
+				$values = array(
+					'status'   => 'published',
+					'form_key' => 'contact-form',
+				);
+				FrmForm::update( $form_id, $values );
+			}
+		}
+	}
 
     /**
      * @param integer $frm_db_version
@@ -240,7 +258,7 @@ class FrmDb {
     private static function interpret_array_to_sql( $key, $value, &$where, &$values ) {
 		$key = trim( $key );
 
-        if ( strpos( $key, 'created_at' ) !== false || strpos( $key, 'updated_at' ) !== false  ) {
+		if ( strpos( $key, 'created_at' ) !== false || strpos( $key, 'updated_at' ) !== false ) {
             $k = explode(' ', $key);
             $where .= ' DATE_FORMAT(' . reset( $k ) . ', %s) ' . str_replace( reset( $k ), '', $key );
             $values[] = '%Y-%m-%d %H:%i:%s';
@@ -276,7 +294,8 @@ class FrmDb {
 			 * If the key is like% then skip the first % for starts with
 			 * If the key is %like then skip the last % for ends with
 			 */
-			$start = $end = '%';
+			$start = '%';
+			$end = '%';
 			if ( $lowercase_key == 'like%' ) {
 				$start = '';
 				$where = rtrim( $where, '%' );
@@ -348,10 +367,34 @@ class FrmDb {
 
 		$query = self::generate_query_string_from_pieces( $field, $table, $where, $args );
 
-		$cache_key = str_replace( array( ' ', ',' ), '_', trim( implode( '_', FrmAppHelper::array_flatten( $where ) ) . implode( '_', $args ) . $field . '_' . $type, ' WHERE' ) );
+		$cache_key = self::generate_cache_key( $where, $args, $field, $type );
 		$results = FrmAppHelper::check_cache( $cache_key, $group, $query, 'get_' . $type );
         return $results;
     }
+
+	/**
+	 * Generate a cache key from the where query, field, type, and other arguments
+	 *
+	 * @since 2.03.07
+	 *
+	 * @param array $where
+	 * @param array $args
+	 * @param string $field
+	 * @param string $type
+	 *
+	 * @return string
+	 */
+	private static function generate_cache_key( $where, $args, $field, $type ) {
+		$cache_key = '';
+		$where = FrmAppHelper::array_flatten( $where );
+		foreach ( $where as $key => $value ) {
+			$cache_key .= $key . '_' . $value;
+		}
+		$cache_key .= implode( '_', $args ) . $field . '_' . $type;
+		$cache_key = str_replace( array( ' ', ',' ), '_', $cache_key );
+
+		return $cache_key;
+	}
 
     /**
      * @param string $table
@@ -811,14 +854,4 @@ DEFAULT_HTML;
 			$wpdb->update( $this->entries, array( 'user_id' => $user_id->meta_value ), array( 'id' => $user_id->item_id ) );
         }
     }
-
-	public static function get_one_record( $table, $args = array(), $fields = '*', $order_by = '' ) {
-		_deprecated_function( __FUNCTION__, '2.0', 'FrmDb::get_row' );
-		return self::get_var( $table, $args, $fields, array( 'order_by' => $order_by, 'limit' => 1 ), '', 'row' );
-	}
-
-	public static function get_records( $table, $args = array(), $order_by = '', $limit = '', $fields = '*' ) {
-		_deprecated_function( __FUNCTION__, '2.0', 'FrmDb::get_results' );
-		return self::get_results( $table, $args, $fields, compact('order_by', 'limit') );
-	}
 }

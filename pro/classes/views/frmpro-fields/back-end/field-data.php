@@ -3,7 +3,9 @@
 if ( ! isset( $field['data_type'] ) || $field['data_type'] == 'data' ) {
 	_e( 'This data is dynamic on change', 'formidable' );
 } else if ( $field['data_type'] == 'select' ) { ?>
-	<select name="<?php echo esc_attr( $field_name ) ?>" id="<?php echo esc_attr( $field_name ) ?>">
+	<select name="<?php echo esc_attr( $field_name ) ?>" id="<?php echo esc_attr( $field_name ) ?>" <?php
+		echo FrmField::is_multiple_select( $field ) ? 'multiple="multiple" ' : '';
+		?>>
 		<?php
 		if ( $field['options'] ) {
 			foreach ( $field['options'] as $opt_key => $opt ) {

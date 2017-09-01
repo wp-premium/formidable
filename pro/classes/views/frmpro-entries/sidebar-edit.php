@@ -31,7 +31,10 @@
     	    </div>
     	    <?php } ?>
     	    <div id="publishing-action">
-    	    <?php submit_button($submit, 'primary', '', false); ?>
+				<?php if ( ! FrmProFormsHelper::is_final_page( $form->id ) ) { ?>
+					<input type="submit" class="button frm_page_skip hide-no-js" data-page="" value="<?php esc_attr_e( 'Save', 'formidable' ) ?>">
+				<?php } ?>
+				<?php submit_button( $submit, 'primary', '', false ); ?>
             </div>
             <div class="clear"></div>
         </div>

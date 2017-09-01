@@ -23,59 +23,7 @@ if ( 'date' == $field['type'] ) {
     }
 
 } else if ( $field['type'] == 'time' ) {
-
-    if ( $field['unique'] ) {
-        if ( ! isset($frm_vars['timepicker_loaded']) || ! is_array($frm_vars['timepicker_loaded']) ) {
-            $frm_vars['timepicker_loaded'] = array();
-        }
-
-        if ( ! isset($frm_vars['timepicker_loaded'][ $html_id ]) ) {
-            $frm_vars['timepicker_loaded'][$html_id] = true;
-        }
-    }
-
-    if ( isset($field['options']['H']) ) {
-        if ( ! empty($field['value']) && ! is_array($field['value']) ) {
-            $h = explode(':', $field['value']);
-            $m = explode(' ', $h[1]);
-            $h = reset($h);
-            $a = isset($m[1]) ? $m[1] : '';
-            $m = reset($m);
-        } else if ( is_array($field['value']) ) {
-            $h = isset($field['value']['H']) ? $field['value']['H'] : '';
-            $m = isset($field['value']['m']) ? $field['value']['m'] : '';
-            $a = isset($field['value']['A']) ? $field['value']['A'] : '';
-        } else {
-            $h = $m = $a = '';
-        }
-?>
-<select name="<?php echo esc_attr( $field_name ) ?>[H]" id="<?php echo esc_attr( $html_id ) ?>_H" <?php do_action( 'frm_field_input_html', $field ) ?>>
-    <?php foreach ( $field['options']['H'] as $hour ) { ?>
-        <option value="<?php echo esc_attr( $hour ) ?>" <?php selected( $h, $hour ) ?>><?php echo esc_html( $hour ) ?></option>
-    <?php } ?>
-</select> :
-<select name="<?php echo esc_attr( $field_name ) ?>[m]" id="<?php echo esc_attr( $html_id ) ?>_m" <?php do_action( 'frm_field_input_html', $field ) ?>>
-    <?php foreach ( $field['options']['m'] as $min ) { ?>
-        <option value="<?php echo esc_attr( $min ) ?>" <?php selected( $m, $min ) ?>><?php echo esc_html( $min ) ?></option>
-    <?php } ?>
-</select>
-<?php   if ( isset($field['options']['A']) ) { ?>
-<select name="<?php echo esc_attr( $field_name ) ?>[A]" id="<?php echo esc_attr( $html_id ) ?>_A" <?php do_action( 'frm_field_input_html', $field ) ?>>
-    <?php foreach ( $field['options']['A'] as $am ) { ?>
-        <option value="<?php echo esc_attr( $am ) ?>" <?php selected( $a, $am ) ?>><?php echo esc_html( $am ) ?></option>
-    <?php } ?>
-</select>
-<?php
-        }
-    } else {
-?>
-<select name="<?php echo esc_attr( $field_name ) ?>" id="<?php echo esc_attr( $html_id ) ?>" <?php do_action( 'frm_field_input_html', $field ) ?>>
-    <?php foreach ( $field['options'] as $t ) { ?>
-        <option value="<?php echo esc_attr( $t ) ?>" <?php selected( $field['value'], $t ) ?>><?php echo esc_html( $t ) ?></option>
-    <?php } ?>
-</select>
-<?php
-    }
+	FrmProTimeField::show_time_field( $field, compact( 'html_id', 'field_name' ) );
 } else if ( 'tag' == $field['type'] ) {
     if ( is_array($field['value']) ) {
         FrmProFieldsHelper::tags_to_list($field, $entry_id);

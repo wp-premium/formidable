@@ -6,16 +6,19 @@ class FrmProSettingsController{
 		$edd_update = new FrmProEddController();
 		$a = FrmAppHelper::simple_get( 't', 'sanitize_title', 'general_settings' );
         remove_action('frm_before_settings', 'FrmSettingsController::license_box');
-		$show_creds_form = ( ! is_multisite() || is_super_admin() || ! get_site_option( $edd_update->pro_wpmu_store ) );
+		$show_creds_form = self::show_license_form();
         include(FrmAppHelper::plugin_path() .'/pro/classes/views/settings/license_box.php');
     }
 
 	public static function standalone_license_box() {
 		$edd_update = new FrmProEddController();
-		$show_creds_form = ( ! is_multisite() || is_super_admin() || ! get_site_option( $edd_update->pro_wpmu_store ) );
-		if ( $show_creds_form ) {
+		if ( self::show_license_form() ) {
 			include(FrmAppHelper::plugin_path() .'/pro/classes/views/settings/standalone_license_box.php');
 		}
+	}
+
+	private static function show_license_form() {
+		return ( ! is_multisite() || current_user_can( 'setup_network' ) || ! get_site_option( $edd_update->pro_wpmu_store ) );
 	}
 
     public static function general_style_settings($frm_settings){
