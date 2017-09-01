@@ -6,30 +6,28 @@ class FrmEntriesListHelper extends FrmListHelper {
 	protected $field;
 
 	public function prepare_items() {
-        global $wpdb, $per_page;
+        global $per_page;
 
 		$per_page = $this->get_items_per_page( 'formidable_page_formidable_entries_per_page' );
-
         $form_id = $this->params['form'];
-        if ( ! $form_id ) {
-            $this->items = array();
-    		$this->set_pagination_args( array(
-    			'total_items' => 0,
-				'per_page' => $per_page,
-    		) );
-            return;
-        }
 
 		$default_orderby = 'id';
 		$default_order = 'DESC';
+		$s_query = array();
 
-	    $s_query = array( 'it.form_id' => $form_id );
+		if ( $form_id ) {
+			$s_query['it.form_id'] = $form_id;
+			$join_form_in_query = false;
+		} else {
+			$s_query[] = array( 'or' => 1, 'parent_form_id' => null, 'parent_form_id <' => 1 );
+			$join_form_in_query = true;
+		}
 
 		$s = isset( $_REQUEST['s'] ) ? stripslashes($_REQUEST['s']) : '';
 
 	    if ( $s != '' && FrmAppHelper::pro_is_installed() ) {
 	        $fid = isset( $_REQUEST['fid'] ) ? sanitize_title( $_REQUEST['fid'] ) : '';
-	        $s_query = FrmProEntriesHelper::get_search_str( $s_query, $s, $form_id, $fid);
+	        $s_query = FrmProEntriesHelper::get_search_str( $s_query, $s, $form_id, $fid );
 	    }
 
         $orderby = isset( $_REQUEST['orderby'] ) ? sanitize_title( $_REQUEST['orderby'] ) : $default_orderby;
@@ -44,7 +42,7 @@ class FrmEntriesListHelper extends FrmListHelper {
         $page = $this->get_pagenum();
 		$start = (int) isset( $_REQUEST['start'] ) ? absint( $_REQUEST['start'] ) : ( ( $page - 1 ) * $per_page );
 
-		$this->items = FrmEntry::getAll( $s_query, $order, ' LIMIT ' . $start . ',' . $per_page, true, false );
+		$this->items = FrmEntry::getAll( $s_query, $order, ' LIMIT ' . $start . ',' . $per_page, true, $join_form_in_query );
         $total_items = FrmEntry::getRecordCount($s_query);
 
 		$this->set_pagination_args( array(
@@ -60,7 +58,9 @@ class FrmEntriesListHelper extends FrmListHelper {
             return;
         }
 
-        $form_id = $form = $this->params['form'];
+		$form_id = $this->params['form'];
+		$form = $this->params['form'];
+
         if ( $form_id ) {
             $form = FrmForm::getOne($form_id);
         }
@@ -71,6 +71,16 @@ class FrmEntriesListHelper extends FrmListHelper {
 
 	public function search_box( $text, $input_id ) {
 		// Searching is a pro feature
+	}
+
+	protected function extra_tablenav( $which ) {
+		$form_id = FrmAppHelper::simple_get( 'form', 'absint' );
+		if ( $which == 'top' && empty( $form_id ) ) {
+			echo '<div class="alignleft actions">';
+			echo FrmFormsHelper::forms_dropdown( 'form', $form_id, array( 'blank' => __( 'View all forms', 'formidable' ) ) );
+			submit_button( __( 'Filter' ), 'filter_action', '', false, array( 'id' => 'post-query-submit' ) );
+			echo '</div>';
+		}
 	}
 
 	/**
@@ -130,8 +140,10 @@ class FrmEntriesListHelper extends FrmListHelper {
 			unset($class);
 			$attributes .= ' data-colname="' . $column_display_name . '"';
 
-			$col_name = preg_replace( '/^(' . $this->params['form'] . '_)/', '', $column_name );
+			$form_id = $this->params['form'] ? $this->params['form'] : 0;
+			$col_name = preg_replace( '/^(' . $form_id . '_)/', '', $column_name );
 			$this->column_name = $col_name;
+			$val = '';
 
 			switch ( $col_name ) {
 				case 'cb':
@@ -162,8 +174,11 @@ class FrmEntriesListHelper extends FrmListHelper {
 				    break;
 				case 'user_id':
 				    $user = get_userdata($item->user_id);
-				    $val = $user->user_login;
+				    $val = $user ? $user->user_login : '';
 				    break;
+				case 'parent_item_id':
+					$val = $item->parent_item_id;
+					break;
 				default:
 					$val = apply_filters( 'frm_entries_' . $col_name . '_column', false, compact( 'item' ) );
 					if ( $val === false ) {
@@ -172,7 +187,7 @@ class FrmEntriesListHelper extends FrmListHelper {
 				break;
 			}
 
-			if ( isset( $val ) ) {
+			if ( $col_name != 'cb' ) {
 			    $r .= "<td $attributes>";
 				if ( $column_name == $action_col ) {
 					$edit_link = '?page=formidable-entries&frm_action=edit&id=' . $item->id;

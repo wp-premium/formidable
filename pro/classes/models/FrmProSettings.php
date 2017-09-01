@@ -8,7 +8,6 @@ class FrmProSettings extends FrmSettings{
     public $already_submitted;
     public $cal_date_format;
     public $date_format;
-    public $permalinks = false;
 
     /**
      * @return array
@@ -30,8 +29,6 @@ class FrmProSettings extends FrmSettings{
 	function update( $params ) {
         $this->date_format = $params['frm_date_format'];
         $this->get_cal_date();
-
-        //$this->permalinks = isset($params['frm_permalinks']) ? $params['frm_permalinks'] : 0;
 
         $this->fill_with_defaults($params);
     }

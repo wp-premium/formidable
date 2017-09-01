@@ -361,6 +361,8 @@ class FrmFormAction {
             return array();
         }
 
+		$limit = apply_filters( 'frm_form_action_limit', $limit, compact( 'type', 'form_id' ) );
+
         if ( 'all' != $type ) {
             return $action_controls->get_all( $form_id, $limit );
         }
@@ -400,6 +402,9 @@ class FrmFormAction {
 	 * @param int $action_id
 	 */
 	public static function get_single_action_type( $action_id, $type ) {
+		if ( ! $type ) {
+			return false;
+		}
 		$action_control = FrmFormActionsController::get_form_actions( $type );
 		return $action_control->get_single_action( $action_id );
 	}

@@ -10,15 +10,17 @@ class FrmProEntriesListHelper extends FrmEntriesListHelper {
         }
 
         //$actions['bulk_export'] = __( 'Export to XML', 'formidable' );
-
-        $actions['bulk_csv'] = __( 'Export to CSV', 'formidable' );
+		if ( $this->params['form'] ) {
+			$actions['bulk_csv'] = __( 'Export to CSV', 'formidable' );
+		}
 
         return $actions;
     }
 
-    function extra_tablenav( $which ) {
-        $footer = ($which == 'top') ? false : true;
-        FrmProEntriesHelper::before_table($footer, $this->params['form']);
+	protected function extra_tablenav( $which ) {
+		parent::extra_tablenav( $which );
+		$is_footer = ( $which !== 'top' );
+		FrmProEntriesHelper::before_table( $is_footer, $this->params['form'] );
 	}
 
 	public function search_box( $text, $input_id ) {
@@ -32,9 +34,11 @@ class FrmProEntriesListHelper extends FrmEntriesListHelper {
 			$form = FrmForm::get_published_forms( array(), 1 );
 		}
 
-		if ( $form ) {
-			$field_list = FrmField::getAll( array( 'fi.form_id' => $form->id, 'fi.type not' => FrmField::no_save_fields() ), 'field_order' );
+		if ( ! $form ) {
+			return;
 		}
+
+		$field_list = FrmField::getAll( array( 'fi.form_id' => $form->id, 'fi.type not' => FrmField::no_save_fields() ), 'field_order' );
 
 		$fid = isset( $_REQUEST['fid'] ) ? esc_attr( stripslashes( $_REQUEST['fid'] ) ) : '';
 		$input_id = $input_id . '-search-input';
@@ -78,10 +82,6 @@ class FrmProEntriesListHelper extends FrmEntriesListHelper {
 	<?php submit_button( $text, 'button hide-if-js', false, false, array( 'id' => 'search-submit' ) );
 	} else {
 		submit_button( $text, 'button', false, false, array( 'id' => 'search-submit' ) );
-		if ( ! empty( $search_str ) ) { ?>
-	<a href="<?php echo esc_url( admin_url( 'admin.php?page=formidable-entries&frm_action=list&form=' . $form->id ) ) ?>"><?php _e( 'Reset', 'formidable' ) ?></a>
-	<?php
-		}
 	} ?>
 
 </div>

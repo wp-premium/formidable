@@ -1,10 +1,10 @@
 <div id="frm_logic_<?php echo esc_attr( $field['id'] .'_'. $meta_name ) ?>" class="frm_logic_row">
-<select name="field_options[hide_field_<?php echo esc_attr( $field['id'] ) ?>][]" onchange="frmGetFieldValues(this.value,<?php echo (int) $field['id'] ?>,<?php echo esc_attr( $meta_name ) ?>,'<?php echo esc_attr( $field['type'] ) ?>')">
+<select name="field_options[hide_field_<?php echo esc_attr( $field['id'] ) ?>][]" class="frm_logic_field_opts" data-type="<?php echo esc_attr( $field['type'] ) ?>">
     <option value=""><?php _e( '&mdash; Select &mdash;' ) ?></option>
     <?php
     $sel = false;
 	foreach ( $form_fields as $ff ) {
-		if ( $ff->id == $field['id'] || FrmField::is_no_save_field( $ff->type ) || in_array( $ff->type, array( 'file', 'rte', 'date', 'address', 'credit_card' ) ) || FrmProField::is_list_field( $ff ) ) {
+		if ( ! FrmProConditionalLogicController::is_field_present_in_logic_options( $field, $ff ) ) {
             continue;
         }
 
@@ -13,7 +13,7 @@
 		}
     ?>
 	<option value="<?php echo esc_attr( $ff->id ) ?>" <?php selected( $ff->id, $hide_field ) ?>>
-		<?php echo esc_html( FrmAppHelper::truncate( $ff->name, 24 ) ); ?>
+		<?php echo esc_html( $ff->name ); ?>
 	</option>
     <?php } ?>
 </select>
@@ -37,13 +37,14 @@ $field['hide_field_cond'][$meta_name] = htmlspecialchars_decode($field['hide_fie
 
 <span id="frm_show_selected_values_<?php echo esc_attr( $field['id'] .'_'. $meta_name ) ?>">
 <?php
-    if ( $hide_field && is_numeric($hide_field) ) {
-        $new_field = FrmField::getOne($hide_field);
-        $field_type = $field['type'];
-    }
-    $current_field_id = $field['id'];
+	$selector_field_id = ( $hide_field && is_numeric( $hide_field ) ) ? (int) $hide_field : 0;
+	$selector_args = array(
+		'html_name' => 'field_options[hide_opt_' . $field['id'] . '][]',
+		'value' => isset( $field['hide_opt'][ $meta_name ] ) ? $field['hide_opt'][$meta_name] : '',
+		'source' => $field['type'],
+	);
 
-    require(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/field-values.php');
+	FrmFieldsHelper::display_field_value_selector( $selector_field_id, $selector_args );
 ?>
 </span>
 <a href="javascript:void(0)" class="frm_remove_tag frm_icon_font" data-removeid="frm_logic_<?php echo esc_attr( $field['id'] .'_'. $meta_name ) ?>"></a>

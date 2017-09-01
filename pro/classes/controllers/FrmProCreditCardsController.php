@@ -27,7 +27,7 @@ class FrmProCreditCardsController extends FrmProComboFieldsController {
 
 	public static function show_in_form_builder( $field, $name = '', $null = null ) {
 		if ( ! is_array( $field['default_value'] ) ) {
-			$field['default_value'] = self::default_labels();
+			$field['default_value'] = self::empty_value_array();
 		}
 		$defaults = self::empty_value_array();
 		self::fill_values( $field['default_value'], $defaults );
@@ -44,7 +44,7 @@ class FrmProCreditCardsController extends FrmProComboFieldsController {
 
 		$fields = array(
 			'cc'    => array(
-				'type' => $html5_type, 'classes' => 'frm_full frm_cc_number', 'label' => 0,
+				'type' => $html5_type, 'classes' => 'frm_full frm_cc_number', 'label' => 1,
 				'atts' => array(
 					'x-autocompletetype' => 'cc-number', 'autocompletetype' => 'cc-number', 'autocorrect' => 'off',
 					'spellcheck' => 'off', 'autocapitalize' => 'off',
@@ -53,16 +53,16 @@ class FrmProCreditCardsController extends FrmProComboFieldsController {
 			),
 			'month' => array(
 				'type' => 'select', 'classes' => 'frm_first frm_fourth frm_cc_exp_month',
-				'label' => 0, 'options' => range( 1, 12 ),
+				'label' => 1, 'options' => range( 1, 12 ),
 				'placeholder' => __( 'Month', 'formidable' ),
 			),
 			'year'  => array(
 				'type' => 'select', 'classes' => 'frm_fourth frm_cc_exp_year',
-				'label' => 0, 'options' => range( date('Y'), date('Y') + 10 ),
+				'label' => 1, 'options' => range( date('Y'), date('Y') + 10 ),
 				'placeholder' => __( 'Year', 'formidable' ),
 			),
 			'cvc'  => array(
-				'type' => $html5_type, 'classes' => 'frm_half frm_cc_cvc', 'label' => 0,
+				'type' => $html5_type, 'classes' => 'frm_half frm_cc_cvc', 'label' => 1,
 				'atts' => array(
 					'spellcheck' => 'off', 'autocapitalize' => 'off',
 					'maxlength' => 4, 'autocorrect' => 'off', 'autocomplete' => 'off',
@@ -76,6 +76,12 @@ class FrmProCreditCardsController extends FrmProComboFieldsController {
 
 	public static function add_default_options( $options ) {
 		$options['save_cc'] = 4;
+
+		$default_labels = self::empty_value_array();
+		foreach ( $default_labels as $key => $label ) {
+			$options[ $key . '_desc' ] = $label;
+		}
+
 		return $options;
 	}
 

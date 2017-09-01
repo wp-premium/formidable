@@ -29,6 +29,7 @@ class FrmEntryMeta {
 
 		if ( $query_results ) {
 			self::clear_cache();
+			wp_cache_delete( $entry_id, 'frm_entry' );
 			$id = $wpdb->insert_id;
 		} else {
 			$id = 0;
@@ -47,7 +48,8 @@ class FrmEntryMeta {
 
         global $wpdb;
 
-        $values = $where_values = array( 'item_id' => $entry_id, 'field_id' => $field_id );
+		$values = array( 'item_id' => $entry_id, 'field_id' => $field_id );
+		$where_values = $values;
         $values['meta_value'] = $meta_value;
         $values = apply_filters('frm_update_entry_meta', $values);
 		if ( is_array($values['meta_value']) ) {
@@ -177,13 +179,6 @@ class FrmEntryMeta {
         $result = stripslashes_deep($result);
 
         return $result;
-    }
-
-	public static function get_entry_metas( $entry_id ) {
-        _deprecated_function( __FUNCTION__, '1.07.10');
-
-        global $wpdb;
-		return FrmDb::get_col( $wpdb->prefix . 'frm_item_metas', array( 'item_id' => $entry_id ), 'meta_value' );
     }
 
     public static function get_entry_metas_for_field( $field_id, $order = '', $limit = '', $args = array() ) {
@@ -322,7 +317,8 @@ class FrmEntryMeta {
             return;
         }
 
-		$draft_where = $user_where = '';
+		$draft_where = '';
+		$user_where = '';
         if ( ! $args['is_draft'] ) {
 			$draft_where = $wpdb->prepare( ' AND e.is_draft=%d', 0 );
         } else if ( $args['is_draft'] == 1 ) {

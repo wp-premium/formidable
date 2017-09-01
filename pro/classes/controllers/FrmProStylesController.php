@@ -9,8 +9,62 @@ class FrmProStylesController extends FrmStylesController{
         }
     }
 
+	public static function add_style_boxes( $boxes ) {
+		$boxes['section-fields'] = __( 'Section Fields', 'formidable' );
+		$boxes['date-fields']   = __( 'Date Fields', 'formidable' );
+		$boxes['progress-bars'] = __( 'Progress Bars &amp; Rootline', 'formidable' );
+
+		add_filter( 'frm_style_settings_progress-bars', 'FrmProStylesController::progress_settings_file' );
+		add_filter( 'frm_style_settings_date-fields', 'FrmProStylesController::date_settings_file' );
+		add_filter( 'frm_style_settings_section-fields', 'FrmProStylesController::section_fields_file' );
+
+		return $boxes;
+	}
+
+	public static function section_fields_file() {
+		return self::view_folder() . '/_section-fields.php';
+	}
+
+	public static function date_settings_file() {
+		return self::view_folder() . '/_date-fields.php';
+	}
+
+	public static function progress_settings_file() {
+		return self::view_folder() . '/_progress-bars.php';
+	}
+
+	public static function get_datepicker_names( $jquery_themes ) {
+		$alt_img_name = array(
+			'ui-lightness'  => 'ui_light',
+			'ui-darkness'   => 'ui_dark',
+			'start'         => 'start_menu',
+			'redmond'       => 'windoze',
+			'vader'         => 'black_matte',
+			'mint-choc'     => 'mint_choco',
+		);
+
+		$theme_names = array_keys( $jquery_themes );
+		$theme_names = array_combine( $theme_names, $theme_names );
+
+		foreach ( $theme_names as $k => $v ) {
+			$theme_names[ $k ] = str_replace( '-', '_', $v );
+			unset($k, $v);
+		}
+
+		$alt_img_name = array_merge( $theme_names, $alt_img_name );
+		$alt_img_name['-1'] = '';
+
+		return $alt_img_name;
+	}
+
+	public static function append_style_form( $atts ) {
+		$style = $atts['style'];
+		$pos_class = $atts['pos_class'];
+		include( self::view_folder() . '/_sample_form.php' );
+	}
+
 	public static function style_switcher( $style, $styles ) {
-		include( FrmAppHelper::plugin_path() . '/pro/classes/views/styles/_style_switcher.php' );
+		include( self::view_folder() . '/_style_switcher.php' );
 	}
 
     public static function maybe_new_style($style) {
@@ -75,5 +129,15 @@ class FrmProStylesController extends FrmStylesController{
         }
     }
 
-}
+	public static function include_front_css( $args ) {
+		$defaults = $args['defaults'];
+		include( FrmAppHelper::plugin_path() . '/pro/css/pro_fields.css.php' );
+		include( FrmAppHelper::plugin_path() . '/pro/css/chosen.css.php' );
+		include( FrmAppHelper::plugin_path() . '/pro/css/dropzone.css' );
+		include( FrmAppHelper::plugin_path() . '/pro/css/progress.css.php' );
+	}
 
+	private static function view_folder() {
+		return FrmAppHelper::plugin_path() . '/pro/classes/views/styles';
+	}
+}

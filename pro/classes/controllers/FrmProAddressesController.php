@@ -40,11 +40,11 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 	public static function get_sub_fields( $field ) {
 		$fields = array(
 			'line1' => array(
-				'type' => 'text', 'classes' => '', 'label' => 0,
+				'type' => 'text', 'classes' => '', 'label' => 1,
 				'atts' => array( 'x-autocompletetype' => 'address-line1', 'autocompletetype' => 'address-line1' ),
 		 	),
 			'line2' => array(
-				'type' => 'text', 'classes' => '', 'optional' => true, 'label' => 0,
+				'type' => 'text', 'classes' => '', 'optional' => true, 'label' => 1,
 				'atts' => array( 'x-autocompletetype' => 'address-line2', 'autocompletetype' => 'address-line2' ),
 			),
 			'city'  => array(
@@ -160,6 +160,8 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 
 	private static function default_labels() {
 		$options = array(
+			'line1' => '',
+			'line2' => '',
 			'city'  => __( 'City', 'formidable' ),
 			'state' => __( 'State/Province', 'formidable' ),
 			'zip'   => __( 'Zip/Postal', 'formidable' ),

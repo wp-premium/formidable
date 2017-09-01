@@ -18,7 +18,7 @@ class FrmProFileField {
 		$the_id = $atts['file_name'];
 		if ( ! isset( $frm_vars['dropzone_loaded'][ $the_id ] ) ) {
 			if ( $is_multiple ) {
-				$max = empty( $field['max'] ) ? 99 : absint( $field['max'] );;
+				$max = empty( $field['max'] ) ? 99 : absint( $field['max'] );
 			} else {
 				$max = 1;
 			}
@@ -32,7 +32,8 @@ class FrmProFileField {
 				'htmlID'      => $the_id,
 				'uploadMultiple' => $is_multiple,
 				'fieldID'     => $field['id'],
-				'formID'      => $field['form_id'],
+				'formID'            => $field['form_id'],
+				'parentFormID'      => isset( $field['parent_form_id'] ) ? $field['parent_form_id'] : $field['form_id'],
 				'fieldName'   => $atts['field_name'],
 				'mockFiles'   => array(),
 				'defaultMessage' => __( 'Drop files here to upload', 'formidable' ),
@@ -126,7 +127,19 @@ class FrmProFileField {
 		}
 	}
 
-	public static function validate( $errors, $field, $values, $args ) {
+	/**
+	 * Validate a file upload field if file was not uploaded with Ajax
+	 *
+	 * @since 2.03.08
+	 *
+	 * @param array $errors
+	 * @param stdClass $field
+	 * @param array $values
+	 * @param array $args
+	 *
+	 * @return array
+	 */
+	public static function no_js_validate( $errors, $field, $values, $args ) {
 		$field->temp_id = $args['id'];
 
 		$args['file_name'] = 'file' . $field->id;
@@ -136,8 +149,53 @@ class FrmProFileField {
 
 		if ( isset( $_FILES[ $args['file_name'] ] ) ) {
 			self::validate_file_upload( $errors, $field, $args, $values );
-			if ( empty( $errors[ 'field' . $field->temp_id ] ) ) {
-				self::maybe_upload_temp_file( $errors, $field, $args, $values );
+			self::add_file_fields_to_global_variable( $field, $args );
+		}
+
+		return $errors;
+	}
+
+	/**
+	 * Add file upload field information to global variable
+	 *
+	 * @since 2.03.08
+	 *
+	 * @param stdClass $field
+	 * @param array $args
+	 */
+	private static function add_file_fields_to_global_variable( $field, $args ) {
+		global $frm_vars;
+		if ( ! isset( $frm_vars['file_fields'] ) ) {
+			$frm_vars['file_fields'] = array();
+		}
+
+		$frm_vars['file_fields'][ $field->temp_id ]               = $args;
+		$frm_vars['file_fields'][ $field->temp_id ]['field_id'] = $field->id;
+	}
+
+	/**
+	 * Upload files the uploaded files when no JS on page
+	 *
+	 * @since 2.03.08
+	 *
+	 * @param array $errors
+	 *
+	 * @return array
+	 */
+	public static function upload_files_no_js( $errors ) {
+		if ( ! empty( $errors ) ) {
+			return $errors;
+		}
+
+		global $frm_vars;
+
+		if ( isset( $frm_vars['file_fields'] ) ) {
+			foreach ( $frm_vars['file_fields'] as $unique_file_id => $file_args ) {
+
+				if ( isset( $_FILES[ $file_args['file_name'] ] ) ) {
+					$file_field = FrmField::getOne( $file_args['field_id'] );
+					self::maybe_upload_temp_file( $errors, $file_field, $file_args );
+				}
 			}
 		}
 
@@ -149,18 +207,19 @@ class FrmProFileField {
 
 		if ( self::file_was_selected( $file_uploads ) ) {
 			// If blank errors are set, remove them since a file was uploaded in this field
-			if ( isset( $errors[ 'field' . $field->temp_id ] ) ) {
-				unset( $errors[ 'field' . $field->temp_id ] );
+			if ( isset( $errors['field' . $field->temp_id ] ) ) {
+				unset( $errors['field' . $field->temp_id ] );
 			}
 
 			self::validate_file_size( $errors, $field, $args );
 			self::validate_file_count( $errors, $field, $args, $values );
 			self::validate_file_type( $errors, $field, $args );
+			$errors = apply_filters( 'frm_validate_file', $errors, $field, $args );
 
 		} elseif ( empty( $values ) ) {
 			$skip_required = FrmProEntryMeta::skip_required_validation( $field );
 			if ( $field->required && ! $skip_required ) {
-				$errors[ 'field' . $field->temp_id ] = FrmFieldsHelper::get_error_msg( $field, 'blank' );
+				$errors['field' . $field->temp_id ] = FrmFieldsHelper::get_error_msg( $field, 'blank' );
 			}
 		}
 	}
@@ -195,7 +254,7 @@ class FrmProFileField {
 
 			// check allowed file size
 			if ( ! empty( $file_uploads['error'] ) && in_array( 1, (array) $file_uploads['error'] ) ) {
-				$errors[ 'field' . $field->temp_id ] = __( 'That file is too big. It must be less than %sMB.', 'formidable' );
+				$errors['field' . $field->temp_id ] = __( 'That file is too big. It must be less than %sMB.', 'formidable' );
 			}
 
 			if ( empty( $name ) ) {
@@ -206,7 +265,7 @@ class FrmProFileField {
 			$this_file_size = $this_file_size / 1000000; // compare in MB
 
 			if ( $this_file_size > $size_limit ) {
-				$errors[ 'field' . $field->temp_id ] = sprintf( __( 'That file is too big. It must be less than %sMB.', 'formidable' ), $size_limit );
+				$errors['field' . $field->temp_id ] = sprintf( __( 'That file is too big. It must be less than %sMB.', 'formidable' ), $size_limit );
 			}
 
 			unset( $name );
@@ -236,7 +295,7 @@ class FrmProFileField {
 
 		$total_upload_count = self::get_new_and_old_file_count( $field, $args, $values );
 		if ( $total_upload_count > $file_count_limit ) {
-			$errors[ 'field' . $field->temp_id ] = sprintf( __( 'You have uploaded too many files. You may only include %d file(s).', 'formidable' ), $file_count_limit );
+			$errors['field' . $field->temp_id ] = sprintf( __( 'You have uploaded too many files. You may only include %d file(s).', 'formidable' ), $file_count_limit );
 		}
 	}
 
@@ -261,7 +320,7 @@ class FrmProFileField {
 	 * @since 2.02
 	 */
 	public static function validate_file_type( &$errors, $field, $args ) {
-		if ( isset( $errors[ 'field' . $field->temp_id ] ) ) {
+		if ( isset( $errors['field' . $field->temp_id ] ) ) {
 			return;
 		}
 
@@ -283,7 +342,7 @@ class FrmProFileField {
 		}
 
         if ( isset( $file_type ) && ! $file_type['ext'] ) {
-            $errors[ 'field' . $field->temp_id ] = self::get_invalid_file_type_message( $field->name, $field->field_options['invalid'] );
+            $errors['field' . $field->temp_id ] = self::get_invalid_file_type_message( $field->name, $field->field_options['invalid'] );
         }
 	}
 
@@ -359,7 +418,7 @@ class FrmProFileField {
 		return $prev_value;
 	}
 
-	private static function maybe_upload_temp_file( &$errors, $field, $args, $values ) {
+	private static function maybe_upload_temp_file( &$errors, $field, $args ) {
 		$file_uploads = $_FILES[ $args['file_name'] ];
 
 		if ( self::file_was_selected( $file_uploads ) ) {
@@ -373,7 +432,7 @@ class FrmProFileField {
 			}
 
 			if ( ! empty( $response['errors'] ) ) {
-				$errors[ 'field' . $field->temp_id ] = implode( ' ', $response['errors'] );
+				$errors['field' . $field->temp_id ] = implode( ' ', $response['errors'] );
 			}
 		}
 	}
@@ -388,13 +447,15 @@ class FrmProFileField {
 
 				foreach ( $_FILES as $file_name => $file ) {
 					$args = array( 'file_name' => $file_name );
-					FrmProFileField::validate_file_type( $response['errors'], $field, $args );
-					FrmProFileField::validate_file_size( $response['errors'], $field, $args );
+					self::validate_file_type( $response['errors'], $field, $args );
+					self::validate_file_size( $response['errors'], $field, $args );
+					$response['errors'] = apply_filters( 'frm_validate_file', $response['errors'], $field, $args );
 
 					if ( empty( $response['errors'] ) ) {
 						self::upload_temp_files( $file_name, $response );
 					}
 				}
+				$response = apply_filters( 'frm_response_after_upload', $response, $field );
 			}
 		}
 
@@ -707,5 +768,14 @@ class FrmProFileField {
 		}
 
 		return $repeating;
+	}
+
+	/**
+	 * @deprecated 2.03.08
+	 */
+	public static function validate( $errors, $field, $values, $args ) {
+		_deprecated_function( __FUNCTION__, '2.03.08', 'FrmProFileField::no_js_validate' );
+
+		return self::no_js_validate( $errors, $field, $values, $args );
 	}
 }

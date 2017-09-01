@@ -3,6 +3,8 @@ function frmFrontFormJS(){
 	var currentlyAddingRow = false;
 	var action = '';
 	var jsErrors = [];
+	var processesRunning = 0;
+	var lookupQueues = {};
 
 	function setNextPage(e){
 		/*jshint validthis:true */
@@ -16,10 +18,24 @@ function frmFrontFormJS(){
 		var v = '';
 		var d = '';
 		var thisName = this.name;
+
 		if ( thisName === 'frm_prev_page' || this.className.indexOf('frm_prev_page') !== -1 ) {
 			v = jQuery(f).find('.frm_next_page').attr('id').replace('frm_next_p_', '');
 		} else if ( thisName === 'frm_save_draft' || this.className.indexOf('frm_save_draft') !== -1 ) {
 			d = 1;
+		} else if ( this.className.indexOf('frm_page_skip') !== -1 ) {
+			var goingTo = $thisObj.data('page');
+			var form_id = jQuery(f).find('input[name="form_id"]').val();
+			var orderField = jQuery(f).find('input[name="frm_page_order_'+form_id+'"]');
+			jQuery(f).append('<input name="frm_last_page" type="hidden" value="'+ orderField.val() +'" />');
+
+			if ( goingTo === '' ) {
+				orderField.remove();
+			} else {
+				orderField.val(goingTo);
+			}
+		} else if ( this.className.indexOf('frm_page_back') !== -1 ) {
+			v = $thisObj.data('page');
 		}
 
 		jQuery('.frm_next_page').val(v);
@@ -29,33 +45,12 @@ function frmFrontFormJS(){
 			f.trigger('submit');
 		}
 	}
-	
+
 	function toggleSection(){
 		/*jshint validthis:true */
 		jQuery(this).parent().children('.frm_toggle_container').slideToggle('fast');
 		jQuery(this).toggleClass('active').children('.ui-icon-triangle-1-e, .ui-icon-triangle-1-s')
 			.toggleClass('ui-icon-triangle-1-s ui-icon-triangle-1-e');
-	}
-
-	function loadUniqueTimeFields() {
-		if ( typeof __frmUniqueTimes === 'undefined' ) {
-			return;
-		}
-
-		var timeFields = __frmUniqueTimes;
-		for ( var i = 0; i < timeFields.length; i++ ) {
-			jQuery( document.getElementById( timeFields[i].dateID ) ).change( maybeTriggerUniqueTime );
-		}
-	}
-
-	function maybeTriggerUniqueTime() {
-		/*jshint validthis:true */
-		var timeFields = __frmUniqueTimes;
-		for ( var i = 0; i < timeFields.length; i++ ) {
-			if ( timeFields[i].dateID == this.id ) {
-				frmFrontForm.removeUsedTimes( this, timeFields[i].timeID );
-			}
-		}
 	}
 
 	function loadDateFields() {
@@ -72,8 +67,13 @@ function frmFrontFormJS(){
 		var dateFields = __frmDatepicker;
 		var id = this.id;
 		var idParts = id.split('-');
-		var lastPart = idParts.pop();
-		var altID = 'input[id^="'+ idParts.join('-') +'"]';
+		var altID = '';
+
+		if ( isRepeatingFieldByName( this.name ) ) {
+			altID = 'input[id^="'+ idParts[0] +'"]';
+		} else {
+			altID = 'input[id^="'+ idParts.join('-') +'"]';
+		}
 
 		jQuery.datepicker.setDefaults(jQuery.datepicker.regional['']);
 
@@ -81,6 +81,7 @@ function frmFrontFormJS(){
 		for ( var i = 0; i < dateFields.length; i++ ) {
 			if ( dateFields[i].triggerID == '#' + id || dateFields[i].triggerID == altID ) {
 				opt_key = i;
+				break;
 			}
 		}
 
@@ -130,8 +131,11 @@ function frmFrontFormJS(){
 		}
 
 		var form = field.closest('form');
-		var submitButton = form.find('input[type="submit"], .frm_submit input[type="button"]');
-		var loading = form.find('.frm_ajax_loading');
+		var formID = '#'+ form.attr('id');
+		if ( formID == '#undefined' ) {
+			// use a class if there is not id for WooCommerce
+			formID = 'form.' + form.attr('class').replace(' ', '.');
+		}
 
 		field.dropzone({
 			url:frm_js.ajax_url,
@@ -140,7 +144,7 @@ function frmFrontFormJS(){
 			maxFilesize: uploadFields[i].maxFilesize,
 			maxFiles: max,
 			uploadMultiple: uploadFields[i].uploadMultiple,
-			hiddenInputContainer:'#'+ form.attr('id'),
+			hiddenInputContainer:formID,
 			dictDefaultMessage: uploadFields[i].defaultMessage,
 			dictFallbackMessage: uploadFields[i].fallbackMessage,
 			dictFallbackText: uploadFields[i].fallbackText,
@@ -157,9 +161,21 @@ function frmFrontFormJS(){
 			},
 			init: function() {
 				this.on('sending', function(file, xhr, formData) {
-					formData.append('action', 'frm_submit_dropzone' );
-					formData.append('field_id', uploadFields[i].fieldID );
-					formData.append('form_id', uploadFields[i].formID );
+
+					if ( ! anyPrecedingRequiredFieldsCompleted( uploadFields[i], selector ) ) {
+						this.removeFile(file);
+						alert(frm_js.empty_fields);
+						return false;
+					} else if ( isSpam( uploadFields[i].parentFormID ) ) {
+						this.removeFile(file);
+						alert(frm_js.file_spam);
+						return false;
+					} else {
+						formData.append('action', 'frm_submit_dropzone' );
+						formData.append('field_id', uploadFields[i].fieldID );
+						formData.append('form_id', uploadFields[i].formID );
+						formData.append('nonce', frm_js.nonce );
+					}
 				});
 
 				this.on('success', function( file, response ) {
@@ -179,6 +195,9 @@ function frmFrontFormJS(){
 				});
 
 				this.on('complete', function( file ) {
+					processesRunning--;
+					removeSubmitLoading(form, 'enable');
+
 					if ( typeof file.mediaID !== 'undefined' ) {
 						if ( uploadFields[i].uploadMultiple ) {
 							jQuery(file.previewElement).append( getHiddenUploadHTML( uploadFields[i], file.mediaID, fieldName ) );
@@ -194,13 +213,9 @@ function frmFrontFormJS(){
 				});
 
 				this.on('addedfile', function(){
-					loading.addClass('frm_loading_now');
-					submitButton.attr('disabled', 'disabled');
-				});
+					processesRunning++;
+					showSubmitLoading( form );
 
-				this.on('queuecomplete', function(){
-					loading.removeClass('frm_loading_now');
-					submitButton.removeAttr('disabled');
 				});
 
 				this.on('removedfile', function( file ) {
@@ -232,6 +247,85 @@ function frmFrontFormJS(){
 				}
 			}
 		});
+	}
+
+	function isSpam( formID ) {
+		if ( isHoneypotSpam( formID ) || isHeadless() ) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Check if submission is Honeypot spam
+	 *
+	 * @since 2.03.08
+	 *
+	 * @returns {boolean}
+	 */
+	function isHoneypotSpam( formID ) {
+		var val = document.getElementById('frm_verify_'+formID).value;
+
+		return val !== '';
+	}
+
+	function isHeadless() {
+		return (
+			window._phantom || window.callPhantom || //phantomjs
+			window.__phantomas || //PhantomJS-based web perf metrics
+			window.Buffer || //nodejs
+			window.emit || //couchjs
+			window.spawn  //rhino
+		);
+	}
+
+	/**
+	 * Check that at least one preceding required field is complete
+	 *
+	 * @since 2.03.08
+	 *
+	 * @param {object} uploadField
+	 * @param {string} uploadField.htmlID
+	 * @param {string} uploadField.fieldID
+	 * @returns {boolean}
+	 */
+	function anyPrecedingRequiredFieldsCompleted( uploadField, fileSelector ) {
+		var dropzoneDiv = jQuery( fileSelector );
+		var form = dropzoneDiv.closest( 'form' );
+
+		if ( form.length < 1 ) {
+			return false;
+		}
+
+		var requiredFields = jQuery(form).find(
+			'.frm_required_field:visible input, .frm_required_field:visible select, .frm_required_field:visible textarea, ' + fileSelector
+		);
+
+		if ( requiredFields.length < 1 ) {
+			return true;
+		} else {
+			var fieldsComplete = true;
+
+			for ( var r = 0, rl = requiredFields.length; r < rl; r++ ) {
+				if ( '#' + requiredFields[r].id === fileSelector ) {
+					break;
+				}
+
+				if ( requiredFields[r].className.indexOf( 'frm_optional' ) > -1 || requiredFields[r].getAttribute( 'data-frmfile' ) !== null ) {
+					continue;
+				}
+
+				if ( checkRequiredField( requiredFields[r], [] ).length < 1 ) {
+					fieldsComplete = true;
+					break;
+				} else {
+					fieldsComplete = false;
+				}
+			}
+		}
+
+		return fieldsComplete;
 	}
 
 	function getHiddenUploadHTML( field, mediaID, fieldName ) {
@@ -330,7 +424,9 @@ function frmFrontFormJS(){
 		var originalEvent = getOriginalEvent( e );
 		checkFieldsWatchingLookup( field_id, jQuery(this), originalEvent );
 		doCalculation(field_id, jQuery(this));
-		maybeValidateChange( field_id, this );
+		if ( e.selfTriggered !== true ) {
+			maybeValidateChange( field_id, this );
+		}
 	}
 
 	function maybeValidateChange( field_id, field ) {
@@ -680,10 +776,31 @@ function frmFrontFormJS(){
 
 		var logicFieldInput = document.getElementById( fieldCall );
 
-		if ( logicFieldInput !== null ) {
+		if ( logicFieldInput === null ) {
+			logicFieldValue = parseTimeValue( logicFieldArgs, fieldCall );
+		} else {
 			logicFieldValue = logicFieldInput.value;
 		}
 
+		return logicFieldValue;
+	}
+
+	function parseTimeValue( logicFieldArgs, fieldCall ) {
+		var logicFieldValue = '';
+		if ( logicFieldArgs.fieldType == 'time' ) {
+			var hour = document.getElementById( fieldCall +'_H' );
+			if ( hour !== null ) {
+				var minute = document.getElementById( fieldCall +'_m' );
+				logicFieldValue = hour.value + ':' + minute.value;
+
+				var pm = document.getElementById( fieldCall +'_A' );
+				if ( logicFieldValue == ':' ) {
+					logicFieldValue = '';
+				} else if ( pm !== null ) {
+					logicFieldValue += ' ' + pm.value;
+				}
+			}
+		}
 		return logicFieldValue;
 	}
 
@@ -1209,6 +1326,11 @@ function frmFrontFormJS(){
 		var prevInput;
 		var valueChanged = true;
 		for ( var i= 0, l=inputs.length; i<l; i++ ){
+			if ( inputs[i].className.indexOf( 'frm_dnc' ) > -1 ) {
+				prevInput = inputs[i];
+				continue;
+			}
+
 			if ( i>0 && prevInput.name != inputs[i].name && valueChanged === true ) {
 				// Only trigger a change after all inputs in a field are cleared
 				triggerChange( jQuery(prevInput) );
@@ -1465,6 +1587,13 @@ function frmFrontFormJS(){
 		}
 	}
 
+	/**
+	 * Update a Lookup field's options
+	 *
+	 * @param {Object} childFieldArgs
+	 * @param {Object} parentRepeatArgs
+	 * @param {String} parentRepeatArgs.repeatRow
+     */
 	function updateLookupFieldOptions( childFieldArgs, parentRepeatArgs ) {
 		var childFieldElements = [];
 		if ( parentRepeatArgs.repeatRow !== '' ) {
@@ -1552,6 +1681,13 @@ function frmFrontFormJS(){
 	function updateSingleWatchingField( childFieldArgs, childElement ) {
 		childFieldArgs.parentVals = getParentLookupFieldVals( childFieldArgs );
 
+		if ( currentLookupHasQueue( childElement.id ) ) {
+			addLookupToQueueOfTwo( childFieldArgs, childElement );
+			return;
+		}
+
+		addLookupToQueueOfTwo( childFieldArgs, childElement );
+
 		maybeInsertValueInFieldWatchingLookup( childFieldArgs, childElement );
 	}
 
@@ -1627,7 +1763,7 @@ function frmFrontFormJS(){
 		var parentVals = [];
 		var parentIds = childFieldArgs.parents;
 
-		var parentFieldArgs, currentParentId;
+		var parentFieldArgs;
 		var parentValue = false;
 		for ( var i = 0, l = parentIds.length; i < l; i++ ) {
 			parentFieldArgs = getLookupArgsForSingleField( parentIds[i] );
@@ -1669,6 +1805,7 @@ function frmFrontFormJS(){
 	 * @param {Array} childFieldArgs.parentVals
 	 * @param {string} childFieldArgs.fieldId
 	 * @param {string} childFieldArgs.fieldKey
+	 * @param {string} childFieldArgs.formId
 	 * @param {object} childDiv
 	 */
 	function maybeReplaceSelectLookupFieldOptions( childFieldArgs, childDiv ) {
@@ -1683,14 +1820,16 @@ function frmFrontFormJS(){
 		if ( childFieldArgs.parentVals === false  ) {
 			// If any parents have blank values, don't waste time looking for values
 			childSelect.options.length = 1;
+			childSelect.value = '';
+			maybeUpdateChosenOptions(childSelect);
 
 			if ( currentValue !== '' ) {
-				childSelect.value = '';
-				maybeUpdateChosenOptions(childSelect);
 				triggerChange(jQuery(childSelect), childFieldArgs.fieldKey);
 			}
+
 		} else {
 			disableLookup( childSelect );
+			disableFormPreLookup( childFieldArgs.formId );
 
 			// If all parents have values, check for updated options
 			jQuery.ajax({
@@ -1704,7 +1843,9 @@ function frmFrontFormJS(){
 					nonce:frm_js.nonce
 				},
 				success:function(newOptions){
-					replaceSelectLookupFieldOptions( childFieldArgs.fieldKey, childSelect, newOptions );
+					replaceSelectLookupFieldOptions( childFieldArgs, childSelect, newOptions );
+					triggerLookupOptionsLoaded( jQuery( childDiv ) );
+					enableFormAfterLookup( childFieldArgs.formId );
 				}
 			});
 		}
@@ -1730,13 +1871,85 @@ function frmFrontFormJS(){
 	}
 
 	/**
+	 * Disable a form prior to a Lookup field's Ajax request
+	 *
+	 * @since 2.03.02
+	 * @param {String} formId
+     */
+	function disableFormPreLookup( formId ) {
+		processesRunning++;
+
+		if ( processesRunning === 1 ) {
+
+			var form = getFormById( formId );
+			if ( form !== null ) {
+				showSubmitLoading( jQuery( form ) );
+			}
+		}
+	}
+
+	/**
+	 * Enable a form if all Lookup field requests are completed
+	 *
+	 * @since 2.03.02
+	 * @param {String} formId
+	 */
+	function enableFormAfterLookup( formId ) {
+		processesRunning--;
+
+		if ( processesRunning <= 0 ) {
+
+			var form = getFormById( formId );
+			if ( form !== null ) {
+				removeSubmitLoading(jQuery(form), 'enable');
+			}
+		}
+	}
+
+	/**
+	 * Get a form element by the ID number
+	 *
+	 * @since 2.03.02
+	 * @param {string} formId
+	 * @returns {Element}
+     */
+	function getFormById( formId ) {
+		return document.querySelector( '#frm_form_' + formId + '_container form');
+	}
+
+	/**
+	 * Disable the submit button for a given jQuery form object
+	 *
+	 * @since 2.03.02
+	 *
+	 * @param {object} $form
+     */
+	function disableSubmitButton( $form ) {
+		$form.find('input[type="submit"], input[type="button"], button[type="submit"]').attr('disabled','disabled');
+	}
+
+	/**
+	 * Enable the submit button for a given jQuery form object
+	 *
+	 * @since 2.03.02
+	 *
+	 * @param {object} $form
+     */
+	function enableSubmitButton( $form ) {
+		$form.find( 'input[type="submit"], input[type="button"], button[type="submit"]' ).removeAttr( 'disabled' );
+	}
+
+	/**
 	 * Enable a Select Lookup field and remove loading image
 	 *
 	 * @since 2.02.11
 	 * @param {object} childSelect
+	 * @pparam {boolean} isReadOnly
 	 */
-	function enableLookup( childSelect ) {
-		childSelect.disabled = false;
+	function enableLookup( childSelect, isReadOnly ) {
+		if ( isReadOnly === false ) {
+			childSelect.disabled = false;
+		}
 		childSelect.className = childSelect.className.replace( ' frm_loading_lookup', '' );
 	}
 
@@ -1744,11 +1957,13 @@ function frmFrontFormJS(){
 	 * Replace the options in a Select Lookup field
 	 *
 	 * @since 2.01.0
-	 * @param {string} fieldKey
+	 * @param {Object} fieldArgs
+	 * @param {string} fieldArgs.fieldKey
+	 * @param {boolean} fieldArgs.isReadOnly
 	 * @param {object} childSelect
 	 * @param {Array} newOptions
 	 */
-	function replaceSelectLookupFieldOptions( fieldKey, childSelect, newOptions ) {
+	function replaceSelectLookupFieldOptions( fieldArgs, childSelect, newOptions ) {
 		var origVal = childSelect.value;
 
 		newOptions = JSON.parse( newOptions );
@@ -1766,13 +1981,13 @@ function frmFrontFormJS(){
 
 		setSelectLookupVal( childSelect, origVal );
 
-		enableLookup( childSelect );
+		enableLookup( childSelect, fieldArgs.isReadOnly );
 
 		maybeUpdateChosenOptions( childSelect );
 
 		// Trigger a change if the new value is different from the old value
 		if ( childSelect.value != origVal ) {
-			triggerChange( jQuery(childSelect), fieldKey );
+			triggerChange( jQuery(childSelect), fieldArgs.fieldKey );
 		}
 	}
 
@@ -1794,6 +2009,7 @@ function frmFrontFormJS(){
 	 *
 	 * @since 2.01.01
 	 * @param {Object} childFieldArgs
+	 * @param {Array} childFieldArgs.parentVals
 	 * @param {object} childDiv
      */
 	function maybeReplaceCbRadioLookupOptions( childFieldArgs, childDiv ) {
@@ -1820,6 +2036,7 @@ function frmFrontFormJS(){
 	 * @param {string} childFieldArgs.fieldId
 	 * @param {string} childFieldArgs.repeatRow
 	 * @param {string} childFieldArgs.fieldKey
+	 * @param {string} childFieldArgs.formId
 	 * @param {object} childDiv
      */
 	function replaceCbRadioLookupOptions( childFieldArgs, childDiv ) {
@@ -1836,6 +2053,7 @@ function frmFrontFormJS(){
 		}
 
 		var defaultValue = jQuery( inputs[0] ).data( 'frmval' );
+		disableFormPreLookup( childFieldArgs.formId );
 
 		jQuery.ajax({
 			type:'POST',
@@ -1845,6 +2063,7 @@ function frmFrontFormJS(){
 				parent_fields:childFieldArgs.parents,
 				parent_vals:childFieldArgs.parentVals,
 				field_id:childFieldArgs.fieldId,
+				container_field_id:getContainerFieldId( childFieldArgs ),
 				row_index:childFieldArgs.repeatRow,
 				current_value:currentValue,
 				default_value:defaultValue,
@@ -1863,8 +2082,22 @@ function frmFrontFormJS(){
 				}
 
 				triggerChange( jQuery( inputs[0] ), childFieldArgs.fieldKey );
+				triggerLookupOptionsLoaded( jQuery( childDiv ) );
+
+				enableFormAfterLookup( childFieldArgs.formId );
 			}
 		});
+	}
+
+	/**
+	 * Trigger the frm_lookup_options_loaded event on the field div
+	 *
+	 * @since 2.03.05
+	 *
+	 * @param {Object} $fieldDiv
+	 */
+	function triggerLookupOptionsLoaded( $fieldDiv ) {
+		$fieldDiv.trigger( 'frmLookupOptionsLoaded' );
 	}
 
 	/**
@@ -1894,7 +2127,7 @@ function frmFrontFormJS(){
 		}
 
 		var inputName = inputs[0].name;
-		setCheckboxOrRadioDefaultValue( inputName, defaultValue )
+		setCheckboxOrRadioDefaultValue( inputName, defaultValue );
 	}
 
 	/**
@@ -1955,6 +2188,7 @@ function frmFrontFormJS(){
 	function maybeInsertValueInFieldWatchingLookup( childFieldArgs, childInput ) {
 		if ( isChildInputConditionallyHidden( childInput, childFieldArgs.formId ) ) {
 			// TODO: What if field is in conditionally hidden section?
+			checkQueueAfterLookupCompleted( childInput.id );
 			return;
 		}
 
@@ -1965,8 +2199,12 @@ function frmFrontFormJS(){
 				newValue = '';
 			}
 			insertValueInFieldWatchingLookup( childFieldArgs, childInput, newValue );
+			checkQueueAfterLookupCompleted( childInput.id );
 		} else {
 			// If all parents have values, check for a new value
+
+			disableFormPreLookup( childFieldArgs.formId );
+
 			jQuery.ajax({
 				type:'POST',
 				url:frm_js.ajax_url,
@@ -1978,13 +2216,89 @@ function frmFrontFormJS(){
 					nonce:frm_js.nonce
 				},
 				success:function(newValue){
-					if ( childInput.value != newValue ) {
+					if ( ! isChildInputConditionallyHidden( childInput, childFieldArgs.formId ) && childInput.value != newValue ) {
 						insertValueInFieldWatchingLookup( childFieldArgs.fieldKey, childInput, newValue );
 					}
+
+					enableFormAfterLookup( childFieldArgs.formId );
+					checkQueueAfterLookupCompleted( childInput.id );
 				}
 			});
 		}
 	}
+
+	/**
+	 * Check if the current Lookup watcher field has a queue
+	 *
+	 * @since 2.03.05
+	 *
+	 * @param {string} elementId
+	 * @returns {boolean}
+     */
+	function currentLookupHasQueue( elementId ) {
+		return ( elementId in lookupQueues && lookupQueues[elementId].length > 0 );
+	}
+
+	/**
+	 * Add the current Lookup watcher to a queue of size two
+	 *
+	 * @since 2.03.05
+	 *
+	 * @param {Object} childFieldArgs
+	 * @param {Object} childInput
+     */
+	function addLookupToQueueOfTwo( childFieldArgs, childInput ) {
+		var elementId = childInput.id;
+
+		if ( elementId in lookupQueues ) {
+			if ( lookupQueues[elementId].length >= 2 ) {
+				lookupQueues[elementId] = lookupQueues[elementId].slice( 0, 1 );
+			}
+		} else {
+			lookupQueues[elementId] = [];
+		}
+
+		lookupQueues[elementId].push( { 'childFieldArgs':childFieldArgs, 'childInput':childInput } );
+	}
+
+	/**
+	 * Check the lookupQueue after a value lookup is completed
+	 *
+	 * @since 2.03.05
+	 *
+	 * @param {string} elementId
+     */
+	function checkQueueAfterLookupCompleted( elementId ) {
+		removeLookupFromQueue( elementId );
+		doNextItemInLookupQueue( elementId );
+	}
+
+	/**
+	 * Remove a Lookup from the queue
+	 *
+	 * @since 2.03.05
+	 *
+	 * @param {string} elementId
+	 */
+	function removeLookupFromQueue( elementId ) {
+		lookupQueues[elementId].shift();
+	}
+
+	/**
+	 * Check the current Lookup queue
+	 *
+	 * @since 2.03.05
+	 *
+	 * @param {string} elementId
+	 */
+	function doNextItemInLookupQueue( elementId ) {
+		if ( currentLookupHasQueue( elementId ) ) {
+			var childFieldArgs = lookupQueues[elementId][0].childFieldArgs;
+			var childInput = lookupQueues[elementId][0].childInput;
+			maybeInsertValueInFieldWatchingLookup( childFieldArgs, childInput );
+		}
+	}
+
 
 	/**
 	 * Insert a new text field Lookup value
@@ -1995,6 +2309,7 @@ function frmFrontFormJS(){
 	 * @param {string} newValue
  	 */
 	function insertValueInFieldWatchingLookup( fieldKey, childInput, newValue ) {
+		newValue = newValue.replace( /&amp;/g, '&' );
 		childInput.value = newValue;
 		triggerChange( jQuery( childInput ), fieldKey );
 	}
@@ -2090,6 +2405,7 @@ function frmFrontFormJS(){
 				entry_id:depFieldArgs.dataLogic.actualValue,
 				current_field:depFieldArgs.fieldId,
 				hide_id:depFieldArgs.containerId,
+				on_current_page:onCurrentPage,
 				nonce:frm_js.nonce
 			},
 			success:function(html){
@@ -2433,7 +2749,7 @@ function frmFrontFormJS(){
 			totalField = getSiblingField( fieldInfo );
 		}
 
-		if ( totalField.length < 1 ) {
+		if ( totalField === null || totalField.length < 1 ) {
 			return;
 		}
 
@@ -2457,6 +2773,8 @@ function frmFrontFormJS(){
 				}
 			}
 
+			thisFullCalc = trimNumericCalculation( thisFullCalc );
+
 			total = parseFloat(eval(thisFullCalc));
 
 			if ( typeof total === 'undefined' || isNaN(total) ) {
@@ -2469,9 +2787,11 @@ function frmFrontFormJS(){
 			}
 		}
 
-		if ( totalField.val() != total ) {
+		if ( totalField.val() !== total ) {
 			totalField.val(total);
-			triggerChange( totalField, field_key );
+			if ( triggerField === null || typeof triggerField === 'undefined' || totalField.attr('name') != triggerField.attr('name') ) {
+				triggerChange( totalField, field_key );
+			}
 		}
 	}
 
@@ -2509,6 +2829,22 @@ function frmFrontFormJS(){
 			thisFullCalc = thisFullCalc.replace(new RegExp(findVar, 'g'), vals[field.valKey]);
 		}
 		return thisFullCalc;
+	}
+
+	/**
+	 * Trim non-numeric characters from the end of a numeric calculation
+	 *
+	 * @since 2.03.02
+	 * @param {String} numericCalc
+	 * @returns {String}
+	 */
+	function trimNumericCalculation( numericCalc ) {
+		var lastChar = numericCalc.charAt( numericCalc.length - 1 );
+		if ( lastChar === '+' || lastChar === '-' ) {
+			numericCalc = numericCalc.substr( 0, numericCalc.length - 1 );
+		}
+
+		return numericCalc;
 	}
 
 	function getCallForField( field, all_calcs ) {
@@ -2652,7 +2988,15 @@ function frmFrontFormJS(){
 			thisVal = thisVal.trim();
 
 			if ( count > 0 ) {
-				sep = ', ';
+				if ( field.thisField.type == 'time' ) {
+					if ( count == 1 ) {
+						sep = ':';
+					} else if ( count == 2 ) {
+						sep = ' ';
+					}
+				} else {
+					sep = ', ';
+				}
 			}
 
 			if ( thisVal !== '' ) {
@@ -2670,7 +3014,7 @@ function frmFrontFormJS(){
 			calcField = jQuery(field.thisFieldCall);
 		} else {
 			calcField = getSiblingField( field );
-			if ( calcField === null || typeof calcField === 'undefined' ) {
+			if ( calcField === null || typeof calcField === 'undefined' || calcField.length < 1  ) {
 				calcField = jQuery(field.thisFieldCall);
 			}
 		}
@@ -2982,7 +3326,9 @@ function frmFrontFormJS(){
 			}
 
 			val = jQuery(field).val();
-			if ( typeof val !== 'string' ) {
+			if ( val === null ) {
+				val = '';
+			} else if ( typeof val !== 'string' ) {
 				var tempVal = val;
 				val = '';
 				for ( var i = 0; i < tempVal.length; i++ ) {
@@ -2996,6 +3342,11 @@ function frmFrontFormJS(){
 				fieldID = getFieldId( field, true );
 			} else {
 				fieldID = getFieldId( field, false );
+			}
+
+			if ( fieldClasses.indexOf('frm_time_select') !== -1 ) {
+				// set id for time field
+				fieldID = fieldID.replace('-H', '').replace('-m', '');
 			}
 		}
 
@@ -3077,6 +3428,31 @@ function frmFrontFormJS(){
 		return errors;
 	}
 
+	function hasInvisibleRecaptcha( object ) {
+		if ( goingToPrevPage( object ) ) {
+			return false;
+		}
+
+		var recaptcha = jQuery(object).find('.frm-g-recaptcha[data-size="invisible"], .g-recaptcha[data-size="invisible"]');
+		if ( recaptcha.length ) {
+			var recaptchaID = recaptcha.data('rid');
+			var alreadyChecked = grecaptcha.getResponse( recaptchaID );
+			if ( alreadyChecked.length === 0 ) {
+				return recaptcha;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+
+	function executeInvisibleRecaptcha( invisibleRecaptcha ) {
+		var recaptchaID = invisibleRecaptcha.data('rid');
+		grecaptcha.reset( recaptchaID );
+		grecaptcha.execute( recaptchaID );
+	}
+
 	function validateRecaptcha( form, errors ) {
 		var $recaptcha = jQuery(form).find('.frm-g-recaptcha');
 		if ( $recaptcha.length ) {
@@ -3105,6 +3481,8 @@ function frmFrontFormJS(){
 			jQuery(object).find('input[name="frm_action"]').val();
 		}
 
+		var fieldset = jQuery(object).find('.frm_form_field');
+		fieldset.addClass('frm_doing_ajax');
 		jQuery.ajax({
 			type:'POST',url:frm_js.ajax_url,
 			data:jQuery(object).serialize() +'&action=frm_entries_'+ action +'&nonce='+frm_js.nonce,
@@ -3122,16 +3500,20 @@ function frmFrontFormJS(){
 				}
 
 				if ( typeof response.redirect != 'undefined' ) {
+					jQuery(document).trigger( 'frmBeforeFormRedirect', [ object, response ] );
 					window.location = response.redirect;
 				} else if ( response.content !== '' ) {
 					// the form or success message was returned
 
-					jQuery(object).find('.frm_ajax_loading').removeClass('frm_loading_now');
-					var formID = jQuery(object).find('input[name="form_id"]').val();
-					jQuery(object).closest( '.frm_forms' ).replaceWith( response.content );
+					removeSubmitLoading( jQuery(object) );
 					if ( frm_js.offset != -1 ) {
 						frmFrontForm.scrollMsg( jQuery(object), false );
 					}
+					var formID = jQuery(object).find('input[name="form_id"]').val();
+					response.content = response.content.replace(/ frm_pro_form /g, ' frm_pro_form frm_no_hide ');
+					jQuery(object).closest( '.frm_forms' ).replaceWith( response.content );
+
+					addUrlParam(response);
 
 					if(typeof(frmThemeOverride_frmAfterSubmit) == 'function'){
 						var pageOrder = jQuery('input[name="frm_page_order_'+ formID +'"]').val();
@@ -3139,22 +3521,12 @@ function frmFrontFormJS(){
 						frmThemeOverride_frmAfterSubmit(formReturned, pageOrder, response.content, object);
 					}
 
-					var entryIdField = jQuery(object).find('input[name="id"]');
-					if(entryIdField.length){
-						jQuery(document.getElementById('frm_edit_'+ entryIdField.val())).find('a').addClass('frm_ajax_edited').click();
-					}
+					afterFormSubmitted( object, response );
 
-					var formCompleted = jQuery(response.content).find('.frm_message');
-					if ( formCompleted.length ) {
-						// if the success message is showing, run the logic
-						checkConditionalLogic( 'pageLoad' );
-					}
-					checkFieldsOnPage();
 				} else if ( Object.keys(response.errors).length ) {
 					// errors were returned
 
-					jQuery(object).find('input[type="submit"], input[type="button"]').removeAttr('disabled');
-					jQuery(object).find('.frm_ajax_loading').removeClass('frm_loading_now');
+					removeSubmitLoading( jQuery(object), 'enable' );
 
 					//show errors
 					var cont_submit = true;
@@ -3200,6 +3572,9 @@ function frmFrontFormJS(){
 						}
 					}
 
+					jQuery(document).trigger( 'frmFormErrors', [ object, response ] );
+
+					fieldset.removeClass('frm_doing_ajax');
 					scrollToFirstField( object );
 
 					if(show_captcha !== true){
@@ -3227,6 +3602,50 @@ function frmFrontFormJS(){
 		});
 	}
 
+	function addUrlParam(response){
+		if ( history.pushState && typeof response.page != 'undefined' ) {
+			var url = addQueryVar('frm_page', response.page);
+			window.history.pushState({"html":response.html}, '', '?'+ url);
+		}
+	}
+
+	function addQueryVar(key, value) {
+		key = encodeURI(key);
+		value = encodeURI(value);
+
+		var kvp = document.location.search.substr(1).split('&');
+
+		var i=kvp.length; var x; while(i--) {
+			x = kvp[i].split('=');
+
+			if (x[0]==key) {
+				x[1] = value;
+				kvp[i] = x.join('=');
+				break;
+			}
+		}
+
+		if (i<0) {
+			kvp[kvp.length] = [key,value].join('=');
+		}
+
+		return kvp.join('&');
+	}
+
+	function afterFormSubmitted( object, response ) {
+		var formCompleted = jQuery(response.content).find('.frm_message');
+		if ( formCompleted.length ) {
+			jQuery(document).trigger( 'frmFormComplete', [ object, response ] );
+
+			// if the success message is showing, run the logic
+			checkConditionalLogic( 'pageLoad' );
+			doEditInPlaceCleanUp( object );
+		} else {
+			jQuery(document).trigger( 'frmPageChanged', [ object, response ] );
+		}
+		checkFieldsOnPage();
+	}
+
 	function addFieldError( $fieldCont, key, jsErrors ) {
 		if ( $fieldCont.length && $fieldCont.is(':visible') ) {
 			$fieldCont.addClass('frm_blank_field');
@@ -3239,12 +3658,12 @@ function frmFrontFormJS(){
 	}
 
 	function removeFieldError( $fieldCont ) {
-		$fieldCont.removeClass('frm_blank_field');
+		$fieldCont.removeClass('frm_blank_field has-error');
 		$fieldCont.find('.frm_error').remove();
 	}
 
 	function removeAllErrors() {
-		jQuery('.form-field').removeClass('frm_blank_field');
+		jQuery('.form-field').removeClass('frm_blank_field has-error');
 		jQuery('.form-field .frm_error').replaceWith('');
 		jQuery('.frm_error_style').remove();
 	}
@@ -3253,6 +3672,30 @@ function frmFrontFormJS(){
 		var field = jQuery(object).find('.frm_blank_field:first');
 		if ( field.length ) {
 			frmFrontForm.scrollMsg( field, object, true );
+		}
+	}
+
+	function showSubmitLoading( $object ) {
+		if ( !$object.hasClass('frm_loading_form') ) {
+			$object.addClass('frm_loading_form');
+
+			$object.trigger( 'frmStartFormLoading' );
+		}
+
+		disableSubmitButton( $object );
+	}
+
+	function removeSubmitLoading( $object, enable ) {
+		if ( processesRunning > 0 ) {
+			return;
+		}
+
+		$object.removeClass('frm_loading_form');
+
+		$object.trigger( 'frmEndFormLoading' );
+
+		if ( enable == 'enable' ) {
+			enableSubmitButton( $object );
 		}
 	}
 
@@ -3470,6 +3913,7 @@ function frmFrontFormJS(){
 
 		var chart = new google.visualization[type]( chartDiv );
 		chart.draw(data, graphData.options);
+		jQuery(document).trigger( 'frmDrawChart', [ chart, 'chart_' + graphData.graph_id, data ] );
 	}
 
 	function getGraphType(field){
@@ -3519,6 +3963,8 @@ function frmFrontFormJS(){
 			if(typeof(frmThemeOverride_frmRemoveRow) == 'function'){
 				frmThemeOverride_frmRemoveRow(id, thisRow);
 			}
+
+			jQuery(document).trigger( 'frmAfterRemoveRow' );
 		});
 
 		return false;
@@ -3601,6 +4047,8 @@ function frmFrontFormJS(){
 					frmThemeOverride_frmAddRow(id, r);
 				}
 
+				jQuery(document).trigger( 'frmAfterAddRow' );
+
 				currentlyAddingRow = false;
 			},
 			error: function() {
@@ -3643,7 +4091,7 @@ function frmFrontFormJS(){
 
 				// Make sure fields just loaded are properly bound
 				jQuery(document).on('change', '.frm-show-form input[name^="item_meta"], .frm-show-form select[name^="item_meta"], .frm-show-form textarea[name^="item_meta"]', maybeCheckDependent);
-				checkFieldsOnPage();
+				checkFieldsOnPage( prefix + entry_id );
 			}
 		});
 		return false;
@@ -3651,19 +4099,29 @@ function frmFrontFormJS(){
 
 	function cancelEdit(){
 		/*jshint validthis:true */
-		var $edit = jQuery(this);
-		var entry_id = $edit.data('entryid');
-		var prefix = $edit.data('prefix');
-		var label = $edit.data('edit');
 
-		if(!$edit.hasClass('frm_ajax_edited')){
-			var $cont = jQuery(document.getElementById(prefix+entry_id));
-			$cont.children('.frm_forms').replaceWith('');
-			$cont.children('.frm_orig_content').fadeIn('slow').removeClass('frm_orig_content');
-		}
-		$edit.removeClass('frm_cancel_edit').addClass('frm_inplace_edit');
-		$edit.html(label);
-		return false;
+		var $cancelLink = jQuery(this);
+		var prefix = $cancelLink.data('prefix');
+		var entry_id = $cancelLink.data('entryid');
+
+		var $cont = jQuery(document.getElementById(prefix+entry_id));
+		$cont.children('.frm_forms').replaceWith('');
+		$cont.children('.frm_orig_content').fadeIn('slow').removeClass('frm_orig_content');
+
+		switchCancelToEdit( $cancelLink );
+	}
+
+	/**
+	 * Switch a Cancel Link back to Edit
+	 *
+	 * @since 2.03.08
+	 *
+	 * @param {object} $link
+     */
+	function switchCancelToEdit( $link ) {
+		var label = $link.data('edit');
+		$link.removeClass('frm_cancel_edit').addClass('frm_inplace_edit');
+		$link.html(label);
 	}
 
 	function deleteEntry(){
@@ -3684,7 +4142,10 @@ function frmFrontFormJS(){
 						container.fadeOut('slow', function(){
 							container.remove();
 						});
+
 						jQuery(document.getElementById('frm_delete_'+entry_id)).fadeOut('slow');
+						jQuery( document ).trigger( 'frmEntryDeleted', [ entry_id ] );
+
 					}else{
 						jQuery(document.getElementById('frm_delete_'+entry_id)).replaceWith(html);
 					}
@@ -3694,16 +4155,72 @@ function frmFrontFormJS(){
 		return false;
 	}
 
+	/**
+	 * Switch Cancel link back to Edit link after entry is updated in-place
+	 *
+	 * @since 2.03.08
+	 *
+	 * @param {object} form
+     */
+	function doEditInPlaceCleanUp( form ) {
+		var entryIdField = jQuery( form ).find( 'input[name="id"]' );
+
+		if ( entryIdField.length ) {
+			var link = document.getElementById( 'frm_edit_' + entryIdField.val() );
+
+			if ( isCancelLink( link ) ) {
+				switchCancelToEdit( jQuery( link ) );
+			}
+		}
+	}
+
+	/**
+	 * Check if a link is a cancel link
+	 *
+	 * @since 2.03.08
+	 *
+	 * @param {object} link
+	 * @returns {boolean}
+     */
+	function isCancelLink( link ) {
+		return ( link !== null && link.className.indexOf( 'frm_cancel_edit' ) > -1 );
+	}
+
+	/**********************************************
+	 * Ajax time field unique check
+	 *********************************************/
+
+	function loadUniqueTimeFields() {
+		if ( typeof __frmUniqueTimes === 'undefined' ) {
+			return;
+		}
+
+		var timeFields = __frmUniqueTimes;
+		for ( var i = 0; i < timeFields.length; i++ ) {
+			jQuery( document.getElementById( timeFields[i].dateID ) ).change( maybeTriggerUniqueTime );
+		}
+	}
+
+	function maybeTriggerUniqueTime() {
+		/*jshint validthis:true */
+		var timeFields = __frmUniqueTimes;
+		for ( var i = 0; i < timeFields.length; i++ ) {
+			if ( timeFields[i].dateID == this.id ) {
+				frmFrontForm.removeUsedTimes( this, timeFields[i].timeID );
+			}
+		}
+	}
+
 	/**********************************************
 	 * General Helpers
 	 *********************************************/
 
-	function checkFieldsOnPage(){
+	function checkFieldsOnPage( chosenContainer ){
 		checkPreviouslyHiddenFields();
 		loadDateFields();
 		loadCustomInputMasks();
 		loadStars();
-		loadChosen();
+		loadChosen( chosenContainer );
 		checkDynamicFields();
 		checkLookupFields();
 		triggerCalc();
@@ -3716,13 +4233,18 @@ function frmFrontFormJS(){
 		}
 	}
 
-	function loadChosen() {
+	function loadChosen( chosenContainer ) {
 		if ( jQuery().chosen ) {
 			var opts = {allow_single_deselect:true,no_results_text:frm_js.no_results};
 			if ( typeof __frmChosen !== 'undefined' ) {
 				opts = '{' + __frmChosen + '}';
 			}
-			jQuery('.frm_chzn').chosen(opts);
+
+			if ( typeof chosenContainer !== 'undefined' ) {
+				jQuery( "#" + chosenContainer ).find( '.frm_chzn' ).chosen( opts );
+			} else {
+				jQuery( '.frm_chzn' ).chosen( opts );
+			}
 		}
 	}
 
@@ -3739,7 +4261,13 @@ function frmFrontFormJS(){
 	function checkConditionalLogic( event ) {
 		if (typeof __frmHideOrShowFields !== 'undefined') {
 			frmFrontForm.hideOrShowFields( __frmHideOrShowFields, event );
+		} else {
+			showForm();
 		}
+	}
+
+	function showForm() {
+		jQuery('.frm_pro_form').fadeIn('slow');
 	}
 
 	function checkDynamicFields() {
@@ -3937,12 +4465,12 @@ function frmFrontFormJS(){
 			jQuery(document).on('click', '.frm_remove_link', removeFile);
 
 			jQuery(document).on('focusin', 'input[data-frmmask]', function(){
-				jQuery(this).mask( jQuery(this).data('frmmask').toString() );
+				jQuery(this).mask( jQuery(this).data('frmmask').toString(), { autoclear: false } );
 			});
 
 			jQuery(document).on('change', '.frm-show-form input[name^="item_meta"], .frm-show-form select[name^="item_meta"], .frm-show-form textarea[name^="item_meta"]', maybeCheckDependent);
 
-			jQuery(document).on('click', '.frm-show-form input[type="submit"], .frm-show-form input[name="frm_prev_page"], .frm-show-form .frm_save_draft', setNextPage);
+			jQuery(document).on('click', '.frm-show-form input[type="submit"], .frm-show-form input[name="frm_prev_page"], .frm_page_back, .frm_page_skip, .frm-show-form .frm_save_draft, .frm_prev_page, .frm_button_submit', setNextPage);
             
             jQuery(document).on('change', '.frm_other_container input[type="checkbox"], .frm_other_container input[type="radio"], .frm_other_container select', showOtherText);
 
@@ -3979,13 +4507,25 @@ function frmFrontFormJS(){
 			addKeysFallbackForIE8();
 		},
 
+		afterSingleRecaptcha: function(token){
+			var object = jQuery('.frm-show-form .g-recaptcha').closest('form')[0];
+			frmFrontForm.submitFormNow( object );
+		},
+
+		afterRecaptcha: function(token, formID){
+			var object = jQuery('#frm_form_'+ formID +'_container form')[0];
+			frmFrontForm.submitFormNow( object );
+		},
+
 		submitForm: function(e){
 			frmFrontForm.submitFormManual( e, this );
 		},
 
 		submitFormManual: function(e, object){
+			var invisibleRecaptcha = hasInvisibleRecaptcha(object);
+
 			var classList = object.className.trim().split(/\s+/gi);
-			if ( classList ) {
+			if ( classList && invisibleRecaptcha.length < 1 ) {
 				var isPro = classList.indexOf('frm_pro_form') > -1;
 				if ( ! isPro ) {
 					return;
@@ -3997,30 +4537,40 @@ function frmFrontFormJS(){
 			}
 
 			e.preventDefault();
-			var errors = frmFrontForm.validateFormSubmit( object );
 
-			if ( Object.keys(errors).length === 0 ) {
-				jQuery(object).find('.frm_ajax_loading').addClass('frm_loading_now');
+			if ( invisibleRecaptcha.length ) {
+				executeInvisibleRecaptcha( invisibleRecaptcha );
+			} else {
 
-				// Disable submit button
-				jQuery(object).find('input[type="submit"], input[type="button"]').attr('disabled','disabled');
+				var errors = frmFrontForm.validateFormSubmit( object );
 
-				if ( classList.indexOf('frm_ajax_submit') > -1 ) {
-					var hasFileFields = jQuery(object).find('input[type="file"]').length;
-					if ( hasFileFields < 1 ) {
-						action = jQuery(object).find('input[name="frm_action"]').val();
-						frmFrontForm.checkFormErrors( object, action );
-					} else {
-						object.submit();
-					}
-				} else {
-					object.submit();
+				if ( Object.keys(errors).length === 0 ) {
+					showSubmitLoading( jQuery(object) );
+
+					frmFrontForm.submitFormNow( object, classList );
 				}
 			}
 		},
 
+		submitFormNow: function(object) {
+			var classList = object.className.trim().split(/\s+/gi);
+			if ( classList.indexOf('frm_ajax_submit') > -1 ) {
+				var hasFileFields = jQuery(object).find('input[type="file"]').filter(function () {
+					return !!this.value;
+				}).length;
+				if ( hasFileFields < 1 ) {
+					action = jQuery(object).find('input[name="frm_action"]').val();
+					frmFrontForm.checkFormErrors( object, action );
+				} else {
+					object.submit();
+				}
+			} else {
+				object.submit();
+			}
+		},
+
 		validateFormSubmit: function( object ){
-			if ( typeof tinyMCE != 'undefined' && jQuery(this).find('.wp-editor-wrap').length ) {
+			if ( typeof tinyMCE != 'undefined' && jQuery(object).find('.wp-editor-wrap').length ) {
 				tinyMCE.triggerSave();
 			}
 
@@ -4090,9 +4640,9 @@ function frmFrontFormJS(){
 			} else {
 				scrollObj = id;
 			}
-			var newPos = scrollObj.offset().top;
 
-			if(!newPos){
+			var newPos = scrollObj.offset().top;
+			if ( !newPos ){
 				return;
 			}
 			newPos = newPos-frm_js.offset;
@@ -4135,6 +4685,9 @@ function frmFrontFormJS(){
 			var repeatArgs = { repeatingSection: '', repeatRow: '' };
 			for ( var i = 0, l = len; i < l; i++ ) {
 				hideOrShowFieldById( ids[i], repeatArgs );
+				if ( i == ( l - 1 ) ) {
+					showForm();
+				}
 			}
 		},
 
@@ -4182,8 +4735,7 @@ function frmFrontFormJS(){
 				setTimeout( frmFrontForm.loadGoogle, 30 );
 			}
 		},
-		
-		/* Time fields */
+
 		removeUsedTimes: function( obj, timeField ) {
 			var e = jQuery(obj).parents('form:first').find('input[name="id"]');
 			jQuery.ajax({
@@ -4199,9 +4751,9 @@ function frmFrontFormJS(){
 				success:function(opts){
 					var $timeField = jQuery(document.getElementById(timeField));
 					$timeField.find('option').removeAttr('disabled');
-					if(opts && opts !== ''){
-						for(var opt in opts){
-							$timeField.find('option[value="'+opt+'"]').attr('disabled', 'disabled');
+					if ( opts.length > 0 ){
+						for ( var i=0, l=opts.length; i<l; i++ ) {
+							$timeField.find('option[value="'+opts[i]+'"]').attr('disabled', 'disabled');
 						}
 					}
 				}
@@ -4235,17 +4787,30 @@ jQuery(document).ready(function($){
 function frmRecaptcha() {
 	var captchas = jQuery('.frm-g-recaptcha');
 	for ( var c = 0, cl = captchas.length; c < cl; c++ ) {
-		var recaptchaID = grecaptcha.render( captchas[c].id, {
+		var size = captchas[c].getAttribute('data-size');
+		var params = {
 			'sitekey': captchas[c].getAttribute('data-sitekey'),
-			'size': captchas[c].getAttribute('data-size'),
+			'size': size,
 			'theme': captchas[c].getAttribute('data-theme')
-		} );
+		};
+		if ( size == 'invisible' ) {
+			var formID = jQuery(captchas[c]).closest('form').find('input[name="form_id"]').val();
+			params.callback = function(token) {
+				frmFrontForm.afterRecaptcha(token, formID)
+			};
+		}
+		var recaptchaID = grecaptcha.render( captchas[c].id, params );
+
 		captchas[c].setAttribute('data-rid', recaptchaID);
 	}
 }
 
+function frmAfterRecaptcha(token){
+	frmFrontForm.afterSingleRecaptcha(token);
+}
+
 function frmUpdateField(entry_id,field_id,value,message,num){
-	jQuery(document.getElementById('frm_update_field_'+entry_id+'_'+field_id)).html('<span class="frm-loading-img"></span>');
+	jQuery(document.getElementById('frm_update_field_'+entry_id+'_'+field_id+'_'+num)).html('<span class="frm-loading-img"></span>');
 	jQuery.ajax({
 		type:'POST',url:frm_js.ajax_url,
 		data:{action:'frm_entries_update_field_ajax', entry_id:entry_id, field_id:field_id, value:value, nonce:frm_js.nonce},
@@ -4257,37 +4822,6 @@ function frmUpdateField(entry_id,field_id,value,message,num){
 			}
 		}
 	});
-}
-
-function frmEditEntry(entry_id,prefix,post_id,form_id,cancel,hclass){
-	console.warn('DEPRECATED: function frmEditEntry in v2.0.13 use frmFrontForm.editEntry');
-	var $edit = jQuery(document.getElementById('frm_edit_'+entry_id));
-	var label = $edit.html();
-	var $cont = jQuery(document.getElementById(prefix+entry_id));
-	var orig = $cont.html();
-	$cont.html('<span class="frm-loading-img" id="'+prefix+entry_id+'"></span><div class="frm_orig_content" style="display:none">'+orig+'</div>');
-	jQuery.ajax({
-		type:'POST',url:frm_js.ajax_url,dataType:'html',
-		data:{action:'frm_entries_edit_entry_ajax', post_id:post_id, entry_id:entry_id, id:form_id, nonce:frm_js.nonce},
-		success:function(html){
-			$cont.children('.frm-loading-img').replaceWith(html);
-			$edit.replaceWith('<span id="frm_edit_'+entry_id+'"><a onclick="frmCancelEdit('+entry_id+',\''+prefix+'\',\''+ frmFrontForm.escapeHtml(label) +'\','+post_id+','+form_id+',\''+hclass+'\')" class="'+hclass+'">'+cancel+'</a></span>');
-		}
-	});
-}
-
-function frmCancelEdit(entry_id,prefix,label,post_id,form_id,hclass){
-	console.warn('DEPRECATED: function frmCancelEdit in v2.0.13 use frmFrontForm.cancelEdit');
-	var $edit = jQuery(document.getElementById('frm_edit_'+entry_id));
-	var $link = $edit.find('a');
-	var cancel = $link.html();
-	
-	if(!$link.hasClass('frm_ajax_edited')){
-		var $cont = jQuery(document.getElementById(prefix+entry_id));
-		$cont.children('.frm_forms').replaceWith('');
-		$cont.children('.frm_orig_content').fadeIn('slow').removeClass('frm_orig_content');
-	}
-	$edit.replaceWith('<a id="frm_edit_'+entry_id+'" class="frm_edit_link '+hclass+'" href="javascript:frmEditEntry('+entry_id+',\''+prefix+'\','+post_id+','+form_id+',\''+ frmFrontForm.escapeHtml(cancel) +'\',\''+hclass+'\')">'+label+'</a>');
 }
 
 function frmDeleteEntry(entry_id,prefix){

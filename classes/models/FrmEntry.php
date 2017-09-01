@@ -134,9 +134,11 @@ class FrmEntry {
 		$new_values['item_key'] = FrmAppHelper::get_unique_key( '', $wpdb->prefix . 'frm_items', 'item_key' );
         $new_values['name'] = $values->name;
         $new_values['is_draft'] = $values->is_draft;
-        $new_values['user_id'] = $new_values['updated_by'] = (int) $values->user_id;
+		$new_values['user_id'] = (int) $values->user_id;
+		$new_values['updated_by'] = (int) $values->user_id;
         $new_values['form_id'] = $values->form_id ? (int) $values->form_id: null;
-        $new_values['created_at'] = $new_values['updated_at'] = current_time('mysql', 1);
+		$new_values['created_at'] = current_time( 'mysql', 1 );
+		$new_values['updated_at'] = $new_values['created_at'];
 
 		$query_results = $wpdb->insert( $wpdb->prefix . 'frm_items', $new_values );
         if ( ! $query_results ) {
@@ -197,7 +199,7 @@ class FrmEntry {
 		return $query_results;
 	}
 
-	public static function &destroy( $id ) {
+	public static function destroy( $id ) {
         global $wpdb;
         $id = (int) $id;
 
@@ -217,7 +219,7 @@ class FrmEntry {
         return $result;
     }
 
-	public static function &update_form( $id, $value, $form_id ) {
+	public static function update_form( $id, $value, $form_id ) {
         global $wpdb;
         $form_id = isset($value) ? $form_id : null;
 		$result = $wpdb->update( $wpdb->prefix . 'frm_items', array( 'form_id' => $form_id ), array( 'id' => $id ) );
@@ -325,7 +327,7 @@ class FrmEntry {
     /**
      * @param string $id
      */
-	public static function &exists( $id ) {
+	public static function exists( $id ) {
         global $wpdb;
 
         if ( FrmAppHelper::check_cache( $id, 'frm_entry' ) ) {
@@ -541,11 +543,11 @@ class FrmEntry {
 		$new_values = array(
 			'item_key'  => FrmAppHelper::get_unique_key( $values['item_key'], $wpdb->prefix . 'frm_items', 'item_key' ),
 			'name'      => FrmAppHelper::truncate( $item_name, 255, 1, '' ),
-			'ip'        => FrmAppHelper::get_ip_address(),
+			'ip'        => self::get_ip( $values ),
 			'is_draft'  => self::get_is_draft_value( $values ),
-			'form_id'   => self::get_form_id( $values ),
-			'post_id'   => self::get_post_id( $values ),
-			'parent_item_id' => self::get_parent_item_id( $values ),
+			'form_id'   => (int) self::get_entry_value( $values, 'form_id', null ),
+			'post_id'   => (int) self::get_entry_value( $values, 'post_id', 0 ),
+			'parent_item_id' => (int) self::get_entry_value( $values, 'parent_item_id', 0 ),
 			'created_at' => self::get_created_at( $values ),
 			'updated_at' => self::get_updated_at( $values ),
 			'description' => self::get_entry_description( $values ),
@@ -561,6 +563,26 @@ class FrmEntry {
 		return $new_values;
 	}
 
+	private static function get_entry_value( $values, $name, $default ) {
+		return isset( $values[ $name ] ) ? $values[ $name ] : $default;
+	}
+
+	/**
+	 * Get the ip for a new entry.
+	 * Allow the import to override the value.
+	 *
+	 * @since 2.03.10
+	 * @param array $values
+	 * @return string
+	 */
+	private static function get_ip( $values ) {
+		$ip = FrmAppHelper::get_ip_address();
+		if ( defined('WP_IMPORTING') && WP_IMPORTING ) {
+			$ip = self::get_entry_value( $values, 'ip', $ip );
+		}
+		return $ip;
+	}
+
 	/**
 	* Get the is_draft value for a new entry
 	*
@@ -569,40 +591,7 @@ class FrmEntry {
 	* @return int
 	*/
 	private static function get_is_draft_value( $values ) {
-		return ( ( isset( $values['frm_saving_draft'] ) && $values['frm_saving_draft'] == 1 ) ||  ( isset( $values['is_draft'] ) && $values['is_draft'] == 1 ) ) ? 1 : 0;
-	}
-
-	/**
-	* Get the form_id value for a new entry
-	*
-	* @since 2.0.16
-	* @param array $values
-	* @return int|null
-	*/
-	private static function get_form_id( $values ) {
-		return isset( $values['form_id'] ) ? (int) $values['form_id'] : null;
-	}
-
-	/**
-	* Get the post_id value for a new entry
-	*
-	* @since 2.0.16
-	* @param array $values
-	* @return int
-	*/
-	private static function get_post_id( $values ) {
-		return isset( $values['post_id'] ) ? (int) $values['post_id']: 0;
-	}
-
-	/**
-	* Get the parent_item_id value for a new entry
-	*
-	* @since 2.0.16
-	* @param array $values
-	* @return int
-	*/
-	private static function get_parent_item_id( $values ) {
-		return isset( $values['parent_item_id'] ) ? (int) $values['parent_item_id']: 0;
+		return ( ( isset( $values['frm_saving_draft'] ) && $values['frm_saving_draft'] == 1 ) || ( isset( $values['is_draft'] ) && $values['is_draft'] == 1 ) ) ? 1 : 0;
 	}
 
 	/**
@@ -613,7 +602,7 @@ class FrmEntry {
 	* @return string
 	*/
 	private static function get_created_at( $values ) {
-		return isset( $values['created_at'] ) ? $values['created_at']: current_time('mysql', 1);
+		return self::get_entry_value( $values, 'created_at', current_time( 'mysql', 1 ) );
 	}
 
 	/**
@@ -793,7 +782,7 @@ class FrmEntry {
 
 		$new_values = array(
 			'name'      => self::get_new_entry_name( $values ),
-			'form_id'   => self::get_form_id( $values ),
+			'form_id'   => (int) self::get_entry_value( $values, 'form_id', null ),
 			'is_draft'  => self::get_is_draft_value( $values ),
 			'updated_at' => current_time('mysql', 1),
 			'updated_by' => isset($values['updated_by']) ? $values['updated_by'] : get_current_user_id(),

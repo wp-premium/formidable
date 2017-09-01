@@ -177,7 +177,8 @@ echo $custom_options;
 			echo 'if(typeof __frmDatepicker == "undefined"){__frmDatepicker=frmDates;}';
 			echo 'else{__frmDatepicker=jQuery.extend(__frmDatepicker,frmDates);}';
 		}
-        self::load_timepicker_js($datepicker, $frm_vars);
+
+		FrmProTimeFieldsController::load_timepicker_js( $datepicker ) ;
     }
 
 	private static function get_custom_date_js( $date_field_id, $options ) {
@@ -189,24 +190,13 @@ echo $custom_options;
 		return $custom_options;
 	}
 
-    public static function load_timepicker_js($datepicker, $frm_vars) {
-        if ( ! isset($frm_vars['timepicker_loaded']) || empty($frm_vars['timepicker_loaded']) || ! $datepicker ) {
-            return;
-        }
-
-		$unique_time_fields = array();
-        foreach ( $frm_vars['timepicker_loaded'] as $time_field_id => $options ) {
-            if ( ! $options ) {
-                continue;
-            }
-
-			$unique_time_fields[] = array( 'dateID' => $datepicker, 'timeID' => $time_field_id );
-        }
-
-		if ( ! empty( $unique_time_fields ) ) {
-			echo '__frmUniqueTimes=' . json_encode( $unique_time_fields ) . ';';
-		}
-    }
+	/**
+	 * @deprecated 2.03
+	 */
+	public static function load_timepicker_js( $datepicker ) {
+		_deprecated_function( __FUNCTION__, '2.03', 'FrmProTimeFieldsController::load_timepicker_js' );
+		FrmProTimeFieldsController::load_timepicker_js( $datepicker );
+	}
 
     public static function load_calc_js($frm_vars) {
         if ( ! isset($frm_vars['calc_fields']) || empty($frm_vars['calc_fields']) ) {
@@ -328,21 +318,40 @@ echo $custom_options;
 		$html_field_id = '="field_'. $calc_field->field_key;
 
 		// If field is inside of repeating section/embedded form or it is a radio, scale, or checkbox field
-		$has_changing_ids = in_array( $calc_field->type, array( 'radio', 'scale', 'checkbox' ) );
-		$is_radio_lookup = ( $calc_field->type == 'lookup' && $calc_field->field_options['data_type'] == 'radio' );
 		$in_child_form = $parent_form_id != $calc_field->form_id;
-		if ( $has_changing_ids || $is_radio_lookup || $in_child_form ) {
+		if ( self::has_variable_html_id( $calc_field ) || $in_child_form ) {
 			$html_field_id = '^'. $html_field_id .'-';
 		} else if ( $calc_field->type == 'select' ) {
 			$is_multiselect = FrmField::get_option( $calc_field, 'multiselect' );
 			if ( $is_multiselect ) {
 				$html_field_id = '^'. $html_field_id;
 			}
+		} elseif ( $calc_field->type == 'time' && ! FrmField::is_option_true( $calc_field, 'single_time' ) ) {
+			$html_field_id = '^'. $html_field_id . '_';
 		}
 
 		$field_call = '[id'. $html_field_id .'"]';
 
 		return $field_call;
+	}
+
+	/**
+	 * Check if a field has a variable HTML ID
+	 *
+	 * @since 2.03.07
+	 *
+	 * @param stdClass $field
+	 *
+	 * @return bool
+	 */
+	private static function has_variable_html_id( $field ) {
+		if ( in_array( $field->type, array( 'radio', 'scale', 'checkbox' ) )
+		     || ( $field->type == 'lookup' && in_array( $field->field_options['data_type'], array( 'radio', 'checkbox' ) ) )
+		) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
     public static function load_input_mask_js() {
@@ -383,7 +392,9 @@ echo $custom_options;
             'success_page_id' => '', 'success_url' => '', 'ajax_submit' => 0,
             'cookie_expiration' => 8000, 'prev_value' => __( 'Previous', 'formidable' ),
 			'submit_align' => '', 'js_validate' => 0,
-			'protect_files' => 0,
+			'protect_files' => 0, 'rootline' => '',
+			'rootline_titles_on' => 0, 'rootline_titles' => array(),
+			'rootline_lines_off' => 0, 'rootline_numbers_off' => 0,
         );
     }
 
@@ -491,6 +502,53 @@ echo $custom_options;
 	}
 
 	/**
+	 * @since 2.3
+	 */
+	public static function get_the_page_number( $form_id ) {
+		$page_num = 1;
+		if ( self::going_to_prev( $form_id ) ) {
+			self::prev_page_num( $form_id, $page_num );
+		} elseif ( self::going_to_next( $form_id ) ) {
+			self::next_page_num( $form_id, $page_num );
+		}
+		return $page_num;
+	}
+
+	/**
+	 * @since 2.3
+	 */
+	private static function next_page_num( $form_id, &$page_num ) {
+		$next_page = FrmAppHelper::get_post_param( 'frm_page_order_' . $form_id, 0, 'absint' );
+		if ( $next_page ) {
+			$page_breaks = FrmField::get_all_types_in_form( $form_id, 'break' );
+			foreach ( $page_breaks as $page_break ) {
+				$page_num++;
+				if ( $page_break->field_order >= $next_page ) {
+					break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * @since 2.3
+	 */
+	private static function prev_page_num( $form_id, &$page_num ) {
+		$next_page = FrmAppHelper::get_post_param( 'frm_next_page', 0, 'absint' );
+		if ( $next_page ) {
+			$page_breaks = FrmField::get_all_types_in_form( $form_id, 'break' );
+			$page_num = count( $page_breaks );
+			$page_breaks = array_reverse( $page_breaks );
+			foreach ( $page_breaks as $page_break ) {
+				if ( $page_break->field_order <= $next_page ) {
+					break;
+				}
+				$page_num--;
+			}
+		}
+	}
+
+	/**
 	 * @since 2.0.8
 	 */
 	public static function has_another_page( $form_id ) {
@@ -560,7 +618,7 @@ echo $custom_options;
 	/**
 	 * check if this entry is currently being saved as a draft
 	 */
-    public static function &saving_draft() {
+    public static function saving_draft() {
 		$saving_draft = FrmAppHelper::get_post_param( 'frm_saving_draft', '', 'sanitize_title' );
 		$saving = ( $saving_draft == '1' && is_user_logged_in() );
         return $saving;
@@ -586,6 +644,38 @@ echo $custom_options;
         return $html;
     }
 
+	/**
+	 * Check if we're on the final page of a given form
+	 *
+	 * @since 2.03.07
+	 *
+	 * @param int|string $form_id
+	 *
+	 * @return bool
+	 */
+    public static function is_final_page( $form_id ) {
+	    global $frm_vars;
+	    return ( ! isset( $frm_vars['next_page'][ $form_id ] ) );
+    }
+
+	/**
+	 * Add a class to the form's Submit button
+	 *
+	 * @since 2.03.07
+	 *
+	 * @param array $classes
+	 * @param stdClass $form
+	 *
+	 * @return array
+	 */
+    public static function add_submit_button_class( $classes, $form ) {
+		if ( self::is_final_page( $form->id ) ) {
+			$classes[] = 'frm_final_submit';
+		}
+
+		return $classes;
+    }
+
 	public static function get_draft_link( $form ) {
         $html = self::get_draft_button($form, '', FrmFormsHelper::get_draft_link());
         return $html;
@@ -597,7 +687,7 @@ echo $custom_options;
 
     public static function has_field($type, $form_id, $single = true) {
         if ( $single ) {
-            $included = FrmDb::get_var( 'frm_fields', array( 'form_id' => $form_id, 'type' => $type) );
+            $included = FrmDb::get_var( 'frm_fields', array( 'form_id' => $form_id, 'type' => $type ) );
             if ( $included ) {
                 $included = FrmField::getOne($included);
             }
@@ -655,6 +745,24 @@ echo $custom_options;
 
         return $type;
     }
+
+	/**
+	 * Require Ajax submission when a form is edited inline
+	 *
+	 * @since 2.03.02
+	 *
+	 * @param object $form
+	 *
+	 * @return object
+	 */
+	public static function prepare_inline_edit_form( $form ) {
+		global $frm_vars;
+		if ( ! empty( $frm_vars['inplace_edit'] ) ) {
+			$form->options['ajax_submit'] = '1';
+		}
+
+		return $form;
+	}
 
 	public static function get_sub_form($field_name, $field, $args = array()) {
 		_deprecated_function( __FUNCTION__, '2.02.06', 'FrmProNestedFormsController::display_front_end_nested_form' );

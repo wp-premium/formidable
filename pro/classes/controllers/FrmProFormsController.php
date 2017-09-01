@@ -2,6 +2,14 @@
 
 class FrmProFormsController{
 
+	/**
+	 * Used for hiding the form on page load
+	 * @since 2.3
+	 */
+	public static function head() {
+		echo '<script type="text/javascript">document.documentElement.className += " js";</script>' . "\r\n";
+	}
+
     public static function add_form_options($values){
         global $frm_vars;
 
@@ -10,6 +18,16 @@ class FrmProFormsController{
 
         require(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-forms/add_form_options.php');
     }
+
+	public static function add_form_page_options( $values ) {
+		$page_fields = FrmField::get_all_types_in_form( $values['id'], 'break' );
+		if ( $page_fields ) {
+			$hide_rootline_class = empty( $values['rootline'] ) ? 'frm_hidden' : '';
+			$hide_rootline_title_class = empty( $values['rootline_titles_on'] ) ? 'frm_hidden' : '';
+			$i = 1;
+			require( FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-forms/form_page_options.php' );
+		}
+	}
 
     public static function add_form_ajax_options($values){
         global $frm_vars;
@@ -88,7 +106,6 @@ class FrmProFormsController{
         $frm_vars['readonly'] = $atts['readonly'];
         $frm_vars['editing_entry'] = false;
         $frm_vars['show_fields'] = array();
-        $frm_vars['editing_entry'] = false;
 
         if ( ! is_array($atts['fields']) ) {
             $frm_vars['show_fields'] = explode(',', $atts['fields']);
@@ -137,8 +154,18 @@ class FrmProFormsController{
 		if ( isset( $form->options['js_validate'] ) && $form->options['js_validate'] ) {
 			echo ' frm_js_validate ';
 		}
+
 		if ( FrmProForm::is_ajax_on( $form ) ) {
 			echo ' frm_ajax_submit ';
+		}
+
+		self::maybe_add_hide_class( $form );
+	}
+
+	private static function maybe_add_hide_class( $form ) {
+		$frm_settings = FrmAppHelper::get_settings();
+		if ( $frm_settings->fade_form && FrmProForm::has_fields_with_conditional_logic( $form ) ) {
+			echo ' frm_logic_form ';
 		}
 	}
 
@@ -159,7 +186,7 @@ class FrmProFormsController{
 
     public static function submit_button_label($submit, $form){
         global $frm_vars;
-		if ( isset( $frm_vars['next_page'][ $form->id ] ) ) {
+		if ( ! FrmProFormsHelper::is_final_page( $form->id ) ) {
 			$submit = $frm_vars['next_page'][ $form->id ];
 			if ( is_object( $submit ) ) {
                 $submit = $submit->name;
@@ -317,8 +344,9 @@ class FrmProFormsController{
 			);
 		}
 
+		// TODO: get rid of this and add event binding instead
 		if ( $atts['onchange'] == '' ) {
-			$atts['onchange'] = "frmGetFieldValues(this.value,'". $atts['key'] . "','" . $atts['meta_name'] . "','" . ( isset( $atts['field']['type'] ) ? $atts['field']['type'] : '' ) . "','" . $atts['names']['hide_opt'] . "')";
+			$atts['onchange'] = "frmGetFieldValues(this.value,'". $atts['key'] . "','" . $atts['meta_name'] . "','','" . $atts['names']['hide_opt'] . "')";
 		}
 
 		$form_fields = FrmField::get_all_for_form( $atts['form_id'] );

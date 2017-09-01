@@ -2,8 +2,21 @@
 
 class FrmProDb{
 
+	public static $db_version = 39;
+
+	/**
+	 * @since 2.3
+	 */
+	public static function needs_upgrade( $needs_upgrade ) {
+		if ( ! $needs_upgrade ) {
+			$db_version = (int) get_option( 'frmpro_db_version' );
+			$needs_upgrade = ( $db_version < self::$db_version );
+		}
+		return $needs_upgrade;
+	}
+
 	public static function upgrade() {
-        $db_version = FrmAppHelper::$pro_db_version; // this is the version of the database we're moving to
+        $db_version = self::$db_version; // this is the version of the database we're moving to
         $old_db_version = get_option('frmpro_db_version');
 
         if ( $db_version == $old_db_version ) {
@@ -11,7 +24,7 @@ class FrmProDb{
         }
 
         if ( $old_db_version ) {
-			$migrations = array( 16, 17, 25, 27, 28, 29, 30, 31, 32, 34, 36, 37 );
+			$migrations = array( 16, 17, 25, 27, 28, 29, 30, 31, 32, 34, 36, 37, 39 );
 			foreach ( $migrations as $migration ) {
 				if ( $db_version >= $migration && $old_db_version < $migration ) {
 					call_user_func( array( __CLASS__, 'migrate_to_' . $migration ) );
@@ -58,6 +71,49 @@ class FrmProDb{
 	 */
 	public static function before_free_version_db_upgrade() {
 		FrmProContent::add_rewrite_endpoint();
+	}
+
+	/**
+	 * Change saved time formats
+	 * @since 2.3
+	 */
+	public static function migrate_to_39() {
+		// Get all time fields on site
+		$times = FrmDb::get_col( 'frm_fields', array( 'type' => array( 'time', 'lookup' ) ), 'id' );
+		if ( ! $times ) {
+			return;
+		}
+		$values = FrmDb::get_results( 'frm_item_metas', array( 'field_id' => $times, 'meta_value LIKE' => array( ' AM', ' PM' ) ), 'meta_value, id' );
+
+		global $wpdb;
+		foreach ( $values as $value ) {
+			$meta_id = $value->id;
+			$value = maybe_unserialize( $value->meta_value );
+			$new_value = array();
+
+			foreach ( (array) $value as $v ) {
+				$formatted_time = FrmProAppHelper::format_time( $v );
+				if ( $formatted_time ) {
+					// double check to make sure the time is correct
+					$check_time = date( 'h:i A', strtotime( $formatted_time ) );
+					if ( $check_time != $v ) {
+						break;
+					}
+
+					$new_value[] = $formatted_time;
+				}
+			}
+
+			if ( ! empty( $new_value ) ) {
+				if ( count( $new_value ) <= 1 ) {
+					$new_time = implode( $new_value, '' );
+				} else {
+					$new_time = maybe_serialize( $new_value );
+				}
+
+				$wpdb->update( $wpdb->prefix . 'frm_item_metas', array( 'meta_value' => $new_time ), array( 'id' => $meta_id ) );
+			}
+		}
 	}
 
 	/**
@@ -177,10 +233,7 @@ class FrmProDb{
 	 * @param object $section_field
 	 */
 	private static function add_in_section_variable_to_section_children( $section_field ) {
-		// Convert section_field object to flat section field array
-		$section_field_array = get_object_vars( $section_field );
-		$section_field_array += $section_field_array['field_options'];
-		unset( $section_field_array['field_options'] );
+		$section_field_array = FrmProFieldsHelper::convert_field_object_to_flat_array( $section_field );
 
 		// Get all children for divider
 		$children = FrmProField::get_children( $section_field_array );

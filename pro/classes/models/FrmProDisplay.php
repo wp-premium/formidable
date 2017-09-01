@@ -70,8 +70,18 @@ class FrmProDisplay{
         }
 
 		foreach ( $new_values as $key => $val ) {
-            update_post_meta($id, $key, $val);
-            unset($key, $val);
+			if ( $key == 'frm_param' ) {
+				$last_param = get_post_meta( $id, $key, true );
+				if ( $last_param != $val ) {
+					update_post_meta( $id, $key, $val );
+					add_rewrite_endpoint( $val, EP_PERMALINK | EP_PAGES );
+					flush_rewrite_rules();
+				}
+			} else {
+				update_post_meta( $id, $key, $val );
+			}
+
+			unset( $key, $val );
         }
     }
 

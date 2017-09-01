@@ -124,13 +124,11 @@ class FrmProDisplaysHelper{
         $tagregexp = implode('|', $tagregexp) .'|';
         $tagregexp .= FrmFieldsHelper::allowed_shortcodes();
 
-		if ( ! ini_get( 'safe_mode' ) ) {
-			// make sure the backtrack limit is as least at the default
-			$backtrack_limit = ini_get( 'pcre.backtrack_limit' );
-			if ( $backtrack_limit < 1000000 ) {
-				ini_set( 'pcre.backtrack_limit', 1000000 );
-			}
-		}
+	    // make sure the backtrack limit is as least at the default
+	    $backtrack_limit = ini_get( 'pcre.backtrack_limit' );
+	    if ( $backtrack_limit < 1000000 ) {
+		    ini_set( 'pcre.backtrack_limit', 1000000 );
+	    }
 
         preg_match_all("/\[(if |foreach )?($tagregexp)\b(.*?)(?:(\/))?\](?:(.+?)\[\/\2\])?/s", $content, $matches, PREG_PATTERN_ORDER);
 

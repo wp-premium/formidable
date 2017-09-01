@@ -56,21 +56,36 @@ class FrmProAppHelper{
 	 * Format the time field values
 	 * @since 2.0.14
 	 */
-	public static function format_time( $time, $format = 'Hi' ) {
-		$parts = str_replace( array( ' PM',' AM'), '', $time );
-		$parts = explode( ':', $parts );
-		if ( is_array( $parts ) && count( $parts ) > 1 ) {
-			if ( self::is_later_than_noon( $time, $parts ) ) {
-				$parts[0] = (int) $parts[0] + 12;
-			}
-			$time = $parts[0] . ':' . $parts[1] . ':00';
+	public static function format_time( $time, $format = 'H:i' ) {
+		if ( is_array( $time ) ) {
+			$time = '';
 		}
 
-		return date( $format, strtotime( $time ) );
+		if ( $time !== '' ) {
+			if ( $format == 'h:i A' ) {
+				// for reverse compatability
+				$format = 'g:i A';
+			}
+			$time = date( $format, strtotime( $time ) );
+		}
+		return $time;
+	}
+
+	public static function format_time_by_reference( &$time ) {
+		$time = self::format_time( $time, 'H:i' );
 	}
 
 	private static function is_later_than_noon( $time, $parts ) {
 		return ( ( preg_match( '/PM/', $time ) && ( (int) $parts[0] != 12 ) ) || ( ( (int) $parts[0] == 12 ) && preg_match( '/AM/', $time ) ) );
+	}
+
+	public static function get_time_format_for_field( $field ) {
+		$time_format = isset( $field->field_options['clock'] ) ? $field->field_options['clock'] : 12;
+		return self::get_time_format_for_setting( $time_format );
+	}
+
+	public static function get_time_format_for_setting( $time_format ) {
+		return ( $time_format == 12 ) ? 'g:i A' : 'H:i';
 	}
 
     /**
@@ -196,10 +211,13 @@ class FrmProAppHelper{
             }
         }
 
-        if(is_numeric($date_elements['m']))
-            $dummy_ts = mktime(0, 0, 0, $date_elements['m'], (isset($date_elements['j']) ? $date_elements['j'] : $date_elements['d']), (isset($date_elements['Y']) ? $date_elements['Y'] : $date_elements['y']) );
-        else
-            $dummy_ts = strtotime($date_str);
+		if ( is_numeric( $date_elements['m'] ) ) {
+			$day = ( isset( $date_elements['j'] ) ? $date_elements['j'] : $date_elements['d'] );
+			$year = ( isset( $date_elements['Y'] ) ? $date_elements['Y'] : $date_elements['y'] );
+			$dummy_ts = mktime( 0, 0, 0, $date_elements['m'], $day, $year );
+		} else {
+			$dummy_ts = strtotime( $date_str );
+		}
 
         return date( $to_format, $dummy_ts );
     }
@@ -318,19 +336,9 @@ class FrmProAppHelper{
      * Called by the filter_where function
      */
     private static function prepare_where_args( &$args, $where_field, $entry_ids ) {
-        if ( $args['where_val'] == 'NOW' ) {
-			$date_format = 'Y-m-d';
-			if ( $where_field->type == 'time' ) {
-				$time_format = isset( $where_field->field_options['clock'] ) ? $where_field->field_options['clock'] : 12;
-				$date_format = ( $time_format == 12 ) ? 'h:i A' : 'H:i';
-			}
-			$args['where_val'] = self::get_date( $date_format );
-			unset( $date_format );
-        }
+		self::prepare_where_datetime( $args, $where_field );
 
-        if ( $where_field->type == 'date' && ! empty($args['where_val']) ) {
-            $args['where_val'] = date('Y-m-d', strtotime($args['where_val']));
-		} else if ( $args['where_is'] == '=' && $args['where_val'] != '' && FrmField::is_field_with_multiple_values( $where_field ) ) {
+		if ( $args['where_is'] == '=' && $args['where_val'] != '' && FrmField::is_field_with_multiple_values( $where_field ) ) {
             if ( $where_field->type != 'data' || $where_field->field_options['data_type'] != 'checkbox' || is_numeric($args['where_val']) ) {
                 // leave $args['where_is'] the same if this is a data from entries checkbox with a numeric value
                 $args['where_is'] = 'LIKE';
@@ -344,7 +352,7 @@ class FrmProAppHelper{
             $args['temp_where_is'] = '!=';
         }
 
-		if ( in_array( $args['where_is'], array( 'LIKE', 'not LIKE') ) ) {
+		if ( self::option_is_like( $args['where_is'] ) ) {
              //add extra slashes to match values that are escaped in the database
 			$args['where_val_esc'] = addslashes( $args['where_val'] );
         } else if ( ! strpos( $args['where_is'], 'in' ) && ! is_numeric( $args['where_val'] ) ) {
@@ -356,6 +364,31 @@ class FrmProAppHelper{
 
         self::prepare_dfe_text($args, $where_field);
     }
+
+	/**
+	 * @since 2.3
+	 */
+	private static function prepare_where_datetime( &$args, $where_field ) {
+		$is_datetime = ( $args['where_val'] == 'NOW' || $where_field->type == 'date' || $where_field->type == 'time' );
+		if ( ! $is_datetime || empty( $args['where_val'] ) ) {
+			return;
+		}
+
+		$date_format = ( $where_field->type == 'time' ) ? 'H:i' : 'Y-m-d';
+
+		if ( $args['where_val'] == 'NOW' ) {
+			$args['where_val'] = self::get_date( $date_format );
+		} elseif ( ! self::option_is_like( $args['where_is'] )  ) {
+			$args['where_val'] = date( $date_format, strtotime( $args['where_val'] ) );
+		}
+	}
+
+	/**
+	 * @since 2.3
+	 */
+	private static function option_is_like( $where_is ) {
+		return in_array( $where_is, array( 'LIKE', 'not LIKE' ) );
+	}
 
 	/**
 	* Replace a text value where_val with the matching entry IDs for Dynamic Field filters

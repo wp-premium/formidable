@@ -8,7 +8,8 @@ class FrmProAppController{
 	 */
 	public static function load_translation( $mo_file, $domain ) {
 		if ( 'formidable' === $domain ) {
-			$file = FrmAppHelper::plugin_path() . '/languages/formidable-' . get_locale() . '.mo';
+			$user_local = ( FrmAppHelper::is_admin() && function_exists('get_user_locale') ) ? get_user_locale() : get_locale();
+			$file = FrmAppHelper::plugin_path() . '/languages/formidable-' . $user_local . '.mo';
 			if ( file_exists( $file ) ) {
 				$mo_file = $file;
 			}
@@ -57,6 +58,10 @@ class FrmProAppController{
     }
 
 	public static function set_get( $atts ) {
+		if ( empty( $atts ) ) {
+			return;
+		}
+
 		foreach ( $atts as $att => $val ) {
             $_GET[$att] = $val;
             unset($att, $val);

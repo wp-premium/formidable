@@ -16,7 +16,7 @@ class FrmAddonsController {
 		$addons = self::get_api_addons();
 		self::prepare_addons( $addons );
 
-		$site_url = 'https://formidablepro.com/';
+		$site_url = 'https://formidableforms.com/';
 
 		include( FrmAppHelper::plugin_path() . '/classes/views/addons/list.php' );
 	}
@@ -28,7 +28,26 @@ class FrmAddonsController {
 			return;
 		}
 
+		$allow_autofill = self::allow_autofill();
+
 		include( FrmAppHelper::plugin_path() . '/classes/views/addons/settings.php' );
+	}
+
+	/**
+	 * Don't allow subsite addon licenses to be fetched
+	 * unless the current user has super admin permissions
+	 *
+	 * @since 2.03.10
+	 */
+	private static function allow_autofill() {
+		$allow_autofill = FrmAppHelper::pro_is_installed();
+		if ( $allow_autofill && is_multisite() ) {
+			$sitewide_activated = get_site_option( 'frmpro-wpmu-sitewide' );
+			if ( $sitewide_activated ) {
+				$allow_autofill = current_user_can( 'setup_network' );
+			}
+		}
+		return $allow_autofill;
 	}
 
 	private static function get_api_addons() {
@@ -71,7 +90,7 @@ class FrmAddonsController {
 			),
 			'autoresponder' => array(
 				'title'   => 'Form Action Automation',
-				'docs'    => 'formidable-autoresponder/',
+				'docs'    => 'schedule-autoresponder/',
 				'excerpt' => 'Schedule email notifications, SMS messages, and API actions.',
 			),
 			'modal' => array(
@@ -140,7 +159,7 @@ class FrmAddonsController {
 	private static function prepare_addons( &$addons ) {
 		$activate_url = '';
 		if ( current_user_can( 'activate_plugins' ) ) {
-			$activate_url = add_query_arg( array( 'action' => 'activate' ), network_admin_url( 'plugins.php' ) );
+			$activate_url = add_query_arg( array( 'action' => 'activate' ), admin_url( 'plugins.php' ) );
 		}
 
 		$loop_addons = $addons;
@@ -180,12 +199,19 @@ class FrmAddonsController {
 	}
 
 	public static function get_licenses() {
-		FrmAppHelper::permission_check('frm_change_settings');
+		$allow_autofill = self::allow_autofill();
+		$required_role = $allow_autofill ? 'setup_network' : 'frm_change_settings';
+		FrmAppHelper::permission_check( $required_role );
 		check_ajax_referer( 'frm_ajax', 'nonce' );
 
-		$license = get_option('frmpro-credentials');
+		if ( is_multisite() && get_site_option( 'frmpro-wpmu-sitewide' ) ) {
+			$license = get_site_option( 'frmpro-credentials' );
+		} else {
+			$license = get_option( 'frmpro-credentials' );
+		}
+
 		if ( $license && is_array( $license ) && isset( $license['license'] ) ) {
-			$url = 'http://formidablepro.com/frm-edd-api/licenses?l=' . urlencode( base64_encode( $license['license'] ) );
+			$url = 'https://formidableforms.com/frm-edd-api/licenses?l=' . urlencode( base64_encode( $license['license'] ) );
 			$licenses = self::send_api_request( $url, array( 'name' => 'frm_api_licence', 'expires' => 60 * 60 * 5 ) );
 			echo json_encode( $licenses );
 		}
@@ -234,5 +260,41 @@ class FrmAddonsController {
 		);
 
 		return $pro_pricing;
+	}
+
+	/**
+	 * Add a filter to shorten the EDD filename for Formidable plugin, and add-on, updates
+	 *
+	 * @since 2.03.08
+	 *
+	 * @param boolean $return
+	 * @param string $package
+	 *
+	 * @return boolean
+	 */
+	public static function add_shorten_edd_filename_filter( $return, $package ) {
+		if ( strpos( $package, '/edd-sl/package_download/' ) !== false && strpos( $package, 'formidableforms.com' ) !== false ) {
+			add_filter( 'wp_unique_filename', 'FrmAddonsController::shorten_edd_filename', 10, 2 );
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Shorten the EDD filename for automatic updates
+	 * Decreases size of file path so file path limit is not hit on Windows servers
+	 *
+	 * @since 2.03.08
+	 *
+	 * @param string $filename
+	 * @param string $ext
+	 *
+	 * @return string
+	 */
+	public static function shorten_edd_filename( $filename, $ext ) {
+		$filename = substr( $filename, 0, 50 ) . $ext;
+		remove_filter( 'wp_unique_filename', 'FrmAddonsController::shorten_edd_filename', 10 );
+
+		return $filename;
 	}
 }
