@@ -1,12 +1,12 @@
 <?php
-// Contains all the functions necessary to provide an update mechanism for FormidablePro!
+// Contains all the functions necessary to provide an update mechanism for FormidableForms!
 
 class FrmUpdatesController{
 
     // Where all the vitals are defined for this plugin
     var $plugin_nicename        = 'formidable';
     var $plugin_name            = 'formidable/formidable.php';
-    var $plugin_url             = 'http://formidablepro.com/';
+    var $plugin_url             = 'https://formidableforms.com/';
     var $pro_mothership         = 'http://api.strategy11.com/plugin-updates/';
     var $pro_cred_store         = 'frmpro-credentials';
     var $pro_auth_store         = 'frmpro-authorized';
@@ -16,15 +16,14 @@ class FrmUpdatesController{
     var $timeout                = 10;
 	var $update_to;
 
-    // Don't modify these variables
-    var $pro_mothership_xmlrpc_url = 'http://formidablepro.com/xmlrpc.php';
     var $pro_wpmu = false;
 
     var $pro_error_message_str;
     var $license        = '';
 
     function __construct(){
-        // This line can be modifed too
+		_deprecated_function( __FUNCTION__, '2.3' );
+
         $this->pro_error_message_str = __( 'Your Formidable Pro License was Invalid', 'formidable' );
 
         // Retrieve Pro Credentials
@@ -97,7 +96,6 @@ class FrmUpdatesController{
         if($save){
             $auth = false;
             if ( is_array($act) ) {
-                $this->manually_queue_update();
 
                 $auth = is_array($act) ? true : false;
                 $wpmu = (isset($_POST) && isset($_POST['proplug-wpmu'])) ? true : $this->pro_wpmu;
@@ -153,7 +151,7 @@ class FrmUpdatesController{
 			return true;
 		}
 
-		return ( ! strpos( $transient->response[ $this->plugin_name ]->url, 'formidablepro.com' ) || version_compare( $version_info['version'], FrmAppHelper::plugin_version(), '<=' ) || $version_info['url'] != $transient->response[ $this->plugin_name ]->package );
+		return ( ! strpos( $transient->response[ $this->plugin_name ]->url, 'formidableforms.com' ) || version_compare( $version_info['version'], FrmAppHelper::plugin_version(), '<=' ) || $version_info['url'] != $transient->response[ $this->plugin_name ]->package );
 	}
 
 	/**
@@ -312,11 +310,6 @@ class FrmUpdatesController{
         return (array) $version_info;
     }
 
-    function manually_queue_update(){
-        $transient = get_site_transient('update_plugins');
-        set_site_transient('update_plugins', $this->queue_update($transient));
-    }
-
     function send_mothership_request( $endpoint, $args = array(), $domain = '' ) {
         if ( empty($domain) ) {
             $domain = $this->pro_mothership;
@@ -334,12 +327,12 @@ class FrmUpdatesController{
         $body = wp_remote_retrieve_body( $resp );
 
         if(is_wp_error($resp)){
-            $message = sprintf(__( 'You had an error communicating with Strategy11\'s API. %1$sClick here%2$s for more information.', 'formidable' ), '<a href="http://formidablepro.com/knowledgebase/why-cant-i-activate-formidable-pro/" target="_blank">', '</a>');
+            $message = sprintf(__( 'You had an error communicating with the Formidable Forms API. %1$sClick here%2$s for more information.', 'formidable' ), '<a href="https://formidableforms.com/knowledgebase/why-cant-i-activate-formidable-pro/" target="_blank">', '</a>');
             if(is_wp_error($resp))
                 $message .= ' '. $resp->get_error_message();
             return $message;
         }else if($body == 'error' || is_wp_error($body)){
-            return __( 'You had an HTTP error connecting to Strategy11\'s API', 'formidable' );
+            return __( 'You had an HTTP error connecting to the Formidable Forms API', 'formidable' );
         }else{
             $json_res = json_decode($body, true);
             if ( null !== $json_res ) {
@@ -359,6 +352,4 @@ class FrmUpdatesController{
     function no_permission_msg(){
         return __( 'A Formidable Forms update is available, but your license is invalid.', 'formidable' );
     }
-
 }
-

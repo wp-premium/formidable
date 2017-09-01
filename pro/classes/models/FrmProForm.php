@@ -179,6 +179,7 @@ class FrmProForm{
         $new_values['name'] = __( 'Status', 'formidable' );
         $new_values['field_options']['post_field'] = 'post_status';
 		$new_values['field_options']['separate_value'] = 1;
+		$new_values['options'] = FrmProFieldsHelper::get_initial_post_status_options();
         $settings['post_status'] = FrmField::create( $new_values );
     }
 
@@ -252,6 +253,12 @@ class FrmProForm{
 
         return $new_opts;
     }
+
+	public static function has_fields_with_conditional_logic( $form ) {
+		$has_no_logic = '"hide_field";a:0:{}';
+		$sub_fields = FrmDb::get_var( 'frm_fields', array( 'field_options not like' => $has_no_logic, 'form_id' => $form->id ) );
+		return ! empty( $sub_fields );
+	}
 
 	public static function is_ajax_on( $form ) {
 		$ajax = isset( $form->options['ajax_submit' ] ) ? $form->options['ajax_submit'] : 0;

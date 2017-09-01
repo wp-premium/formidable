@@ -47,7 +47,15 @@ class FrmProEddController extends FrmAddon {
 			}
 		}
 
+		if ( empty( $license ) ) {
+			$license = $this->activate_defined_license();
+		}
+
 		return $license;
+	}
+
+	public function get_defined_license() {
+		return defined( 'FRM_PRO_LICENSE' ) ? FRM_PRO_LICENSE : false;
 	}
 
 	public function clear_license() {
@@ -72,6 +80,10 @@ class FrmProEddController extends FrmAddon {
         } else {
             update_option( $this->pro_auth_store, $is_active );
         }
+
+		// update style sheet to make sure pro css is included
+		$frm_style = new FrmStyle();
+		$frm_style->update( 'default' );
 	}
 
 	private function get_pro_cred_form_vals() {
@@ -111,26 +123,36 @@ class FrmProEddController extends FrmAddon {
 
     public function pro_cred_form(){
         global $frm_vars;
+		$config_license = $this->get_defined_license();
 
 ?>
 <div id="frm_license_top" class="<?php echo esc_attr( $frm_vars['pro_is_authorized'] ? 'frm_hidden' : '' ) ?>">
     <?php $this->display_form();
 
     if ( ! $frm_vars['pro_is_authorized'] ) { ?>
-    <p>Already signed up? <a href="https://formidablepro.com/account/?action=licenses" target="_blank"><?php _e( 'Click here', 'formidable' ) ?></a> to get your license number.</p>
+    <p>Already signed up? <a href="https://formidableforms.com/account/licenses/" target="_blank"><?php _e( 'Click here', 'formidable' ) ?></a> to get your license number.</p>
     <?php } ?>
 </div>
 
 <div id="frm_license_bottom" class="<?php echo esc_attr( $frm_vars['pro_is_authorized'] ? '' : 'frm_hidden' ) ?>">
 <div class="frm_pro_installed">
-<div><strong class="alignleft" style="margin-right:10px;"><?php _e( 'Formidable Pro is Installed', 'formidable' ) ?></strong>
-    <a href="javascript:void(0)" class="frm_show_auth_form button-secondary alignleft"><?php _e( 'Enter new license', 'formidable' ) ?></a>
-    <a href="#" id="frm_deauthorize_link" class="button-secondary alignright" data-plugin="<?php echo esc_attr( $this->plugin_slug ) ?>"><?php _e( 'Deauthorize this site', 'formidable' ) ?></a>
+<div>
+	<strong class="alignleft" style="margin-right:10px;">
+		<?php esc_html_e( 'Formidable Pro is Installed', 'formidable' ) ?>
+	</strong>
+	<?php if ( ! $config_license ) { ?>
+	<a href="javascript:void(0)" class="frm_show_auth_form button-secondary alignleft">
+		<?php esc_html_e( 'Enter new license', 'formidable' ) ?>
+	</a>
+	<a href="#" id="frm_deauthorize_link" class="button-secondary alignright" data-plugin="<?php echo esc_attr( $this->plugin_slug ) ?>">
+		<?php esc_html_e( 'Deauthorize this site', 'formidable' ) ?>
+	</a>
+	<?php } ?>
     <div class="spinner"></div>
 </div>
 <div class="clear"></div>
 </div>
-<p class="frm_aff_link"><a href="https://formidablepro.com/account/licenses" target="_blank"><?php _e( 'Account', 'formidable' ) ?></a></p>
+<p class="frm_aff_link"><a href="https://formidableforms.com/account/licenses/" target="_blank"><?php _e( 'Account', 'formidable' ) ?></a></p>
 </div>
 <p class="frm_pro_license_msg"></p>
 <div class="clear"></div>

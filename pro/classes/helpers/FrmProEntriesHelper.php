@@ -3,7 +3,7 @@
 class FrmProEntriesHelper{
 
     // check if form should automatically be in edit mode (limited to one, has draft)
-    public static function &allow_form_edit($action, $form) {
+    public static function allow_form_edit($action, $form) {
         if ( $action != 'new' ) {
             // make sure there is an entry id in the url if the action is being set in the url
 			$entry_id = FrmAppHelper::simple_get( 'entry', 'sanitize_title', 0 );
@@ -35,7 +35,7 @@ class FrmProEntriesHelper{
 
                 if ( $meta ) {
                     if ( $checking_drafts ) {
-                        $is_draft = 1;
+                        $is_draft = true;
                     }
 
                     $action = 'edit';
@@ -278,7 +278,7 @@ class FrmProEntriesHelper{
             return;
         }
 
-        if ( $footer ) {
+        if ( $footer && $form_id ) {
             if ( apply_filters('frm_show_delete_all', current_user_can('frm_edit_entries'), $form_id) ) {
             ?><div class="frm_uninstall alignleft actions"><a href="?page=formidable-entries&amp;frm_action=destroy_all<?php echo esc_attr( $form_id ? '&form=' . absint( $form_id ) : '' ); ?>" class="button" onclick="return confirm('<?php esc_attr_e( 'Are you sure you want to permanently delete ALL the entries in this form?', 'formidable' ) ?>')"><?php _e( 'Delete ALL Entries', 'formidable' ) ?></a></div>
 <?php
@@ -297,9 +297,15 @@ class FrmProEntriesHelper{
     	if ( !empty( $_REQUEST['fid'] ) )
     	    $page_params['fid'] = (int) $_REQUEST['fid'];
 
+		if ( $form_id ) {
         ?>
-        <div class="alignleft actions"><a href="<?php echo esc_url(add_query_arg($page_params, admin_url( 'admin-ajax.php' ))) ?>" class="button"><?php _e( 'Download CSV', 'formidable' ); ?></a></div>
+		<div class="alignleft actions">
+			<a href="<?php echo esc_url( add_query_arg( $page_params, admin_url( 'admin-ajax.php' ) ) ) ?>" class="button">
+				<?php _e( 'Download CSV', 'formidable' ); ?>
+			</a>
+		</div>
         <?php
+		}
     }
 
     // check if entry being updated just switched draft status

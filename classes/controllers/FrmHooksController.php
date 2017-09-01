@@ -55,8 +55,6 @@ class FrmHooksController {
         add_action( 'wp_loaded', 'FrmEntriesController::process_entry', 10, 0 );
         add_filter( 'frm_redirect_url', 'FrmEntriesController::delete_entry_before_redirect', 50, 3 );
         add_action( 'frm_after_entry_processed', 'FrmEntriesController::delete_entry_after_save', 100 );
-        add_filter( 'frm_email_value', 'FrmEntriesController::filter_email_value', 10, 3 );
-        add_filter( 'frmpro_fields_replace_shortcodes', 'FrmEntriesController::filter_shortcode_value', 10, 4 );
 
         // Form Actions Controller
         add_action( 'init', 'FrmFormActionsController::register_post_types', 1 );
@@ -92,6 +90,7 @@ class FrmHooksController {
 
 		// Addons Controller
 		add_action( 'admin_menu', 'FrmAddonsController::menu', 100 );
+		add_filter( 'upgrader_pre_download', 'FrmAddonsController::add_shorten_edd_filename_filter', 10, 4 );
 
         // Entries Controller
         add_action( 'admin_menu', 'FrmEntriesController::menu', 12 );
@@ -123,6 +122,7 @@ class FrmHooksController {
         // Settings Controller
         add_action( 'admin_menu', 'FrmSettingsController::menu', 45 );
         add_action( 'frm_before_settings', 'FrmSettingsController::license_box' );
+		add_action( 'wp_ajax_frm_settings_tab', 'FrmSettingsController::load_settings_tab' );
 
         // Styles Controller
         add_action( 'admin_menu', 'FrmStylesController::menu', 14 );
@@ -152,8 +152,6 @@ class FrmHooksController {
         add_action( 'wp_ajax_frm_duplicate_field', 'FrmFieldsController::duplicate' );
         add_action( 'wp_ajax_frm_delete_field', 'FrmFieldsController::destroy' );
         add_action( 'wp_ajax_frm_add_field_option', 'FrmFieldsController::add_option' );
-        add_action( 'wp_ajax_frm_field_option_ipe', 'FrmFieldsController::edit_option' );
-        add_action( 'wp_ajax_frm_delete_field_option', 'FrmFieldsController::delete_option' );
         add_action( 'wp_ajax_frm_import_choices', 'FrmFieldsController::import_choices' );
         add_action( 'wp_ajax_frm_import_options', 'FrmFieldsController::import_options' );
         add_action( 'wp_ajax_frm_update_field_order', 'FrmFieldsController::update_order' );
@@ -205,7 +203,6 @@ class FrmHooksController {
     }
 
 	public static function load_multisite_hooks() {
-		add_action( 'init', 'FrmAppController::front_head' );
 		add_action( 'wpmu_upgrade_site', 'FrmAppController::network_upgrade_site' );
 
         // drop tables when mu site is deleted

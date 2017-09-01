@@ -250,8 +250,18 @@ class FrmProGraphsController {
 		return $defaults;
 	}
 
+	/**
+	 * Get the default graph colors
+	 *
+	 * @since 2.0
+	 *
+	 * @return string
+	 */
 	private static function get_default_colors() {
-		return '#00bbde,#fe6672,#eeb058,#8a8ad6,#ff855c,#00cfbb,#5a9eed,#73d483,#c879bb,#0099b6';
+		$colors = '#00bbde,#fe6672,#eeb058,#8a8ad6,#ff855c,#00cfbb,#5a9eed,#73d483,#c879bb,#0099b6';
+		$colors = (string) apply_filters( 'frm_graph_default_colors', $colors );
+
+		return $colors;
 	}
 
 	/**
@@ -1634,11 +1644,11 @@ class FrmProGraphsController {
 	private static function add_first_row_to_graph_data( $atts, &$graph_data ) {
 		if ( $atts['form'] ) {
 			$first_row = self::get_first_row_labels_for_form_graph();
-		} else if ( $atts['x_axis_field'] && ! empty( $atts['fields']) ) {
+			array_unshift( $graph_data, $first_row );
+		} elseif ( $atts['x_axis_field'] && ! empty( $atts['fields'] ) ) {
 			$first_row = self::get_first_row_labels_for_x_axis_graph( $atts );
+			array_unshift( $graph_data, $first_row );
 		}
-
-		array_unshift( $graph_data, $first_row );
 	}
 
 	/**
@@ -2228,5 +2238,4 @@ class FrmProGraphsController {
 			_deprecated_function( 'The frm_final_graph_values filter', '2.02.05', 'the frm_graph_data filter' );
 		}
 	}
-
 }

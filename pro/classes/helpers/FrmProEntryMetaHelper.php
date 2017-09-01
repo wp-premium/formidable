@@ -2,63 +2,6 @@
 
 class FrmProEntryMetaHelper{
 
-    public static function email_value($value, $meta, $entry) {
-        if ( $entry->id != $meta->item_id ) {
-            $entry = FrmEntry::getOne($meta->item_id);
-        }
-
-        $field = FrmField::getOne($meta->field_id);
-        if ( ! $field ) {
-            return $value;
-        }
-
-		if ( FrmField::is_option_true( $field, 'post_field' ) ) {
-            $value = self::get_post_or_meta_value($entry, $field, array( 'truncate' => true));
-            $value = maybe_unserialize($value);
-        }
-
-		switch ( $field->type ) {
-            case 'user_id':
-                $value = FrmProFieldsHelper::get_display_name($value);
-                break;
-            case 'data':
-				if ( is_array( $value ) ) {
-                    $new_value = array();
-					foreach ( $value as $val ) {
-                        $new_value[] = FrmProFieldsHelper::get_data_value($val, $field);
-					}
-                    $value = $new_value;
-                }else{
-                    $value = FrmProFieldsHelper::get_data_value($value, $field);
-                }
-                break;
-            case 'file':
-                $value = FrmProFieldsHelper::get_file_name($value);
-                break;
-            case 'date':
-                $value = FrmProFieldsHelper::get_date($value);
-        }
-
-		if ( is_array( $value ) ) {
-			$new_value = '';
-			foreach ( $value as $val ) {
-				if ( is_array( $val ) ) {
-					// This will affect checkboxes inside of repeating sections
-					$new_value .= implode( ', ', $val ) . "\n";
-				}
-			}
-
-			if ( $new_value != '' ) {
-				$value = $new_value;
-			} else {
-				// Only keep non-empty values in array
-				$value = array_filter( $value );
-			}
-		}
-
-        return $value;
-    }
-
     public static function display_value( $value, $field, $atts = array() ) {
         _deprecated_function( __FUNCTION__, '2.0', 'FrmEntriesHelper::display_value');
         return FrmEntriesHelper::display_value($value, $field, $atts);
@@ -68,10 +11,12 @@ class FrmProEntryMetaHelper{
         $values = array();
         foreach ( $entries as $entry ) {
             $sub_val = self::get_post_or_meta_value($entry, $field, $atts);
-            if ( $sub_val != '' ) {
-                $values[] = $sub_val;
-            }
+			$include_blank = ( isset( $atts['include_blank'] ) && $atts['include_blank'] );
+			if ( $sub_val != '' || $include_blank ) {
+				$values[ $entry->id ] = $sub_val;
+			}
         }
+
         return $values;
     }
 
@@ -419,7 +364,7 @@ class FrmProEntryMetaHelper{
 		}
 
 		if ( ! $field ) {
-			return;
+			return '';
 		}
 
 		$max = FrmDb::get_var( 'frm_item_metas', array( 'field_id' => $field->id ), 'meta_value', array( 'order_by' => 'item_id DESC' ) );
@@ -442,12 +387,24 @@ class FrmProEntryMetaHelper{
 
 	/**
 	 * If an auto_id field includes a prefix or suffix, strip them from the last value
+	 *
+	 * @param string $max
+	 * @param stdClass $field
+	 * @return string
 	 */
 	private static function get_increment_from_value( $max, $field ) {
 		$default_value = $field->default_value;
 		if ( strpos( $default_value, '[auto_id') !== false ) {
 			list( $prefix, $shortcode ) = explode( '[auto_id', $default_value );
 			list( $shortcode, $suffix ) = explode( ']', $shortcode );
+
+			if ( $prefix !== '' ) {
+				FrmProFieldsHelper::replace_non_standard_formidable_shortcodes( array(), $prefix );
+			}
+
+			if ( $suffix !== '' ) {
+				FrmProFieldsHelper::replace_non_standard_formidable_shortcodes( array(), $suffix );
+			}
 
 			$max = str_replace( $prefix, '', $max );
 			$max = str_replace( $suffix, '', $max );
@@ -459,21 +416,11 @@ class FrmProEntryMetaHelper{
 	}
 
 	/**
-	 * Set the Dynamic List field shortcodes for the default HTML email
-	 *
-	 * @since 2.0.23
-	 * @param array $field_shortcodes
-	 * @param object $f
-	 * @return array
+	 * @deprecated 2.04
 	 */
-	public static function get_pro_field_shortcodes_for_default_email( $field_shortcodes, $f ) {
-		if ( $f->type == 'data' && $f->field_options['data_type'] == 'data' ) {
-			if ( ! empty( $f->field_options['hide_field'] ) && ! empty( $f->field_options['form_select'] ) ) {
-				$field_id_string = reset( $f->field_options[ 'hide_field' ] ) . ' show=' . $f->field_options[ 'form_select' ];
-				$field_shortcodes['val'] = '[' . $field_id_string . ']';
-			}
-		}
+	public static function email_value( $value ) {
+		_deprecated_function( __FUNCTION__, '2.04', 'custom code' );
 
-		return $field_shortcodes;
+		return $value;
 	}
 }

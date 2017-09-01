@@ -25,7 +25,11 @@ class FrmProComboFieldsController {
 		}
 	}
 
-	public static function include_placeholder( $default_value, $sub_field ) {
+	public static function include_placeholder( $default_value, $sub_field, $field = array() ) {
+		if ( ! empty( $field ) && ! FrmField::is_option_true( $field, 'clear_on_focus' ) ) {
+			return;
+		}
+
 		if ( isset( $default_value[ $sub_field ] ) && ! empty( $sub_field ) ) {
 			echo ' placeholder="' . esc_attr( $default_value[ $sub_field ] ) . '" ';
 		}
@@ -37,7 +41,7 @@ class FrmProComboFieldsController {
 	}
 
 	public static function add_atts_to_input( $atts ) {
-		self::include_placeholder( $atts['field']['default_value'], $atts['key'] );
+		self::include_placeholder( $atts['field']['default_value'], $atts['key'], $atts['field'] );
 
 		if ( isset( $atts['field']['default_value'][ $atts['key'] ] ) ) {
 			$atts['field']['default_value'] = $atts['field']['default_value'][ $atts['key'] ];
@@ -81,7 +85,9 @@ class FrmProComboFieldsController {
 	public static function show_sub_label( $atts ) {
 		$field = $atts['field'];
 		$option_name = $atts['option_name'];
-		echo '<div class="frm_description">' . wp_kses_post( $field[ $option_name ] ) . '</div>';
+		if ( $field[ $option_name ] !== '' ) {
+			echo '<div class="frm_description">' . wp_kses_post( $field[ $option_name ] ) . '</div>';
+		}
 	}
 
 	public static function maybe_add_error_class( $atts ) {

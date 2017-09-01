@@ -11,8 +11,8 @@
     <div class="inside">
         <div class="with_frm_style" id="frm_import_message"><span class="frm_message" style="padding:7px;"><?php printf(__( '%1$s entries are importing', 'formidable' ), '<span class="frm_csv_remaining">'. $left .'</span>') ?></span></div>
 
-        <div class="frm_progress">
-          <div class="frm_progress_bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="<?php echo esc_attr( $left ) ?>" style="width:0%;">
+        <div class="frm_admin_progress">
+          <div class="frm_admin_progress_bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="<?php echo esc_attr( $left ) ?>" style="width:0%;">
           </div>
         </div>
 

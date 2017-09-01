@@ -5,7 +5,9 @@ class FrmProFieldsHelper{
     public static function get_default_value( $value, $field, $dynamic_default = true, $allow_array = false ) {
 		$unserialized = maybe_unserialize( $value );
 		if ( is_array( $unserialized ) ) {
-			if ( FrmAppHelper::is_empty_value( $unserialized ) || count( array_filter( $unserialized ) ) === 0  ) {
+			if ( $field->type == 'time' && FrmProTimeField::is_time_empty( $value ) ) {
+				$value = '';
+			} elseif ( FrmAppHelper::is_empty_value( $unserialized ) || count( array_filter( $unserialized ) ) === 0  ) {
 				$value = '';
 			} else {
 				return $value;
@@ -449,12 +451,17 @@ class FrmProFieldsHelper{
 	}
 
 	private static function filter_default_values( $field, &$values ) {
+		$is_default = ( $values['default_value'] === $values['value'] );
 		if ( is_array( $values['value'] ) ) {
 			foreach ( $values['value'] as $val_key => $val ) {
 				$values['value'][ $val_key ] = apply_filters( 'frm_filter_default_value', $val, $field, false );
 			}
 		} else if ( ! empty( $values['value'] ) ) {
 			$values['value'] = apply_filters( 'frm_filter_default_value', $values['value'], $field, false );
+		}
+
+		if ( $is_default ) {
+			$values['default_value'] = $values['value'];
 		}
 	}
 
@@ -519,7 +526,8 @@ class FrmProFieldsHelper{
 			FrmProDynamicFieldsController::add_options_for_dynamic_field( $field, $values, array( 'entry_id' => $values['entry_id'] ) );
 	
 		} elseif ( $values['type'] == 'time' ) {
-			$values['options'] = self::get_time_options( $values );
+			$values['options'] = FrmProTimeField::get_time_options( $values );
+			$values['value'] = self::get_time_display_value( $values['value'], array(), $field );
 		} elseif ( $values['type'] == 'date' || $values['original_type'] == 'date' ) {
 			$values['value'] = FrmProAppHelper::maybe_convert_from_db_date( $values['value'] );
 		} elseif ( $values['type'] == 'lookup' ) {
@@ -560,6 +568,7 @@ class FrmProFieldsHelper{
 
 	private static function prepare_to_show_field_options( $field, &$values ) {
 		foreach ( $values['options'] as $val_key => $val_opt ) {
+			self::maybe_remove_separate_value( $field, $val_opt );
 			if ( is_array( $val_opt ) ) {
 				foreach ( $val_opt as $opt_key => $opt ) {
 					$values['options'][ $val_key ][ $opt_key ] = self::get_default_value( $opt, $field, false );
@@ -569,6 +578,25 @@ class FrmProFieldsHelper{
 				$values['options'][ $val_key ] = self::get_default_value( $val_opt, $field, false );
 			}
 			unset( $val_key, $val_opt );
+		}
+	}
+
+	/**
+	 * If a field doesn't have separate values, simplify the options array
+	 * to include only the key and displayed value.
+	 * Since v2.03, the field options always include separate values.
+	 * This causes trouble with custom code reverse compatability.
+	 *
+	 * @since 2.03.05
+	 */
+	private static function maybe_remove_separate_value( $field, &$opt ) {
+		if ( ! is_array( $opt ) || ! isset( $opt['label'] ) ) {
+			return;
+		}
+
+		$no_separate_values = FrmField::is_option_empty( $field, 'separate_value' );
+		if ( $no_separate_values ) {
+			$opt = $opt['label'];
 		}
 	}
 
@@ -630,7 +658,7 @@ class FrmProFieldsHelper{
 			case 'scale':
 				if ( $field ) {
 					$range = maybe_unserialize( $field->options );
-					$minnum = $range[0];
+					$minnum = reset( $range );
 					$maxnum = end( $range );
 				}
 			break;
@@ -659,7 +687,8 @@ class FrmProFieldsHelper{
             'data_type' => 'select', 'restrict' => 0, 'start_year' => 2000, 'end_year' => 2020, 'read_only' => 0,
             'admin_only' => '', 'locale' => '', 'attach' => false, 'minnum' => $minnum, 'maxnum' => $maxnum,
 			'delete' => false,
-            'step' => $step, 'clock' => 12, 'start_time' => '00:00', 'end_time' => '23:'.$end_minute,
+			'step' => $step, 'clock' => 12, 'single_time' => 0,
+			'start_time' => '00:00', 'end_time' => '23:' . $end_minute,
 			'unique' => 0, 'use_calc' => 0, 'calc' => '', 'calc_dec' => '', 'calc_type' => '',
             'dyn_default_value' => '', 'multiple' => 0, 'unique_msg' => $frm_settings->unique_msg, 'autocom' => 0,
             'format' => '', 'repeat' => 0, 'add_label' => __( 'Add', 'formidable' ), 'remove_label' => __( 'Remove', 'formidable' ),
@@ -682,7 +711,9 @@ class FrmProFieldsHelper{
 
 	public static function setup_input_masks( $field ) {
 		$html = '';
-		if ( self::is_format_option_true_with_no_regex( $field ) &&	in_array( $field['type'], array( 'phone', 'text' ) ) ) {
+		$text_lookup = $field['type'] == 'lookup' && $field['data_type'] == 'text';
+		$is_format_field = in_array( $field['type'], array( 'phone', 'text' ) ) || $text_lookup;
+		if ( self::is_format_option_true_with_no_regex( $field ) &&	$is_format_field ) {
 			$html = self::setup_input_mask( $field['format'] );
 		}
 
@@ -1095,10 +1126,7 @@ class FrmProFieldsHelper{
 	 * @return array $field_array
 	 */
 	public static function convert_field_object_to_flat_array( $field ) {
-		$field_options = $field->field_options;
-		$field_array = get_object_vars( $field );
-		unset( $field_array['field_options'] );
-		return $field_array + $field_options;
+		return FrmFieldsHelper::convert_field_object_to_flat_array( $field );
 	}
 
 	/**
@@ -1370,142 +1398,124 @@ class FrmProFieldsHelper{
     	echo '</div>';
     }
 
+    /**
+	 * Filter the post status options for the current user
+	 * Add default options if there are no valid options
+	 *
+	 * @param object $field
+	 * @param array $options
+	 *
+	 * @return array
+	 */
 	public static function get_status_options( $field, $options = array() ) {
-        $post_type = FrmProFormsHelper::post_type($field->form_id);
-        $post_type_object = get_post_type_object($post_type);
+		return self::get_post_status_options( $field->form_id, $options );
+	}
 
-        if ( ! $post_type_object ) {
-            return $options;
-        }
+	/**
+	 * Filter the post status options for the current user
+	 * Add default options if there are no valid options
+	 *
+	 * @param string $form_id
+	 * @param array $options
+	 *
+	 * @return array
+	 */
+	public static function get_post_status_options( $form_id, $options = array() ) {
+		if ( FrmAppHelper::is_admin() ) {
+			$post_status_options = self::get_initial_post_status_options();
+		} else {
+			$post_status_options = self::get_post_status_options_for_current_user( $form_id );
+		}
 
-		$new_options = array();
+		if ( empty( $post_status_options ) ) {
+			return array();
+		}
+
+		$post_status_keys = array_keys( $post_status_options );
+		$post_status_keys[] = 'publish'; // allow publish to be included as an option for everyone
+
+		$final_options = array();
 		foreach ( $options as $opt_key => $opt ) {
 			if ( is_array( $opt ) ){
 				$opt_key = isset( $opt['value'] ) ? $opt['value'] : ( isset( $opt['label'] ) ? $opt['label'] : reset( $opt ) );
 			} else {
 				$opt_key = $opt;
 			}
-			if ( in_array( $opt_key, array( 'publish', 'private' ) ) ) {
-				$new_options[ $opt_key ] = $opt;
+
+			if ( in_array( $opt_key, $post_status_keys ) ) {
+				$final_options[ $opt_key ] = $opt;
 			}
 		}
 
-		if ( ! empty( $new_options ) ) {
-			return $new_options;
+		if ( empty( $final_options ) ) {
+			$final_options = $post_status_options;
 		}
 
-        $can_publish = current_user_can($post_type_object->cap->publish_posts);
-        $options = get_post_statuses(); //'draft', pending, publish, private
+		return $final_options;
+	}
 
-        // Contributors only get "Unpublished" and "Pending Review"
-        if ( ! $can_publish ) {
-        	unset($options['publish']);
-			if ( isset( $options['future'] ) ) {
-				unset( $options['future'] );
+    /**
+	 * Get the initial options for a Post Status field
+	 *
+	 * @since 2.03.01
+	 *
+	 * @return array
+	 */
+	public static function get_initial_post_status_options() {
+		$post_statuses = get_post_statuses();
+
+		foreach ( $post_statuses as $key => $value ) {
+			$post_statuses[ $key ] = array( 'label' => $value, 'value' => $key );
+		}
+
+		return $post_statuses;
+	}
+
+    /**
+	 * Get the possible post status options for the current user
+	 *
+	 * @since 2.03.01
+	 *
+	 * @param string $form_id
+	 *
+	 * @return array - associative array with lowercase post status options as keys
+	 */
+	private static function get_post_status_options_for_current_user( $form_id ) {
+		$post_status_options = array();
+		$post_type = FrmProFormsHelper::post_type( $form_id );
+		$post_type_object = get_post_type_object( $post_type );
+
+		if ( ! $post_type_object ) {
+			return $post_status_options;
+		}
+
+		$post_status_options = get_post_statuses();
+
+		// Remove options that the current user should not have
+		$can_publish = current_user_can( $post_type_object->cap->publish_posts );
+		if ( ! $can_publish ) {
+			unset( $post_status_options['publish'] );
+
+			if ( isset( $post_status_options['future'] ) ) {
+				unset( $post_status_options['future'] );
 			}
-        }
-        return $options;
-    }
+		}
+
+		return $post_status_options;
+	}
 
 	public static function get_user_options() {
-        global $wpdb;
-        $users = get_users( array( 'fields' => array( 'ID','user_login','display_name'), 'blog_id' => $GLOBALS['blog_id'], 'orderby' => 'display_name'));
-        $options = array( '' => '');
+		$users = get_users( array(
+			'fields' => array( 'ID', 'user_login', 'display_name'),
+			'blog_id' => $GLOBALS['blog_id'],
+			'orderby' => 'display_name',
+		) );
+
+		$options = array( '' => '' );
 		foreach ( $users as $user ) {
 			$options[ $user->ID ] = ( ! empty( $user->display_name ) ) ? $user->display_name : $user->user_login;
 		}
         return $options;
-    }
-
-	public static function get_time_options( $values ) {
-		if ( empty( $values['start_time'] ) ) {
-			$values['start_time'] = '00:00';
-		}
-
-		if ( empty( $values['end_time'] ) ) {
-			$values['end_time'] = '23:59';
-		}
-
-        $time = strtotime($values['start_time']);
-        $end_time = strtotime($values['end_time']);
-        $step = explode(':', $values['step']);
-        $step = (isset($step[1])) ? ($step[0] * 3600 + $step[1] * 60) : ($step[0] * 60);
-        if ( empty($step) ) {
-            // force an hour step if none was defined to prevent infinite loop
-            $step = 60;
-        }
-        $format = ($values['clock'] == 24) ? 'H:i' : 'h:i A';
-
-        $options = array( '' );
-		while ( $time <= $end_time ) {
-            $options[] = date($format, $time);
-            $time += $step;
-        }
-
-        return $options;
-
-        /*
-        //Separate dropdowns
-        $step = $values['step'];
-        $hour_step = floor($step / 60);
-        if(!$hour_step)
-            $hour_step = 1;
-        $start_time = $values['start_time'];
-        $end_time = $values['end_time'];
-        $show24Hours = ((isset($values['clock']) and $values['clock'] == 24) ? true : false);
-        $separator = ':';
-
-        $start = explode($separator, $start_time);
-        $end = explode($separator, $end_time);
-
-        if($end[0] < $start[0])
-            $end[0] += 12;
-
-        $options = array();
-        $options['H'] = range($start[0], $end[0], $hour_step);
-        foreach($options['H'] as $k => $h){
-            if(!$show24Hours and $h > 12)
-                $options['H'][$k] = $h - 12;
-
-            if(!$options['H'][$k]){
-                unset($options['H'][$k]); //remove 0
-                continue;
-            }
-
-            if($options['H'][$k] < 10)
-                $options['H'][$k] = '0'. $options['H'][$k];
-
-            unset($k);
-            unset($h);
-        }
-        $options['H'] = array_unique($options['H']);
-        sort($options['H']);
-        array_unshift($options['H'], '');
-
-        if($step > 60){
-            if($step %60 == 0){
-                //the step is an even hour
-                $step = 60;
-            }else{
-                //get the number of minutes
-                $step = $step - ($hour_step*60);
-            }
-        }
-
-        $options['m'] = range($start[1], 59, $step);
-        foreach($options['m'] as $k => $m){
-            if($m < 10)
-                $options['m'][$k] = '0'. $m;
-            unset($k);
-            unset($m);
-        }
-
-        array_unshift($options['m'], '');
-
-        if(!$show24Hours)
-            $options['A'] = array( '', 'AM', 'PM');
-
-        return $options;*/
     }
 
     public static function posted_field_ids( $where ) {
@@ -1579,10 +1589,9 @@ class FrmProFieldsHelper{
 		return $default_date;
 	}
 
-    public static function get_form_fields( $fields, $form_id, $error = false ) {
-		global $frm_vars;
-
-		$page_numbers = self::get_base_page_info( compact( 'fields', 'form_id', 'error' ) );
+    public static function get_form_fields( $fields, $form_id, $errors = array() ) {
+		$error = ! empty( $errors );
+		$page_numbers = self::get_base_page_info( compact( 'fields', 'form_id', 'error', 'errors' ) );
 
 		$ajax = FrmProFormsHelper::has_form_setting( array( 'form_id' => $form_id, 'setting_name' => 'ajax_submit', 'expected_setting' => 1 ) );
 
@@ -1661,7 +1670,16 @@ class FrmProFieldsHelper{
             $page_numbers['set_prev'] = $page_numbers['prev_page'];
 
             if ( $page_numbers['prev_page'] ) {
-                $page_numbers['prev_page'] = $page_numbers['prev_page'] - 1;
+				$came_from_page = self::get_last_page_num( $atts );
+
+				if ( false === $came_from_page ) {
+					$page_numbers['prev_page'] = $page_numbers['prev_page'] - 1;
+				} else {
+					$page_numbers['prev_page'] = $came_from_page - 1;
+					if ( $page_numbers['set_prev'] ) {
+						$page_numbers['set_prev'] = $page_numbers['prev_page'];
+					}
+				}
             } else {
                 $page_numbers['prev_page'] = 999;
                 $page_numbers['get_last'] = true;
@@ -1669,6 +1687,39 @@ class FrmProFieldsHelper{
         }
 
 		return $page_numbers;
+	}
+
+	private static function get_last_page_num( $atts ) {
+		$has_last_page = isset( $_POST['frm_last_page'] );
+		if ( $has_last_page ) {
+			$came_from_page = FrmAppHelper::get_param( 'frm_last_page', false, 'get', 'sanitize_text_field' );
+		} else {
+			$came_from_page = false;
+		}
+
+		self::get_page_with_error( $atts, $came_from_page );
+		return $came_from_page;
+	}
+
+	private static function get_page_with_error( $atts, &$came_from_page ) {
+		if ( empty( $atts['errors'] ) ) {
+			return;
+		}
+
+		$error_fields = array_keys( $atts['errors'] );
+		$field_ids = array();
+		foreach ( $error_fields as $error_field ) {
+			if ( strpos( $error_field, 'field' ) === 0 ) {
+				$field_ids[] = str_replace( 'field', '', $error_field );
+			}
+		}
+
+		if ( ! empty( $field_ids ) ) {
+			$first_error = FrmDb::get_var( 'frm_fields', array( 'id' => $field_ids ), 'field_order', array( 'order_by' => 'field_order ASC' ) );
+			if ( is_numeric( $first_error ) ) {
+				$came_from_page = $first_error + 1;
+			}
+		}
 	}
 
 	/**
@@ -1692,7 +1743,8 @@ class FrmProFieldsHelper{
 				}
 			break;
 			case 'time':
-				if ( isset( $f->field_options['unique'] ) && $f->field_options['unique'] ) {
+				if ( isset( $f->field_options['unique'] ) && $f->field_options['unique'] &&
+				 isset( $f->field_options['single_time'] ) && $f->field_options['single_time']) {
 					if ( ! isset( $frm_vars['timepicker_loaded'] ) ) {
 						$frm_vars['timepicker_loaded'] = array();
 					}
@@ -2166,12 +2218,13 @@ DEFAULT_HTML;
 
 			if ( isset( $headings[3] ) && ! empty( $headings[3] ) ) {
 				$header_text = reset( $headings[3] );
+				$search_header_text = '>' . $header_text . '<';
 				$old_header_html = reset( $headings[0] );
 
 				if ( 'before' == $style->post_content['collapse_pos'] ) {
-					$new_header_html = str_replace( $header_text, '<i class="frm_icon_font frm_arrow_icon"></i> ' . $header_text, $old_header_html );
+					$new_header_html = str_replace( $search_header_text, '><i class="frm_icon_font frm_arrow_icon"></i> ' . $header_text . '<', $old_header_html );
 				} else {
-					$new_header_html = str_replace( $header_text, $header_text . '<i class="frm_icon_font frm_arrow_icon"></i> ', $old_header_html );
+					$new_header_html = str_replace( $search_header_text, '>' . $header_text . '<i class="frm_icon_font frm_arrow_icon"></i><', $old_header_html );
 				}
 
 				$html = str_replace( $old_header_html, $new_header_html, $html );
@@ -2235,44 +2288,81 @@ DEFAULT_HTML;
         return $image;
     }
 
-    public static function get_file_name( $media_ids, $short = true ) {
-        $value = '';
-        foreach ( (array) $media_ids as $media_id ) {
-            if ( ! is_numeric($media_id) ) {
-                continue;
-            }
+    /**
+	 * Get the file name for the given media IDs
+	 *
+	 * @param $media_ids
+	 * @param bool $short
+	 * @param string $sep
+	 *
+	 * @return string
+	 */
+	public static function get_file_name( $media_ids, $short = true, $sep = 'default' ) {
+		$sep = ( $sep === 'default' ) ? "<br/>\r\n" : $sep;
+		$value = '';
+		$media_ids = (array) $media_ids;
 
-            $attachment = get_post($media_id);
-            if ( ! $attachment ) {
-                continue;
-            }
+		foreach ( $media_ids as $media_id ) {
+			$value = self::get_file_name_from_array( compact( 'media_id', 'sep', 'short' ), $value );
+			unset( $media_id );
+		}
 
-            $url = wp_get_attachment_url($media_id);
+		return $value;
+	}
 
-            $label = $short ? basename($attachment->guid) : $url;
-			$action = FrmAppHelper::simple_get( 'action', 'sanitize_title' );
-			$frm_action = FrmAppHelper::simple_get( 'frm_action', 'sanitize_title' );
+	/**
+	 * The file id may be an array.
+	 * Loop through values in the nested array too.
+	 *
+	 * @since 2.03.10
+	 */
+	private static function get_file_name_from_array( $atts, $value ) {
+		if ( is_array( $atts['media_id'] ) ) {
+			foreach ( $atts['media_id'] as $id ) {
+				$atts['media_id'] = $id;
+				self::get_file_name_from_id( $atts, $value );
+			}
+		} else {
+			self::get_file_name_from_id( $atts, $value );
+		}
 
-            if ( $frm_action == 'csv' || $action == 'frm_entries_csv' ) {
-                if ( !empty($value) ) {
-                    $value .= ', ';
-                }
-            } else if ( FrmAppHelper::is_admin() ) {
-				$url = '<a href="' . esc_url( $url ) . '">' . $label . '</a>';
-				if ( strpos( FrmAppHelper::simple_get( 'page', 'sanitize_title' ), 'formidable' ) === 0 ) {
-					$url .= '<br/><a href="' . esc_url( admin_url( 'media.php?action=edit&attachment_id=' . $media_id ) ) . '">' . __( 'Edit Uploaded File', 'formidable' ) . '</a>';
-                }
-            } else if ( !empty($value) ) {
-                $value .= "<br/>\r\n";
-            }
+		return $value;
+	}
 
-            $value .= $url;
+	/**
+	 * Get the file output values from the media id
+	 */
+	private static function get_file_name_from_id( $atts, &$value ) {
+		if ( ! is_numeric( $atts['media_id'] ) ) {
+			return;
+		}
 
-            unset($media_id);
-	    }
+		$attachment = get_post( $atts['media_id'] );
+		if ( ! $attachment ) {
+			return;
+		}
 
-	    return $value;
-    }
+		$url = wp_get_attachment_url( $atts['media_id'] );
+
+		$label = $atts['short'] ? basename( $attachment->guid ) : $url;
+		$action = FrmAppHelper::simple_get( 'action', 'sanitize_title' );
+		$frm_action = FrmAppHelper::simple_get( 'frm_action', 'sanitize_title' );
+
+		if ( $frm_action == 'csv' || $action == 'frm_entries_csv' ) {
+			if ( ! empty( $value ) ) {
+				$value .= ', ';
+			}
+		} else if ( FrmAppHelper::is_admin() ) {
+			$url = '<a href="' . esc_url( $url ) . '">' . $label . '</a>';
+			if ( strpos( FrmAppHelper::simple_get( 'page', 'sanitize_title' ), 'formidable' ) === 0 ) {
+				$url .= '<br/><a href="' . esc_url( admin_url( 'media.php?action=edit&attachment_id=' . $atts['media_id'] ) ) . '">' . __( 'Edit Uploaded File', 'formidable' ) . '</a>';
+			}
+		} else if ( ! empty( $value ) ) {
+			$value .= $atts['sep'];
+		}
+
+		$value .= $url;
+	}
 
 	/**
 	* Get the value that will be displayed for a Dynamic Field
@@ -2412,28 +2502,17 @@ DEFAULT_HTML;
 		}
 	}
 
-    public static function get_date( $date, $date_format = false ) {
-        if ( empty($date) ) {
-            return $date;
-        }
+	public static function get_date( $date, $date_format = false ) {
+		if ( empty( $date ) ) {
+			return $date;
+		}
 
-        if ( ! $date_format ) {
-            $date_format = apply_filters( 'frm_date_format', get_option( 'date_format' ) );
-        }
+		if ( ! $date_format ) {
+			$date_format = apply_filters( 'frm_date_format', get_option( 'date_format' ) );
+		}
 
-        if ( is_array($date) ) {
-            $dates = array();
-            foreach ( $date as $d ) {
-                $dates[] = self::get_single_date($d, $date_format);
-                unset($d);
-            }
-            $date = $dates;
-        } else {
-            $date = self::get_single_date($date, $date_format);
-        }
-
-        return $date;
-    }
+		return self::format_values_in_array( $date, $date_format, array( 'self', 'get_single_date' ) );
+	}
 
     public static function get_single_date($date, $date_format) {
 		if ( preg_match( '/^\d{1-2}\/\d{1-2}\/\d{4}$/', $date ) ) {
@@ -2443,6 +2522,25 @@ DEFAULT_HTML;
 
         return date_i18n($date_format, strtotime($date));
     }
+
+	public static function format_values_in_array( $value, $format, $callback ) {
+		if ( empty( $value ) ) {
+			return $value;
+		}
+
+		if ( is_array( $value ) ) {
+			$formated_values = array();
+			foreach ( $value as $v ) {
+				$formated_values[] = call_user_func_array( $callback, array( $v, $format ) );
+				unset( $v );
+			}
+			$value = $formated_values;
+		} else {
+			$value = call_user_func_array( $callback, array( $value, $format ) );
+		}
+
+		return $value;
+	}
 
     public static function get_display_name( $user_id, $user_info = 'display_name', $args = array() ) {
         $defaults = array(
@@ -2813,7 +2911,7 @@ DEFAULT_HTML;
     }
 
 	public static function get_user_id_display_value($replace_with, $atts) {
-		$user_info = isset($atts['show']) ? $atts['show'] : 'display_name';
+		$user_info = self::prepare_user_info_attribute( $atts );
 		$replace_with = self::get_display_name($replace_with, $user_info, $atts);
 
 		if ( is_array( $replace_with ) ) {
@@ -2824,26 +2922,104 @@ DEFAULT_HTML;
 		return $replace_with;
 	}
 
-	public static function get_time_display_value( $replace_with, $atts, $field ) {
-		$time_clock = ( isset( $field->field_options['clock'] ) ) ? $field->field_options['clock'] : 12;
-		$defaults = array(
-			'format' => ( $time_clock == 24 ) ? 'H:i' : 'g:i A',
-		);
-		$atts = wp_parse_args( $atts, $defaults );
+	/**
+	 * Get a JSON array of values from Repeating Section
+	 *
+	 * @since 2.03.08
+	 *
+	 * @param $value
+	 * @param $atts
+	 * @param $field
+	 *
+	 * @return mixed
+	 */
+	public static function get_divider_display_value( $value, $atts, $field ) {
+		if ( ! FrmField::is_repeating_field( $field ) ) {
+			return $value;
+		}
 
-		if ( strpos( $replace_with, ',' ) ) {
+		if ( ! is_array( $value ) && ! empty( $value ) && $atts['format'] === 'json' ) {
+			$child_entries = explode( ',', $value );
+			$value = array();
+
+			foreach ( $child_entries as $child_id ) {
+
+				$pass_args = array(
+	                'format' => 'array',
+	                'include_blank' => true,
+	                'id' => $child_id,
+	                'user_info' => false,
+	            );
+
+				$child_entry = FrmEntriesController::show_entry_shortcode( $pass_args );
+				$value[] = $child_entry;
+			}
+
+			$value = json_encode( $value );
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Generate the user info attribute for the get_display_name() function
+	 *
+	 * @since 2.03.07
+	 * @param $atts
+	 *
+	 * @return string
+	 */
+	private static function prepare_user_info_attribute( $atts ) {
+		if ( isset( $atts['show'] ) ) {
+			if ( $atts['show'] === 'id' ) {
+				$user_info = 'ID';
+			} else {
+				$user_info = $atts['show'];
+			}
+		} else {
+			$user_info = 'display_name';
+		}
+
+		return $user_info;
+	}
+
+	public static function get_time_options( $values ) {
+		_deprecated_function( __FUNCTION__, '2.03.01', 'FrmProTimeField::get_time_options' );
+		return FrmProTimeField::get_time_options( $values );
+	}
+
+	public static function show_time_field( $field, $values ) {
+		_deprecated_function( __FUNCTION__, '2.03.01', 'FrmProTimeField::show_time_field' );
+		FrmProTimeField::show_time_field( $field, $values );
+	}
+
+	public static function time_array_to_string( &$value ) {
+		_deprecated_function( __FUNCTION__, '2.03.01', 'FrmProTimeField::time_array_to_string' );
+		FrmProTimeField::time_array_to_string( $value );
+	}
+
+	public static function is_time_empty( $value ) {
+		_deprecated_function( __FUNCTION__, '2.03.01', 'FrmProTimeField::is_time_empty' );
+		return FrmProTimeField::is_time_empty( $value );
+	}
+
+	public static function get_time_display_value( $replace_with, $atts, $field ) {
+		if ( empty( $replace_with ) ) {
+			return $replace_with;
+		}
+
+		$defaults = array(
+			'format' => FrmProAppHelper::get_time_format_for_field( $field ),
+		);
+
+		$atts = wp_parse_args( $atts, $defaults );
+		if ( is_array( $replace_with ) && isset( $replace_with['H'] ) ) {
+			FrmProTimeField::time_array_to_string( $replace_with );
+		} elseif ( ! is_array( $replace_with ) && strpos( $replace_with, ',' ) ) {
 			$replace_with = explode( ',', $replace_with );
 		}
 
-		if ( is_array( $replace_with ) ) {
-			foreach ( $replace_with as $k => $v ) {
-				$replace_with[ $k ] = FrmProAppHelper::format_time( $replace_with[ $k ], $atts['format'] );
-			}
-		} else {
-			$replace_with = FrmProAppHelper::format_time( $replace_with, $atts['format'] );
-		}
-		return $replace_with;
-
+		return self::format_values_in_array( $replace_with, $atts['format'], array( 'FrmProAppHelper', 'format_time' ) );
 	}
 
     public static function get_date_display_value($replace_with, $atts) {
@@ -2861,18 +3037,11 @@ DEFAULT_HTML;
 				$replace_with = explode( ',', $replace_with );
 			}
 
-            if ( is_array($replace_with) ) {
-                foreach ( $replace_with as $k => $v ) {
-                    $replace_with[$k] = self::get_date($v, $atts['format']);
-                }
-            } else {
-                $replace_with = self::get_date($replace_with, $atts['format']);
-            }
-            return $replace_with;
-        }
-
-        $replace_with = self::get_date($replace_with, 'Y-m-d H:i:s');
-        $replace_with = FrmAppHelper::human_time_diff( strtotime($replace_with), strtotime(date_i18n('Y-m-d')) );
+			$replace_with = self::format_values_in_array( $replace_with, $atts['format'], array( 'self', 'get_date' ) );
+		} else {
+			$replace_with = self::get_date( $replace_with, 'Y-m-d H:i:s' );
+			$replace_with = FrmAppHelper::human_time_diff( strtotime( $replace_with ), strtotime( date_i18n( 'Y-m-d' ) ), absint( $atts['time_ago'] ) );
+		}
 
         return $replace_with;
     }
@@ -3909,7 +4078,7 @@ DEFAULT_HTML;
 
 	public static function do_shortcode_detaillink(&$content, $atts, $shortcodes, $short_key, $args, $display) {
 		_deprecated_function( __FUNCTION__, '2.02.08', 'FrmProContent::' . __FUNCTION__ );
-		FrmProContent::do_shortcode_detaillink( $content, $atts, $shortcodes, $short_key, $args );
+		FrmProContent::do_shortcode_detaillink( $content, $atts, $shortcodes, $short_key, $args, $display );
 	}
 
 	public static function do_shortcode_editlink(&$content, $atts, $shortcodes, $short_key, $args) {

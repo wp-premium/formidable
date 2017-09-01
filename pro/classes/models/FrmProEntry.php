@@ -6,69 +6,69 @@ class FrmProEntry{
 
         $frm_settings = FrmAppHelper::get_settings();
 
-        if ( (($_POST && isset($_POST['frm_page_order_'. $form->id])) || FrmProFormsHelper::going_to_prev($form->id)) && ! FrmProFormsHelper::saving_draft() ) {
+		$has_another_page = ( $_POST && isset( $_POST['frm_page_order_' . $form->id ] ) );
+		$switching_pages = ( $has_another_page || FrmProFormsHelper::going_to_prev( $form->id ) );
+		$entry_id = FrmFormsController::just_created_entry( $form->id );
+		$args = compact( 'fields', 'form', 'title', 'description', 'entry_id' );
+
+		if ( $switching_pages && ! FrmProFormsHelper::saving_draft() ) {
             $errors = '';
             $fields = FrmFieldsHelper::get_form_fields($form->id);
             $submit = isset($form->options['submit_value']) ? $form->options['submit_value'] : $frm_settings->submit_value;
             $values = $fields ? FrmEntriesHelper::setup_new_vars($fields, $form) : array();
-            require(FrmAppHelper::plugin_path() .'/classes/views/frm-entries/new.php');
-            add_filter('frm_continue_to_create', '__return_false');
-		} else if ( $form->editable && isset( $form->options['single_entry'] ) && $form->options['single_entry'] && $form->options['single_entry_type'] == 'user' && ! FrmProFormsHelper::saving_draft() ) {
+
+			$autosave = FrmAppHelper::get_post_param( 'frm_autosaving', '', 'absint' );
+			if ( $autosave && $entry_id ) {
+				$args['fields'] = $fields;
+				$args['function'] = 'show_form_after_first_save_draft_click';
+				self::show_entry_for_edit( $args );
+			} else {
+				require( FrmAppHelper::plugin_path() .'/classes/views/frm-entries/new.php' );
+				add_filter('frm_continue_to_create', '__return_false');
+			}
+		} else if ( $entry_id && $form->editable && isset( $form->options['single_entry'] ) && $form->options['single_entry'] && $form->options['single_entry_type'] == 'user' && ! FrmProFormsHelper::saving_draft() ) {
 			$show_form = ( isset( $form->options['show_form'] ) ) ? $form->options['show_form'] : true;
 
 			if ( $show_form ) {
-
-				$entry_id = isset( $frm_vars[ 'created_entries' ][ $form->id ][ 'entry_id' ] ) ? $frm_vars[ 'created_entries' ][ $form->id ][ 'entry_id' ] : 0;
-
-				if ( ! $entry_id ) {
-					return;
-				}
-
 				$saved_message = isset( $form->options[ 'success_msg' ] ) ? $form->options[ 'success_msg' ] : $frm_settings->success_msg;
 				$saved_message = apply_filters( 'frm_content', $saved_message, $form, ( $entry_id ? $entry_id : false ) );
 				$message = wpautop( do_shortcode( $entry_id ? $saved_message : $frm_settings->failed_msg ) );
 				$message = '<div class="frm_message" id="message">' . $message . '</div>';
 
-				$args = array(
-					'fields' => $fields,
-					'form' => $form,
-					'show_title' => $title,
-					'show_description' => $description,
-					'conf_message' => $message
-				);
+				$args['message'] = $message;
+				$args['function'] = 'show_form_after_single_editable_entry_submission';
 
-				FrmProEntriesController::show_form_after_single_editable_entry_submission( $entry_id, $args );
-
-				add_filter( 'frm_continue_to_create', '__return_false' );
+				self::show_entry_for_edit( $args );
 			}
-		} else if ( FrmProFormsHelper::saving_draft() ) {
-            $record = ( isset( $frm_vars['created_entries'] ) && isset( $frm_vars['created_entries'][ $form->id ] ) ) ? $frm_vars['created_entries'][ $form->id ]['entry_id'] : 0;
-
-            if ( ! $record ) {
-                return;
-            }
-
-            $saved_message = '';
-            FrmProFormsHelper::save_draft_msg( $saved_message, $form, $record );
-
+		} else if ( FrmProFormsHelper::saving_draft() && $entry_id ) {
+			$saved_message = '';
+			FrmProFormsHelper::save_draft_msg( $saved_message, $form, $entry_id );
 			$message = FrmFormsHelper::get_success_message( array(
 				'message' => $saved_message, 'form' => $form,
-				'entry_id' => $record, 'class' => 'frm_message',
+				'entry_id' => $entry_id, 'class' => 'frm_message',
 			) );
 
-			$args = array(
-				'fields' => $fields,
-				'form' => $form,
-				'show_title' => $title,
-				'show_description' => $description,
-				'conf_message' => $message
-			);
+			$args['message'] = $message;
+			$args['function'] = 'show_form_after_first_save_draft_click';
 
-			FrmProEntriesController::show_form_after_first_save_draft_click( $record, $args );
-
-            add_filter('frm_continue_to_create', '__return_false');
+			self::show_entry_for_edit( $args );
         }
     }
+
+	private static function show_entry_for_edit( $args ) {
+		$values = array(
+			'fields'       => $args['fields'],
+			'form'         => $args['form'],
+			'show_title'   => $args['title'],
+			'show_description' => $args['description'],
+			'conf_message' => isset( $args['message'] ) ? $args['message'] : '',
+		);
+
+		$function = $args['function'];
+		FrmProEntriesController::$function( $args['entry_id'], $values );
+
+		add_filter( 'frm_continue_to_create', '__return_false' );
+	}
 
     public static function save_sub_entries($values, $action = 'create') {
         $form_id = isset($values['form_id']) ? (int) $values['form_id']: 0;
@@ -93,7 +93,10 @@ class FrmProEntry{
         foreach ( $form_fields as $field ) {
             if ( ! isset($values['item_meta'][ $field->id ]) || ! isset($field->field_options['form_select']) || ! isset($values['item_meta'][ $field->id ]['form']) ) {
                 // don't continue if we don't know which form to insert the sub entries into
-                unset($values['item_meta'][$field->id]);
+
+	            self::delete_all_sub_entries( $action, $values, $field->id );
+	            unset( $values['item_meta'][$field->id] );
+
                 continue;
             }
 
@@ -107,12 +110,7 @@ class FrmProEntry{
             $sub_form_id = $field->field_options['form_select'];
 
             if ( $action != 'create' ) {
-                $old_ids = FrmEntryMeta::get_entry_meta_by_field($values['id'], $field->id);
-				if ( $old_ids ) {
-					$old_ids = array_filter( (array) $old_ids, 'is_numeric');
-				} else {
-					$old_ids = array();
-				}
+	            $old_ids = self::get_existing_sub_entries( $values[ 'id' ], $field->id );
             } else {
                 $old_ids = array();
             }
@@ -154,17 +152,65 @@ class FrmProEntry{
             $values['item_meta'][$field->id] = $sub_ids; // array of sub entry ids
 
             $old_ids = array_diff($old_ids, $sub_ids);
-            if ( ! empty($old_ids) ) {
-                // delete entries that were removed from section
-                foreach ( $old_ids as $old_id ) {
-                    FrmEntry::destroy( $old_id );
-                }
-            }
+	        self::delete_sub_entries( $old_ids );
 
             unset($field);
         }
 
         return $values;
+    }
+
+	/**
+	 * Delete the sub entries that have been removed
+	 *
+	 * @since 2.03.05
+	 *
+	 * @param string $action
+	 * @param array $values
+	 * @param string|int $field_id
+	 */
+    private static function delete_all_sub_entries( $action, $values, $field_id ) {
+	    if ( $action != 'create' ) {
+		    $old_ids = self::get_existing_sub_entries( $values[ 'id' ], $field_id );
+		    self::delete_sub_entries( $old_ids );
+	    }
+    }
+
+	/**
+	 * Get the existing sub entries
+	 *
+	 * @since 2.03.05
+	 *
+	 * @param string|int $entry_id
+	 * @param string|int $section_id
+	 * @return array $old_ids
+	 */
+    private static function get_existing_sub_entries( $entry_id, $section_id ) {
+	    $old_ids = FrmEntryMeta::get_entry_meta_by_field( $entry_id, $section_id );
+	    if ( $old_ids ) {
+		    $old_ids = array_filter( (array) $old_ids, 'is_numeric');
+	    } else {
+		    $old_ids = array();
+	    }
+
+	    return $old_ids;
+    }
+
+
+	/**
+	 * Delete entries that were removed from section
+	 *
+	 * @since 2.03.05
+	 *
+	 * @param array $child_entry_ids
+	 */
+    private static function delete_sub_entries( $child_entry_ids ) {
+	    if ( ! empty( $child_entry_ids) ) {
+
+		    foreach ( $child_entry_ids as $old_id ) {
+			    FrmEntry::destroy( $old_id );
+		    }
+	    }
     }
 
     /**
@@ -420,8 +466,6 @@ class FrmProEntry{
 		$query = implode($query, ' ') . $args['limit'];
 		$entry_ids = $wpdb->get_col( $query );
 
-		self::reorder_time_entries( $entry_ids, $args['time_field'] );
-
 		return $entry_ids;
 	}
 
@@ -512,48 +556,6 @@ class FrmProEntry{
         } else {
             $query['order'] .= 'it.'. $o_field .' '. $args['order_array'][$o_key] .', ';
         }
-    }
-
-    /**
-     * Reorder entries if 12 hour time field is selected for first ordering field.
-     * If the $time_field variable is set, this means the first ordering field is a time field.
-     */
-	private static function reorder_time_entries( &$entry_ids, $time_field ) {
-		if ( ! $time_field || ! is_array( $entry_ids ) || empty( $entry_ids ) ) {
-            return;
-        }
-
-        if ( isset($time_field->field_options['clock']) && $time_field->field_options['clock'] != 12 ) {
-            // only reorder with 12 hour times
-            return;
-        }
-
-		global $wpdb;
-
-		//Reorder entries
-    	$new_order = array();
-		$empty_times = array();
-		$times = $wpdb->get_results( $wpdb->prepare( 'SELECT item_id, meta_value FROM ' . $wpdb->prefix . 'frm_item_metas WHERE field_id=%d', $time_field->id ), OBJECT_K );
-
-		foreach ( $entry_ids as $e_key ) {
-			if ( ! isset( $times[ $e_key ] ) ) {
-				$empty_times[ $e_key ] = '';
-				continue;
-			}
-
-			$time = $times[ $e_key ]->meta_value;
-			$new_order[ $e_key ] = FrmProAppHelper::format_time( $time, 'Hi' );
-
-        	unset($e_key, $entry);
-		}
-
-    	//array with sorted times
-    	asort($new_order);
-
-		$new_order = $new_order + $empty_times;
-    	$final_order = array_keys( $new_order );
-
-        $entry_ids = $final_order;
     }
 
 	public static function pre_validate( $errors, $values ) {

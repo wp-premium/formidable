@@ -1,8 +1,5 @@
 <?php
 
-global $frm_update;
-$frm_update  = new FrmUpdatesController();
-
 $frmedd_update  = new FrmProEddController();
 
 // load the license form

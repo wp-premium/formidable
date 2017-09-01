@@ -58,6 +58,7 @@ class FrmProLookupFieldsController{
 
 	/**
 	 * Clean a Lookup field's options before updating in the database
+	 * Necessary when switching from another field type to a Lookup
 	 *
 	 * @since 2.01.02
 	 * @param array $values
@@ -66,10 +67,14 @@ class FrmProLookupFieldsController{
 	public static function clean_field_options_before_update( $values ) {
 		if ( $values['type'] == 'lookup' ) {
 
-			// Necessary when switching from another field type to a Lookup
 			if ( isset( $values['field_options']['autopopulate_value'] ) ) {
 				unset( $values['field_options']['autopopulate_value'] );
 			}
+
+			if ( ! empty( $values['options'] ) ) {
+				$values['options'] = array();
+			}
+
 		}
 
 		return $values;
@@ -121,6 +126,7 @@ class FrmProLookupFieldsController{
 			'date',
 			'select',
 			'hidden',
+			'textarea',
 		);
 
 		return $autopopulate_field_types;
@@ -177,6 +183,7 @@ class FrmProLookupFieldsController{
 			// Filter options
 			require( FrmAppHelper::plugin_path() . '/pro/classes/views/lookup-fields/back-end/filter.php' );
 
+			FrmProFieldsController::show_format_option( $field );
 		} else {
 
 			if ( $field['data_type'] == 'select' ) {
@@ -554,7 +561,7 @@ class FrmProLookupFieldsController{
 	private static function get_initial_dependent_lookup_field_options( $values ) {
 		if ( isset( $values['value'] ) && $values['value'] ) {
 			// If editing an entry or switching between pages, add an option for the saved value
-			$options = (array) $values['value'];
+			$options = (array) self::decode_html_entities( $values['value'] );
 		} else {
 			$options = array();
 		}
@@ -567,6 +574,29 @@ class FrmProLookupFieldsController{
 		}
 
 		return $options;
+	}
+
+	/**
+	 * Decode HTML entities recursively
+	 *
+	 * @since 2.04
+	 *
+	 * @param mixed $value
+	 *
+	 * @return array|string
+	 */
+	private static function decode_html_entities( $value ) {
+		// TODO: add single, centralized function to decode entities
+
+		if ( is_array( $value ) ) {
+			foreach ( $value as $key => $single_value ) {
+				$value[ $key ] = self::decode_html_entities( $single_value );
+			}
+		} else {
+			$value = html_entity_decode( $value );
+		}
+
+		return $value;
 	}
 
 	/**
@@ -604,9 +634,10 @@ class FrmProLookupFieldsController{
 			$frm_vars['lookup_fields'][ $values['id'] ]['fieldType'] = $values['original_type'];
 			$frm_vars['lookup_fields'][ $values['id'] ]['formId'] = $values['parent_form_id'];
 			$frm_vars['lookup_fields'][ $values['id'] ]['inSection'] = isset( $values['in_section'] ) ? $values['in_section'] : '0';
+			$frm_vars['lookup_fields'][ $values['id'] ]['inEmbedForm'] = isset( $values['in_embed_form'] ) ? $values['in_embed_form'] : '0';
 			$frm_vars['lookup_fields'][ $values['id'] ]['isRepeating'] = $values['form_id'] != $values['parent_form_id'];
 			$frm_vars['lookup_fields'][ $values['id'] ]['isMultiSelect'] = false;
-			// TODO: check if this works with embedded fields
+			$frm_vars['lookup_fields'][ $values['id'] ]['isReadOnly'] = (bool) $values['read_only'];
 
 			if ( $values['original_type'] == 'lookup' ) {
 				$frm_vars['lookup_fields'][ $values['id'] ]['inputType'] = $values['data_type'];
@@ -650,17 +681,15 @@ class FrmProLookupFieldsController{
 		// TODO: don't reload for ajax
 		if ( isset( $frm_vars['lookup_fields'] ) && ! empty( $frm_vars['lookup_fields'] ) ) {
 			$lookup_field_ids = array();
-			$checked_forms = array();
+
 			foreach ( $frm_vars['lookup_fields'] as $l_id => $lookup_field ) {
-				if ( $lookup_field['parents'] ) {
+				if ( isset( $lookup_field['parents'] ) && $lookup_field['parents'] ) {
 					if ( $lookup_field['fieldType'] == 'lookup' ) {
 						// Update all dependent Lookup fields
 						$lookup_field_ids[] = $l_id;
 					} else {
-						self::get_form_action( $lookup_field['formId'], $checked_forms, $form_action );
-
 						// Only update non-lookup fields if this is the initial form load
-						if ( 'new' === $form_action ) {
+						if ( 'new' === self::get_form_action() ) {
 							$lookup_field_ids[] = $l_id;
 						}
 					}
@@ -671,22 +700,15 @@ class FrmProLookupFieldsController{
 	}
 
 	/**
-	 * Get a specific form's action (new, create, edit, update)
+	 * Get the current action from the URL (new, create, edit, update)
 	 *
 	 * @since 2.02
-	 * @param int $form_id
-	 * @param array $checked_forms
-	 * @param string $form_action
+	 * @return string $form_action
 	 */
-	private static function get_form_action( $form_id, &$checked_forms, &$form_action ) {
-		if ( isset( $checked_forms[ $form_id ] ) ) {
-			$form_params = $checked_forms[ $form_id ];
-		} else {
-			$form_params = FrmForm::get_params( $form_id );
-			$checked_forms[ $form_id ] = $form_params;
-		}
+	private static function get_form_action() {
+		$action_var = isset( $_REQUEST['frm_action'] ) ? 'frm_action' : 'action';
 
-		$form_action = $form_params['action'];
+		return FrmAppHelper::get_param( $action_var, 'new', 'get', 'sanitize_title' );
 	}
 
 	/**
@@ -722,8 +744,10 @@ class FrmProLookupFieldsController{
 			'parent_field_ids' => FrmAppHelper::get_param( 'parent_fields', '', 'post', 'absint' ),
 			'parent_vals' => FrmAppHelper::get_param( 'parent_vals', '', 'post', 'wp_kses_post' ),
 		);
+
 		$args = array(
 			'row_index' => FrmAppHelper::get_param( 'row_index', '', 'post', 'sanitize_text_field' ),
+			'container_field_id' => FrmAppHelper::get_param( 'container_field_id', '', 'post', 'sanitize_text_field' ),
 			'current_value' => FrmAppHelper::get_param( 'current_value', '', 'post', 'sanitize_text_field' ),
 			'default_value' => FrmAppHelper::get_param( 'default_value', '', 'post', 'sanitize_text_field' ),
 		);
@@ -807,7 +831,7 @@ class FrmProLookupFieldsController{
 	}
 
 	/**
-	 * Generate the field input name for a repeating or non-repeating field
+	 * Generate the field input name for a repeating, embedded, or standard field
 	 *
 	 * @since 2.01.0
 	 *
@@ -818,7 +842,7 @@ class FrmProLookupFieldsController{
 	private static function generate_field_name_for_radio_inputs( $field, $args ) {
 		if ( $args['row_index'] != '' ) {
 			$i = str_replace( '-', '', $args['row_index'] );
-			$field_name = 'item_meta[' . $field->field_options['in_section'] . '][' . $i . '][' . $field->id . ']';
+			$field_name = 'item_meta[' . $args['container_field_id'] . '][' . $i . '][' . $field->id . ']';
 		} else {
 			$field_name = 'item_meta[' . $field->id . ']';
 		}
@@ -875,6 +899,8 @@ class FrmProLookupFieldsController{
 			$parent_val = $selected_values[ $i ];
 
 			$args['comparison_type'] = apply_filters( 'frm_set_comparison_type_for_lookup', 'equals', $parent_field, $child_field );
+			$args['and_or'] = apply_filters( 'frm_set_and_or_for_lookup', 'and', $parent_field, $child_field );
+			self::apply_current_user_filter_for_non_lookup( $child_field, $parent_field, $args );
 
 			$entry_ids = self::get_entry_ids_for_parent_field_and_value( $linked_field, $parent_val, $args );
 
@@ -882,11 +908,25 @@ class FrmProLookupFieldsController{
 				break;
 			}
 
+			self::append_child_entry_ids( $entry_ids );
+
 			$args['entry_ids'] = $entry_ids;
 		}
 
 		return $entry_ids;
 
+	}
+
+	/**
+	 *
+	 * @param stdClass $child_field
+	 * @param stdClass $parent_field
+	 * @param array $args
+	 */
+	private static function apply_current_user_filter_for_non_lookup( $child_field, $parent_field, &$args ) {
+		if ( $child_field->type !== 'lookup' && self::need_to_filter_values_for_current_user( $parent_field->field_options ) ) {
+			$args['user_id'] = get_current_user_id();
+		}
 	}
 
 	/**
@@ -900,16 +940,50 @@ class FrmProLookupFieldsController{
 	 */
 	private static function get_entry_ids_for_parent_field_and_value( $linked_field, $parent_val, $args ) {
 		if ( is_array( $parent_val ) ) {
-			$entry_ids = array();
+			$entry_ids = array( 'first' => true );
 			foreach ( $parent_val as $p_val ) {
 				$new_entry_ids = FrmProEntryMeta::get_entry_ids_for_field_and_value( $linked_field, $p_val, $args );
-				$entry_ids = array_merge( $entry_ids, $new_entry_ids );
+				$entry_ids = self::filter_or_merge_entry_ids( $entry_ids, $new_entry_ids, $args['and_or'] );
 			}
 		} else {
 			$entry_ids = FrmProEntryMeta::get_entry_ids_for_field_and_value( $linked_field, $parent_val, $args );
 		}
 
 		return $entry_ids;
+	}
+
+	/**
+	 * Either combine the results, or get only those in common.
+	 * and/or depends on the frm_set_and_or_for_lookup filter
+	 *
+	 * @since 2.03.08
+	 */
+	private static function filter_or_merge_entry_ids( $entry_ids, $new_entry_ids, $and_or ) {
+		if ( isset( $entry_ids['first'] ) ) {
+			return $new_entry_ids;
+		}
+
+		if ( $and_or == 'or' ) {
+			$entry_ids = array_intersect( $entry_ids, $new_entry_ids );
+		} else {
+			$entry_ids = array_merge( $entry_ids, $new_entry_ids );
+		}
+
+		return $entry_ids;
+	}
+
+	/**
+	 * Append child entry IDs, if there are any, to an array of entry IDs
+	 *
+	 * @since 2.02.13
+	 * @param array $entry_ids
+	 */
+	private static function append_child_entry_ids( &$entry_ids ) {
+		$child_entry_ids = FrmDb::get_col( 'frm_items', array( 'parent_item_id' => $entry_ids ), 'id' );
+
+		if ( is_array( $child_entry_ids ) && ! empty( $child_entry_ids ) ) {
+			$entry_ids = array_merge( $entry_ids, $child_entry_ids );
+		}
 	}
 
 	/**
@@ -967,10 +1041,12 @@ class FrmProLookupFieldsController{
 	private static function flatten_and_unserialize_meta_values( $meta_values ) {
 		$final_values = array();
 		foreach ( $meta_values as $meta_val ) {
+
 			$meta_val = maybe_unserialize( $meta_val );
 			if ( is_array( $meta_val ) ) {
 				$final_values = array_merge( $final_values, $meta_val );
 			} else {
+				$meta_val = self::decode_html_entities( $meta_val );
 				$final_values[] = $meta_val;
 			}
 		}
@@ -1022,6 +1098,7 @@ class FrmProLookupFieldsController{
 	public static function get_front_end_lookup_field_html( $field, $field_name, $html_id ) {
 		$disabled = self::get_disabled_input_string( $field );
 		$saved_value_array = (array) $field['value'];
+		$saved_value_array = self::decode_html_entities( $saved_value_array );
 
 		if ( 'checkbox' == $field['data_type'] ) {
 			$field_name .= '[]';

@@ -279,5 +279,4 @@ class FrmProXMLController{
 
         wp_die();
     }
-
 }

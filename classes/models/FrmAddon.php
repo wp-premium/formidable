@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class FrmAddon {
-	public $store_url = 'https://formidablepro.com';
+	public $store_url = 'https://formidableforms.com';
 	public $download_id;
 	public $plugin_file;
 	public $plugin_folder;
@@ -80,21 +80,70 @@ class FrmAddon {
 	}
 
 	public function get_license() {
-		return trim( get_option( $this->option_name . 'key' ) );
+		$license = trim( get_option( $this->option_name . 'key' ) );
+		if ( empty( $license ) ) {
+			$license = $this->activate_defined_license();
+		}
+		return $license;
+	}
+
+	/**
+	 * Activate the license in wp-config.php
+	 * @since 2.04
+	 */
+	public function activate_defined_license() {
+		$license = $this->get_defined_license();
+		if ( ! empty( $license ) && ! $this->is_active() && $this->is_time_to_auto_activate() ) {
+			$response = $this->activate_license( $license );
+			$this->set_auto_activate_time();
+			if ( ! $response['success'] ) {
+				$license = '';
+			}
+		}
+		return $license;
+	}
+
+	/**
+	 * Check the wp-config.php for the license key
+	 * @since 2.04
+	 */
+	public function get_defined_license() {
+		$consant_name = 'FRM_' . strtoupper( $this->plugin_slug ) . '_LICENSE';
+		return defined( $consant_name ) ? constant( $consant_name ) : false;
 	}
 
 	public function set_license( $license ) {
 		update_option( $this->option_name . 'key', $license );
 	}
 
+	/**
+	 * If the license is in the config, limit the frequency of checks.
+	 * The license may be entered incorrectly, so we don't want to check on every page load.
+	 * @since 2.04
+	 */
+	private function is_time_to_auto_activate() {
+		$last_try = get_option( $this->option_name .'last_activate' );
+		return ( ! $last_try || $last_try < strtotime('-1 day') );
+	}
+
+	private function set_auto_activate_time() {
+		update_option( $this->option_name . 'last_activate', time() );
+	}
+
+	public function is_active() {
+		return get_option( $this->option_name . 'active' );
+	}
+
 	public function clear_license() {
 		delete_option( $this->option_name . 'active' );
 		delete_option( $this->option_name . 'key' );
 		delete_site_transient( $this->transient_key() );
+		delete_transient('frm_api_licence');
 	}
 
 	public function set_active( $is_active ) {
 		update_option( $this->option_name . 'active', $is_active );
+		delete_transient('frm_api_licence');
 	}
 
 	public function show_license_message( $file, $plugin ) {
@@ -191,23 +240,33 @@ class FrmAddon {
 	 	check_ajax_referer( 'frm_ajax', 'nonce' );
 
 		if ( ! isset( $_POST['license'] ) || empty( $_POST['license'] ) ) {
-			wp_die( __( 'Oops! You forgot to enter your license number.', 'formidable' ) );
+			wp_die( json_encode( array(
+				'message' => __( 'Oops! You forgot to enter your license number.', 'formidable' ),
+				'success' => false,
+			) ) );
 		}
 
 		$license = stripslashes( sanitize_text_field( $_POST['license'] ) );
 		$plugin_slug = sanitize_text_field( $_POST['plugin'] );
 		$this_plugin = self::get_addon( $plugin_slug );
-		$this_plugin->set_license( $license );
-		$this_plugin->license = $license;
+		$response = $this_plugin->activate_license( $license );
 
-		$response = $this_plugin->get_license_status();
+		echo json_encode( $response );
+		wp_die();
+	}
+
+	private function activate_license( $license ) {
+		$this->set_license( $license );
+		$this->license = $license;
+
+		$response = $this->get_license_status();
 		$response['message'] = '';
 		$response['success'] = false;
 
 		if ( $response['error'] ) {
 			$response['message'] = $response['status'];
 		} else {
-			$messages = $this_plugin->get_messages();
+			$messages = $this->get_messages();
 			if ( is_string( $response['status'] ) && isset( $messages[ $response['status'] ] ) ) {
 				$response['message'] = $messages[ $response['status'] ];
 			} else {
@@ -219,11 +278,10 @@ class FrmAddon {
 				$is_valid = 'valid';
 				$response['success'] = true;
 			}
-			$this_plugin->set_active( $is_valid );
+			$this->set_active( $is_valid );
 		}
 
-		echo json_encode( $response );
-		wp_die();
+		return $response;
 	}
 
 	private function get_license_status() {
@@ -317,10 +375,10 @@ class FrmAddon {
 
 		$message = __( 'Your License Key was invalid', 'formidable' );
 		if ( is_wp_error( $resp ) ) {
-			$message = sprintf( __( 'You had an error communicating with Formidable Pro\'s API. %1$sClick here%2$s for more information.', 'formidable' ), '<a href="http://formidablepro.com/knowledgebase/why-cant-i-activate-formidable-pro/" target="_blank">', '</a>');
+			$message = sprintf( __( 'You had an error communicating with the Formidable API. %1$sClick here%2$s for more information.', 'formidable' ), '<a href="https://formidableforms.com/knowledgebase/why-cant-i-activate-formidable-pro/" target="_blank">', '</a>');
 			$message .= ' ' . $resp->get_error_message();
 		} else if ( $body == 'error' || is_wp_error( $body ) ) {
-			$message = __( 'You had an HTTP error connecting to Formidable Pro\'s API', 'formidable' );
+			$message = __( 'You had an HTTP error connecting to the Formidable API', 'formidable' );
 		} else {
 			$json_res = json_decode( $body, true );
 			if ( null !== $json_res ) {

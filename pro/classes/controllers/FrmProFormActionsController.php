@@ -128,34 +128,52 @@ class FrmProFormActionsController{
 		FrmAppHelper::permission_check('frm_edit_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
-        global $wpdb;
         $custom_data = array( 'meta_name' => $_POST['meta_name'], 'field_id' => '');
-        $action_key = (int) $_POST['action_key'];
+        $action_key = absint( $_POST['action_key'] );
         $action_control = FrmFormActionsController::get_form_actions( 'wppost' );
         $action_control->_set($action_key);
 
         $values = array();
 
         if ( isset($_POST['form_id']) ) {
-			$values['fields'] = FrmField::getAll( array( 'fi.form_id' => (int) $_POST['form_id'], 'fi.type not' => FrmField::no_save_fields() ), 'field_order');
+			$values['fields'] = FrmField::getAll( array( 'fi.form_id' => absint( $_POST['form_id'] ), 'fi.type not' => FrmField::no_save_fields() ), 'field_order');
         }
         $echo = false;
 
-        $limit = (int) apply_filters( 'postmeta_form_limit', 40 );
-		$cf_keys = $wpdb->get_col( 'SELECT meta_key FROM ' . $wpdb->postmeta . ' GROUP BY meta_key ORDER BY meta_key LIMIT ' . (int) $limit );
-    	if ( ! is_array($cf_keys) ) {
-            $cf_keys = array();
-        }
-        if ( ! in_array( '_thumbnail_id', $cf_keys) ) {
-            $cf_keys[] = '_thumbnail_id';
-        }
-        if ( ! empty($cf_keys) ) {
-    		natcasesort($cf_keys);
-        }
+		$cf_keys = self::get_post_meta_keys();
 
         include(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-form-actions/_custom_field_row.php');
         wp_die();
     }
+
+	private static function get_post_meta_keys() {
+		global $wpdb;
+
+		$post_type = FrmAppHelper::get_param( 'post_type', 'post', 'post', 'sanitize_text_field' );
+		$limit = (int) apply_filters( 'postmeta_form_limit', 50 );
+		$sql = "SELECT DISTINCT meta_key
+			FROM $wpdb->postmeta pm
+			LEFT JOIN $wpdb->posts p
+			ON (p.ID = pm.post_ID)
+			WHERE p.post_type = %s
+			ORDER BY meta_key
+			LIMIT %d";
+		$cf_keys = $wpdb->get_col( $wpdb->prepare( $sql, $post_type, $limit ) );
+
+		if ( ! is_array( $cf_keys ) ) {
+			$cf_keys = array();
+		}
+
+		if ( 'post' == $post_type && ! in_array( '_thumbnail_id', $cf_keys ) ) {
+			$cf_keys[] = '_thumbnail_id';
+		}
+
+		if ( ! empty( $cf_keys ) ) {
+			natcasesort( $cf_keys );
+		}
+
+		return $cf_keys;
+	}
 
     public static function _posttax_row(){
 		FrmAppHelper::permission_check('frm_edit_forms');

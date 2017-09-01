@@ -51,6 +51,7 @@ class FrmFieldsHelper {
         } else if ( $type == 'captcha' ) {
             $frm_settings = FrmAppHelper::get_settings();
             $values['invalid'] = $frm_settings->re_msg;
+			$values['field_options']['label'] = 'none';
         } else if ( 'url' == $type ) {
             $values['name'] = __( 'Website', 'formidable' );
         }
@@ -183,11 +184,11 @@ class FrmFieldsHelper {
 		return $msg;
 	}
 
-    public static function get_form_fields( $form_id, $error = false ) {
-        $fields = FrmField::get_all_for_form($form_id);
-        $fields = apply_filters('frm_get_paged_fields', $fields, $form_id, $error);
-        return $fields;
-    }
+	public static function get_form_fields( $form_id, $error = array() ) {
+		$fields = FrmField::get_all_for_form( $form_id );
+		$fields = apply_filters( 'frm_get_paged_fields', $fields, $form_id, $error );
+		return $fields;
+	}
 
 	public static function get_default_html( $type = 'text' ) {
 		if ( apply_filters( 'frm_normal_field_type_html', true, $type ) ) {
@@ -491,11 +492,16 @@ DEFAULT_HTML;
         wp_register_script( 'recaptcha-api', $api_js_url, '', true );
         wp_enqueue_script( 'recaptcha-api' );
 
-		// for reverse compatability
+		// for reverse compatibility
 		$field['captcha_size'] = ( $field['captcha_size'] == 'default' ) ? 'normal' : $field['captcha_size'];
+		$field['captcha_size'] = ( $frm_settings->re_type == 'invisible' ) ? 'invisible' : $field['captcha_size'];
 
 ?>
-<div id="field_<?php echo esc_attr( $field['field_key'] ) ?>" class="<?php echo esc_attr( $class_prefix ) ?>g-recaptcha" data-sitekey="<?php echo esc_attr( $frm_settings->pubkey ) ?>" data-size="<?php echo esc_attr( $field['captcha_size'] ) ?>" data-theme="<?php echo esc_attr( $field['captcha_theme'] ) ?>"></div>
+<div id="field_<?php echo esc_attr( $field['field_key'] ) ?>" class="<?php echo esc_attr( $class_prefix ) ?>g-recaptcha" data-sitekey="<?php echo esc_attr( $frm_settings->pubkey ) ?>" data-size="<?php echo esc_attr( $field['captcha_size'] ) ?>" data-theme="<?php echo esc_attr( $field['captcha_theme'] ) ?>" <?php
+	if ( $field['captcha_size'] == 'invisible' && ! $allow_mutiple ) {
+		echo 'data-callback="frmAfterRecaptcha"';
+	}
+?>></div>
 <?php
     }
 
@@ -655,6 +661,10 @@ DEFAULT_HTML;
         );
 
         foreach ( $shortcodes[0] as $short_key => $tag ) {
+			if ( empty( $tag ) ) {
+				continue;
+			}
+
             $atts = FrmShortcodeHelper::get_shortcode_attribute_array( $shortcodes[3][ $short_key ] );
 
             if ( ! empty( $shortcodes[3][ $short_key ] ) ) {
@@ -677,7 +687,7 @@ DEFAULT_HTML;
                 case 'user_agent':
                 case 'user-agent':
                     $entry->description = maybe_unserialize($entry->description);
-					$replace_with = FrmEntryFormat::get_browser( $entry->description['browser'] );
+					$replace_with = FrmEntriesHelper::get_browser( $entry->description['browser'] );
                 break;
 
                 case 'created_at':
@@ -836,7 +846,11 @@ DEFAULT_HTML;
             }
 			unset( $autop );
 		} else if ( is_array( $replace_with ) ) {
-			$replace_with = implode( $sep, $replace_with );
+			if ( isset( $atts['show'] ) && $atts['show'] && isset( $replace_with[ $atts['show'] ] ) ) {
+				$replace_with = $replace_with[ $atts['show'] ];
+			} else {
+				$replace_with = implode( $sep, $replace_with );
+			}
 		}
 
 		return $replace_with;
@@ -875,17 +889,17 @@ DEFAULT_HTML;
         }
     }
 
-    /**
-    * Check if current field option is an "other" option
-    *
-    * @since 2.0.6
-    *
-    * @param string $opt_key
-    * @return boolean Returns true if current field option is an "Other" option
-    */
-    public static function is_other_opt( $opt_key ) {
-        return $opt_key && strpos( $opt_key, 'other' ) !== false;
-    }
+	/**
+	 * Check if current field option is an "other" option
+	 *
+	 * @since 2.0.6
+	 *
+	 * @param string $opt_key
+	 * @return boolean Returns true if current field option is an "Other" option
+	 */
+	public static function is_other_opt( $opt_key ) {
+		return $opt_key && strpos( $opt_key, 'other_' ) === 0;
+	}
 
     /**
     * Get value that belongs in "Other" text box
@@ -1028,7 +1042,8 @@ DEFAULT_HTML;
 	 * @since 2.0.6
 	 */
 	private static function set_other_value( $args, &$other_args ) {
-		$parent = $pointer = '';
+		$parent = '';
+		$pointer = '';
 
 		// Check for parent ID and pointer
 		$temp_array = explode( '[', $args['field_name'] );
@@ -1302,6 +1317,35 @@ DEFAULT_HTML;
 
 		$prepop = apply_filters( 'frm_bulk_field_choices', $prepop );
     }
+
+	/**
+	 * Display a field value selector
+	 *
+	 * @since 2.03.05
+	 *
+	 * @param int $selector_field_id
+	 * @param array $selector_args
+	 */
+    public static function display_field_value_selector( $selector_field_id, $selector_args ) {
+	    $field_value_selector = FrmFieldFactory::create_field_value_selector( $selector_field_id, $selector_args );
+	    $field_value_selector->display();
+    }
+
+	/**
+	 * Convert a field object to a flat array
+	 *
+	 * @since 2.03.05
+	 *
+	 * @param object $field
+	 *
+	 * @return array
+	 */
+	public static function convert_field_object_to_flat_array( $field ) {
+		$field_options = $field->field_options;
+		$field_array = get_object_vars( $field );
+		unset( $field_array['field_options'] );
+		return $field_array + $field_options;
+	}
 
 	public static function field_selection() {
 		_deprecated_function( __FUNCTION__, '2.0.9', 'FrmField::field_selection' );

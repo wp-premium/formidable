@@ -26,9 +26,10 @@
         <option value="not LIKE" <?php selected($where_is, 'not LIKE') ?>><?php _e( 'NOT like', 'formidable' ) ?></option>
 		<option value="LIKE%" <?php selected($where_is, 'LIKE%') ?>><?php _e( 'starts with', 'formidable' ) ?></option>
 		<option value="%LIKE" <?php selected($where_is, '%LIKE') ?>><?php _e( 'ends with', 'formidable' ) ?></option>
-		<option value="group_by" <?php selected($where_is, 'group_by') ?>><?php _e( 'unique', 'formidable' ) ?></option>
+		<option value="group_by" <?php selected($where_is, 'group_by') ?>><?php _e( 'unique (get oldest entries)', 'formidable' ) ?></option>
+		<option value="group_by_newest" <?php selected($where_is, 'group_by_newest') ?>><?php _e( 'unique (get newest entries)', 'formidable' ) ?></option>
     </select>
-    <span id="where_field_options_<?php echo esc_attr( $where_key ); ?>" class="frm_where_val frm_inline<?php echo esc_attr( $where_is == 'group_by' ? ' frm_hidden' : '' ); ?>">
+    <span id="where_field_options_<?php echo esc_attr( $where_key ); ?>" class="frm_where_val frm_inline<?php echo esc_attr( strpos( $where_is, 'group_by' ) === 0 ? ' frm_hidden' : '' ); ?>">
         <?php FrmProDisplaysController::add_where_options($where_field, $where_key, $where_val); ?>
     </span>
     <a href="javascript:void(0)" class="frm_remove_tag frm_icon_font" data-removeid="frm_where_field_<?php echo esc_attr( $where_key ); ?>" data-showlast="#frm_where_options .frm_add_where_row"></a>

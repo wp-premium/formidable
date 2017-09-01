@@ -9,12 +9,13 @@ class FrmProCSVExportHelper{
 
 	private static function set_class_paramters() {
 		_deprecated_function( __METHOD__, '2.0.19', 'FrmCSVExportHelper::'. __FUNCTION__ );
-		return FrmCSVExportHelper::set_class_paramters();
+		return;
 	}
 
 	public static function get_csv_format() {
 		_deprecated_function( __METHOD__, '2.0.19', 'FrmCSVExportHelper::'. __FUNCTION__ );
-		return FrmCSVExportHelper::get_csv_format();
+		FrmCSVExportHelper::get_csv_format();
+		return;
 	}
 
 	public static function encode_value( $line ) {

@@ -834,7 +834,7 @@ class FrmProDisplaysController {
 			'id' => '', 'entry_id' => '', 'filter' => false,
 			'user_id' => false, 'limit' => '', 'page_size' => '',
 			'order_by' => '', 'order' => '', 'get' => '', 'get_value' => '',
-			'drafts' => false,
+			'drafts' => 'default',
 		);
 
 		$sc_atts = shortcode_atts( $defaults, $atts );
@@ -902,6 +902,8 @@ class FrmProDisplaysController {
 			return $content;
 		}
 
+		$view = apply_filters( 'frm_filter_view', $view );
+
 		self::load_view_hooks( $view );
 		self::add_to_forms_loaded_vars();
 
@@ -928,7 +930,7 @@ class FrmProDisplaysController {
 	/**
 	 * Make sure the View object has the necessary properties set
 	 *
-	 * TODO: Maybe do not change a value by reference and return a value
+	 * TODO: Do not change a value by reference and return a value
 	 *
 	 * @since 2.0.23
 	 *
@@ -1342,7 +1344,7 @@ class FrmProDisplaysController {
 			foreach ( $view->frm_where as $i => $where_field ) {
 
 				// If no value is saved for where field or current filter is a unique filter, move on
-				if ( $where_field === '' || 'group_by' === $view->frm_where_is[ $i ] ) {
+				if ( $where_field === '' || strpos( $view->frm_where_is[ $i ], 'group_by' ) === 0 ) {
 					continue;
 				}
 
@@ -1735,25 +1737,7 @@ class FrmProDisplaysController {
 			return;
 		}
 
-		$original_value = $where_val;
-
-		if ( $where_val == 'NOW' ) {
-			$where_val = current_time( 'mysql', 1 );
-		}
-
-		if ( strpos( $view->frm_where_is[ $i ], 'LIKE' ) === false ) {
-			$where_val = date( 'Y-m-d H:i:s', strtotime( $where_val ) );
-
-			// If using less than or equal to, set the time to the end of the day
-			if ( $view->frm_where_is[ $i ] == '<=' ) {
-				$where_val = str_replace( '00:00:00', '23:59:59', $where_val );
-			}
-
-			// Convert date to GMT since that is the format in the DB
-			if ( strpos( $original_value, 'hour' ) === false ) {
-				$where_val = get_gmt_from_date( $where_val );
-			}
-		}
+		FrmProContent::get_gmt_for_filter( $view->frm_where_is[ $i ], $where_val );
 	}
 
 	/**
@@ -1765,14 +1749,14 @@ class FrmProDisplaysController {
 	 * @param string|array $where_val
 	 */
 	private static function prepare_where_val_for_id_and_key_columns( $view, $i, &$where_val ) {
-		if ( in_array( $view->frm_where[ $i ], array( 'id', 'item_key', 'post_id' ) ) && ! is_array( $where_val ) && strpos( $where_val, ',' ) ) {
-			$where_val = explode( ',', $where_val );
-			$where_val = array_filter( $where_val );
-		}
+		if ( in_array( $view->frm_where[ $i ], array( 'id', 'item_key', 'post_id' ) ) && ! is_array( $where_val ) ) {
 
-		// Make sure entry ID values are always an array
-		if ( $view->frm_where[ $i ] == 'id' && ! is_array( $where_val ) ) {
-			$where_val = (array) $where_val;
+			if ( strpos( $where_val, ',' ) ) {
+				$where_val = explode( ',', $where_val );
+				$where_val = array_filter( $where_val );
+			} else if ( in_array( $view->frm_where_is[ $i ], array( '=', 'LIKE' ) ) ) {
+				$where_val = (array) $where_val;
+			}
 		}
 	}
 
@@ -1786,9 +1770,9 @@ class FrmProDisplaysController {
 	private static function prepare_where_is( $i, &$view ) {
 		$where_is = $view->frm_where_is[ $i ];
 
-		if ( is_array( $view->frm_where_val[ $i ] ) && !empty( $view->frm_where_val[ $i ] ) ) {
+		if ( is_array( $view->frm_where_val[ $i ] ) && ! empty( $view->frm_where_val[ $i ] ) ) {
 			if ( strpos( $where_is, '!' ) === false && strpos( $where_is, 'not' ) === false ) {
-				$where_is = ' in ';
+				$where_is = 'in';
 			} else {
 				$where_is = 'not in';
 			}
@@ -1891,6 +1875,10 @@ class FrmProDisplaysController {
 	private static function add_to_frm_items_query( $view, $i, &$where ) {
 		$array_key = 'it.' . sanitize_title( $view->frm_where[ $i ] ) . FrmDb::append_where_is( $view->frm_where_is[ $i ] );
 
+		if ( $array_key === 'it.id ' ) {
+			$array_key = rtrim( $array_key );
+		}
+
 		if ( isset( $where[ $array_key ] ) ) {
 			if ( $array_key == 'it.id' ) {
 				$view->frm_where_val[ $i ] = array_intersect( $where['it.id'], $view->frm_where_val[ $i ] );
@@ -1914,18 +1902,20 @@ class FrmProDisplaysController {
 			return;
 		}
 
-		if ( isset( $view->frm_where_is ) && ! empty( $view->frm_where_is ) && in_array( 'group_by', $view->frm_where_is ) ) {
+		if ( self::has_unique_filter( $view ) ) {
 			if ( ! isset( $where['it.id'] ) ) {
 				$where['it.id'] = self::get_all_entry_ids_for_view( $view );
 			}
 
 			foreach ( $view->frm_where as $i => $filter_field ) {
-				if ( $view->frm_where_is[ $i ] != 'group_by' ) {
+				if ( strpos( $view->frm_where_is[ $i ],  'group_by' ) !== 0 ) {
 					continue;
 				}
 
+				self::set_unique_filter_order( $view->frm_where_is[ $i ], $where['it.id'] );
+
 				if ( is_numeric( $view->frm_where[ $i ] ) ) {
-					self::check_unique_field_filter( $view, $i, $where );
+					$where['it.id'] = self::check_unique_field_filter( $view, $i, $where['it.id'] );
 				} else {
 					if ( in_array( $view->frm_where[ $i ], array( 'id', 'item_key' ) ) ) {
 						continue;
@@ -1938,19 +1928,55 @@ class FrmProDisplaysController {
 	}
 
 	/**
+	 * Check if a View has any unique filters on it
+	 *
+	 * @since 2.03.05
+	 *
+	 * @param object $view
+	 *
+	 * @return bool
+	 */
+	private static function has_unique_filter( $view ) {
+		$has_unique_filter = false;
+		if ( isset( $view->frm_where_is ) && ! empty( $view->frm_where_is ) ) {
+			if ( in_array( 'group_by', $view->frm_where_is ) || in_array( 'group_by_newest', $view->frm_where_is ) ) {
+				$has_unique_filter = true;
+			}
+		}
+
+		return $has_unique_filter;
+	}
+
+	/**
+	 * Set the order for the unique filter
+	 *
+	 * @since 2.03.05
+	 *
+	 * @param string $where_is
+	 * @param array $entry_ids
+	 */
+	private static function set_unique_filter_order( $where_is, &$entry_ids ) {
+		if ( $where_is === 'group_by_newest' ) {
+			rsort( $entry_ids );
+		}
+	}
+
+	/**
 	 * Check a unique field filter
 	 *
 	 * @since 2.0.23
 	 * @param object $view
 	 * @param int $i
-	 * @param array $where
+	 * @param array $entry_ids
+	 *
+	 * @return array
 	 */
-	private static function check_unique_field_filter( $view, $i, &$where ){
+	private static function check_unique_field_filter( $view, $i, $entry_ids ){
 		$unique_field = FrmField::getOne( $view->frm_where[ $i ] );
 
 		if ( FrmField::is_repeating_field( $unique_field ) || $unique_field->type == 'form' ) {
 			// TODO: Add embedded field functionality
-			return;
+			return $entry_ids;
 		}
 
 		if ( FrmField::is_option_value_in_object( $unique_field, 'post_field' ) ) {
@@ -1959,7 +1985,7 @@ class FrmProDisplaysController {
 			$results = self::get_values_and_item_ids_for_unique_fields( $unique_field->id );
 		}
 
-		$where['it.id'] = self::get_the_entry_ids_for_a_unique_filter( $results, $where['it.id'] );
+		return self::get_the_entry_ids_for_a_unique_filter( $results, $entry_ids );
 	}
 
 	/**
@@ -2169,8 +2195,6 @@ class FrmProDisplaysController {
 					$view->frm_order[ $i ] = 'DESC';
 				}
 			}
-
-
 		}
 	}
 
@@ -2418,12 +2442,6 @@ class FrmProDisplaysController {
 			$after_content = $view->frm_after_content;
 
 			self::replace_entry_count_shortcode( $args, $after_content );
-
-			// TODO: Remove this hook after a few versions have passed
-			$after_content = apply_filters( 'frm_after_content', $after_content, $view, 'all', $args );
-			if ( has_filter( 'frm_after_content' ) ) {
-				_deprecated_function( 'The frm_after_content filter', '2.0.23', 'the frm_after_display_content filter' );
-			}
 		}
 
 		if ( 'calendar' == $view->frm_show_count ) {

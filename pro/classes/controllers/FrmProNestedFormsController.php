@@ -338,11 +338,17 @@ class FrmProNestedFormsController {
 	 * @param string $id
 	 */
 	private static function insert_basic_hidden_field( $name, $value, $id ) {
+		if ( strpos( $name, '[form]' ) !== false ) {
+			$class = 'frm_dnc';
+		} else {
+			$class = '';
+		}
+
 		if ( $id ) {
 			?><input type="hidden" name="<?php echo esc_attr( $name ) ?>" id="<?php echo esc_attr( $id ) ?>" value="<?php echo esc_attr( $value ) ?>" />
 			<?php
 		} else {
-			?><input type="hidden" name="<?php echo esc_attr( $name ) ?>" value="<?php echo esc_attr( $value ) ?>"/>
+			?><input type="hidden" name="<?php echo esc_attr( $name ) ?>" value="<?php echo esc_attr( $value )?>" class="<?php echo esc_attr( $class )?>" />
 			<?php
 		}
 	}

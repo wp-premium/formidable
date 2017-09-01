@@ -288,8 +288,6 @@ class FrmFormsController {
             $wp->register_globals();
         }
 
-		self::register_pro_scripts();
-
 		header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
 
 		$key = FrmAppHelper::simple_get( 'form', 'sanitize_title' );
@@ -307,11 +305,9 @@ class FrmFormsController {
     }
 
 	public static function register_pro_scripts() {
+		_deprecated_function( __FUNCTION__, '2.03', 'FrmProEntriesController::register_scripts' );
 		if ( FrmAppHelper::pro_is_installed() ) {
-			wp_register_script( 'jquery-frm-rating', FrmAppHelper::plugin_url() . '/pro/js/jquery.rating.min.js', array( 'jquery' ), '4.11', true );
-			wp_register_script( 'jquery-maskedinput', FrmAppHelper::plugin_url() . '/pro/js/jquery.maskedinput.min.js', array( 'jquery' ), '1.4', true );
-			wp_register_script( 'jquery-chosen', FrmAppHelper::plugin_url() . '/pro/js/chosen.jquery.min.js', array( 'jquery' ), '1.5.1', true );
-			wp_register_script( 'dropzone', FrmAppHelper::plugin_url() . '/pro/js/dropzone.js', array( 'jquery' ), '4.3.0', true );
+			FrmProEntriesController::register_scripts();
 		}
 	}
 
@@ -571,29 +567,16 @@ class FrmFormsController {
 		);
 	}
 
-	public static function hidden_columns( $result ) {
-        $return = false;
-        foreach ( (array) $result as $r ) {
-            if ( ! empty( $r ) ) {
-                $return = true;
-                break;
-            }
-        }
+	public static function hidden_columns( $hidden_columns ) {
+		$type = isset( $_REQUEST['form_type'] ) ? $_REQUEST['form_type'] : '';
 
-        if ( $return ) {
-            return $result;
+		if ( $type === 'template' ) {
+			$hidden_columns[] = 'id';
+			$hidden_columns[] = 'form_key';
 		}
 
-        $type = isset( $_REQUEST['form_type'] ) ? $_REQUEST['form_type'] : '';
-
-        $result[] = 'created_at';
-        if ( $type == 'template' ) {
-            $result[] = 'id';
-            $result[] = 'form_key';
-        }
-
-        return $result;
-    }
+		return $hidden_columns;
+	}
 
 	public static function save_per_page( $save, $option, $value ) {
         if ( $option == 'formidable_page_formidable_per_page' ) {
@@ -662,6 +645,8 @@ class FrmFormsController {
             wp_die(__( 'That template cannot be edited', 'formidable' ));
         }
 
+		self::clean_submit_html( $values );
+
         $action_controls = FrmFormActionsController::get_form_actions();
 
         $sections = apply_filters('frm_add_form_settings_section', array(), $values);
@@ -671,6 +656,19 @@ class FrmFormsController {
 
 		require( FrmAppHelper::plugin_path() . '/classes/views/frm-forms/settings.php' );
     }
+
+	/**
+	 * Replace old Submit Button href with new href to avoid errors in Chrome
+	 *
+	 * @since 2.03.08
+	 *
+	 * @param array|boolean $values
+	 */
+	private static function clean_submit_html( &$values ) {
+		if ( is_array( $values ) && isset( $values['submit_html'] ) ) {
+			$values['submit_html'] = str_replace( 'javascript:void(0)', '#', $values['submit_html'] );
+		}
+	}
 
     public static function mb_tags_box( $form_id, $class = '' ) {
         $fields = FrmField::get_all_for_form($form_id, '', 'include');
@@ -740,6 +738,7 @@ class FrmFormsController {
 			$entry_shortcodes['editlink location="front" label="Edit" page_id=x'] = __( 'Edit Entry Link', 'formidable' );
 			$entry_shortcodes['evenodd'] = __( 'Even/Odd', 'formidable' );
 			$entry_shortcodes['entry_count'] = __( 'Entry Count', 'formidable' );
+			$entry_shortcodes['event_date format="Y-m-d"'] = __( 'Calendar Date', 'formidable' );
 		}
 
 		/**
@@ -762,7 +761,7 @@ class FrmFormsController {
     public static function get_email_html() {
 		FrmAppHelper::permission_check('frm_view_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
-		echo FrmEntryFormat::show_entry( array(
+		echo FrmEntriesController::show_entry_shortcode( array(
 			'form_id'       => FrmAppHelper::get_post_param( 'form_id', '', 'absint' ),
 	        'default_email' => true,
 			'plain_text'    => FrmAppHelper::get_post_param( 'plain_text', '', 'absint' ),
@@ -1148,14 +1147,15 @@ class FrmFormsController {
 
         $user_ID = get_current_user_id();
 		$params = FrmForm::get_params( $form );
-        $message = $errors = '';
+		$message = '';
+		$errors = array();
 
         if ( $params['posted_form_id'] == $form->id && $_POST ) {
             $errors = isset( $frm_vars['created_entries'][ $form->id ] ) ? $frm_vars['created_entries'][ $form->id ]['errors'] : array();
         }
 
 		$include_form_tag = apply_filters( 'frm_include_form_tag', true, $form );
-        $fields = FrmFieldsHelper::get_form_fields( $form->id, ( isset( $errors ) && ! empty( $errors ) ) );
+		$fields = FrmFieldsHelper::get_form_fields( $form->id, $errors );
 
         if ( $params['action'] != 'create' || $params['posted_form_id'] != $form->id || ! $_POST ) {
             do_action('frm_display_form_action', $params, $fields, $form, $title, $description);
@@ -1179,7 +1179,7 @@ class FrmFormsController {
 
         $values = FrmEntriesHelper::setup_new_vars($fields, $form, true);
         $created = self::just_created_entry( $form->id );
-        $conf_method = apply_filters('frm_success_filter', 'message', $form, $form->options, 'create');
+        $conf_method = apply_filters('frm_success_filter', 'message', $form, 'create');
 
         if ( $created && is_numeric($created) && $conf_method != 'message' ) {
             do_action('frm_success_action', $conf_method, $form, $form->options, $created);
