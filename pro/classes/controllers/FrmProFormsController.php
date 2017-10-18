@@ -88,8 +88,17 @@ class FrmProFormsController{
 			'get param=whatever' => array( 'label' => __( 'GET/POST', 'formidable' ), 'title' => __( 'A variable from the URL or value posted from previous page.', 'formidable' ) .' '. __( 'Replace \'whatever\' with the parameter name. In url.com?product=form, the variable is \'product\'. You would use [get param=product] in your field.', 'formidable' )),
 			'server param=whatever' => array( 'label' => __( 'SERVER', 'formidable' ), 'title' => __( 'A variable from the PHP SERVER array.', 'formidable' ) .' '. __( 'Replace \'whatever\' with the parameter name. To get the url of the current page, use [server param="REQUEST_URI"] in your field.', 'formidable' )),
 		);
+
+		self::maybe_remove_ip( $tags );
+
         include(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-forms/instructions.php');
     }
+
+	private static function maybe_remove_ip( &$tags ) {
+		if ( ! FrmAppHelper::ips_saved() ) {
+			unset( $tags['ip'] );
+		}
+	}
 
     public static function add_field_link($field_type) {
         return '<a href="#" class="frm_add_field">'. $field_type .'</a>';
@@ -406,19 +415,29 @@ class FrmProFormsController{
         </select>
         <div class="frm_box_line"></div>
 <?php
-        $opts = array(
-            'filter' => array( 'val' => 1, 'label' => __( 'Filter shortcodes within the view content', 'formidable' )),
-            'limit' => array( 'val' => '', 'label' => __( 'Limit', 'formidable' ), 'type' => 'text'),
-            'page_size' => array( 'val' => '', 'label' => __( 'Page size', 'formidable' ), 'type' => 'text'),
+		$opts = array(
+			'filter' => array( 'val' => 'limited', 'label' => __( 'Filter shortcodes within the view content', 'formidable' ) ),
+			'limit' => array( 'val' => '', 'label' => __( 'Limit', 'formidable' ), 'type' => 'text' ),
+			'page_size' => array( 'val' => '', 'label' => __( 'Page size', 'formidable' ), 'type' => 'text' ),
 			'order'  => array(
-                'val'   => '', 'label' => __( 'Entry order', 'formidable' ), 'type' => 'select',
-                'opts'  => array(
-                    ''      => __( 'Default', 'formidable' ),
-                    'ASC'   => __( 'Ascending', 'formidable' ),
-                    'DESC'  => __( 'Descending', 'formidable' ),
-                ),
-            ),
-        );
+				'val'   => '', 'label' => __( 'Entry order', 'formidable' ), 'type' => 'select',
+				'opts'  => array(
+					''      => __( 'Default', 'formidable' ),
+					'ASC'   => __( 'Ascending', 'formidable' ),
+					'DESC'  => __( 'Descending', 'formidable' ),
+				),
+			),
+			'drafts' => array(
+				'val'   => '',
+				'label' => __( 'Include draft entries', 'formidable' ),
+				'type'  => 'select',
+				'opts'  => array(
+					''     => __( 'No draft entries', 'formidable' ),
+					'1'    => __( 'Only draft entries', 'formidable' ),
+					'both' => __( 'All entries', 'formidable' ),
+				),
+			),
+		);
     }
 
     private static function popup_opts_frm_search(array &$opts) {
@@ -663,6 +682,7 @@ class FrmProFormsController{
     }
 
 	public static function add_form_row( ) {
+		_deprecated_function( __FUNCTION__, '2.05', 'FrmProNestedFormsController::ajax_add_repeat_row' );
 		FrmProNestedFormsController::ajax_add_repeat_row();
 	}
 }

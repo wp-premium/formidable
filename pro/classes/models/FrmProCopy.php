@@ -155,26 +155,13 @@ class FrmProCopy{
 	private static function get_templates_to_copy() {
 		global $wpdb, $blog_id;
 
-		$query = $wpdb->prepare(
-			'SELECT
-				c.*, p.post_name
-			FROM
-				' . self::table_name() . ' c
-			LEFT JOIN
-				' . $wpdb->prefix . 'frm_forms f
-			ON
-				(c.copy_key = f.form_key)
-			LEFT JOIN
-				' . $wpdb->posts . ' p
-			ON
-				(c.copy_key = p.post_name)
-			WHERE
-				blog_id != %d
-				AND ((type = %s AND f.form_key is NULL) OR (type = %s AND p.post_name is NULL))
-			ORDER BY
-				type DESC',
-			$blog_id, 'form', 'display'
-		);
+		$query = 'SELECT c.*, p.post_name FROM ' . self::table_name() . ' c ' .
+				'LEFT JOIN ' . $wpdb->prefix . 'frm_forms f ON (c.copy_key = f.form_key) ' .
+				'LEFT JOIN ' . $wpdb->posts . ' p ON (c.copy_key = p.post_name) ' .
+				'WHERE blog_id != %d ' .
+				'AND ((type = %s AND f.form_key is NULL) OR (type = %s AND p.post_name is NULL)) ' .
+				'ORDER BY type DESC';
+		$query = $wpdb->prepare( $query, $blog_id, 'form', 'display' );
 
 		return FrmAppHelper::check_cache( 'all_templates_' . $blog_id, 'frm_copy', $query, 'get_results' );
 	}

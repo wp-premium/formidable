@@ -26,11 +26,20 @@ class FrmProComboFieldsController {
 	}
 
 	public static function include_placeholder( $default_value, $sub_field, $field = array() ) {
-		if ( ! empty( $field ) && ! FrmField::is_option_true( $field, 'clear_on_focus' ) ) {
-			return;
+		if ( ! empty( $field ) ) {
+			$use_placeholder = FrmField::is_option_true( $field, 'clear_on_focus' );
+			if ( ( ! $use_placeholder || empty( $default_value[ $sub_field ] ) ) && $sub_field == 'line1' ) {
+				$default_value[ $sub_field ] = FrmFieldsController::get_default_value_from_name( $field );
+				$use_placeholder = ( $default_value[ $sub_field ] != '' );
+			}
+
+			if ( ! $use_placeholder ) {
+				return;
+			}
 		}
 
-		if ( isset( $default_value[ $sub_field ] ) && ! empty( $sub_field ) ) {
+		$has_placeholder = ( isset( $default_value[ $sub_field ] ) && $default_value[ $sub_field ] != '' );
+		if ( $has_placeholder ) {
 			echo ' placeholder="' . esc_attr( $default_value[ $sub_field ] ) . '" ';
 		}
 	}

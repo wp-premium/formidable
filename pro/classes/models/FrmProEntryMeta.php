@@ -780,6 +780,11 @@ class FrmProEntryMeta{
 
 		$operator = self::get_operator_for_query( $args );
 
+		if ( in_array( $field->type, array( 'number', 'scale' ) ) ) {
+			// TODO: DRY throughout plugin
+			$operator = ' +0' . $operator;
+		}
+
 		if ( ! FrmField::is_option_true( $field, 'post_field' ) ) {
 			// If field is not a post field
 			$get_field = 'em.item_id';

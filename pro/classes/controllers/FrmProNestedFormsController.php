@@ -6,13 +6,15 @@ class FrmProNestedFormsController {
 	 * Display an embedded form on the current page
 	 *
 	 * @since 2.02.06
+	 *
 	 * @param array $field
 	 * @param string $field_name
 	 * @param array $errors
 	 */
 	public static function display_front_end_embedded_form( $field, $field_name, $errors ) {
 		self::display_front_end_nested_form( $field_name, $field, array(
-			'errors' => $errors, 'repeat' => 0,
+			'errors' => $errors,
+			'repeat' => 0,
 		) );
 	}
 
@@ -20,13 +22,15 @@ class FrmProNestedFormsController {
 	 * Display a repeating section on the current page
 	 *
 	 * @since 2.02.06
+	 *
 	 * @param array $field
 	 * @param string $field_name
 	 * @param array $errors
 	 */
 	public static function display_front_end_repeating_section( $field, $field_name, $errors ) {
 		self::display_front_end_nested_form( $field_name, $field, array(
-			'errors' => $errors, 'repeat' => 5,
+			'errors' => $errors,
+			'repeat' => 5,
 		) );
 	}
 
@@ -63,29 +67,31 @@ class FrmProNestedFormsController {
 		}
 
 		$repeat_atts = array(
-			'form' => $subform,
-			'fields' => $subfields,
-			'errors' => $args['errors'],
-			'parent_field' => $field,
-			'repeat' => $args['repeat'],
-			'field_name' => $field_name,
+			'form'                    => $subform,
+			'fields'                  => $subfields,
+			'errors'                  => $args['errors'],
+			'parent_field'            => $field,
+			'repeat'                  => $args['repeat'],
+			'field_name'              => $field_name,
+			'is_repeat_limit_reached' => self::is_repeat_limit_reached_for_field( $field ),
 		);
 
 		if ( empty( $field['value'] ) ) {
 			// Row count must be zero if field value is empty
 			$start_rows = apply_filters( 'frm_repeat_start_rows', 1, $field );
 
-			for ( $i = 0, $j = $start_rows; $i < $j; $i++ ) {
+			for ( $i = 0, $j = $start_rows; $i < $j; $i ++ ) {
 				// add an empty sub entry
 				$repeat_atts['row_count'] = $repeat_atts['i'] = $i;
 				self::display_single_iteration_of_nested_form( $field_name, $repeat_atts );
 			}
+
 			return;
 		}
 
 		$row_count = 0;
-		foreach ( (array)$field['value'] as $k => $checked ) {
-			$repeat_atts['i'] = $k;
+		foreach ( (array) $field['value'] as $k => $checked ) {
+			$repeat_atts['i']     = $k;
 			$repeat_atts['value'] = '';
 
 			if ( ! isset( $field['value']['form'] ) ) {
@@ -95,9 +101,9 @@ class FrmProNestedFormsController {
 					continue;
 				}
 
-				$repeat_atts['i'] = 'i' . $checked;
+				$repeat_atts['i']        = 'i' . $checked;
 				$repeat_atts['entry_id'] = $checked;
-				$repeat_atts['value'] = $checked;
+				$repeat_atts['value']    = $checked;
 			} else if ( $k === 'form' || $k === 'row_ids' ) {
 				continue;
 			} else if ( strpos( $k, 'i' ) === 0 ) {
@@ -107,7 +113,7 @@ class FrmProNestedFormsController {
 
 			// Keep track of row count
 			$repeat_atts['row_count'] = $row_count;
-			$row_count++;
+			$row_count ++;
 
 			// show each existing sub entry
 			self::display_single_iteration_of_nested_form( $field_name, $repeat_atts );
@@ -118,31 +124,72 @@ class FrmProNestedFormsController {
 	}
 
 	/**
+	 * Check if repeat limit is reached for a section field
+	 *
+	 * @since 2.05
+	 *
+	 * @param array $field
+	 *
+	 * @return bool
+	 */
+	private static function is_repeat_limit_reached_for_field( $field ) {
+		$is_repeat_limit_reached = false;
+
+		if ( isset( $field['repeat_limit'] ) && ( $field['repeat_limit'] !== '' ) ) {
+
+			if ( empty( $field['value'] ) ) {
+				$row_count = 1;
+			} else if ( isset( $field['value']['row_ids'] ) ) {
+				if ( is_array( $field['value']['row_ids'] ) ) {
+					$row_count = count( $field['value']['row_ids'] );
+				} else {
+					$row_count = 1;
+				}
+			} else {
+				// When editing an entry, the value will be an array of child IDs on initial load
+				$row_count = count( $field['value'] );
+			}
+
+			$is_repeat_limit_reached = self::is_repeat_limit_reached( $field['repeat_limit'], $row_count );
+		}
+
+		return $is_repeat_limit_reached;
+	}
+
+	/**
 	 * Add a repeating section row with ajax
 	 */
 	public static function ajax_add_repeat_row() {
-		//check_ajax_referer( 'frm_ajax', 'nonce' );
-
 		$field_id = absint( $_POST['field_id'] );
 		if ( ! $field_id ) {
 			wp_die();
 		}
 
-		$field = FrmField::getOne( $field_id );
+		$row_count    = absint( $_POST['numberOfSections'] );
+		$field        = FrmField::getOne( $field_id );
+		$repeat_limit = absint( FrmField::get_option_in_object( $field, 'repeat_limit' ) );
 
 		$args = array(
-			'i' => absint( $_POST['i'] ),
-			'parent_field' => absint( $field->id ),
-			'form' => ( isset( $field->field_options['form_select'] ) ? $field->field_options['form_select'] : 0 ),
-			'repeat' => 1,
+			'i'            => absint( $_POST['i'] ),
+			'parent_field' => $field->id,
+			'form'         => ( isset( $field->field_options['form_select'] ) ? $field->field_options['form_select'] : 0 ),
+			'repeat'       => 1,
 		);
+
 		$field_name = 'item_meta[' . $args['parent_field'] . ']';
+
+		if ( self::is_repeat_limit_reached( $repeat_limit, $row_count ) ) {
+			echo json_encode( array() );
+			wp_die();
+		}
 
 		// let's show a textarea since the ajax with multiple rte doesn't work well in WP right now
 		global $frm_vars;
 		$frm_vars['skip_rte'] = true;
 
-		$response = array();
+		$response = array(
+			'is_repeat_limit_reached' => self::is_repeat_limit_reached( $repeat_limit, $row_count + 1 ),
+		);
 
 		ob_start();
 		self::display_single_iteration_of_nested_form( $field_name, $args );
@@ -154,11 +201,26 @@ class FrmProNestedFormsController {
 	}
 
 	/**
+	 * Check if the repeat limit is reached
+	 *
+	 * @since 2.05
+	 *
+	 * @param int $repeat_limit
+	 * @param int $row_count
+	 *
+	 * @return bool
+	 */
+	private static function is_repeat_limit_reached( $repeat_limit, $row_count ) {
+		return $repeat_limit && $row_count >= $repeat_limit;
+	}
+
+	/**
 	 * Load JavaScript for hidden subfields
 	 * Applies to repeating sections and embed form fields
 	 * TODO: clean this up, maybe don't remove child fields from field array when they're on a different page
 	 *
 	 * @since 2.01.0
+	 *
 	 * @param array $field
 	 */
 	public static function load_hidden_sub_field_javascript( $field ) {
@@ -168,8 +230,8 @@ class FrmProNestedFormsController {
 			foreach ( $child_fields as $child_field_obj ) {
 				$child_field = FrmProFieldsHelper::convert_field_object_to_flat_array( $child_field_obj );
 
-				$child_field['original_type'] = $child_field['type'];
-				$child_field['type'] = 'hidden';
+				$child_field['original_type']  = $child_field['type'];
+				$child_field['type']           = 'hidden';
 				$child_field['parent_form_id'] = $field['form_id'];
 				if ( ! isset( $child_field['value'] ) ) {
 					$child_field['value'] = '';
@@ -190,6 +252,7 @@ class FrmProNestedFormsController {
 	 * This will only be used on initial form load when editing an entry
 	 *
 	 * @since 2.0
+	 *
 	 * @param array $field
 	 */
 	public static function format_saved_values_for_hidden_nested_forms( &$field ) {
@@ -202,7 +265,7 @@ class FrmProNestedFormsController {
 
 		// Begin formatting field value
 		$field['value'] = array(
-			'form' => $field['form_select'],
+			'form'    => $field['form_select'],
 			'row_ids' => self::format_entry_ids_for_row_ids( $field['value'] ),
 		);
 
@@ -229,7 +292,9 @@ class FrmProNestedFormsController {
 	 * Check if a field is a hidden repeating section/embedded form
 	 *
 	 * @since 2.02.06
+	 *
 	 * @param $field
+	 *
 	 * @return bool
 	 */
 	public static function is_hidden_nested_form_field( $field ) {
@@ -249,6 +314,7 @@ class FrmProNestedFormsController {
 	 * Insert the fields and JavaScript for a hidden nested form
 	 *
 	 * @since 2.02.06
+	 *
 	 * @param array $field
 	 * @param string $field_name
 	 * @param array|string $field_value
@@ -262,6 +328,7 @@ class FrmProNestedFormsController {
 	 * Insert the fields in a hidden nested form
 	 *
 	 * @since 2.02.06
+	 *
 	 * @param array $field
 	 * @param string $field_name
 	 * @param array|string $value_array
@@ -269,6 +336,7 @@ class FrmProNestedFormsController {
 	private static function insert_hidden_nested_form_fields( $field, $field_name, $value_array ) {
 		if ( ! is_array( $value_array ) ) {
 			self::insert_basic_hidden_field( $field_name, '', $field['html_id'] );
+
 			return;
 		}
 
@@ -289,6 +357,7 @@ class FrmProNestedFormsController {
 	 * Insert the row_ids input for a nested form
 	 *
 	 * @since 2.02.06
+	 *
 	 * @param array $field
 	 * @param array|string $value
 	 */
@@ -307,6 +376,7 @@ class FrmProNestedFormsController {
 	 * Insert the sub fields in a hidden nested form
 	 *
 	 * @since 2.02.06
+	 *
 	 * @param array $field
 	 * @param string $field_name
 	 * @param array|string $value
@@ -333,6 +403,7 @@ class FrmProNestedFormsController {
 	 * Insert a basic hidden field
 	 *
 	 * @since 2.02.06
+	 *
 	 * @param string $name
 	 * @param string $value
 	 * @param string $id
@@ -358,9 +429,11 @@ class FrmProNestedFormsController {
 	 * Their HTML ID should be the same when hidden or visible to work with calculations and logic
 	 *
 	 * @since 2.02.06
+	 *
 	 * @param string $field_name
 	 * @param string $opt_key
 	 * @param string $html_id
+	 *
 	 * @return string
 	 */
 	private static function get_html_id_for_hidden_sub_fields( $field_name, $opt_key, $html_id ) {
@@ -396,13 +469,15 @@ class FrmProNestedFormsController {
 	 * Get the HTML ID for hidden other fields inside of repeating sections when value is posted
 	 *
 	 * @since 2.0.8
+	 *
 	 * @param array $parts (array of the field name)
 	 * @param string|boolean $opt_key
 	 * @param string $html_id
+	 *
 	 * @return string
 	 */
 	private static function get_html_id_for_hidden_other_fields( $parts, $opt_key, $html_id ) {
-		$field_id = absint( $parts[ 3 ] );
+		$field_id  = absint( $parts[ 3 ] );
 		$field_key = FrmField::get_key_by_id( $field_id );
 
 		if ( $field_key ) {
@@ -423,12 +498,14 @@ class FrmProNestedFormsController {
 	 * Convert entry IDs to row IDs
 	 *
 	 * @since 2.02.06
+	 *
 	 * @param array|string $entry_ids
+	 *
 	 * @return array
 	 */
 	private static function format_entry_ids_for_row_ids( $entry_ids ) {
 		$row_ids = array();
-		foreach ( (array)$entry_ids as $entry_id ) {
+		foreach ( (array) $entry_ids as $entry_id ) {
 			if ( $entry_id ) {
 				$row_ids[] = 'i' . $entry_id;
 			}
@@ -441,21 +518,23 @@ class FrmProNestedFormsController {
 	 * Display a single iteration of a nested form
 	 *
 	 * @since 2.02.06
+	 *
 	 * @param string $field_name
 	 * @param array $args
 	 */
 	private static function display_single_iteration_of_nested_form( $field_name, $args = array() ) {
 		$defaults = array(
-			'i' => 0,
-			'entry_id' => false,
-			'form' => false,
-			'fields' => array(),
-			'errors' => array(),
-			'parent_field' => 0,
-			'repeat' => 0,
-			'row_count' => false,
-			'value' => '',
-			'field_name' => '',
+			'i'                       => 0,
+			'entry_id'                => false,
+			'form'                    => false,
+			'fields'                  => array(),
+			'errors'                  => array(),
+			'parent_field'            => 0,
+			'repeat'                  => 0,
+			'row_count'               => false,
+			'value'                   => '',
+			'field_name'              => '',
+			'is_repeat_limit_reached' => false,
 		);
 		$args = wp_parse_args( $args, $defaults );
 
@@ -464,7 +543,7 @@ class FrmProNestedFormsController {
 		}
 
 		if ( is_numeric( $args['parent_field'] ) ) {
-			$args['parent_field'] = (array)FrmField::getOne( $args['parent_field'] );
+			$args['parent_field'] = (array) FrmField::getOne( $args['parent_field'] );
 			$args['parent_field']['format'] = isset( $args['parent_field']['field_options']['format'] ) ? $args['parent_field']['field_options']['format'] : '';
 		}
 
@@ -478,12 +557,12 @@ class FrmProNestedFormsController {
 
 		if ( $args['fields'] ) {
 			$pass_args = array(
-				'parent_form_id' => $args['parent_field']['form_id'],
+				'parent_form_id'  => $args['parent_field']['form_id'],
 				'parent_field_id' => $args['parent_field']['id'],
-				'key_pointer' => $args['i'],
-				'repeating' => true,
-				'fields' => $args['fields'],
-				'in_embed_form' => $args['parent_field']['type'] == 'form' ? $args['parent_field']['id'] : '0',
+				'key_pointer'     => $args['i'],
+				'repeating'       => true,
+				'fields'          => $args['fields'],
+				'in_embed_form'   => $args['parent_field']['type'] == 'form' ? $args['parent_field']['id'] : '0',
 			);
 
 			// Find the connection between here and where logic is packaged
@@ -502,8 +581,8 @@ class FrmProNestedFormsController {
 		}
 
 		$format = isset( $args['parent_field']['format'] ) ? $args['parent_field']['format'] : '';
-		$end = false;
-		$count = 0;
+		$end    = false;
+		$count  = 0;
 		foreach ( $values['fields'] as $subfield ) {
 			if ( 'end_divider' == $subfield['type'] ) {
 				$end = $subfield;
@@ -511,13 +590,13 @@ class FrmProNestedFormsController {
 				if ( isset( $subfield['conf_field'] ) && $subfield['conf_field'] ) {
 					$count = $count + 2;
 				} else {
-					$count++;
+					$count ++;
 				}
 			}
 			unset( $subfield );
 		}
 		if ( $args['repeat'] ) {
-			$count++;
+			$count ++;
 		}
 
 		$classes = array(
@@ -540,9 +619,9 @@ class FrmProNestedFormsController {
 		$label_pos = 'top';
 		$field_num = 1;
 		foreach ( $values['fields'] as $subfield ) {
-			$subfield_name = $field_name . '[' . $args['i'] . '][' . $subfield['id'] . ']';
+			$subfield_name    = $field_name . '[' . $args['i'] . '][' . $subfield['id'] . ']';
 			$subfield_plus_id = '-' . $args['i'];
-			$subfield_id = $subfield['id'] . '-' . $args['parent_field']['id'] . $subfield_plus_id;
+			$subfield_id      = $subfield['id'] . '-' . $args['parent_field']['id'] . $subfield_plus_id;
 
 			if ( $args['parent_field'] && ! empty( $args['parent_field']['value'] ) && isset( $args['parent_field']['value']['form'] ) && isset( $args['parent_field']['value'][ $args['i'] ] ) && isset( $args['parent_field']['value'][ $args['i'] ][ $subfield['id'] ] ) ) {
 				// this is a posted value from moving between pages, so set the POSTed value
@@ -557,7 +636,7 @@ class FrmProNestedFormsController {
 				}
 			}
 
-			$field_num++;
+			$field_num ++;
 
 			if ( 'top' == $label_pos && in_array( $subfield['label'], array( 'top', 'hidden', '' ) ) ) {
 				// add placeholder label if repeating
@@ -565,10 +644,10 @@ class FrmProNestedFormsController {
 			}
 
 			$field_args = array(
-				'field_name' => $subfield_name,
-				'field_id' => $subfield_id,
+				'field_name'    => $subfield_name,
+				'field_id'      => $subfield_id,
 				'field_plus_id' => $subfield_plus_id,
-				'section_id' => $args['parent_field']['id'],
+				'section_id'    => $args['parent_field']['id'],
 			);
 
 			if ( apply_filters( 'frm_show_normal_field_type', true, $subfield['type'] ) ) {
@@ -590,11 +669,12 @@ class FrmProNestedFormsController {
 		if ( ! $args['repeat'] ) {
 			// Close frm_repeat div
 			echo '</div>' . "\n";
+
 			return;
 		}
 
-		$args['format'] = $format;
-		$args['label_pos'] = $label_pos;
+		$args['format']      = $format;
+		$args['label_pos']   = $label_pos;
 		$args['field_class'] = $field_class;
 		echo self::get_repeat_buttons( $args, $end );
 
@@ -606,6 +686,7 @@ class FrmProNestedFormsController {
 	 * Adds the row_ids to a nested form on the current page
 	 *
 	 * @since 2.02.06
+	 *
 	 * @param $args
 	 */
 	private static function add_hidden_repeat_row_id( $args ) {
@@ -616,6 +697,7 @@ class FrmProNestedFormsController {
 	 * Add item meta to each row in repeating section or embedded form so the entry is always validated
 	 *
 	 * @since 2.0.08
+	 *
 	 * @param array $args
 	 */
 	private static function add_default_item_meta_field( $args ) {
@@ -627,6 +709,7 @@ class FrmProNestedFormsController {
 	 *
 	 * @param array $args
 	 * @param bool $end
+	 *
 	 * @return mixed|void
 	 */
 	private static function get_repeat_buttons( $args, $end = false ) {
@@ -637,7 +720,7 @@ class FrmProNestedFormsController {
 		}
 
 		if ( $end ) {
-			$args['add_label'] = $end['add_label'];
+			$args['add_label']    = $end['add_label'];
 			$args['remove_label'] = $end['remove_label'];
 
 			if ( ! empty( $end['format'] ) ) {
@@ -654,11 +737,16 @@ class FrmProNestedFormsController {
 	 * Get the end divider field for a repeating section
 	 *
 	 * @param array $args
+	 *
 	 * @return mixed|void
 	 */
 	private static function get_end_repeat_field( $args ) {
-		$query = array( 'fi.form_id' => $args['parent_field']['form_id'], 'type' => 'end_divider', 'field_order >' => $args['parent_field']['field_order'] + 1 );
-		$end_field = FrmField::getAll( $query, 'field_order', 1 );
+		$query       = array(
+			'fi.form_id'    => $args['parent_field']['form_id'],
+			'type'          => 'end_divider',
+			'field_order >' => $args['parent_field']['field_order'] + 1
+		);
+		$end_field   = FrmField::getAll( $query, 'field_order', 1 );
 		$field_array = FrmProFieldsHelper::initialize_array_field( $end_field );
 
 		foreach ( array( 'format', 'add_label', 'remove_label', 'classes' ) as $o ) {
@@ -673,20 +761,23 @@ class FrmProNestedFormsController {
 	}
 
 	/**
-	 * Get the HTML fo the repeat buttons
+	 * Get the HTML for the repeat buttons
 	 *
 	 * @param array $args
 	 * @param array $end
+	 *
 	 * @return string
 	 */
 	private static function repeat_button_html( $args, $end ) {
+
 		$defaults = array(
-			'add_icon' => '',
-			'remove_icon' => '',
-			'add_label' => __( 'Add', 'formidable' ),
-			'remove_label' => __( 'Remove', 'formidable' ),
-			'add_classes' => ' frm_button',
-			'remove_classes' => ' frm_button',
+			'add_icon'                => '',
+			'remove_icon'             => '',
+			'add_label'               => __( 'Add', 'formidable' ),
+			'remove_label'            => __( 'Remove', 'formidable' ),
+			'add_classes'             => ' frm_button',
+			'remove_classes'          => ' frm_button',
+			'is_repeat_limit_reached' => false,
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -707,6 +798,10 @@ class FrmProNestedFormsController {
 		// Hide Remove button on first row
 		if ( $args['row_count'] === 0 ) {
 			$args['remove_classes'] .= ' frm_hidden';
+		}
+
+		if ( $args['is_repeat_limit_reached'] ) {
+			$args['add_classes'] .= ' frm_hide_add_button';
 		}
 
 		$classes = 'frm_form_field frm_' . $args['label_pos'] . '_container frm_repeat_buttons';

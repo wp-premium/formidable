@@ -8,6 +8,12 @@ class FrmProFieldValue extends FrmFieldValue {
 	private $is_empty_container = false;
 
 	/**
+	 * @since 2.05
+	 * @var array
+	 */
+	private $exclude_fields = array();
+
+	/**
 	 * FrmFieldValue constructor.
 	 *
 	 * @param stdClass $field
@@ -15,9 +21,25 @@ class FrmProFieldValue extends FrmFieldValue {
 	 * @param array $atts
 	 */
 	public function __construct( $field, $entry, $atts = array() ) {
+		$this->init_exclude_fields( $atts );
+
 		parent::__construct( $field, $entry, $atts );
 
 		$this->init_is_empty_container();
+	}
+
+	/**
+	 * Initialize the exclude fields property
+	 * This is only for repeating sections and embedded form field values
+	 *
+	 * @since 2.05
+	 *
+	 * @param array $atts
+	 */
+	protected function init_exclude_fields( $atts ) {
+		if ( isset( $atts['exclude_fields'] ) ) {
+			$this->exclude_fields = $atts['exclude_fields'];
+		}
 	}
 
 	/**
@@ -75,7 +97,7 @@ class FrmProFieldValue extends FrmFieldValue {
 		if ( $this->has_child_entries() ) {
 			$this->displayed_value = array();
 			foreach ( $this->saved_value as $child_id ) {
-				$child_values = new FrmProEntryValues( $child_id, array( 'source' => $this->source ) );
+				$child_values = new FrmProEntryValues( $child_id, array( 'source' => $this->source, 'exclude_fields' => $this->exclude_fields ) );
 				$this->displayed_value[ $child_id ] = $child_values->get_field_values();
 			}
 

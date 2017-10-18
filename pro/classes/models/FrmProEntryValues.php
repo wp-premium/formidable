@@ -116,7 +116,7 @@ class FrmProEntryValues extends FrmEntryValues {
 	 */
 	protected function add_field_values( $field ) {
 		$atts = array(
-			'exclude_fields' => $this->exclude_fields,// TODO: is this necessary?
+			'exclude_fields' => $this->exclude_fields,
 			'source' => $this->source,
 			);
 

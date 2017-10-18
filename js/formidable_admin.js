@@ -157,8 +157,8 @@ function frmAdminBuildJS(){
 		}
 
 		var c = t.replace('#', '.');
-		var pro=jQuery('#taxonomy-linkcategory .frm-category-tabs li').length > 2;
-		link.closest('li').addClass('tabs active').siblings('li').removeClass('tabs active');
+		var pro = jQuery('#taxonomy-linkcategory .frm-category-tabs li').length > 2;
+		link.closest('li').addClass('tabs active').siblings('li').removeClass('tabs active starttab');
 		if(link.closest('div').find('.tabs-panel').length){
 			link.closest('div').children('.tabs-panel').not(t).not(c).hide();
 		}else{
@@ -480,13 +480,7 @@ function frmAdminBuildJS(){
 			success:function(msg){
 				jQuery('.frm_no_fields').hide();
 				$newFields.append(msg);
-				var regex = /id="(\S+)"/;
-				var match=regex.exec(msg);
-				jQuery('#'+match[1]+' .frm_ipe_field_label').mouseover().click();
-				section = '#'+match[1]+'.edit_field_type_divider ul.frm_sorting';
-				setupSortable(section);
-				toggleOneSectionHolder(jQuery(section));
-				initiateMultiselect();
+				afterAddField( msg, true );
 			}
 		});
 		return false;
@@ -501,11 +495,25 @@ function frmAdminBuildJS(){
 			data:{action:'frm_duplicate_field', field_id:field_id, form_id:this_form_id, children:children, nonce:frmGlobal.nonce},
 			success:function(msg){
 				thisField.after(msg);
+				updateFieldOrder();
+				afterAddField( msg, false );
 			}
 		});
 		return false;
 	}
-	
+
+	function afterAddField( msg, addFocus ){
+		var regex = /id="(\S+)"/;
+		var match = regex.exec(msg);
+		section = '#'+match[1]+'.edit_field_type_divider ul.frm_sorting';
+		setupSortable(section);
+		if ( addFocus ) {
+			jQuery('#'+match[1]+' .frm_ipe_field_label').mouseover().click();
+			toggleOneSectionHolder(jQuery(section));
+		}
+		initiateMultiselect();
+	}
+
 	function popCalcFields(v){
 		var p;
 		if(!v.type){
@@ -988,6 +996,14 @@ function frmAdminBuildJS(){
 		}
 	}
 
+	function checkRepeatLimit() {
+		var val = this.value;
+		if ( val < 2 || val > 200) {
+			alert(frm_admin_js.repeat_limit_min);
+			this.value = '';
+		}
+	}
+
 	function updateRepeatText(obj, addRemove){
 		var $thisField = jQuery(obj).closest('.frm_field_box');
 		$thisField.find('.frm_'+ addRemove +'_form_row .frm_repeat_label').text(obj.value);
@@ -1430,7 +1446,18 @@ function frmAdminBuildJS(){
 		if(obj.className.indexOf('edit_field_type_end_divider') !== -1 && $thisobj.closest('.edit_field_type_divider').hasClass('no_repeat_section')){
 			return;
 		}
+
+		var selected = jQuery('li.ui-state-default.selected');
+
+		// get offsets before anything changes
 		var curOffset = $thisobj.offset().top;
+		var preTop = document.documentElement.scrollTop || document.body.scrollTop; // body for Safari;
+		var selectedOffset = 0;
+		var selectedHeight = 0;
+		if ( selected.length )	{
+			selectedOffset = selected.offset().top;
+			selectedHeight = selected.height();
+		}
 
 		if(obj.className.indexOf('edit_field_type_divider') !== -1){
 			$thisobj.find('.frm_default_val_icons').hide().css('visibility', 'hidden');
@@ -1443,13 +1470,17 @@ function frmAdminBuildJS(){
 			}
 		}
 
-		jQuery('li.ui-state-default.selected').removeClass('selected');
+		selected.removeClass('selected');
 		$thisobj.addClass('selected');
-
 		var newOffset = $thisobj.offset().top;
-		if(newOffset != curOffset){
+
+		if(selected.length && newOffset != curOffset){
 			var curTop = document.documentElement.scrollTop || document.body.scrollTop; // body for Safari;
-			jQuery(window).scrollTop(curTop - (curOffset-newOffset));
+			var selectedBottom = selectedOffset + selectedHeight;
+
+			if ( preTop < selectedBottom ) {
+				jQuery(window).scrollTop(curTop - (curOffset-newOffset));
+			}
 		}
 	}
 	
@@ -1996,11 +2027,11 @@ function frmAdminBuildJS(){
 	function setPosClass(){
 		var value = this.value;
 		if(value == 'none'){
-			value='top';
+			value = 'top';
 		} else if ( value == 'no_label' ) {
 			value = 'none';
 		}
-		jQuery('.frm_pos_container').removeClass('frm_top_container frm_left_container frm_right_container frm_none_container').addClass('frm_'+value+'_container');
+		jQuery('.frm_pos_container').removeClass('frm_top_container frm_left_container frm_right_container frm_none_container frm_inside_container').addClass('frm_'+value+'_container');
 	}
 
     function collapseAllSections(){
@@ -2414,7 +2445,8 @@ function frmAdminBuildJS(){
 				clickTab(this);
 				return false;
 			});
-			
+			jQuery('.starttab a').trigger('click');
+
 			// submit the search for with dropdown
 			jQuery('#frm-fid-search-menu a').click(function(){
 				var val = this.id.replace('fid-', '');
@@ -2517,6 +2549,7 @@ function frmAdminBuildJS(){
 
 			$newFields.on('click', '.frm_repeat_field', toggleRepeat);
 			$newFields.on('change', '.frm_repeat_format', toggleRepeatButtons);
+			$newFields.on('change', '.frm_repeat_limit', checkRepeatLimit);
 			$newFields.on('input', 'input[name^="field_options[add_label_"]', function(){
 				updateRepeatText(this, 'add');
 			});
@@ -2719,11 +2752,10 @@ function frmAdminBuildJS(){
             // click tabs after panel is replaced with ajax
             jQuery('#side-sortables').on('click', '.frm_doing_ajax.categorydiv .category-tabs a', clickTabsAfterAjax);
 
-			var $postForm = jQuery(document.getElementById('post'));
 			jQuery('input[name="show_count"]').change(showCount);
-			
+
 			jQuery(document.getElementById('form_id')).change(displayFormSelected);
-			
+
 			var $addRemove = jQuery('.frm_add_remove');
 			$addRemove.on('click', '.frm_add_order_row', addOrderRow);
 			$addRemove.on('click', '.frm_add_where_row', addWhereRow);

@@ -112,6 +112,16 @@ legend.frm_hidden{
     visibility:hidden;
 }
 
+.with_frm_style .frm_inside_container label.frm_primary_label{
+	opacity:0;
+	transition: opacity 0.1s linear;
+}
+
+.with_frm_style .frm_inside_container label.frm_visible,
+.frm_visible{
+	opacity:1;
+}
+
 .with_frm_style .frm_description{
 	clear:both;
 }
@@ -524,6 +534,11 @@ select.frm_loading_lookup{
 	display:inline;
 	max-width:33%;
 	margin-right:10px;
+}
+
+.with_frm_style .frm_conf_field.frm_left_container label.frm_primary_label{
+	display:inline;
+	visibility:hidden;
 }
 
 .frm_form_field.frm_left_container input:not([type=radio]):not([type=checkbox]),
