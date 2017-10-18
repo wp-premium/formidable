@@ -19,7 +19,7 @@ class FrmProHooksController{
         // Views
         add_action('init', 'FrmProDisplaysController::register_post_types', 0);
         add_action('before_delete_post', 'FrmProDisplaysController::before_delete_post');
-        add_filter('the_content', 'FrmProDisplaysController::get_content', 8);
+        add_filter( 'the_content', 'FrmProDisplaysController::get_content', 1 );
 		add_action( 'init', 'FrmProContent::add_rewrite_endpoint' );
 
         // Display Shortcodes
@@ -415,7 +415,6 @@ class FrmProHooksController{
         add_action('frm_form_fields', 'FrmProFieldsController::form_fields', 10, 3);
         add_action('frm_show_other_field_type', 'FrmProFieldsController::show_other', 10, 3);
         add_action('frm_get_field_scripts', 'FrmProFieldsController::show_field', 10, 3);
-        add_filter('frm_html_label_position', 'FrmProFieldsController::label_position', 10, 3);
         add_action('frm_date_field_js', 'FrmProFieldsController::date_field_js', 10, 2);
 		add_filter( 'frm_is_field_required', 'FrmProFieldsController::maybe_make_field_optional', 10, 2 );
 

@@ -104,6 +104,8 @@ class FrmProFileField {
 	/**
 	 * Always hide the temp files from queries.
 	 * Hide all unattached form uploads from those without permission.
+	 *
+	 * @param WP_Query $query
 	 */
 	public static function filter_media_library( $query ) {
 		if ( 'attachment' == $query->get('post_type') ) {
@@ -113,16 +115,21 @@ class FrmProFileField {
 				$show = false;
 			}
 
-			$meta_query = array(
-				array(
-					'key'     => '_frm_temporary',
-					'compare' => 'NOT EXISTS',
-				),
-				array(
-					'key'     => '_frm_file',
-					'compare' => $show ? 'EXISTS' : 'NOT EXISTS',
-				),
+			$meta_query = $query->get('meta_query');
+			if ( ! is_array ( $meta_query ) ) {
+				$meta_query = array();
+			}
+
+			$meta_query[] = array(
+				'key'     => '_frm_temporary',
+				'compare' => 'NOT EXISTS',
 			);
+
+			$meta_query[] = array(
+				'key'     => '_frm_file',
+				'compare' => $show ? 'EXISTS' : 'NOT EXISTS',
+			);
+
 			$query->set( 'meta_query', $meta_query );
 		}
 	}

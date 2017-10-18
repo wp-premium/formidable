@@ -4,13 +4,13 @@ if ( ! defined('ABSPATH') ) {
 }
 
 class FrmAppHelper {
-	public static $db_version = 44; //version of the database we are moving to
+	public static $db_version = 45; //version of the database we are moving to
 	public static $pro_db_version = 37; //deprecated
 
 	/**
 	 * @since 2.0
 	 */
-	public static $plug_version = '2.04.01';
+	public static $plug_version = '2.05.01';
 
     /**
      * @since 1.07.02
@@ -88,6 +88,14 @@ class FrmAppHelper {
 	public static function get_menu_name() {
 		$frm_settings = FrmAppHelper::get_settings();
 		return $frm_settings->menu;
+	}
+
+	/**
+	 * @since 2.02.04
+	 */
+	public static function ips_saved() {
+		$frm_settings = self::get_settings();
+		return ! $frm_settings->no_ips;
 	}
 
     /**
@@ -1781,6 +1789,7 @@ class FrmAppHelper {
 				'private'           => __( 'Private' ),
 				'jquery_ui_url'     => self::jquery_ui_base_url(),
 				'no_licenses'       => __( 'No new licenses were found', 'formidable' ),
+				'repeat_limit_min'  => __( 'Please enter a Repeat Limit that is greater than 1.', 'formidable' ),
 			) );
 		}
 	}

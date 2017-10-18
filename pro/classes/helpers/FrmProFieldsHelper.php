@@ -697,6 +697,10 @@ class FrmProFieldsHelper{
 			'in_section' => 0,
         );
 
+		if ( 'divider' === $field_type ) {
+			$opts['repeat_limit'] = '';
+		}
+
 		FrmProLookupFieldsController::add_autopopulate_value_field_options( $values, $field, $opts );
 
 		FrmProLookupFieldsController::add_field_options_specific_to_lookup_field( $values, $field, $opts );
@@ -744,6 +748,7 @@ class FrmProFieldsHelper{
 		$field['size'] = ( isset( $field_object->field_options['size'] ) && $field_object->field_options['size'] != '' ) ? $field_object->field_options['size'] : '';
 		$field['blank'] = $field_object->field_options['blank'];
 		$field['default_value'] = isset( $args['default_value'] ) ? $args['default_value'] : '';
+		$field['parent_form_id'] = $field_object->form_id;
 
 		if ( isset( $args['field_id'] ) ) {
 			// this might not be needed. Is field_id ever different from $field['id']?
@@ -1707,12 +1712,7 @@ class FrmProFieldsHelper{
 		}
 
 		$error_fields = array_keys( $atts['errors'] );
-		$field_ids = array();
-		foreach ( $error_fields as $error_field ) {
-			if ( strpos( $error_field, 'field' ) === 0 ) {
-				$field_ids[] = str_replace( 'field', '', $error_field );
-			}
-		}
+		$field_ids = self::get_field_ids_for_error( $error_fields );
 
 		if ( ! empty( $field_ids ) ) {
 			$first_error = FrmDb::get_var( 'frm_fields', array( 'id' => $field_ids ), 'field_order', array( 'order_by' => 'field_order ASC' ) );
@@ -1720,6 +1720,31 @@ class FrmProFieldsHelper{
 				$came_from_page = $first_error + 1;
 			}
 		}
+	}
+
+	/**
+	 * Get an array of field ids that have errors.
+	 * If the field is in a repeating or embedded form, use the id
+	 * of the field that belongs to this form instead of a child form.
+	 *
+	 * @since 2.05
+	 */
+	private static function get_field_ids_for_error( $error_fields ) {
+		$field_ids = array();
+		foreach ( $error_fields as $error_field ) {
+			if ( strpos( $error_field, 'field' ) === 0 ) {
+				$field_id = str_replace( 'field', '', $error_field );
+				if ( strpos( $field_id, '-' ) ) {
+					$field_parts = explode( '-', $field_id );
+					if ( count( $field_parts ) == 3 ) {
+						// use the id of the parent repeating/embedded field
+						$field_id = $field_parts[1];
+					}
+				}
+				$field_ids[] = $field_id;
+			}
+		}
+		return $field_ids;
 	}
 
 	/**
@@ -2104,14 +2129,26 @@ DEFAULT_HTML;
 		}
 		$conf_html = str_replace( $container_class, $container_class . ' frm_conf_field', $conf_html );
 
-		// Remove label if stacked. Hide if inline.
-		if ( $field['conf_field'] == 'inline' ) {
-			$conf_html = str_replace( $container_class, $container_class . ' frm_hidden_container', $conf_html );
-		} else {
-		   $conf_html = str_replace( $container_class, $container_class . ' frm_none_container', $conf_html );
-		}
+		$add_class = self::get_confirmation_field_class( $field );
 
-		return $conf_html;
+		return str_replace( $container_class, $container_class . $add_class, $conf_html );
+	}
+
+	/**
+	 * Remove confirmation field label if stacked.
+	 * Hide if inline, right, or left.
+	 *
+	 * @since 2.05
+	 */
+	private static function get_confirmation_field_class( $field ) {
+		if ( $field['conf_field'] == 'inline' ) {
+			$add_class = ' frm_hidden_container';
+		} elseif ( $field['label'] == 'left' || $field['label'] == 'right' ) {
+			$add_class = ' frm_hidden_container';
+		} else {
+			$add_class = ' frm_none_container';
+		}
+		return $add_class;
 	}
 
 	/**
@@ -2715,7 +2752,8 @@ DEFAULT_HTML;
 			$new_atts = array(
 				'show_filename' => ( isset($atts['show_filename']) && $atts['show_filename'] ) ? true : false,
 				'show_image' => ( isset( $atts['show_image'] ) && $atts['show_image'] ) ? true : false,
-				'add_link' => ( isset( $atts['add_link'] ) && $atts['add_link'] ) ? true : false
+				'add_link' => ( isset( $atts['add_link'] ) && $atts['add_link'] ) ? true : false,
+				'new_tab' => ( isset ( $atts['new_tab'] ) && $atts['new_tab'] ) ? true: false,
 			);
 
 			self::modify_atts_for_reverse_compatibility( $atts, $new_atts );
@@ -2853,10 +2891,18 @@ DEFAULT_HTML;
 
 		// If add_link=1 is included
 		if ( $atts['add_link'] || ( $is_non_image && $atts['add_link_for_non_image'] ) ) {
+
+			$target = '';
+			if ( isset( $atts['new_tab'] ) && $atts['new_tab'] ) {
+				$target = ' target="_blank"';
+			}
+
 			if ( empty( $image_url ) ) {
 				$image_url = wp_get_attachment_url( $id );
 			}
-			$img_html = '<a href="' . esc_url( $image_url ) . '" class="frm_file_link">' . $img_html . '</a>';
+
+			$img_html = '<a href="' . esc_url( $image_url ) . '" class="frm_file_link"' . $target . '>' . $img_html .
+			 '</a>';
 		}
 
 		$atts['media_id'] = $id;
@@ -2938,7 +2984,7 @@ DEFAULT_HTML;
 			return $value;
 		}
 
-		if ( ! is_array( $value ) && ! empty( $value ) && $atts['format'] === 'json' ) {
+		if ( ! is_array( $value ) && ! empty( $value ) && isset( $atts['format'] ) && $atts['format'] === 'json' ) {
 			$child_entries = explode( ',', $value );
 			$value = array();
 

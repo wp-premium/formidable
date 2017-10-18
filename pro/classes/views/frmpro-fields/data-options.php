@@ -20,7 +20,7 @@ $selected = ( $field['value'] == $opt_key || in_array($opt_key, (array) $field['
 } else if ( $field['data_type'] == 'data' && is_numeric( $field['hide_opt'] ) && is_numeric( $field['form_select'] ) ) {
 	$value = FrmEntryMeta::get_entry_meta_by_field($field['hide_opt'], $field['form_select']);
 	echo wp_kses_post( $value ); ?>
-    <input type="hidden" value="<?php echo esc_attr( $value ) ?>" name="<?php echo esc_attr( $field_name ) ?>" />
+    <input type="hidden" value="<?php echo esc_attr( $value ) ?>" name="<?php echo esc_attr( $field_name ) ?>" id="<?php echo esc_attr( $html_id ) ?>" />
 <?php } else if ( $field['data_type'] == 'data' && is_numeric( $field['hide_field'] ) && is_numeric( $field['form_select'] ) ) {
 	$get_id = FrmAppHelper::simple_get( 'id' );
 	if ( $_POST && isset( $_POST['item_meta'] ) ) {
@@ -36,10 +36,10 @@ $selected = ( $field['value'] == $opt_key || in_array($opt_key, (array) $field['
 	}
 ?>
 <p><?php echo wp_kses_post( $value ) ?></p>
-<input type="hidden" value="<?php echo esc_attr($value) ?>" name="<?php echo esc_attr( $field_name ) ?>" />
+<input type="hidden" value="<?php echo esc_attr($value) ?>" name="<?php echo esc_attr( $field_name ) ?>" id="<?php echo esc_attr( $html_id ) ?>" />
 <?php } else if ( $field['data_type'] == 'data' && ! is_array($field['value']) ) { ?>
 <p><?php echo wp_kses_post( $field['value'] ); ?></p>
-<input type="hidden" value="<?php echo esc_attr( $field['value'] ) ?>" name="<?php echo esc_attr( $field_name ) ?>" />
+<input type="hidden" value="<?php echo esc_attr( $field['value'] ) ?>" name="<?php echo esc_attr( $field_name ) ?>" id="<?php echo esc_attr( $html_id ) ?>" />
 <?php } else if ( $field['data_type'] == 'text' && is_numeric( $field['form_select'] ) ) {
 	$get_id = FrmAppHelper::simple_get( 'id' );
 	if ( $_POST && isset( $_POST['item_meta'] ) ) {
@@ -54,7 +54,7 @@ $selected = ( $field['value'] == $opt_key || in_array($opt_key, (array) $field['
         $value = '';
 	}
 ?>
-<input type="text" value="<?php echo esc_attr( $value ) ?>" name="<?php echo esc_attr( $field_name ) ?>" />
+<input type="text" value="<?php echo esc_attr( $value ) ?>" name="<?php echo esc_attr( $field_name ) ?>" id="<?php echo esc_attr( $html_id ) ?>" />
 
 <?php
 } else if ( $field['data_type'] == 'checkbox' ) {
@@ -65,7 +65,7 @@ $selected = ( $field['value'] == $opt_key || in_array($opt_key, (array) $field['
             $checked = ( ( ! is_array($field['value']) && $field['value'] == $opt_key ) || ( is_array($field['value']) && in_array($opt_key, $field['value']) ) ) ? ' checked="checked"' : ''; ?>
 <div class="<?php echo esc_attr( apply_filters( 'frm_checkbox_class', 'frm_checkbox', $field, $opt_key ) ) ?>">
 	<label for="<?php echo esc_attr( $html_id .'-'. $opt_key ) ?>">
-		<input type="checkbox" name="<?php echo esc_attr( $field_name ) ?>[]"  id="<?php echo esc_attr( $html_id .'-'. $opt_key ) ?>" value="<?php echo esc_attr( $opt_key ) ?>" <?php
+		<input type="checkbox" name="<?php echo esc_attr( $field_name ) ?>[]" id="<?php echo esc_attr( $html_id .'-'. $opt_key ) ?>" value="<?php echo esc_attr( $opt_key ) ?>" <?php
     echo $checked . $disabled .' ';
     do_action( 'frm_field_input_html', $field );
 ?> /> <?php echo $opt ?>
@@ -90,7 +90,6 @@ $selected = ( $field['value'] == $opt_key || in_array($opt_key, (array) $field['
 <?php
         }
 	}
-
 }
 
 FrmProFieldsHelper::maybe_get_hidden_dynamic_field_inputs( $field, array( 'disabled' => $disabled, 'field_name' => $field_name, 'html_id' => $html_id ) );

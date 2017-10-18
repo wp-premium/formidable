@@ -81,6 +81,9 @@ class FrmProContent {
 			$replace_with = FrmAppHelper::array_flatten( $replace_with );
 		}
 
+		if ( $field->type == 'address' && ! isset( $atts['blank'] ) ) {
+			$atts['blank'] = 1;
+		}
 		$atts['entry_id'] = $entry->id;
 		$atts['entry_key'] = $entry->item_key;
 		$atts['post_id'] = $entry->post_id;

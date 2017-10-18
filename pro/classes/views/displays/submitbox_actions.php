@@ -3,9 +3,9 @@
     <a href="#edit_frm_shortcode" class="edit-frm_shortcode hide-if-no-js" tabindex='4'><?php _e( 'Show', 'formidable' ) ?></a>
     <div id="frm_shortcodediv" class="hide-if-js">
         <p class="howto"><?php _e( 'Insert on a page, post, or text widget', 'formidable' ) ?>:</p>
-		<p><input type="text" readonly="readonly" class="frm_select_box frm_98_width" value="[display-frm-data id=<?php echo ( isset( $post->ID ) ) ? $post->ID : __( 'Save to get ID', 'formidable' ) ?> filter=1]" />
+		<p><input type="text" readonly="readonly" class="frm_select_box frm_98_width" value="[display-frm-data id=<?php echo ( isset( $post->ID ) ) ? $post->ID : __( 'Save to get ID', 'formidable' ) ?> filter=limited]" />
     	<?php if ( isset($post->post_name) && ! empty( $post->post_name ) && ( $post->post_name != $post->ID ) ) { ?>
-		<input type="text" style="margin-top:4px;" readonly="readonly" class="frm_select_box frm_98_width" value="[display-frm-data id=<?php echo ( isset( $post->post_name ) && $post->post_name != '' ) ? $post->post_name : '??'; ?> filter=1]" />
+		<input type="text" style="margin-top:4px;" readonly="readonly" class="frm_select_box frm_98_width" value="[display-frm-data id=<?php echo ( isset( $post->post_name ) && $post->post_name != '' ) ? $post->post_name : '??'; ?> filter=limited]" />
     	<?php } ?>
     	</p>
 

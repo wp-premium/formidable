@@ -153,16 +153,10 @@ class FrmProFieldsController{
 		return $filename;
 	}
 
-    public static function &label_position($position, $field, $form) {
-        if ( $position && $position != '' ) {
-            return $position;
-        }
-
-		$style_pos = FrmStylesController::get_style_val('position', $form);
-		$position = ( $style_pos == 'none' ? 'top' : ( $style_pos == 'no_label' ? 'none' : $style_pos ) );
-
-        return $position;
-    }
+	public static function &label_position( $position ) {
+		_deprecated_function( __METHOD__, '2.05', 'FrmFieldsHelper::label_position' );
+		return $position;
+	}
 
     public static function build_field_class($classes, $field) {
         if ( 'end_divider' == $field['type'] ) {
@@ -1192,12 +1186,13 @@ class FrmProFieldsController{
 	public static function delete_temp_files() {
 		remove_action( 'pre_get_posts', 'FrmProFileField::filter_media_library', 99 );
 
+		$timestamp_cutoff = date( 'Y-m-d H:i:s', strtotime( '-3 hours' ) );
 		$old_uploads = get_posts( array(
 			'post_type' => 'attachment',
 			'posts_per_page' => 50,
 			'date_query' => array(
 				'column' => 'post_date_gmt',
-				'before' => '3 hours ago',
+				'before' => $timestamp_cutoff,
 			),
 			'meta_query' => array(
 				array(
@@ -1370,7 +1365,10 @@ class FrmProFieldsController{
 		}
 		array_unshift( $fields, $section_field );
 
-		$field_count = FrmDb::get_count( $wpdb->prefix .'frm_fields fi LEFT JOIN '. $wpdb->prefix .'frm_forms fr ON (fi.form_id = fr.id)', array( 'or' => 1, 'fr.id' => $form_id, 'fr.parent_form_id' => $form_id ) );
+		$order_query = array( 'field_order >' => $section_field->field_order, 'form_id' => $form_id, 'type' => 'end_divider' );
+		$end_section_order = FrmDb::get_var( 'frm_fields', $order_query, 'field_order', array( 'order_by' => 'field_order ASC') );
+		$field_order = max( $section_field->field_order, $end_section_order );
+
         $ended = false;
 
         if ( isset($section_field->field_options['repeat']) && $section_field->field_options['repeat'] ) {
@@ -1391,8 +1389,8 @@ class FrmProFieldsController{
                 $values['field_options']['form_select'] = $new_form_id;
             }
 
-            $field_count++;
-            $values['field_order'] = $field_count;
+			$values['field_order'] = $field_order;
+			$field_order++;
 
 	        $values = apply_filters( 'frm_duplicated_field', $values );
 	        $field_id = FrmField::create( $values );

@@ -16,21 +16,32 @@
 	clear:both;
 }
 
-.frm_form_field .frm_repeat_sec .frm_add_form_row{
-    opacity:0;
-	display:none;
-	*display:inline;
-	display:inline\0/; /* For IE 8-9 */
+.frm_form_field .frm_repeat_sec .frm_add_form_row,
+.frm_section_heading div.frm_repeat_sec:last-child .frm_add_form_row.frm_hide_add_button,
+.frm_form_field div.frm_repeat_grid .frm_add_form_row.frm_hide_add_button,
+.frm_form_field div.frm_repeat_inline .frm_add_form_row.frm_hide_add_button {
 	-moz-transition: opacity .15s ease-in-out;
 	-webkit-transition: opacity .15s ease-in-out;
 	transition: opacity .15s ease-in-out;
-    pointer-events:none;
+	pointer-events: none;
 }
 
-.frm_section_heading div.frm_repeat_sec:last-child .frm_add_form_row{
-    opacity:100;
-	display:inline;
-    pointer-events:auto;
+.frm_form_field .frm_repeat_sec .frm_add_form_row,
+.frm_section_heading div.frm_repeat_sec:last-child .frm_add_form_row.frm_hide_add_button {
+	display: none;
+}
+
+.frm_form_field div.frm_repeat_grid .frm_add_form_row.frm_hide_add_button,
+.frm_form_field div.frm_repeat_inline .frm_add_form_row.frm_hide_add_button {
+	visibility: hidden;
+}
+
+.frm_form_field div.frm_repeat_grid .frm_add_form_row,
+.frm_form_field div.frm_repeat_inline .frm_add_form_row,
+.frm_section_heading div.frm_repeat_sec:last-child .frm_add_form_row {
+	display: inline;
+	visibility: visible;
+	pointer-events: auto;
 }
 
 .frm_form_field .frm_repeat_grid .frm_form_field label.frm_primary_label{
@@ -40,7 +51,6 @@
 .frm_form_field .frm_repeat_grid.frm_first_repeat .frm_form_field label.frm_primary_label{
     display:inherit !important;
 }
-
 
 #ui-datepicker-div{
     display:none;

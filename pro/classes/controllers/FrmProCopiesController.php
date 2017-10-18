@@ -3,6 +3,12 @@
 class FrmProCopiesController{
 
 	public static function install() {
+		$frm_db_version = (int) get_option( 'frm_db_version' );
+		if ( ! $frm_db_version ) {
+			// The main plugin tables haven't been installed yet
+			return;
+		}
+
         FrmProCopy::install();
     }
 

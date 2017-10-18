@@ -527,7 +527,7 @@ class FrmProLookupFieldsController{
 
 		$args = array();
 
-		if ( self::need_to_filter_values_for_current_user( $values ) ) {
+		if ( self::need_to_filter_values_for_current_user( $values['id'], $values ) ) {
 			$current_user = get_current_user_id();
 
 			// If user isn't logged in, don't display any options
@@ -888,7 +888,7 @@ class FrmProLookupFieldsController{
 		$args = array();
 
 		// TODO: Maybe add current user filter here, or maybe add it in final call
-		if ( self::need_to_filter_values_for_current_user( $child_field->field_options ) ) {
+		if ( self::need_to_filter_values_for_current_user( $child_field->id, $child_field->field_options ) ) {
 			$args['user_id'] = get_current_user_id();
 		}
 
@@ -924,7 +924,7 @@ class FrmProLookupFieldsController{
 	 * @param array $args
 	 */
 	private static function apply_current_user_filter_for_non_lookup( $child_field, $parent_field, &$args ) {
-		if ( $child_field->type !== 'lookup' && self::need_to_filter_values_for_current_user( $parent_field->field_options ) ) {
+		if ( $child_field->type !== 'lookup' && self::need_to_filter_values_for_current_user( $parent_field->id, $parent_field->field_options ) ) {
 			$args['user_id'] = get_current_user_id();
 		}
 	}
@@ -957,6 +957,12 @@ class FrmProLookupFieldsController{
 	 * and/or depends on the frm_set_and_or_for_lookup filter
 	 *
 	 * @since 2.03.08
+	 *
+	 * @param array $entry_ids
+	 * @param array $new_entry_ids
+	 * @param string $and_or
+	 *
+	 * @return array
 	 */
 	private static function filter_or_merge_entry_ids( $entry_ids, $new_entry_ids, $and_or ) {
 		if ( isset( $entry_ids['first'] ) ) {
@@ -1024,11 +1030,16 @@ class FrmProLookupFieldsController{
 	 * Check if the values need to be filtered for the current user
 	 *
 	 * @since 2.01.0
+	 *
+	 * @param int|string $field_id
 	 * @param array $field_options
+	 *
 	 * @return bool
 	 */
-	private static function need_to_filter_values_for_current_user( $field_options ) {
-		return FrmField::is_option_true_in_array( $field_options, 'lookup_filter_current_user' ) && ! current_user_can( 'administrator' ) && ! FrmAppHelper::is_admin();
+	private static function need_to_filter_values_for_current_user( $field_id, $field_options ) {
+		$is_filter_needed = FrmField::is_option_true_in_array( $field_options, 'lookup_filter_current_user' ) && ! current_user_can( 'administrator' ) && ! FrmAppHelper::is_admin();
+
+		return apply_filters( 'frm_lookup_is_current_user_filter_needed', $is_filter_needed, $field_id, $field_options );
 	}
 
 	/**

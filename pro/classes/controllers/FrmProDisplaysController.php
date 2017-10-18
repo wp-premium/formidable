@@ -209,7 +209,7 @@ class FrmProDisplaysController {
 				$val = FrmFormsHelper::edit_form_link( $form_id );
 				break;
 			case 'shortcode':
-				$code = '[display-frm-data id=' . $id . ' filter=1]';
+				$code = '[display-frm-data id=' . $id . ' filter=limited]';
 
 				$val = '<input type="text" readonly="readonly" class="frm_select_box" value="' . esc_attr( $code ) . '" />';
 				break;
@@ -401,7 +401,6 @@ class FrmProDisplaysController {
 		}
 
 		$entry_id = false;
-		$filter = apply_filters( 'frm_filter_auto_content', true );
 
 		if ( $post->post_type == self::$post_type && in_the_loop() ) {
 			global $frm_displayed;
@@ -415,7 +414,7 @@ class FrmProDisplaysController {
 
 			$frm_displayed[] = $post->ID;
 
-			return self::get_display_data( $post, $content, false, compact( 'filter' ) );
+			return self::get_display_data( $post, $content, false );
 		}
 
 		if ( is_singular() && post_password_required() ) {
@@ -465,7 +464,7 @@ class FrmProDisplaysController {
 
 		$frm_displayed[] = $display->ID;
 		$content = self::get_display_data( $display, $content, $entry_id, array(
-			'filter' => $filter, 'auto_id' => $entry_id,
+			'auto_id' => $entry_id,
 		) );
 
 		return $content;
@@ -919,7 +918,7 @@ class FrmProDisplaysController {
 
 		self::do_all_shortcodes_except_formidable( $view_content );
 
-		self::maybe_apply_the_content_filter( $atts, $view_content );
+		self::maybe_filter_content( $atts, $view_content );
 
 		// load the styling for css classes and pagination
 		FrmStylesController::enqueue_style();
@@ -2571,11 +2570,7 @@ class FrmProDisplaysController {
 			$empty_msg = '<div class="frm_no_entries">' . FrmProFieldsHelper::get_default_value( $view->frm_empty_msg, false ) . '</div>';
 		}
 
-		$empty_msg = apply_filters( 'frm_no_entries_message', $empty_msg, array( 'display' => $view ) );
-
-		self::maybe_apply_the_content_filter( $atts, $empty_msg );
-
-		return $empty_msg;
+		return apply_filters( 'frm_no_entries_message', $empty_msg, array( 'display' => $view ) );
 	}
 
 	/**
@@ -2593,17 +2588,58 @@ class FrmProDisplaysController {
 	}
 
 	/**
-	 * Apply the content filter if filter=1 is set
+	 * Apply the filters normally run on the_content if filter=1 is set
 	 *
 	 * @since 2.0.23
+	 *
 	 * @param string $content
 	 * @param array $atts
-	 * @return string
 	 */
-	private static function maybe_apply_the_content_filter( $atts, &$content ) {
-		if ( $atts['filter'] ) {
+	private static function maybe_filter_content( $atts, &$content ) {
+		if ( $atts['filter'] == 'limited' ) {
+			self::filter_embeds( $content );
+			self::add_content_filters();
+
+			$content = apply_filters( 'frm_the_content', $content );
+		} elseif ( $atts['filter'] ) {
 			$content = apply_filters( 'the_content', $content );
 		}
+	}
+
+	/**
+	 * Filter embeds instead of using the_content filter
+	 *
+	 * @since 2.05
+	 */
+	private static function filter_embeds( &$content ) {
+		global $wp_embed;
+		$content = $wp_embed->run_shortcode( $content );
+		$content = $wp_embed->autoembed( $content );
+	}
+
+	/**
+	 * Add all the default the_content filters to be run
+	 * on frm_the_content
+	 *
+	 * @since 2.05
+	 */
+	private static function add_content_filters() {
+		if ( has_filter( 'frm_the_content', 'do_shortcode' ) ) {
+			// don't add the filters a second time
+			return;
+		}
+
+		if ( has_filter('the_content', 'wptexturize' ) ) {
+			add_filter( 'frm_the_content', 'wptexturize' );
+		}
+
+		if ( has_filter('the_content', 'wpautop' ) ) {
+			add_filter( 'frm_the_content', 'wpautop' );
+		}
+
+		add_filter( 'frm_the_content', 'wp_make_content_images_responsive' );
+		add_filter( 'frm_the_content', 'shortcode_unautop' );
+		add_filter( 'frm_the_content', 'do_shortcode', 11 );
 	}
 
 	/**

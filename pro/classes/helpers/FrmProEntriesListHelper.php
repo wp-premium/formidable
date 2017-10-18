@@ -40,9 +40,9 @@ class FrmProEntriesListHelper extends FrmEntriesListHelper {
 
 		$field_list = FrmField::getAll( array( 'fi.form_id' => $form->id, 'fi.type not' => FrmField::no_save_fields() ), 'field_order' );
 
-		$fid = isset( $_REQUEST['fid'] ) ? esc_attr( stripslashes( $_REQUEST['fid'] ) ) : '';
+		$fid = isset( $_REQUEST['fid'] ) ? sanitize_title( stripslashes( $_REQUEST['fid'] ) ) : '';
 		$input_id = $input_id . '-search-input';
-		$search_str = isset( $_REQUEST['s'] ) ? esc_attr( stripslashes( $_REQUEST['s'] ) ) : '';
+		$search_str = isset( $_REQUEST['s'] ) ? sanitize_text_field( stripslashes( $_REQUEST['s'] ) ) : '';
 
 		foreach ( array( 'orderby', 'order' ) as $get_var ) {
 			if ( ! empty( $_REQUEST[ $get_var ] ) ) {
