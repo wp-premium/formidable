@@ -14,6 +14,7 @@ class FrmProCreditCard {
 
 		add_filter( 'frm_redirect_url', 'FrmProCreditCard::secure_before_redirect', 50, 3 );
 		add_action( 'frm_after_entry_processed', 'FrmProCreditCard::secure_after_save', 100 );
+		add_action( 'frm_after_draft_entry_processed', 'FrmProCreditCard::secure_after_save', 100 );
 
 		return $errors;
 	}
@@ -30,13 +31,18 @@ class FrmProCreditCard {
 
 	public static function should_require( $field, $values ) {
 		$partial_fill = ( isset( $values['cc'] ) && ! empty( $values['cc'] ) );
-		$is_editing = ( $_POST && isset( $_POST['id'] ) && is_numeric( $_POST['id'] ) );
+		$saving_draft = FrmProFormsHelper::saving_draft();
+		if ( $saving_draft ) {
+			$is_editing = false;
+		} else {
+			$is_editing = ( $_POST && isset( $_POST['id'] ) && is_numeric( $_POST['id'] ) );
+		}
 
 		if ( $partial_fill && ! $is_editing ) {
 			return true;
 		}
 
-		if ( ! $field->required || $is_editing ) {
+		if ( ! $field->required || $is_editing || $saving_draft ) {
 			return false;
 		}
 
@@ -89,7 +95,7 @@ class FrmProCreditCard {
 			return;
 		}
 
-		$credit_card_number = str_replace( array( '-', ' ' ), '', $card_number );
+		$card_number = str_replace( array( '-', ' ' ), '', $card_number );
 		$map = array( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 2, 4, 6, 8, 1, 3, 5, 7, 9 );
 		$sum = 0;
 		$last = strlen( $card_number ) - 1;
@@ -103,7 +109,7 @@ class FrmProCreditCard {
 
 		if ( ! $is_valid ) {
 			$allow = array( '4242424242424242' );
-			$is_valid = in_array( $credit_card_number, $allow );
+			$is_valid = in_array( $card_number, $allow );
 		}
 	}
 
@@ -144,7 +150,8 @@ class FrmProCreditCard {
     }
 
 	private static function delete_values( $entry_id, $form ) {
-		$credit_card_fields = FrmField::get_all_types_in_form( $form->id, 'credit_card', '', 'include' );
+		$form_id = is_numeric( $form ) ? $form : $form->id;
+		$credit_card_fields = FrmField::get_all_types_in_form( $form_id, 'credit_card', '', 'include' );
 		foreach ( $credit_card_fields as $cc_field ) {
 			$cc_values = FrmEntryMeta::get_entry_meta_by_field( $entry_id, $cc_field->id );
 			self::delete_cvc( $cc_values );

@@ -27,7 +27,9 @@
     <td class="td_select_padding">
         <select name="options[single_entry_type]" id="frm_single_entry_type" class="hide_single_entry <?php echo esc_attr( $values['single_entry'] ? '' : 'frm_invisible' ); ?>">
             <option value="user" <?php selected($values['single_entry_type'], 'user') ?>><?php _e( 'Logged-in User', 'formidable' ) ?></option>
+			<?php if ( FrmAppHelper::ips_saved() ) { ?>
             <option value="ip" <?php selected($values['single_entry_type'], 'ip') ?>><?php _e( 'IP Address', 'formidable' ) ?></option>
+			<?php } ?>
             <option value="cookie" <?php selected($values['single_entry_type'], 'cookie') ?>><?php _e( 'Saved Cookie', 'formidable' ) ?></option>
         </select>
     </td>

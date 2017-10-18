@@ -104,8 +104,7 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 			if ( ! empty( $value['line2'] ) ) {
 				$new_value .= $value['line2'] . ' <br/>';
 			}
-			$new_value .= $value['city'] . ', ' . $value['state'] . ' <br/>';
-			$new_value .= $value['zip'];
+			$new_value .= $value['city'] . ', ' . $value['state'] . ' ' . $value['zip'];
 			if ( isset( $value['country'] ) && ! empty( $value['country']) ) {
 				$new_value .= ' <br/>' . $value['country'];
 			}

@@ -274,11 +274,11 @@ class FrmProEntriesHelper{
     }
 
     public static function before_table( $footer, $form_id = false ) {
-		if ( FrmAppHelper::simple_get( 'page', 'sanitize_title' ) != 'formidable-entries' ) {
+		if ( FrmAppHelper::simple_get( 'page', 'sanitize_title' ) != 'formidable-entries' || ! $form_id ) {
             return;
         }
 
-        if ( $footer && $form_id ) {
+        if ( $footer ) {
             if ( apply_filters('frm_show_delete_all', current_user_can('frm_edit_entries'), $form_id) ) {
             ?><div class="frm_uninstall alignleft actions"><a href="?page=formidable-entries&amp;frm_action=destroy_all<?php echo esc_attr( $form_id ? '&form=' . absint( $form_id ) : '' ); ?>" class="button" onclick="return confirm('<?php esc_attr_e( 'Are you sure you want to permanently delete ALL the entries in this form?', 'formidable' ) ?>')"><?php _e( 'Delete ALL Entries', 'formidable' ) ?></a></div>
 <?php
@@ -286,27 +286,31 @@ class FrmProEntriesHelper{
             return;
         }
 
-        $page_params = array( 'frm_action' => 0, 'action' => 'frm_entries_csv', 'form' => $form_id);
+		do_action( 'frm_before_entries_table', $form_id );
 
-        if ( !empty( $_REQUEST['s'] ) )
-            $page_params['s'] = sanitize_text_field( $_REQUEST['s'] );
+		self::insert_download_csv_button( $form_id );
+    }
 
-        if ( !empty( $_REQUEST['search'] ) )
-            $page_params['search'] = sanitize_text_field( $_REQUEST['search'] );
+	private static function insert_download_csv_button( $form_id ) {
+		$page_params = array( 'frm_action' => 0, 'action' => 'frm_entries_csv', 'form' => $form_id );
 
-    	if ( !empty( $_REQUEST['fid'] ) )
-    	    $page_params['fid'] = (int) $_REQUEST['fid'];
+		if ( ! empty( $_REQUEST['s'] ) )
+			$page_params['s'] = sanitize_text_field( $_REQUEST['s'] );
 
-		if ( $form_id ) {
-        ?>
+		if ( ! empty( $_REQUEST['search'] ) )
+			$page_params['search'] = sanitize_text_field( $_REQUEST['search'] );
+
+		if ( ! empty( $_REQUEST['fid'] ) )
+			$page_params['fid'] = (int) $_REQUEST['fid'];
+
+		?>
 		<div class="alignleft actions">
 			<a href="<?php echo esc_url( add_query_arg( $page_params, admin_url( 'admin-ajax.php' ) ) ) ?>" class="button">
 				<?php _e( 'Download CSV', 'formidable' ); ?>
 			</a>
 		</div>
-        <?php
-		}
-    }
+		<?php
+	}
 
     // check if entry being updated just switched draft status
     public static function is_new_entry($entry) {
@@ -444,55 +448,68 @@ class FrmProEntriesHelper{
 	private static function search_entry_metas_for_value( $form_id, $search_param ) {
 		$where_args = array(
 			'fi.form_id' => $form_id,
-			'meta_value like' => $search_param,
 		);
 
-		self::add_linked_field_query( '', $form_id, $search_param, $where_args );
+		$dynamic_field_query = self::get_linked_field_query( $form_id, $search_param );
+		if ( empty( $dynamic_field_query ) ) {
+			$where_args['meta_value like'] = $search_param;
+		} else {
+			$where_args[] = array(
+				'meta_value like' => $search_param,
+				'or' => 1,
+				$dynamic_field_query,
+			);
+		}
 
 		return FrmEntryMeta::getEntryIds( $where_args, '', '', true, array( 'is_draft' => 'both' ) );
 	}
 
 	/**
-	 * Check linked entries for the search query
+	 * Generate query for entry IDs in dynamic fields
+	 *
+	 * @since 2.05
+	 *
+	 * @param int|string $form_id
+	 * @param string|array $search_param
+	 *
+	 * @return array
 	 */
-	private static function add_linked_field_query( $fid, $form_id, $search_param, &$where_entries_array ) {
-		$data_fields = FrmProFormsHelper::has_field( 'data', $form_id, false );
-		if ( empty ( $data_fields ) ) {
-			// this form has no linked fields
-			return;
+	private static function get_linked_field_query( $form_id, $search_param ) {
+		$dynamic_fields = FrmProFormsHelper::has_field( 'data', $form_id, false );
+		if ( empty ( $dynamic_fields ) ) {
+			// this form has no Dynamic fields
+			return array();
 		}
 
-		$df_form_ids = array();
+		$linked_field_ids = $dynamic_field_ids = array();
 
-		//search the joined entry too
-		foreach ( (array) $data_fields as $df ) {
-			//don't check if a different field is selected
-			if ( is_numeric( $fid ) && (int) $fid != $df->id ) {
-				continue;
-			}
-
-			FrmProFieldsHelper::get_subform_ids( $df_form_ids, $df );
-
-			unset( $df );
+		// Get linked field IDs
+		foreach ( (array) $dynamic_fields as $dynamic_field ) {
+			FrmProFieldsHelper::get_subform_ids( $linked_field_ids, $dynamic_field );
+			$dynamic_field_ids[] = $dynamic_field->id;
 		}
-		unset( $data_fields );
+		unset( $dynamic_field );
 
-		if ( empty( $df_form_ids ) ) {
-			return;
+		if ( empty( $linked_field_ids ) ) {
+			return array();
 		}
 
-		$data_form_ids = FrmDb::get_col( 'frm_fields', array( 'id' => $df_form_ids), 'form_id' );
+		$dynamic_field_query = array( 'field_id' => $dynamic_field_ids );
 
-		if ( $data_form_ids ) {
-			$data_entry_ids = FrmEntryMeta::getEntryIds( array( 'fi.form_id' => $data_form_ids, 'meta_value LIKE' => $search_param ),  '', '', true, array( 'is_draft' => 'both' ) );
-			if ( ! empty( $data_entry_ids ) ) {
-				if ( count($data_entry_ids) == 1 ) {
-					$where_entries_array['meta_value like'] = reset( $data_entry_ids );
+		$linked_form_ids = FrmDb::get_col( 'frm_fields', array( 'id' => $linked_field_ids), 'form_id' );
+		if ( $linked_form_ids ) {
+			$linked_entry_ids = FrmEntryMeta::getEntryIds( array( 'fi.form_id' => $linked_form_ids, 'meta_value LIKE' => $search_param ),  '', '', true, array( 'is_draft' => 'both' ) );
+
+			if ( ! empty( $linked_entry_ids ) ) {
+				if ( count( $linked_entry_ids ) == 1 ) {
+					$dynamic_field_query['meta_value like'] = reset( $linked_entry_ids );
 				} else {
-					$where_entries_array['meta_value'] = $data_entry_ids;
+					$dynamic_field_query['meta_value'] = $linked_entry_ids;
 				}
 			}
 		}
+
+		return $dynamic_field_query;
 	}
 
 	/**
@@ -648,30 +665,38 @@ class FrmProEntriesHelper{
 			}
 
 			if ( $data_field ) {
-                $df_form_ids = array();
+				$linked_field_ids = array();
 
-                //search the joined entry too
-                foreach ( (array) $data_field as $df ) {
-                    FrmProFieldsHelper::get_subform_ids($df_form_ids, $df);
+				//search the joined entry too
+				foreach ( (array) $data_field as $df ) {
+					FrmProFieldsHelper::get_subform_ids( $linked_field_ids, $df );
+				}
+				unset( $df );
 
-                    unset($df);
-                }
+				if ( ! empty( $linked_field_ids ) ) {
 
-                $data_form_ids = FrmDb::get_col( $wpdb->prefix .'frm_fields', array( 'id' => $df_form_ids), 'form_id' );
-                unset($df_form_ids);
+					$data_form_ids = FrmDb::get_col( $wpdb->prefix . 'frm_fields', array( 'id' => $linked_field_ids ), 'form_id' );
+					unset( $linked_field_ids );
 
-				if ( $data_form_ids ) {
-					$data_entry_ids = FrmEntryMeta::getEntryIds( array( 'fi.form_id' => $data_form_ids, 'meta_value like' => $term ) );
-					if ( $data_entry_ids ) {
-						if ( ! isset( $search['meta_value'] ) ) {
-							$search['meta_value'] = array();
+					if ( $data_form_ids ) {
+
+						$where = array(
+							'fi.form_id'      => $data_form_ids,
+							'meta_value like' => $term
+						);
+						$data_entry_ids = FrmEntryMeta::getEntryIds( $where );
+
+						if ( $data_entry_ids ) {
+							if ( ! isset( $search['meta_value'] ) ) {
+								$search['meta_value'] = array();
+							}
+							$search['meta_value'] = array_merge( $search['meta_value'], $data_entry_ids );
 						}
-						$search['meta_value'] = array_merge( $search['meta_value'], $data_entry_ids );
 					}
-                }
+				}
 
-                unset($data_form_ids);
-            }
+				unset( $data_form_ids );
+			}
 		}
 
 		$matching_posts = FrmDb::get_col( $wpdb->posts, $p_search, 'ID' );

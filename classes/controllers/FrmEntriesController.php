@@ -81,7 +81,7 @@ class FrmEntriesController {
 
 		$columns[ $form_id . '_created_at' ] = __( 'Entry creation date', 'formidable' );
 		$columns[ $form_id . '_updated_at' ] = __( 'Entry update date', 'formidable' );
-		$columns[ $form_id . '_ip' ] = 'IP';
+		self::maybe_add_ip_col( $form_id, $columns );
 
         $frm_vars['cols'] = $columns;
 
@@ -128,6 +128,12 @@ class FrmEntriesController {
 				}
 				$columns[ $form_id . '_' . $col_id ] = FrmAppHelper::truncate( $form_col->name, 35 );
 			}
+		}
+	}
+
+	private static function maybe_add_ip_col( $form_id, &$columns ) {
+		if ( FrmAppHelper::ips_saved() ) {
+			$columns[ $form_id . '_ip' ] = 'IP';
 		}
 	}
 
@@ -523,6 +529,7 @@ class FrmEntriesController {
 			'default_email'  => false,
 			'form_id'        => false,
 			'format'         => 'text',
+			'array_key'      => 'key',
 			'direction'      => 'ltr',
 			'font_size'      => '',
 			'text_color'     => '',
@@ -540,8 +547,8 @@ class FrmEntriesController {
 		$atts = shortcode_atts( $defaults, $atts );
 
 		if ( $atts['default_email'] ) {
-
-			$entry_shortcode_formatter = FrmEntryFactory::entry_shortcode_formatter_instance( $atts['form_id'], $atts['format'] );
+			$shortcode_atts = array( 'format' => $atts['format'], 'plain_text' => $atts['plain_text'] );
+			$entry_shortcode_formatter = FrmEntryFactory::entry_shortcode_formatter_instance( $atts['form_id'], $shortcode_atts );
 			$formatted_entry = $entry_shortcode_formatter->content();
 
 		} else {

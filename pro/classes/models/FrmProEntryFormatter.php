@@ -332,7 +332,7 @@ class FrmProEntryFormatter extends FrmEntryFormatter {
 	 * @param array $output
 	 */
 	protected function push_single_field_to_array( $field_value, &$output ) {
-		$field_key = $field_value->get_field_key();
+		$field_key = $this->get_key_or_id( $field_value );
 		$field_type = $field_value->get_field_type();
 
 		if ( $field_type == 'form' ) {
@@ -374,21 +374,21 @@ class FrmProEntryFormatter extends FrmEntryFormatter {
 
 			if ( $this->include_repeating_field_in_array( $field_value ) ) {
 
-				if ( ! isset( $output[ $field_value->get_field_key() ] ) ) {
-					$output[ $field_value->get_field_key() ] = array();
+				if ( ! isset( $output[ $this->get_key_or_id( $field_value ) ] ) ) {
+					$output[ $this->get_key_or_id( $field_value ) ] = array();
 				}
 
 				$displayed_value = $this->prepare_display_value_for_array( $field_value->get_displayed_value() );
-				$output[ $field_value->get_field_key() ][ $index ] = $displayed_value;
+				$output[ $this->get_key_or_id( $field_value ) ][ $index ] = $displayed_value;
 
 				$saved_value = $field_value->get_saved_value();
 				if ( $displayed_value !== $saved_value ) {
 
-					if ( ! isset( $output[ $field_value->get_field_key() ] ) ) {
-						$output[ $field_value->get_field_key() . '-value' ] = array();
+					if ( ! isset( $output[ $this->get_key_or_id( $field_value ) ] ) ) {
+						$output[ $this->get_key_or_id( $field_value ) . '-value' ] = array();
 					}
 
-					$output[ $field_value->get_field_key() . '-value' ][ $index ] = $field_value->get_saved_value();
+					$output[ $this->get_key_or_id( $field_value ) . '-value' ][ $index ] = $field_value->get_saved_value();
 				}
 			}
 		}
