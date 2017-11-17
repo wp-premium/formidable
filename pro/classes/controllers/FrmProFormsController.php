@@ -403,7 +403,7 @@ class FrmProFormsController{
 
     private static function popup_opts_display_frm_data(array &$opts, $shortcode) {
         //'entry_id' => '',  'user_id' => false, 'order' => '',
-        $displays = FrmProDisplay::getAll( array(), 'post_title');
+		$displays = FrmProDisplay::getAll( array(), 'title ASC' );
 
 ?>
         <h4 for="frmsc_<?php echo esc_attr( $shortcode ) ?>_id" class="frm_left_label"><?php _e( 'Select a view:', 'formidable' ) ?></h4>

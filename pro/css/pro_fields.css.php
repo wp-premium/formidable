@@ -2,6 +2,11 @@
     display:none;
 }
 
+.with_frm_style .frm_conf_field.frm_half label.frm_conf_label {
+    overflow: hidden;
+    white-space: nowrap;
+}
+
 .with_frm_style select.frm_time_select{
 	white-space:pre;
 	display:inline;

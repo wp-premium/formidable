@@ -2,15 +2,15 @@
 Contributors: formidableforms, sswells, srwells, jamie.wahlin
 Tags: contact form, form builder, custom form, forms, form, form maker, form creator
 Requires at least: 4.0
-Tested up to: 4.8.2
-Requires PHP: 5.2
-Stable tag: 2.05.01
+Tested up to: 4.9
+Requires PHP: 5.3
+Stable tag: 2.05.05
 
 The best WordPress form plugin for contact forms, surveys and more. Make forms a breeze with a drag and drop form builder and form style generator.
 
 == Description ==
 = WordPress Form Builder Plugin =
-Formidable Forms is a flexible and free WordPress form plugin. Easily create contact forms, polls and surveys, lead generation forms, email forms, and any other forms you imagine. Start with a pre-built contact form template or create totally custom forms. From the smallest sidebar opt-in form to large job application forms, Formidable Forms is built to do it all. Learn more about Formidable Forms at [FormidableForms.com](https://formidableforms.com/ "FormidableForms.com")
+Formidable Forms is a flexible and free WordPress form plugin. Easily create contact forms, polls and surveys, lead generation forms, email forms, and any other forms you imagine. Start with a pre-built contact form template or create totally custom forms. From the smallest sidebar opt-in form to large job and employment application forms, Formidable Forms is built to do it all. Learn more about Formidable Forms at [FormidableForms.com](https://formidableforms.com/ "FormidableForms.com")
 
 Create a professional WordPress contact form without any code. Get mobile-friendly responsive forms that look great on any screen size. Additionally, changing the form layout is simple with included layout classes. If you need more advanced customizations, you have complete access to change the form HTML and CSS.
 
@@ -81,21 +81,21 @@ Formidable Forms Pro is an upgrade that adds even more power to your WordPress f
 * World Class Support: if you have questions or need guidance on how to set up your application, we are happy to help. Our goal with Formidable Forms is to help you take on bigger projects, earn more clients, and grow your business.
 
 = Form add-on library =
-* [User registration](https://formidableforms.com/downloads/user-registration/ "User registration"). Register users and create subdomains when using WordPress multisite.
+* [User registration Forms](https://formidableforms.com/downloads/user-registration/ "User registration forms"). Register users and create subdomains when using WordPress multisite.
 * [Form action automation](https://formidableforms.com/downloads/autoresponder/ "Form action automation"). Schedule email notifications, SMS messages, and API actions.
-* [Signatures](https://formidableforms.com/downloads/signature/ "Signatures"). Add a signature field to your form. The user may write their signature with a trackpad/mouse or just type it.
+* [Digital Signature Forms](https://formidableforms.com/downloads/signature/ "Digital Signature Forms"). Add a signature field to your form. The user may write their signature with a trackpad/mouse or just type it.
 * [Formidable Forms API](https://formidableforms.com/downloads/formidable-api/ "Formidable Forms API"). Send entry results to any other site that has a Rest API. This includes the option of sending entries from one Formidable site to another.
-* [PayPal](https://formidableforms.com/downloads/paypal-standard/ "PayPal"). Automate your business by collecting instant payments from your clients. Collect information, calculate a total, and send clients on to PayPal.
-* [Stripe](https://formidableforms.com/downloads/stripe/ "Stripe"). Any Formidable forms on your site can accept credit card payments without users ever leaving your site.
-* [Authorize.net AIM](https://formidableforms.com/downloads/authorize-net-aim/ "Authorize.net AIM"). Accept one-time payments directly on your site, using Authorize.net AIM.
-* [MailChimp](https://formidableforms.com/downloads/mailchimp/ "MailChimp"). Add leads to a MailChimp mailing list when they submit forms and update their information along with the entry.
-* [Aweber](https://formidableforms.com/downloads/aweber/ "Aweber"). Subscribe users to an AWeber mailing list when they submit a form. AWeber is a powerful email marketing service.
-* [Highrise](https://formidableforms.com/downloads/highrise/ "Higrise"). Add your leads to your Highrise CRM account any time a Formidable form is submitted.
-* [Twilio for SMS](https://formidableforms.com/downloads/twilio/ "Twilio for SMS"). Allow users to text their votes for polls created by Formidable Forms, or send SMS notifications when form entries are submitted or updated.
-* [WPML](https://formidableforms.com/downloads/wp-multilingual/ "WPML"). Translate your forms into multiple languages using the Formidable-integrated WPML plugin.
-* [Polylang](https://formidableforms.com/downloads/polylang/ "Polylang"). Create bilingual or multilingual forms with help from Polylang.
+* [PayPal Forms](https://formidableforms.com/downloads/paypal-standard/ "PayPal Forms"). Automate your business by collecting instant payments from your clients. Collect information, calculate a total, and send clients on to PayPal.
+* [Stripe Forms](https://formidableforms.com/downloads/stripe/ "Stripe Forms"). Any Formidable forms on your site can accept credit card payments without users ever leaving your site.
+* [Authorize.net AIM Forms](https://formidableforms.com/downloads/authorize-net-aim/ "Authorize.net AIM Forms"). Accept one-time payments directly on your site, using Authorize.net AIM.
+* [MailChimp Forms](https://formidableforms.com/downloads/mailchimp/ "MailChimp Forms"). Add leads to a MailChimp mailing list when they submit forms and update their information along with the entry.
+* [Aweber Forms](https://formidableforms.com/downloads/aweber/ "Aweber Forms"). Subscribe users to an AWeber mailing list when they submit a form. AWeber is a powerful email marketing service.
+* [Highrise Forms](https://formidableforms.com/downloads/highrise/ "Highrise Forms"). Add your leads to your Highrise CRM account any time a Formidable form is submitted.
+* [Twilio for SMS Forms](https://formidableforms.com/downloads/twilio/ "Twilio for SMS Forms"). Allow users to text their votes for polls created by Formidable Forms, or send SMS notifications when form entries are submitted or updated.
+* [WPML Forms](https://formidableforms.com/downloads/wp-multilingual/ "WPML Forms"). Translate your forms into multiple languages using the Formidable-integrated WPML plugin.
+* [Polylang Forms](https://formidableforms.com/downloads/polylang/ "Polylang Forms"). Create bilingual or multilingual forms with help from Polylang.
 * [Bootstrap Form Styles](https://formidableforms.com/downloads/bootstrap/ "Bootstrap Form Styles"). Instantly add Bootstrap styling to all your Formidable forms.
-* [Zapier](https://formidableforms.com/downloads/zapier/ "Zapier"). Connect with hundreds of different applications through Zapier. Insert a new row in a Google docs spreadsheet, post on Twitter, or add a new Dropbox file with your form.
+* [Zapier Forms](https://formidableforms.com/downloads/zapier/ "Zapier Forms"). Connect with hundreds of different applications through Zapier. Insert a new row in a Google docs spreadsheet, post on Twitter, or add a new Dropbox file with your form.
 
 Learn more at [Formidable Forms](https://formidableforms.com/ "Formidable Forms")
 
@@ -145,6 +145,54 @@ The field and form names and descriptions are all changed with in-place edit. Ju
 [See more FAQs](https://formidableforms.com/formidable-faqs/ "Formidable Form FAQs")
 
 == Changelog ==
+= 2.05.05 =
+* Fix: When form actions were added at the same time with non-alphabetical naming, a new addon was replacing the first one
+* **Pro Version Forms**
+* Fix: Show update notifications more reliably on sites that don't save the transient expiration
+* Fix: Allow script and style tags in the content boxes of views
+
+= 2.05.04 =
+* Tweak: Remove recaptcha and website fields from sample Contact us form template since most people don't need them
+* Fix: Updates for WP 4.9 compatibility. This includes preventing double filtering on contact form widgets and using the WordPress Codemirror scripts for the form CSS page.
+* Fix: Prevent "are you sure" message that has started occuring from WordPress when saving a WordPress form
+* Fix: Correctly validate form fields with an Inside field label when HTML5 forms are not enabled
+* Fix: Set the background color on loading form submit button. Depending on the hover button covers, the loading spinner may have been the same color as the button
+* Fix: Additional security checks when getting POST or GET values in some places
+* Fix: Return int rather than string from FrmForm::getIdByKey
+* **Pro Version Forms**
+* New: Allow normal WordPress shortcodes in the field calculations box
+* Fix: Strip commas during form validation in non-HTML5 number fields
+* Fix: Correctly order the views dropdown in the shortcode builder
+
+= 2.05.03 =
+* Enhancement: Clean up BCC and CC email buttons on small screens
+* Security enhancement: Use wp_kses instead of wp_kses_post for showing entries
+* Enhancement: Add more HTML options to the wp_kses filters
+* Fix: Correctly show the list of trashed forms after one is permanently deleted
+* **Pro Version Forms**
+* New: Add frm_xml_field_export_value hook
+* Fix: PHP error when editing an entry with a date field set as the post date
+* Fix: Field value formatting when exporting XML
+* Fix: Allow striphtml=1 to work for array values
+* Fix: Prevent confirmation field from moving down on small screens
+
+= 2.05.02 =
+* New: Add frm_affiliate_id hook for theme author affiliates
+* Fix: XSS vulnerability on form preview page. Don't check POST values before displaying the form
+* Enhancement: Speed up the Formidable > Entries listing page for large forms
+* Fix: Don't add slashes to default field values
+* Fix: Replace the arrows in the settings sections that disappeared in WP 4.8
+* **Pro Version Forms**
+* Enhancement: Add frmCalSeparation jQuery event for changing the comma in text calculations to something else
+* Fix: Prevent more themes from overriding the progress bar styling when the option to override theme styling is checked
+* Fix: More reliably hide and show the buttons for adding taxonomies and custom fields in the create post settings
+* Fix: Several issues with calculations with both fields inside and outside of repeating sections. Fixed issue with conditional radio fields used in repeating calculations.
+* Fix: Prevent endless loops in conditional logic when fields are dependent on each other
+* Fix: Searching number field values with LIKE was causing issues
+* Fix: Use secure cookies on SSL sites
+* Fix: Convert dates in certain formats more realibly before save
+* Fix: Correctly duplicate fields inside a repeating section
+
 = 2.05.01 =
 * Fix: Let the new label position option override the setting in the styles
 * Fix: Trigger an update for the styling settings so a manual save isn't required to get new updates
@@ -179,7 +227,7 @@ The field and form names and descriptions are all changed with in-place edit. Ju
 * Enhancement: Add frm_main_feedback hook to messages shown after draft and edit.
 * Enhancement: Display zip code on the same line with city and state when an address is displayed.
 * Enhancement: Improve searching Dynamic field values on Entries tab
-* Fix: Improve compatibiliy with page builders and membership plugins. Don't run the_content filter on the View content. Instead, filter the content by calling those functions directly.
+* Fix: Improve compatibility with page builders and membership plugins. Don't run the_content filter on the View content. Instead, filter the content by calling those functions directly.
 * Fix: Delete temporary files after no less than 3 hours, regardless of time zone.
 * Fix: Append the media meta_query rather than replacing it. This resolves a conflict with files in WooCommerce.
 * Fix: Trim logic and actual value in conditional logic comparison.
@@ -2006,7 +2054,7 @@ The field and form names and descriptions are all changed with in-place edit. Ju
 
 = 1.06 =
 * User Interface improvements to form builder
-* Increased security, spped, and optimization
+* Increased security, speed, and optimization
 * Moved the "automatic width" check box for drop-down select fields to free form builder plugin
 * Moved email "From/Reply to" options to free WordPress form builder plugin
 * Fixed form preview page for form templates

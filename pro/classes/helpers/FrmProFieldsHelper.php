@@ -1658,10 +1658,10 @@ class FrmProFieldsHelper{
 
 		if ( FrmProFormsHelper::going_to_prev( $atts['form_id'] ) ) {
 			$page_numbers['go_back'] = true;
-			$page_numbers['next_page'] = FrmAppHelper::get_param( 'frm_next_page' );
+			$page_numbers['next_page'] = FrmAppHelper::get_param( 'frm_next_page', 0, 'get', 'absint' );
 			$page_numbers['prev_page'] = $page_numbers['set_prev'] = $page_numbers['next_page'] - 1;
 		} else if ( FrmProFormsHelper::saving_draft() && ! $atts['error'] ) {
-			$page_numbers['next_page'] = FrmAppHelper::get_param( 'frm_page_order_' . $atts['form_id'], false );
+			$page_numbers['next_page'] = FrmAppHelper::get_param( 'frm_page_order_' . $atts['form_id'], false, 'get', 'absint' );
 
 			// If next_page is zero, assume user clicked "Save Draft" on last page of form
 			if ( $page_numbers['next_page'] == 0 ) {
@@ -2297,7 +2297,7 @@ DEFAULT_HTML;
             }
 		}
 
-        return $val;
+        return apply_filters( 'frm_xml_field_export_value', $val, $field );
     }
 
 	public static function get_file_icon( $media_id ) {
