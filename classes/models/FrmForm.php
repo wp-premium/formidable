@@ -446,8 +446,7 @@ class FrmForm {
      * @return int form id
      */
 	public static function getIdByKey( $key ) {
-        $id = FrmDb::get_var( 'frm_forms', array( 'form_key' => sanitize_title( $key ) ) );
-        return $id;
+		return (int) FrmDb::get_var( 'frm_forms', array( 'form_key' => sanitize_title( $key ) ) );
     }
 
     /**
@@ -655,7 +654,7 @@ class FrmForm {
 				if ( $var == 'action' ) {
 					$values[ $var ] = FrmAppHelper::get_param( $action_var, $default, 'get', 'sanitize_title' );
 				} else {
-					$values[ $var ] = FrmAppHelper::get_param( $var, $default );
+					$values[ $var ] = FrmAppHelper::get_param( $var, $default, 'get', 'sanitize_text_field' );
 				}
 				unset( $var, $default );
 			}
@@ -676,7 +675,7 @@ class FrmForm {
 	public static function list_page_params() {
 		$values = array();
 		foreach ( array( 'template' => 0, 'id' => '', 'paged' => 1, 'form' => '', 'search' => '', 'sort' => '', 'sdir' => '' ) as $var => $default ) {
-			$values[ $var ] = FrmAppHelper::get_param( $var, $default );
+			$values[ $var ] = FrmAppHelper::get_param( $var, $default, 'get', 'sanitize_text_field' );
 		}
 
 		return $values;
@@ -696,7 +695,7 @@ class FrmForm {
 			'field_id' => '', 'search' => '', 'sort' => '', 'sdir' => '', 'fid' => '',
 			'keep_post' => '',
 		) as $var => $default ) {
-			$values[ $var ] = FrmAppHelper::get_param( $var, $default );
+			$values[ $var ] = FrmAppHelper::get_param( $var, $default, 'get', 'sanitize_text_field' );
 		}
 
 		return $values;

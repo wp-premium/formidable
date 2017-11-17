@@ -6,10 +6,7 @@ if ( ! defined('ABSPATH') ) {
 class FrmEntriesHelper {
 
     public static function setup_new_vars( $fields, $form = '', $reset = false, $args = array() ) {
-        $values = array();
-		foreach ( array( 'name' => '', 'description' => '', 'item_key' => '' ) as $var => $default ) {
-			$values[ $var ] = FrmAppHelper::get_post_param( $var, $default, 'wp_kses_post' );
-        }
+		$values = array( 'name' => '', 'description' => '', 'item_key' => '' );
 
         $values['fields'] = array();
         if ( empty($fields) ) {
@@ -62,13 +59,10 @@ class FrmEntriesHelper {
             }
         }
 
-        $form->options = maybe_unserialize($form->options);
-        if ( is_array($form->options) ) {
-            foreach ( $form->options as $opt => $value ) {
-                $values[ $opt ] = FrmAppHelper::get_post_param( $opt, $value );
-                unset($opt, $value);
-            }
-        }
+		$form->options = maybe_unserialize( $form->options );
+		if ( is_array( $form->options ) ) {
+			$values = array_merge( $values, $form->options );
+		}
 
 		$form_defaults = FrmFormsHelper::get_default_opts();
 
@@ -259,9 +253,7 @@ class FrmEntriesHelper {
         }
 
         $val = implode(', ', (array) $field_value );
-		$val = wp_kses_post( $val );
-
-        return $val;
+		return FrmAppHelper::kses( $val, 'all' );
     }
 
     /**
@@ -330,7 +322,7 @@ class FrmEntriesHelper {
         }
 
 		if ( ! $atts['keepjs'] && ! is_array( $value ) ) {
-			$value = wp_kses_post( $value );
+			$value = FrmAppHelper::kses( $value, 'all' );
 		}
 
         return apply_filters('frm_display_value', $value, $field, $atts);

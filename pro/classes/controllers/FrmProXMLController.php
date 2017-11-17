@@ -172,7 +172,7 @@ class FrmProXMLController{
         }
 
         //upload
-        $media_id = ( isset( $_POST[ $name ] ) && ! empty( $_POST[ $name ] ) && is_numeric( $_POST[ $name ] ) ) ? $_POST[ $name ] : FrmProFileField::upload_file( $name );
+        $media_id = ( isset( $_POST[ $name ] ) && ! empty( $_POST[ $name ] ) && is_numeric( $_POST[ $name ] ) ) ? absint( $_POST[ $name ] ) : FrmProFileField::upload_file( $name );
         if ( $media_id && ! is_wp_error( $media_id ) ) {
             $filename = get_attached_file($media_id);
         }
@@ -236,7 +236,7 @@ class FrmProXMLController{
             $import_count = $left;
         }
 
-        $mapping = FrmAppHelper::get_param('data_array');
+		$mapping = FrmAppHelper::get_param( 'data_array', '', 'get', 'sanitize_text_field' );
         $url_vars = "&csv_del=". urlencode($csv_del) ."&form_id={$form_id}&frm_import_file={$media_id}&row={$row}&max={$import_count}";
 		$url_vars .= "&csv_files=" . $csv_files;
 

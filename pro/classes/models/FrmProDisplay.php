@@ -132,22 +132,28 @@ class FrmProDisplay{
         return $post;
     }
 
-    public static function getAll( $where = array(), $order_by = 'post_date', $limit = 99 ) {
-        if ( ! is_numeric($limit) ) {
-            $limit = (int) $limit;
-        }
+	public static function getAll( $where = array(), $order_by = 'post_date', $limit = 99 ) {
+		if ( ! is_numeric($limit) ) {
+			$limit = (int) $limit;
+		}
 
-        $query = array(
-            'numberposts'   => $limit,
-            'orber_by'      => $order_by,
+		$order = 'DESC';
+		if ( strpos( $order_by, ' ' ) ) {
+			list( $order_by, $order ) = explode( ' ', $order_by );
+		}
+
+		$query = array(
+			'numberposts'   => $limit,
+			'orderby'       => $order_by,
+			'order'         => $order,
 			'post_type'     => 'frm_display',
 			'post_status'	=> array('publish','private'),
-        );
+		);
 		$query = array_merge( (array) $where, $query );
 
-        $results = get_posts($query);
-        return $results;
-    }
+		$results = get_posts($query);
+		return $results;
+	}
 
     /**
      * Check for a qualified view.

@@ -167,7 +167,7 @@
             <td colspan="2">
                 <h3><?php _e( 'Taxonomies/Categories', 'formidable' ) ?> <span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php esc_attr_e( 'Select the field(s) from your form that you would like to populate with your categories, tags, or other taxonomies.', 'formidable' );
 ?>" ></span></h3>
-                <div id="frm_posttax_rows" style="padding-bottom:8px;">
+                <div id="frm_posttax_rows" class="frm_add_remove" style="padding-bottom:8px;">
                 <?php
                 $tax_key = 0;
                 foreach ( $form_action->post_content['post_category'] as $field_vars ) {
@@ -177,12 +177,11 @@
                 }
                 ?>
                 </div>
-                <p><a href="javascript:void(0)" class="frm_add_posttax_row button">+ <?php _e( 'Add') ?></a></p>
 
+                <p><a href="javascript:void(0)" class="frm_add_posttax_row button <?php echo esc_attr( empty( $form_action->post_content['post_category'] ) ? '' : 'frm_hidden' ) ?>">+ <?php _e( 'Add') ?></a></p>
 
                 <h3><?php _e( 'Custom Fields', 'formidable' ) ?> <span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php esc_attr_e( 'To set the featured image, use \'_thumbnail_id\' as the custom field name.', 'formidable' );
 ?>" ></span></h3>
-
                 <div id="postcustomstuff" class="frm_name_value<?php echo empty($form_action->post_content['post_custom_fields']) ? ' frm_hidden' : ''; ?>">
                 <table id="list-table">
                     <thead>

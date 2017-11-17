@@ -780,7 +780,7 @@ class FrmProEntryMeta{
 
 		$operator = self::get_operator_for_query( $args );
 
-		if ( in_array( $field->type, array( 'number', 'scale' ) ) ) {
+		if ( in_array( $field->type, array( 'number', 'scale' ) ) && strpos( $operator, 'LIKE' ) === false ) {
 			// TODO: DRY throughout plugin
 			$operator = ' +0' . $operator;
 		}

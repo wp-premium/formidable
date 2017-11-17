@@ -14,7 +14,7 @@ class FrmFormsController {
 
 	public static function maybe_load_listing_hooks() {
 		$action = FrmAppHelper::simple_get( 'frm_action', 'sanitize_title' );
-		if ( ! empty( $action ) && ! in_array( $action, array( 'list', 'trash', 'untrash' ) ) ) {
+		if ( ! empty( $action ) && ! in_array( $action, array( 'list', 'trash', 'untrash', 'destroy' ) ) ) {
 			return;
 		}
 
@@ -815,7 +815,7 @@ class FrmFormsController {
             $bulkaction = str_replace( 'bulk_', '', $bulkaction );
         }
 
-        $ids = FrmAppHelper::get_param( 'item-action', '' );
+		$ids = FrmAppHelper::get_param( 'item-action', '', 'get', 'sanitize_text_field' );
         if ( empty( $ids ) ) {
             $errors[] = __( 'No forms were specified', 'formidable' );
             return $errors;

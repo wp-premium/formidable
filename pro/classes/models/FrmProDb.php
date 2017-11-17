@@ -199,7 +199,7 @@ class FrmProDb{
 			}
 
 			foreach ( $file_ids as $file_id ) {
-				update_post_meta( $file_id, '_frm_file', 1 );
+				update_post_meta( absint( $file_id ), '_frm_file', 1 );
 			}
 		}
 	}
