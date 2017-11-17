@@ -11,7 +11,7 @@ if ( $page_count <= 1 ) {
     }
 
 	$page_params = isset( $page_params ) ? $page_params : '';
-	$s = FrmAppHelper::get_param( 'frm_search', false );
+	$s = FrmAppHelper::get_param( 'frm_search', false, 'get', 'sanitize_text_field' );
 	if ( $s ) {
 		$page_params .= '&frm_search=' . urlencode( $s );
 	}

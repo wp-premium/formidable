@@ -48,7 +48,7 @@ class FrmProEntriesHelper{
             return $action;
         }
 
-        $entry = FrmAppHelper::get_param('entry', 0);
+		$entry = FrmAppHelper::get_param( 'entry', 0, 'get', 'sanitize_text_field' );
 
         if ( ! self::user_can_edit($entry, $form) ) {
             $action = 'new';

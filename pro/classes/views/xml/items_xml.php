@@ -12,7 +12,8 @@ $entries = FrmDb::get_results( 'frm_items', array( 'or' => 1, 'id' => $next_set,
 // Begin Loop
 foreach ( $entries as $entry ) {
 	if ( $item_form_id != $entry->form_id ) {
-		$fields = FrmField::get_all_for_form( $entry->form_id );
+        $where = array( 'form_id' => absint( $entry->form_id ) );
+		$fields = FrmDb::get_var( 'frm_fields', $where, '*', array( 'order_by' => 'field_order' ), '', 'associative_results' );
         $item_form_id = $entry->form_id;
     }
 ?>

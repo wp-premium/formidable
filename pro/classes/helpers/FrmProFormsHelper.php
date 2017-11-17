@@ -5,7 +5,7 @@ class FrmProFormsHelper{
 	public static function setup_new_vars( $values ) {
 
         foreach ( self::get_default_opts() as $var => $default ) {
-            $values[$var] = FrmAppHelper::get_param($var, $default);
+			$values[ $var ] = FrmAppHelper::get_param( $var, $default, 'post', 'sanitize_text_field' );
         }
         return $values;
     }
@@ -13,11 +13,11 @@ class FrmProFormsHelper{
 	public static function setup_edit_vars( $values ) {
         $record = FrmForm::getOne($values['id']);
         foreach ( array( 'logged_in' => $record->logged_in, 'editable' => $record->editable) as $var => $default)
-            $values[$var] = FrmAppHelper::get_param($var, $default);
+			$values[ $var ] = FrmAppHelper::get_param( $var, $default, 'get', 'sanitize_text_field' );
 
 		foreach ( self::get_default_opts() as $opt => $default ) {
             if ( ! isset($values[$opt]) ) {
-                $values[$opt] = ( $_POST && isset($_POST['options'][$opt]) ) ? $_POST['options'][$opt] : $default;
+				$values[ $opt ] = ( $_POST && isset( $_POST['options'][ $opt ] ) ) ? sanitize_text_field( $_POST['options'][ $opt ] ) : $default;
             }
 
             unset($opt, $default);
@@ -216,6 +216,8 @@ echo $custom_options;
 			$calc_rules['fieldsWithCalc'][ $field['field_id'] ] = $result;
             $calc = $field['calc'];
 			FrmProFieldsHelper::replace_non_standard_formidable_shortcodes( array( 'field' => $field['field_id'] ), $calc );
+			$calc = do_shortcode( $calc );
+
             preg_match_all("/\[(.?)\b(.*?)(?:(\/))?\]/s", $calc, $matches, PREG_PATTERN_ORDER);
 
             $field_keys = $calc_fields = array();
@@ -611,7 +613,7 @@ echo $custom_options;
 	}
 
     public static function get_prev_button( $form, $class = '' ) {
-        $html = '[if back_button]<input type="submit" value="[back_label]" name="frm_prev_page" formnovalidate="formnovalidate" class="frm_prev_page '. $class .'" [back_hook] />[/if back_button]';
+        $html = '[if back_button]<input type="submit" value="[back_label]" name="frm_prev_page" formnovalidate="formnovalidate" class="frm_prev_page ' . esc_attr( $class ) . '" [back_hook] />[/if back_button]';
         return self::get_draft_button( $form, $class, $html, 'back_button' );
     }
 
@@ -634,7 +636,7 @@ echo $custom_options;
 
     public static function get_draft_button( $form, $class = '', $html = '', $button_type = 'save_draft' ) {
         if ( empty( $html ) ) {
-            $html = '[if save_draft]<input type="submit" value="[draft_label]" name="frm_save_draft" formnovalidate="formnovalidate" class="frm_save_draft '. $class .'" [draft_hook] />[/if save_draft]';
+			$html = '[if save_draft]<input type="submit" value="[draft_label]" name="frm_save_draft" formnovalidate="formnovalidate" class="frm_save_draft ' . esc_attr( $class ) . '" [draft_hook] />[/if save_draft]';
         }
 
         $html = FrmProFormsController::replace_shortcodes($html, $form);
@@ -677,8 +679,7 @@ echo $custom_options;
     }
 
 	public static function get_draft_link( $form ) {
-        $html = self::get_draft_button($form, '', FrmFormsHelper::get_draft_link());
-        return $html;
+		return self::get_draft_button( $form, '', FrmFormsHelper::get_draft_link() );
     }
 
     public static function is_show_data_field($field) {

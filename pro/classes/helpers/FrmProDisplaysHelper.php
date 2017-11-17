@@ -6,7 +6,8 @@ class FrmProDisplaysHelper{
         $values = array();
         $defaults = self::get_default_opts();
 		foreach ( $defaults as $var => $default ) {
-			$values[ $var ] = FrmAppHelper::get_param( $var, $default );
+			$sanitize = self::sanitize_option( $var );
+			$values[ $var ] = FrmAppHelper::get_param( $var, $default, 'post', $sanitize );
 		}
 
         return $values;
@@ -18,21 +19,23 @@ class FrmProDisplaysHelper{
         }
 
         $values = (object) $post;
-        $defaults = self::get_default_opts();
 
 		foreach ( array( 'form_id', 'entry_id', 'dyncontent', 'param', 'type', 'show_count' ) as $var ) {
             $values->{'frm_'. $var} = get_post_meta($post->ID, 'frm_'. $var, true);
             if ( $check_post ) {
-                $values->{'frm_'. $var} = FrmAppHelper::get_param($var, $values->{'frm_'. $var});
+				$sanitize = self::sanitize_option( $var );
+				$values->{'frm_' . $var} = FrmAppHelper::get_param( $var, $values->{'frm_' . $var}, 'post', $sanitize );
             }
         }
 
+		$defaults = self::get_default_opts();
         $options = get_post_meta($post->ID, 'frm_options', true);
 		foreach ( $defaults as $var => $default ) {
             if ( ! isset( $values->{'frm_'. $var} ) ) {
 				$values->{'frm_'. $var} = isset($options[$var]) ? $options[$var] : $default;
                 if ( $check_post ) {
-                    $values->{'frm_'. $var} = FrmAppHelper::get_post_param('options['. $var .']', $values->{'frm_'. $var});
+					$sanitize = self::sanitize_option( $var );
+					$values->{'frm_' . $var} = FrmAppHelper::get_post_param( 'options[' . $var . ']', $values->{'frm_' . $var}, $sanitize );
                 }
             } else if ( $var == 'param' && empty($values->{'frm_'. $var}) ) {
                 $values->{'frm_'. $var} = $default;
@@ -45,6 +48,17 @@ class FrmProDisplaysHelper{
 
         return $values;
     }
+
+	/**
+	 * Allow script and style tags in content boxes,
+	 * but remove them from other settings
+	 *
+	 * @since 2.05.05
+	 */
+	private static function sanitize_option( $name ) {
+		$allow_code = array( 'before_content', 'content', 'after_content', 'dyncontent' );
+		return in_array( $name, $allow_code ) ? '' : 'sanitize_text_field';
+	}
 
 	public static function get_default_opts() {
 

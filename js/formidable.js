@@ -406,8 +406,8 @@ function frmFrontFormJS(){
 
 	function maybeShowLabel(e){
 		/*jshint validthis:true */
-		const $field = jQuery(this);
-		const $label = $field.closest('.frm_inside_container').find('label.frm_primary_label');
+		var $field = jQuery(this);
+		var $label = $field.closest('.frm_inside_container').find('label.frm_primary_label');
 
 		if ( $field.val().length > 0 ) {
 			$label.addClass('frm_visible');
@@ -1282,14 +1282,14 @@ function frmFrontFormJS(){
 			return;
 		}
 
+        addToHideFields( depFieldArgs.containerId, depFieldArgs.formId );
+
 		if ( onCurrentPage ) {
 			hideFieldContainer( depFieldArgs.containerId );
 			clearInputsInFieldOnPage( depFieldArgs.containerId );
 		} else {
 			clearInputsInFieldAcrossPage( depFieldArgs );
 		}
-
-		addToHideFields( depFieldArgs.containerId, depFieldArgs.formId );
 	}
 
 	function hideFieldContainer( containerId ) {
@@ -2994,6 +2994,7 @@ function frmFrontFormJS(){
 
 		var count = 0;
 		var sep = '';
+		var customSep = '';
 
 		calcField.each(function(){
 			var thisVal = getOptionValue( field.thisField, this );
@@ -3011,6 +3012,11 @@ function frmFrontFormJS(){
 				}
 			}
 
+			customSep = jQuery(document).triggerHandler( 'frmCalSeparation', [  field.thisField, count ] );
+			if ( typeof customSep !== 'undefined' ) {
+				sep = customSep;
+			}
+
 			if ( thisVal !== '' ) {
 				vals[field.valKey] += sep + thisVal;
 				count++;
@@ -3026,9 +3032,6 @@ function frmFrontFormJS(){
 			calcField = jQuery(field.thisFieldCall);
 		} else {
 			calcField = getSiblingField( field );
-			if ( calcField === null || typeof calcField === 'undefined' || calcField.length < 1  ) {
-				calcField = jQuery(field.thisFieldCall);
-			}
 		}
 
 		if ( calcField === null || typeof calcField === 'undefined' || calcField.length < 1 ) {
@@ -3101,15 +3104,44 @@ function frmFrontFormJS(){
 
 		var fields = null;
 		var container = field.triggerField.closest('.frm_repeat_sec, .frm_repeat_inline, .frm_repeat_grid');
-		if ( container.length ) {
-			var siblingFieldCall = field.thisFieldCall.replace('[id=', '[id^=');
-			fields = container.find(siblingFieldCall);
+		var repeatArgs = getRepeatArgsFromFieldName( field.triggerField.attr('name') );
+		var siblingFieldCall = field.thisFieldCall.replace('[id=', '[id^=').replace(/-"]/g, '-' + repeatArgs.repeatRow +'"]');
+
+		if ( container.length || repeatArgs.repeatRow !== '' ) {
+			if ( container.length ) {
+				fields = container.find(siblingFieldCall);
+			} else {
+				fields = jQuery(siblingFieldCall);
+			}
+
+			if ( fields === null || typeof fields === 'undefined' || fields.length < 1  ) {
+				fields = uncheckedSiblingOrOutsideSection( field, container, siblingFieldCall );
+			}
 		} else {
 			// the trigger is not in the repeating section
-			fields = jQuery(field.thisFieldCall);
+			fields = getNonSiblingField( field );
 		}
 
 		return fields;
+	}
+
+	function uncheckedSiblingOrOutsideSection( field, container, siblingFieldCall ) {
+		var fields = null;
+		if ( siblingFieldCall.indexOf(':checked') ) {
+			// check if the field has nothing selected, or is not inside the section
+			var inSection = container.find( siblingFieldCall.replace(':checked', '') );
+			if ( inSection.length < 1 ) {
+				fields = getNonSiblingField( field );
+			}
+		} else {
+			// the field holding the value is outside of the section
+			fields = getNonSiblingField( field );
+		}
+		return fields;
+	}
+
+	function getNonSiblingField( field ) {
+		return jQuery(field.thisFieldCall);
 	}
 
 	function getOptionValue( thisField, currentOpt ) {

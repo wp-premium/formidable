@@ -741,7 +741,7 @@ class FrmProFieldsController{
 		    $selector_args['html_name'] = 'field_options[hide_opt_' . absint( $_POST['current_field'] ) . '][]';
 	    }
 
-	    if ( FrmAppHelper::get_param( 'form_action' ) == 'update_settings' ) {
+	    if ( FrmAppHelper::get_param( 'form_action', '', 'get', 'sanitize_text_field' ) == 'update_settings' ) {
 	    	$selector_args['source'] = 'form_actions';
 	    } else {
 		    $field_type = sanitize_text_field( $_POST['t'] );
@@ -881,13 +881,9 @@ class FrmProFieldsController{
     public static function ajax_get_data(){
         //check_ajax_referer( 'frm_ajax', 'nonce' );
 
-        $entry_id = FrmAppHelper::get_param('entry_id');
-        if ( is_array($entry_id) ){
-            $entry_id = implode(',', $entry_id);
-        }
-        $entry_id = trim($entry_id, ',');
+		$entry_id = self::get_posted_entry_ids();
 		$current_field = FrmAppHelper::get_param( 'current_field', '', 'get', 'absint' );
-		$hidden_field_id = FrmAppHelper::get_param( 'hide_id' );
+		$hidden_field_id = FrmAppHelper::get_param( 'hide_id', '', 'get', 'sanitize_text_field' );
 
 		$current = FrmField::getOne($current_field);
 		$data_field = FrmField::getOne( $current->field_options['form_select'] );
@@ -952,6 +948,17 @@ class FrmProFieldsController{
     }
 
 	/**
+	 * @since 2.05.04
+	 */
+	private static function get_posted_entry_ids() {
+		$entry_id = FrmAppHelper::get_param( 'entry_id', '', 'get', 'sanitize_text_field' );
+		if ( is_array($entry_id) ){
+			$entry_id = implode(',', $entry_id);
+		}
+		return trim( $entry_id, ',' );
+	}
+
+	/**
 	* Get the HTML for a dependent Dynamic field when the parent changes
 	*/
 	public static function ajax_data_options(){
@@ -959,7 +966,7 @@ class FrmProFieldsController{
 
 		$args = array(
 			'trigger_field_id' => FrmAppHelper::get_param( 'trigger_field_id', '', 'post', 'absint' ),
-			'entry_id' => FrmAppHelper::get_param( 'entry_id' ),
+			'entry_id' => FrmAppHelper::get_param( 'entry_id', '', 'post', 'sanitize_text_field' ),
 			'field_id' => FrmAppHelper::get_param( 'field_id', '', 'post', 'absint' ),
 			'container_id' => FrmAppHelper::get_param( 'container_id', '', 'post', 'sanitize_title' ),
 			'default_value' => FrmAppHelper::get_param( 'default_value', '', 'post', 'sanitize_title' ),

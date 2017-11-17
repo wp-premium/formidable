@@ -60,7 +60,7 @@ if ( $selected_type == 'tag' ) { ?>
 		<input type="checkbox" value="1" name="<?php echo esc_attr( $action_control->get_field_name('post_category') ) ?>[<?php echo esc_attr( $tax_meta ) ?>][show_exclude]" id="<?php echo esc_attr( $tax_meta ) ?>_show_exclude" <?php echo ( isset( $field_vars['exclude_cat'] ) && $field_vars['exclude_cat'] && ! empty( $field_vars['exclude_cat'] ) ) ? 'checked="checked"' : ''; ?> onchange="frm_show_div('frm_exclude_cat_list_<?php echo esc_attr( $tax_meta ) ?>',this.checked,1,'#')" class="frm_show_exclude" />
 		<?php _e( 'Exclude options', 'formidable' ); ?>
 	</label>
-    <a href="javascript:void(0)" class="frm_remove_tag frm_icon_font" data-removeid="frm_posttax_<?php echo esc_attr( $tax_meta ) ?>"></a>
+    <a href="javascript:void(0)" class="frm_remove_tag frm_icon_font" data-removeid="frm_posttax_<?php echo esc_attr( $tax_meta ) ?>" data-showlast=".frm_add_posttax_row.button"></a>
     <a href="javascript:void(0)" class="frm_add_tag frm_icon_font frm_add_posttax_row"></a>
 
     <div class="frm_exclude_cat_<?php echo esc_attr( $tax_meta ) ?> with_frm_style">
