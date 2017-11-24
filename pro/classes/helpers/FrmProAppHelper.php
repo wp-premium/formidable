@@ -482,7 +482,7 @@ class FrmProAppHelper{
 				}
 			} else {
 				// if the filter changed the query to a string, allow it
-				$where_statement .= FrmAppHelper::prepend_and_or_where( ' AND ', array( 'item_id' => $entry_ids ) );
+				$where_statement .= FrmDb::prepend_and_or_where( ' AND ', array( 'item_id' => $entry_ids ) );
 			}
 		}
 

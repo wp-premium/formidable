@@ -56,7 +56,7 @@ class FrmProDisplaysHelper{
 	 * @since 2.05.05
 	 */
 	private static function sanitize_option( $name ) {
-		$allow_code = array( 'before_content', 'content', 'after_content', 'dyncontent' );
+		$allow_code = array( 'before_content', 'content', 'after_content', 'dyncontent', 'empty_msg', 'where_is' );
 		return in_array( $name, $allow_code ) ? '' : 'sanitize_text_field';
 	}
 
@@ -180,5 +180,22 @@ class FrmProDisplaysHelper{
 		}
 
 		return $shortcodes;
+	}
+
+	public static function where_is_options() {
+		return array(
+			'='               => __( 'equal to', 'formidable' ),
+			'!='              => __( 'NOT equal to', 'formidable' ),
+			'>'               => __( 'greater than', 'formidable' ),
+			'<'               => __( 'less than', 'formidable' ),
+			'>='              => __( 'greater than or equal to', 'formidable' ),
+			'<='              => __( 'less than or equal to', 'formidable' ),
+			'LIKE'            => __( 'like', 'formidable' ),
+			'not LIKE'        => __( 'NOT like', 'formidable' ),
+			'LIKE%'           => __( 'starts with', 'formidable' ),
+			'%LIKE'           => __( 'ends with', 'formidable' ),
+			'group_by'        => __( 'unique (get oldest entries)', 'formidable' ),
+			'group_by_newest' => __( 'unique (get newest entries)', 'formidable' ),
+		);
 	}
 }

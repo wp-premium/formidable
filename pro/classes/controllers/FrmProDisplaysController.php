@@ -827,7 +827,20 @@ class FrmProDisplaysController {
 		wp_die();
 	}
 
-	/* Shortcodes */
+	/**
+	 * @param string|int $atts[id] The View id or key
+	 * @param string|int $atts[entry_id] entry key, id ot list of ids/keys
+	 * @param string $atts[filter] 1, 0, or limited
+	 * @param string|int $atts[user_id] user id, email, or login
+	 * @param string|int $atts[limit] 10 or 10, 20
+	 * @param int $atts[page_size]
+	 * @param string $atts[order_by] field id or key or list of fields
+	 * @param string $atts[order] ASC, DESC, or RAND
+	 * @param string $atts[get]
+	 * @param string $atts[get_value]
+	 * @param string $atts[drafts] 1, 0, or both
+	 * @return string
+	 */
 	public static function get_shortcode( $atts ) {
 		$defaults = array(
 			'id' => '', 'entry_id' => '', 'filter' => false,
@@ -837,12 +850,12 @@ class FrmProDisplaysController {
 		);
 
 		$sc_atts = shortcode_atts( $defaults, $atts );
-		$atts = array_merge( (array)$atts, (array)$sc_atts );
+		$atts = array_merge( (array) $atts, (array) $sc_atts );
 
 		$display = FrmProDisplay::getOne( $atts['id'], false, true );
 		$user_id = FrmAppHelper::get_user_id_param( $atts['user_id'] );
 
-		if ( !empty( $atts['get'] ) ) {
+		if ( ! empty( $atts['get'] ) ) {
 			$_GET[ $atts['get'] ] = $atts['get_value'];
 		}
 
@@ -856,15 +869,19 @@ class FrmProDisplaysController {
 			unset( $att, $val );
 		}
 
-		if ( !$display ) {
+		if ( ! $display ) {
 			return __( 'There are no views with that ID', 'formidable' );
 		}
 
-		return self::get_display_data( $display, '', $atts['entry_id'], array(
-			'filter' => $atts['filter'], 'user_id' => $user_id,
-			'limit' => $atts['limit'], 'page_size' => $atts['page_size'],
-			'order_by' => $atts['order_by'], 'order' => $atts['order'],
-			'drafts' => $atts['drafts'],
+		return self::get_view_data( $display, '', array(
+			'filter'    => sanitize_title( $atts['filter'] ),
+			'user_id'   => sanitize_text_field( $user_id ),
+			'limit'     => sanitize_text_field( $atts['limit'] ),
+			'page_size' => absint( $atts['page_size'] ),
+			'order_by'  => sanitize_text_field( $atts['order_by'] ),
+			'order'     => sanitize_text_field( $atts['order'] ),
+			'drafts'    => sanitize_title( $atts['drafts'] ),
+			'entry_id'  => sanitize_text_field( $atts['entry_id'] ),
 		) );
 	}
 
@@ -1092,7 +1109,7 @@ class FrmProDisplaysController {
 	 * @return array
 	 */
 	private static function get_where_query_for_view_listing_page( $view, $atts ) {
-		$where = array( 'it.form_id' => $view->frm_form_id );
+		$where = array( 'it.form_id' => absint( $view->frm_form_id ) );
 
 		if ( self::skip_view_filters( $atts ) ) {
 			$where['it.id'] = self::get_entry_ids_that_override_filters( $atts );
@@ -1431,9 +1448,7 @@ class FrmProDisplaysController {
 	 * @return int
 	 */
 	private static function convert_single_entry_to_numeric_id( $e_id ) {
-		if ( is_numeric( $e_id ) ) {
-			// keep it as is
-		} else {
+		if ( ! is_numeric( $e_id ) ) {
 			$e_id = FrmEntry::get_id_by_key( $e_id );
 		}
 
@@ -2224,7 +2239,7 @@ class FrmProDisplaysController {
 	 */
 	private static function maybe_add_limit_to_query( $view, &$display_page_query ){
 		if ( is_numeric( $view->frm_limit ) ) {
-			$display_page_query['limit'] = ' LIMIT ' . $view->frm_limit;
+			$display_page_query['limit'] = FrmDb::esc_limit( $view->frm_limit );
 		}
 	}
 

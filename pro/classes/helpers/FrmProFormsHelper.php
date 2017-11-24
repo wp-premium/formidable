@@ -216,7 +216,6 @@ echo $custom_options;
 			$calc_rules['fieldsWithCalc'][ $field['field_id'] ] = $result;
             $calc = $field['calc'];
 			FrmProFieldsHelper::replace_non_standard_formidable_shortcodes( array( 'field' => $field['field_id'] ), $calc );
-			$calc = do_shortcode( $calc );
 
             preg_match_all("/\[(.?)\b(.*?)(?:(\/))?\]/s", $calc, $matches, PREG_PATTERN_ORDER);
 
@@ -240,6 +239,11 @@ echo $custom_options;
 				if ( $field['calc_type'] != 'text' ) {
 					$calc = str_replace( '-[', '- [', $calc );
 				}
+			}
+
+			if ( strpos( $calc, '[' ) !== false ) {
+				// check for WP shortcodes if there are any left
+				$calc = do_shortcode( $calc );
 			}
 
             $triggers[] = reset($field_keys);

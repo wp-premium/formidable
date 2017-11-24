@@ -83,7 +83,7 @@ class FrmProCopy{
 
             require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
-            $frmdb = new FrmDb();
+            $frmdb = new FrmMigrate();
             $charset_collate = $frmdb->collation();
 
             /* Create/Upgrade Display Table */
@@ -163,7 +163,7 @@ class FrmProCopy{
 				'ORDER BY type DESC';
 		$query = $wpdb->prepare( $query, $blog_id, 'form', 'display' );
 
-		return FrmAppHelper::check_cache( 'all_templates_' . $blog_id, 'frm_copy', $query, 'get_results' );
+		return FrmDb::check_cache( 'all_templates_' . $blog_id, 'frm_copy', $query, 'get_results' );
 	}
 
 	/**

@@ -341,13 +341,16 @@ class FrmProEntryFormatter extends FrmEntryFormatter {
 			$this->push_field_values_to_array( $child_values, $output );
 
 		} else if ( $field_type == 'divider' && $field_value->has_child_entries() ) {
-			$output[ $field_key ] = array();
+			$output[ $field_key ] = array(
+				'form' => $field_value->get_field_option('form_select'),
+			);
 
 			$count = 0;
-			foreach ( $field_value->get_displayed_value() as $row_values ) {
-				$output[ $field_key ][ $count ] = array();
+			foreach ( $field_value->get_displayed_value() as $entry_id => $row_values ) {
+				$index = 'i' . $entry_id;
+				$output[ $field_key ][ $index ] = array();
+				$this->push_field_values_to_array( $row_values, $output[ $field_key ][ $index ] );
 
-				$this->push_field_values_to_array( $row_values, $output[ $field_key ][ $count ] );
 				$this->push_repeating_field_values_to_array( $row_values, $count, $output );
 
 				$count++;
