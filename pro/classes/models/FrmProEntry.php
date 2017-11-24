@@ -458,7 +458,7 @@ class FrmProEntry{
         $query = apply_filters('frm_view_order', $query, $args);
 
         if ( ! empty($query['where']) ) {
-			$query['where'] = FrmAppHelper::prepend_and_or_where( 'WHERE ', $query['where'] );
+			$query['where'] = FrmDb::prepend_and_or_where( 'WHERE ', $query['where'] );
         }
 
 		$query['order'] = rtrim($query['order'], ', ');
@@ -495,8 +495,9 @@ class FrmProEntry{
 			$query['order'] = ' ORDER BY';
 
 			foreach ( $args['order_by_array'] as $o_key => $order_by ) {
+				FrmDb::esc_order_by( $args['order_array'][ $o_key ] );
 				$query['order'] .= ' it.' . sanitize_title( $order_by ) . ' ' . $args['order_array'][ $o_key ] . ', ';
-				unset($order_by);
+				unset( $order_by );
 			}
             return;
         }
@@ -529,24 +530,29 @@ class FrmProEntry{
     private static function prepare_ordered_entries_query( &$query, &$args, $o_key, $o_field, $first_order ) {
         global $wpdb;
 
+		$order = $args['order_array'][ $o_key ];
+		FrmDb::esc_order_by( $order );
+
+		$o_key = sanitize_title( $o_key );
+
         //if field is some type of post field
 		if ( isset($o_field->field_options['post_field']) && $o_field->field_options['post_field'] ) {
 
             //if field is custom field
 			if ( $o_field->field_options['post_field'] == 'post_custom' ) {
                 $query['select'] .= $wpdb->prepare(' LEFT JOIN '. $wpdb->postmeta .' pm'. $o_key .' ON pm'. $o_key .'.post_id=it.post_id AND pm'. $o_key .'.meta_key = %s ', $o_field->field_options['custom_field']);
-				$query['order'] .= 'CASE when pm'. $o_key .'.meta_value IS NULL THEN 1 ELSE 0 END, pm'. $o_key .'.meta_value ' . ( in_array($o_field->type, array( 'number', 'scale')) ? '+0 ' : '') . $args['order_array'][$o_key] .', ';
+				$query['order'] .= 'CASE when pm'. $o_key .'.meta_value IS NULL THEN 1 ELSE 0 END, pm'. $o_key .'.meta_value ' . ( in_array($o_field->type, array( 'number', 'scale')) ? '+0 ' : '') . $order .', ';
             } else if ( $o_field->field_options['post_field'] != 'post_category' ) {
                 //if field is a non-category post field
                 $query['select'] .= $first_order ? ' INNER ' : ' LEFT ';
-				$query['select'] .= 'JOIN '. $wpdb->posts .' p'. $o_key .' ON p'. $o_key .'.ID=it.post_id ';
+				$query['select'] .= 'JOIN '. sanitize_title( $wpdb->posts ) .' p'. $o_key .' ON p'. $o_key .'.ID=it.post_id ';
 
-                $query['order'] .= 'CASE p'. $o_key .'.'. $o_field->field_options['post_field']." WHEN '' THEN 1 ELSE 0 END, p$o_key.". $o_field->field_options['post_field'].' '. $args['order_array'][$o_key] .', ';
+				$query['order'] .= 'CASE p' . $o_key . '.' . sanitize_title( $o_field->field_options['post_field'] ) . " WHEN '' THEN 1 ELSE 0 END, p$o_key." . sanitize_title( $o_field->field_options['post_field'] ) . ' ' . $order . ', ';
             }
         } else if ( is_numeric($args['order_by_array'][$o_key]) ) {
             //if ordering by a normal, non-post field
             $query['select'] .= $wpdb->prepare(' LEFT JOIN '. $wpdb->prefix .'frm_item_metas em'. $o_key .' ON em'. $o_key .'.item_id=it.id AND em'. $o_key .'.field_id=%d ', $o_field->id);
-            $query['order'] .= 'CASE when em'. $o_key .'.meta_value IS NULL THEN 1 ELSE 0 END, em'. $o_key .'.meta_value '. ( in_array($o_field->type, array( 'number', 'scale')) ? '+0 ' : '') . $args['order_array'][$o_key] .', ';
+            $query['order'] .= 'CASE when em'. $o_key .'.meta_value IS NULL THEN 1 ELSE 0 END, em'. $o_key .'.meta_value '. ( in_array($o_field->type, array( 'number', 'scale')) ? '+0 ' : '') . $order .', ';
 
 			//Meta value is only necessary for time field reordering and only if time field is first ordering field
 			//Check if time field (for time field ordering)
@@ -554,7 +560,7 @@ class FrmProEntry{
                 $args['time_field'] = $o_field;
             }
         } else {
-            $query['order'] .= 'it.'. $o_field .' '. $args['order_array'][$o_key] .', ';
+			$query['order'] .= 'it.' . sanitize_title( $o_field ) . ' ' . $order . ', ';
         }
     }
 

@@ -92,6 +92,7 @@ class FrmProDisplay{
 			switch_to_blog( $blog_id );
 		}
 
+		$id = sanitize_title( $id );
         if ( ! is_numeric($id) ) {
             $id = FrmDb::get_var( $wpdb->posts, array( 'post_name' => $id, 'post_type' => 'frm_display', 'post_status !' => 'trash'), 'ID' );
 
@@ -99,6 +100,11 @@ class FrmProDisplay{
                 return false;
             }
         }
+
+		if ( empty( $id ) ) {
+			// don't let it get the current page
+			return false;
+		}
 
         $post = get_post($id);
         if ( ! $post || $post->post_type != 'frm_display' || $post->post_status == 'trash' ) {

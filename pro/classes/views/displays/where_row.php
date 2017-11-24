@@ -16,18 +16,9 @@
     </select>
     <?php _e( 'is', 'formidable' ) ?>
     <select id="where_field_is_<?php echo esc_attr( $where_key ); ?>" class="frm_where_is_options" name="options[where_is][<?php echo esc_attr( $where_key ); ?>]">
-        <option value="=" <?php selected($where_is, '=') ?>><?php _e( 'equal to', 'formidable' ) ?></option>
-        <option value="!=" <?php selected($where_is, '!=') ?>><?php _e( 'NOT equal to', 'formidable' ) ?></option>
-        <option value=">" <?php selected($where_is, '>') ?>><?php _e( 'greater than', 'formidable' ) ?></option>
-        <option value="<" <?php selected($where_is, '<') ?>><?php _e( 'less than', 'formidable' ) ?></option>
-        <option value=">=" <?php selected($where_is, '>=') ?>><?php _e( 'greater than or equal to', 'formidable' ) ?> &nbsp;</option>
-        <option value="<=" <?php selected($where_is, '<=') ?>><?php _e( 'less than or equal to', 'formidable' ) ?></option>
-        <option value="LIKE" <?php selected($where_is, 'LIKE') ?>><?php _e( 'like', 'formidable' ) ?></option>
-        <option value="not LIKE" <?php selected($where_is, 'not LIKE') ?>><?php _e( 'NOT like', 'formidable' ) ?></option>
-		<option value="LIKE%" <?php selected($where_is, 'LIKE%') ?>><?php _e( 'starts with', 'formidable' ) ?></option>
-		<option value="%LIKE" <?php selected($where_is, '%LIKE') ?>><?php _e( 'ends with', 'formidable' ) ?></option>
-		<option value="group_by" <?php selected($where_is, 'group_by') ?>><?php _e( 'unique (get oldest entries)', 'formidable' ) ?></option>
-		<option value="group_by_newest" <?php selected($where_is, 'group_by_newest') ?>><?php _e( 'unique (get newest entries)', 'formidable' ) ?></option>
+		<?php foreach ( FrmProDisplaysHelper::where_is_options() as $opt => $label ) { ?>
+			<option value="<?php echo esc_attr( $opt) ?>" <?php selected( $where_is, $opt ) ?>><?php echo esc_html( $label ) ?></option>
+		<?php } ?>
     </select>
     <span id="where_field_options_<?php echo esc_attr( $where_key ); ?>" class="frm_where_val frm_inline<?php echo esc_attr( strpos( $where_is, 'group_by' ) === 0 ? ' frm_hidden' : '' ); ?>">
         <?php FrmProDisplaysController::add_where_options($where_field, $where_key, $where_val); ?>

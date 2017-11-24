@@ -321,7 +321,7 @@ class FrmProEntriesHelper{
     }
 
     public static function get_field($field = 'is_draft', $id) {
-        $entry = FrmAppHelper::check_cache( $id, 'frm_entry' );
+        $entry = FrmDb::check_cache( $id, 'frm_entry' );
         if ( $entry && isset($entry->$field) ) {
             return $entry->{$field};
         }
