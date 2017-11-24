@@ -44,6 +44,11 @@ class FrmProFieldsHelper{
 	 * @param string $value
 	 */
 	public static function replace_non_standard_formidable_shortcodes( $args, &$value ) {
+		if ( strpos( $value, '[' ) === false ) {
+			// don't run checks if there are no shortcodes
+			return;
+		}
+
 		$default_args = array(
 			'allow_array' => false,
 			'field' => false,
@@ -1784,6 +1789,11 @@ class FrmProFieldsHelper{
 				}
 			break;
 		}
+
+		/**
+		 * @since 2.05.06
+		 */
+		do_action( 'frm_load_ajax_field_scripts', array( 'field' => $f, 'is_first' => $ajax_now ) );
 	}
 
 	/**

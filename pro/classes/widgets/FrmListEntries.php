@@ -13,7 +13,7 @@ class FrmListEntries extends WP_Widget {
         $display = FrmProDisplay::getOne($instance['display_id'], false, true);
 
 		$title = apply_filters( 'widget_title', ( empty( $instance['title'] ) && $display ) ? $display->post_title : $instance['title'] );
-        $limit = empty($instance['limit']) ? ' LIMIT 100' : " LIMIT {$instance['limit']}";
+        $limit = FrmDb::esc_limit( empty( $instance['limit'] ) ? '100' : $instance['limit'] );
         $post_id = $instance['post_id'];
         $page_url = get_permalink($post_id);
 
@@ -27,7 +27,7 @@ class FrmListEntries extends WP_Widget {
 					//Get only the first order field and order
 					$order_field = reset($display->frm_order_by);
 					$order = reset($display->frm_order);
-					FrmAppHelper::esc_order_by( $order );
+					FrmDb::esc_order_by( $order );
 
 					if ( $order_field == 'rand' ) {
 						//If random is set, set the order to random
