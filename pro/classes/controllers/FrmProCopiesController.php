@@ -3,14 +3,10 @@
 class FrmProCopiesController{
 
 	public static function install() {
-		$frm_db_version = (int) get_option( 'frm_db_version' );
-		if ( ! $frm_db_version ) {
-			// The main plugin tables haven't been installed yet
-			return;
+		if ( is_multisite() ) {
+			FrmProCopy::install();
 		}
-
-        FrmProCopy::install();
-    }
+	}
 
     public static function activation_install() {
         // make sure post type exists before creating any views
@@ -18,8 +14,33 @@ class FrmProCopiesController{
         self::install();
     }
 
+	/**
+	 * Importing default templates is happening before the tables are installed
+	 *
+	 * @since 2.05.09
+	 */
+	public static function maybe_install_import() {
+		$importing = defined( 'WP_IMPORTING' ) && WP_IMPORTING;
+		if ( $importing ) {
+			$install_complete = get_option( 'frmpro_db_version' );
+			if ( ! $install_complete ) {
+				self::install();
+			}
+		}
+	}
+
+	/**
+	 * @since 2.05.09
+	 */
+	public static function copy_forms() {
+		FrmProCopy::copy_forms();
+	}
+
 	public static function save_copied_display( $id, $values ) {
         global $wpdb, $blog_id;
+
+		self::maybe_install_import();
+
         $wpdb->delete(FrmProCopy::table_name(), array( 'form_id' => $id, 'type' => 'display', 'blog_id' => $blog_id));
 
         if ( isset($values['options']['copy']) && $values['options']['copy'] ) {
@@ -28,13 +49,29 @@ class FrmProCopiesController{
     }
 
 	public static function save_copied_form( $id, $values ) {
-        global $blog_id, $wpdb;
-        if ( isset( $values['options']['copy'] ) && $values['options']['copy'] ) {
-            FrmProCopy::create( array( 'form_id' => $id, 'type' => 'form'));
-        } else {
-            $wpdb->delete(FrmProCopy::table_name(), array( 'type' => 'form', 'form_id' => $id, 'blog_id' => $blog_id));
-        }
-    }
+		global $blog_id, $wpdb;
+
+		self::maybe_install_import();
+
+		$form_key = FrmForm::getKeyByID( $id );
+		if ( 'contact' === $form_key ) {
+			// don't copy the form that is already autocreated
+			return;
+		}
+
+		if ( isset( $values['options']['copy'] ) && $values['options']['copy'] ) {
+			FrmProCopy::create( array(
+				'form_id' => $id,
+				'type'    => 'form',
+			) );
+		} else {
+			$wpdb->delete( FrmProCopy::table_name(), array(
+				'type'    => 'form',
+				'form_id' => $id,
+				'blog_id' => $blog_id,
+			) );
+		}
+	}
 
 	public static function destroy_copied_display( $id ) {
         global $blog_id, $wpdb;

@@ -32,7 +32,7 @@ if ( $field['type'] == 'hidden' ) {
         }
 
     }else{ ?>
-<input type="hidden" name="frm_page_order_<?php echo esc_attr( $field['form_id'] ) ?>" value="<?php echo esc_attr( $field['field_order'] ); ?>" />
+<input type="hidden" name="frm_page_order_<?php echo esc_attr( $field['form_id'] ) ?>" id="frm_page_order_<?php echo esc_attr( $field['form_id'] ) ?>" value="<?php echo esc_attr( $field['field_order'] ); ?>" />
 <?php
 		if ( $field['form_id'] == $post_form_id && ! defined('DOING_AJAX') && ! isset( $frm_vars['scrolled'] ) ) {
             $frm_vars['scrolled'] = true;

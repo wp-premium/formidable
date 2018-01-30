@@ -182,7 +182,7 @@
 
                 <h3><?php _e( 'Custom Fields', 'formidable' ) ?> <span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php esc_attr_e( 'To set the featured image, use \'_thumbnail_id\' as the custom field name.', 'formidable' );
 ?>" ></span></h3>
-                <div id="postcustomstuff" class="frm_name_value<?php echo empty($form_action->post_content['post_custom_fields']) ? ' frm_hidden' : ''; ?>">
+                <div id="postcustomstuff" class="frm_add_remove frm_name_value<?php echo empty($form_action->post_content['post_custom_fields']) ? ' frm_hidden' : ''; ?>">
                 <table id="list-table">
                     <thead>
                     <tr>

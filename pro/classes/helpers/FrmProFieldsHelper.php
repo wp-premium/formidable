@@ -241,11 +241,12 @@ class FrmProFieldsHelper{
 	 */
 	private static function do_auto_id_shortcode( $args ) {
 		$last_entry = FrmProEntryMetaHelper::get_max( $args['field'] );
+		$start = isset( $args['shortcode_atts']['start'] ) ? absint( $args['shortcode_atts']['start'] ) : false;
 
-		if ( ! $last_entry && isset( $args['shortcode_atts']['start'] ) ) {
-			$new_value = absint( $args['shortcode_atts']['start'] );
+		if ( ! $last_entry && $start !== false ) {
+			$new_value = $start;
 		} else {
-			$new_value = absint( $last_entry ) + 1;
+			$new_value = max( $start, absint( $last_entry ) + 1 );
 		}
 
 		return $new_value;
