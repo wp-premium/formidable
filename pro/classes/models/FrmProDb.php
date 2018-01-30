@@ -30,7 +30,9 @@ class FrmProDb{
 					call_user_func( array( __CLASS__, 'migrate_to_' . $migration ) );
 				}
 			}
-        }
+		}
+
+		FrmProCopiesController::install();
 
 		update_option('frmpro_db_version', $db_version);
 

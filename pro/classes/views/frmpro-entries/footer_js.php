@@ -1,5 +1,5 @@
 
-<script type="text/javascript">
+<script>
 /*<![CDATA[*/
 <?php
 if ( isset($frm_vars['tinymce_loaded']) && $frm_vars['tinymce_loaded'] === true ) {
