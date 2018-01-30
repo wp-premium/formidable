@@ -2667,7 +2667,7 @@ function frmFrontFormJS(){
 		var keys = calc.total;
 		var len = keys.length;
 		var vals = [];
-		var pages = getStartEndPage( all_calcs.calc[ keys[0] ].form_id );
+		var pages = getStartEndPage( all_calcs.calc[ keys[0] ] );
 
 		// loop through each calculation this field is used in
 		for ( var i = 0, l = len; i < l; i++ ) {
@@ -2683,8 +2683,23 @@ function frmFrontFormJS(){
 	 * @param formId
 	 * @since 2.05.06
 	 */
-	function getStartEndPage( formId ) {
-		var hasPreviousPage = document.getElementById('frm_form_'+ formId +'_container').getElementsByClassName('frm_next_page');
+	function getStartEndPage( thisField ) {
+		var formId = thisField.form_id;
+		var formContainer = document.getElementById('frm_form_'+ formId +'_container');
+
+		if ( formContainer === null && thisField.in_section ) {
+			var fieldContainer = document.getElementById('frm_field_'+ thisField.in_section +'_container');
+
+			if ( fieldContainer !== null ) {
+				formContainer = closest( fieldContainer, function(el) {
+    				return el.tagName === 'FORM';
+				} );
+
+				formId = formContainer.elements.namedItem('form_id').value;
+			}
+		}
+
+		var hasPreviousPage = formContainer.getElementsByClassName('frm_next_page');
 		var hasAnotherPage  = document.getElementById('frm_page_order_'+ formId);
 
 		var pages = [];
@@ -2696,6 +2711,10 @@ function frmFrontFormJS(){
 		}
 
 		return pages;
+	}
+
+	function closest( el, fn ) {
+	    return el && (fn(el) ? el : closest(el.parentNode, fn));
 	}
 
 	/**
@@ -4165,6 +4184,13 @@ function frmFrontFormJS(){
 						}
 					});
 
+					jQuery( html ).find( '.frm_html_container' ).each( function() {
+						// check heading logic
+						var fieldID = this.id.replace( 'frm_field_', '' ).split( '-' )[0];
+						checked.push( fieldID );
+						hideOrShowFieldById( fieldID, repeatArgs );
+					} );
+
 					loadDropzones(repeatArgs.repeatRow);
 					loadStars();
 
@@ -4362,7 +4388,11 @@ function frmFrontFormJS(){
 
 	function loadChosen( chosenContainer ) {
 		if ( jQuery().chosen ) {
-			var opts = {allow_single_deselect:true,no_results_text:frm_js.no_results};
+			var opts = {
+				allow_single_deselect:true,
+				no_results_text:frm_js.no_results,
+				search_contains:true
+			};
 			if ( typeof __frmChosen !== 'undefined' ) {
 				opts = '{' + __frmChosen + '}';
 			}

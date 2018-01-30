@@ -4,6 +4,7 @@ class FrmProHooksController{
     public static function load_hooks(){
 		add_filter( 'load_textdomain_mofile', 'FrmProAppController::load_translation', 10, 2 );
         add_action('init', 'FrmProAppController::create_taxonomies', 0 );
+		add_action( 'wp_before_admin_bar_render', 'FrmProAppController::admin_bar_configure', 25 );
 
 		add_filter( 'frm_db_needs_upgrade', 'FrmProDb::needs_upgrade' );
 		add_action( 'frm_before_install', 'FrmProDb::before_free_version_db_upgrade' );
@@ -453,7 +454,7 @@ class FrmProHooksController{
 
     public static function load_multisite_hooks() {
         // Copies Controller
-        add_action('init', 'FrmProCopiesController::install');
+		add_action( 'init', 'FrmProCopiesController::copy_forms' );
         add_action('frm_after_install', 'FrmProCopiesController::activation_install', 20);
         add_action('frm_update_form', 'FrmProCopiesController::save_copied_form', 20, 2);
         add_action('frm_create_display', 'FrmProCopiesController::save_copied_display', 20, 2);

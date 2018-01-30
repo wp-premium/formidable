@@ -4,7 +4,7 @@ Tags: contact form, form builder, custom form, forms, form, form maker, form cre
 Requires at least: 4.0
 Tested up to: 4.9
 Requires PHP: 5.3
-Stable tag: 2.05.06
+Stable tag: 2.05.09
 
 The best WordPress form plugin for contact forms, surveys and more. Make forms a breeze with a drag and drop form builder and form style generator.
 
@@ -153,6 +153,38 @@ The field and form names and descriptions are all changed with in-place edit. Ju
 [See more FAQs](https://formidableforms.com/formidable-faqs/ "Formidable Form FAQs")
 
 == Changelog ==
+= 2.05.09 =
+* Fix: Read only background and border colors weren't showing in the form correctly
+* Fix: A PHP warning was showing with validation messages in the form
+* **Pro Version Forms**
+* Fix: Autocomplete dropdowns were looking for a space before the typed value
+* Fix: /r was showing in conditional multi-line default values
+* Fix: Add error styling to single option autocomplete dropdowns
+* Fix: Check conditional logic on html fields inside a repeating section
+* Fix: Prevent database errors on the first install in a multisite network
+
+= 2.05.08 =
+* Fix: Hide extra columns on the Formidable -> Entries page more accurately
+* Fix: Prevent WP confirmation messages from showing when saving a form
+* Fix: Some tooltips were partially covered by the admin menu
+* **Pro Version Forms**
+* Enhancement: When [auto_id start=100] is higher than the last value in the entry, use 100.
+* Enhancement: Remove type="text/javascript" for new HTML5 validation requirements
+* Fix: The Formidable -> Views page didn't look good on small screens
+* Fix: All custom field rows were being removed in post settings when one was removed
+* Fix: Lookup calculations in repeating sections were returning javascript errors
+
+= 2.05.07 =
+* New: Limit the number of field columns in the entry listing page to a max of 11 fields
+* Security Fix: Fix an SQL injection vulnerability on the Form listing page on the backend. Vulnerability discovered by the static code analysis solution RIPS (www.ripstech.com)
+* **Pro Version Forms**
+* New: Add links to edit views and post entry in the top admin bar
+* Tweak: Show default val/placeholder text icons for any item in an address field and confirmation fields
+* Tweak: Apply the frm_csv_sep hook when importing addresses. This allows for a difference separator to be specified for values in an address field
+* Fix: View pagination was being ignored when is wasn't overridden from the view shortcode
+* Fix: Prevent errors with hitting server limits for a long regex when processing shortcodes in a view with a long form
+* Fix: Set dependencies on the datepicker locale js. This solves the problem with the scripts getting out of order on some sites.
+
 = 2.05.06 =
 * Tweak: Move database functions from FrmAppHelper to FrmDb
 * Tweak: Move install/update/migrate functions from FrmDb to FrmMigrate

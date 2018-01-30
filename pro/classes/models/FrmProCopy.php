@@ -11,8 +11,6 @@ class FrmProCopy{
 	public static function create( $values ) {
 		global $wpdb, $blog_id;
 
-		self::maybe_install();
-
 		$new_values = array();
 		self::prepare_values( $values, $new_values );
 
@@ -61,17 +59,6 @@ class FrmProCopy{
 		$new_values['created_at'] = current_time('mysql', 1);
 	}
 
-	/**
-	 * @since 2.02.10
-	 */
-	private static function maybe_install() {
-		global $wpdb;
-		$exists = $wpdb->query( 'DESCRIBE '. self::table_name() );
-		if ( ! $exists ) {
-			self::install( true );
-		}
-	}
-
     public static function install( $force = false ) {
         $db_version = 1.2; // this is the version of the database we're moving to
         $old_db_version = get_site_option('frmpro_copies_db_version');
@@ -107,30 +94,30 @@ class FrmProCopy{
         self::copy_forms($force);
     }
 
-    /**
-     * Copy forms that are set to copy from one site to another
-     */
-    private static function copy_forms($force) {
-        self::maybe_force( $force );
-        if ( ! $force ) {
-            return;
-        }
+	/**
+	 * Copy forms that are set to copy from one site to another
+	 */
+	public static function copy_forms( $force = false ) {
+		self::maybe_force( $force );
+		if ( ! $force ) {
+			return;
+		}
 
-        $templates = self::get_templates_to_copy();
+		$templates = self::get_templates_to_copy();
 
-        foreach ( $templates as $temp ) {
-            if ( $temp->type == 'form' ) {
-                self::copy_form( $temp );
-            } else {
-            	self::copy_view( $temp );
-            }
+		foreach ( $templates as $temp ) {
+			if ( $temp->type == 'form' ) {
+				self::copy_form( $temp );
+			} else {
+				self::copy_view( $temp );
+			}
 
-            //TODO: replace any ids with field keys in the display before duplicated
-            unset($temp);
-        }
+			//TODO: replace any ids with field keys in the display before duplicated
+			unset( $temp );
+		}
 
-        update_option('frmpro_copies_checked', time());
-    }
+		update_option( 'frmpro_copies_checked', time() );
+	}
 
 	/**
 	 * @since 2.02.10

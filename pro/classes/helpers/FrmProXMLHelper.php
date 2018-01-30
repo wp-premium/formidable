@@ -338,7 +338,8 @@ class FrmProXMLHelper{
 			return $value;
 		}
 
-		$value = explode( ', ', $value );
+		$sep = apply_filters( 'frm_csv_sep', ', ' );
+		$value = explode( $sep, $value );
 
 		$count = count( $value );
 

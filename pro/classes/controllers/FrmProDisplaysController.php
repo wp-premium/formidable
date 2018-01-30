@@ -131,8 +131,8 @@ class FrmProDisplaysController {
 	public static function manage_columns( $columns ) {
 		unset( $columns['title'], $columns['date'] );
 
-		$columns['id'] = 'ID';
 		$columns['title'] = __( 'View Title', 'formidable' );
+		$columns['id'] = 'ID';
 		$columns['description'] = __( 'Description' );
 		$columns['form_id'] = __( 'Form', 'formidable' );
 		$columns['show_count'] = __( 'Entry', 'formidable' );
@@ -877,7 +877,7 @@ class FrmProDisplaysController {
 			'filter'    => sanitize_title( $atts['filter'] ),
 			'user_id'   => sanitize_text_field( $user_id ),
 			'limit'     => sanitize_text_field( $atts['limit'] ),
-			'page_size' => absint( $atts['page_size'] ),
+			'page_size' => sanitize_title( $atts['page_size'] ),
 			'order_by'  => sanitize_text_field( $atts['order_by'] ),
 			'order'     => sanitize_text_field( $atts['order'] ),
 			'drafts'    => sanitize_title( $atts['drafts'] ),
@@ -939,6 +939,8 @@ class FrmProDisplaysController {
 
 		// load the styling for css classes and pagination
 		FrmStylesController::enqueue_style();
+
+		self::add_view_to_globals( $view );
 
 		return $view_content;
 	}
@@ -2717,6 +2719,17 @@ class FrmProDisplaysController {
 
         wp_die();
     }
+
+	/**
+	 * @since 2.05.07
+	 */
+	private static function add_view_to_globals( $view ) {
+		global $frm_vars;
+		if ( ! isset( $frm_vars['views_loaded'] ) ) {
+			$frm_vars['views_loaded'] = array();
+		}
+		$frm_vars['views_loaded'][ $view->ID ] = $view->post_title;
+	}
 
 	public static function filter_after_content( $content, $display, $show, $atts ) {
 		_deprecated_function( __FUNCTION__, '2.0.23', 'FrmProDisplaysController::replace_entry_count_shortcode()' );

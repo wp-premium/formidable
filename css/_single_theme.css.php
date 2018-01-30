@@ -3,7 +3,7 @@
 $settings = FrmStylesHelper::get_settings_for_output( $style );
 extract( $settings );
 
-$important = empty($important_style) ? '' : ' !important';
+$important = empty( $important_style ) ? '' : ' !important';
 $label_margin = (int) $width + 10;
 
 $minus_icons = FrmStylesHelper::minus_icons();
@@ -28,7 +28,7 @@ $arrow_icons = FrmStylesHelper::arrow_icons();
     text-align:<?php echo esc_html( $form_align . $important ) ?>;
 }
 
-<?php if ( $center_form ) {?>
+<?php if ( $center_form ) { ?>
 .frm_inline_form.<?php echo esc_html( $style_class ) ?> form{
 	text-align:center;
 }
@@ -324,7 +324,8 @@ $arrow_icons = FrmStylesHelper::arrow_icons();
 .<?php echo esc_html( $style_class ) ?> .chosen-container-single .chosen-single{
     color:<?php echo esc_html( $text_color . $important ) ?>;
 	background-color:<?php echo esc_html( $bg_color . $important ); ?>;
-<?php if ( ! empty($important) ) {
+<?php
+if ( ! empty( $important ) ) {
     echo esc_html( 'background-image:none' . $important . ';' );
 }
 ?>
@@ -343,7 +344,7 @@ $arrow_icons = FrmStylesHelper::arrow_icons();
     box-sizing:border-box;
     outline:none<?php echo esc_html( $important ) ?>;
     font-weight:<?php echo esc_html( $field_weight ) ?>;
-    box-shadow:<?php echo esc_html( ( isset( $remove_box_shadow ) && $remove_box_shadow ) ? 'none' : '0 1px 1px rgba(0, 0, 0, 0.075) inset' )?>;
+    box-shadow:<?php echo esc_html( ( isset( $remove_box_shadow ) && $remove_box_shadow ) ? 'none' : '0 1px 1px rgba(0, 0, 0, 0.075) inset' ) ?>;
 }
 
 .<?php echo esc_html( $style_class ) ?> input[type=file]::-webkit-file-upload-button{
@@ -433,9 +434,9 @@ $arrow_icons = FrmStylesHelper::arrow_icons();
 .<?php echo esc_html( $style_class ) ?> input[readonly],
 .<?php echo esc_html( $style_class ) ?> select[readonly],
 .<?php echo esc_html( $style_class ) ?> textarea[readonly]{
-	background-color:<?php echo esc_html( $bg_color_disabled . $important ); ?>;
-    color: <?php echo esc_html( $text_color_disabled . $important ) ?>;
-    border-color:#<?php echo esc_html( $border_color_disabled . $important ) ?>;
+	background-color:#<?php echo esc_html( $bg_color_disabled . $important ); ?>;
+	color:<?php echo esc_html( $text_color_disabled . $important ) ?>;
+	border-color:#<?php echo esc_html( $border_color_disabled . $important ) ?>;
 }
 
 /* These do not work if they are combined */
@@ -509,8 +510,7 @@ $arrow_icons = FrmStylesHelper::arrow_icons();
 	margin-top: 0 <?php echo esc_html( $important ) ?>;
 }
 
-<?php
-if ( ! $submit_style ) { ?>
+<?php if ( ! $submit_style ) { ?>
 .<?php echo esc_html( $style_class ) ?> .frm_compact .frm_dropzone.dz-clickable .dz-message,
 .<?php echo esc_html( $style_class ) ?> input[type=submit],
 .<?php echo esc_html( $style_class ) ?> .frm_submit input[type=button],
@@ -523,11 +523,15 @@ if ( ! $submit_style ) { ?>
     height:<?php echo esc_html( $submit_height . $important ) ?>;
     line-height:normal<?php echo esc_html( $important ) ?>;
     text-align:center;
-    background: <?php echo esc_html( $submit_bg_color );
-	if ( ! empty($submit_bg_img) ) {
+    background:
+	<?php
+	echo esc_html( $submit_bg_color );
+	if ( ! empty( $submit_bg_img ) ) {
 		echo esc_html( ' url(' . $submit_bg_img . ')' );
 	}
-	echo esc_html( $important ); ?>;
+	echo esc_html( $important );
+	?>
+	;
     border-width:<?php echo esc_html( $submit_border_width ) ?>;
     border-color: <?php echo esc_html( $submit_border_color . $important ) ?>;
     border-style:solid;
@@ -557,12 +561,11 @@ if ( ! $submit_style ) { ?>
 	margin:0;
 }
 
-<?php
-	if ( empty( $submit_bg_img ) ) {
-?>.<?php echo esc_html( $style_class ) ?> input[type=submit]:hover,
-.<?php echo esc_html( $style_class ) ?> .frm_submit input[type=button]:hover,
-.<?php echo esc_html( $style_class ) ?> .frm_submit button:hover,
-.<?php echo esc_html( $style_class ) ?>.frm_login_form input[type=submit]:hover{
+<?php if ( empty( $submit_bg_img ) ) { ?>
+.<?php echo esc_html( $style_class ); ?> input[type=submit]:hover,
+.<?php echo esc_html( $style_class ); ?> .frm_submit input[type=button]:hover,
+.<?php echo esc_html( $style_class ); ?> .frm_submit button:hover,
+.<?php echo esc_html( $style_class ); ?>.frm_login_form input[type=submit]:hover{
     background: <?php echo esc_html( $submit_hover_bg_color . $important ) ?>;
     border-color: <?php echo esc_html( $submit_hover_border_color . $important ) ?>;
     color: <?php echo esc_html( $submit_hover_color . $important ) ?>;
@@ -671,6 +674,7 @@ if ( ! $submit_style ) { ?>
 .<?php echo esc_html( $style_class ) ?> .frm_blank_field .frm-g-recaptcha iframe,
 .<?php echo esc_html( $style_class ) ?> .frm_blank_field .g-recaptcha iframe,
 .<?php echo esc_html( $style_class ) ?> .frm_blank_field .chosen-container-multi .chosen-choices,
+.<?php echo esc_html( $style_class ) ?> .frm_blank_field .chosen-container-single .chosen-single,
 .<?php echo esc_html( $style_class ) ?> .frm_form_field :invalid{
     color:#<?php echo esc_html( $text_color_error . $important ) ?>;
 	background-color:<?php echo esc_html( $bg_color_error . $important ); ?>;
@@ -962,11 +966,11 @@ if ( ! $submit_style ) { ?>
 
 .<?php echo esc_html( $style_class ) ?> .chosen-container-single .chosen-single div{
 <?php
-    // calculate the top position based on field padding
-    $top_pad = explode(' ', $field_pad);
-    $top_pad = reset($top_pad); // the top padding is listed first
-    $pad_unit = preg_replace('/[0-9]+/', '', $top_pad); //px, em, rem...
-    $top_margin = (int) str_replace($pad_unit, '', $top_pad) / 2;
+// calculate the top position based on field padding
+$top_pad = explode( ' ', $field_pad );
+$top_pad = reset( $top_pad ); // the top padding is listed first
+$pad_unit = preg_replace( '/[0-9]+/', '', $top_pad ); //px, em, rem...
+$top_margin = (int) str_replace( $pad_unit, '', $top_pad ) / 2;
 ?>
     top:<?php echo esc_html( $top_margin . $pad_unit . $important ) ?>;
 }
