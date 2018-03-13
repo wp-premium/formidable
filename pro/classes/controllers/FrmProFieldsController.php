@@ -2,47 +2,6 @@
 
 class FrmProFieldsController{
 
-    public static function show_normal_field( $show, $field_type ) {
-        if ( in_array( $field_type, array( 'hidden', 'user_id', 'break', 'end_divider') ) ) {
-            $show = false;
-        }
-        return $show;
-    }
-
-    public static function &normal_field_html($show, $field_type){
-        if ( in_array( $field_type, array( 'hidden', 'user_id', 'break', 'divider', 'end_divider', 'html', 'form' ) ) ) {
-            $show = false;
-        }
-        return $show;
-    }
-
-    public static function show_other($field, $form, $args) {
-        global $frm_vars;
-
-		if ( 'end_divider' == $field['type'] ) {
-			// close the section's frm_field_x_container div
-			if ( isset( $frm_vars['div'] ) && $frm_vars['div'] ) {
-				echo "</div>\n";
-				$frm_vars['div'] = false;
-			}
-
-			// close the collapsible section toggle div
-			if ( isset( $frm_vars['collapse_div'] ) && $frm_vars['collapse_div'] ) {
-				echo "</div>\n";
-				$frm_vars['collapse_div'] = false;
-			}
-			return;
-		}
-
-        // Set the field name
-		$field_name = isset( $args['field_name'] ) ? $args['field_name'] : 'item_meta[' . $field['id'] . ']';
-		$html_id = FrmFieldsHelper::get_html_id( $field, isset( $args['field_plus_id'] ) ? $args['field_plus_id'] : '' );
-
-		FrmProFieldsHelper::set_field_js( $field );
-
-		include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/show-other.php' );
-    }
-
     public static function &change_type($type, $field){
         global $frm_vars;
 
@@ -57,7 +16,7 @@ class FrmProFieldsController{
             $type = 'scale';
         }
 
-        if ( ! FrmAppHelper::is_admin() && $type != 'hidden' ) {
+        if ( ! FrmAppHelper::is_admin() && $type != 'hidden' && $type != 'divider' ) {
             if ( !FrmProFieldsHelper::is_field_visible_to_user($field) ) {
                 $type = 'hidden';
             }
@@ -100,77 +59,7 @@ class FrmProFieldsController{
         }
     }
 
-    public static function show( $field, $name = '' ) {
-		// If Lookup Field, route to its own function
-		if ( is_array( $field ) && $field['type'] == 'lookup' ) {
-			FrmProLookupFieldsController::show_lookup_field_input_on_form_builder( $field );
-			return;
-		}
-
-        $field_name = empty($name) ? 'item_meta' : $name;
-
-        if ( is_object($field) ) {
-            $field = FrmFieldsHelper::setup_edit_vars($field);
-            if ( in_array($field['type'], array( 'text', 'textarea', 'radio', 'checkbox', 'select', 'captcha')) ) {
-                $frm_settings = FrmAppHelper::get_settings();
-                $field_name .= '['. $field['id'] .']';
-                $html_id = FrmFieldsHelper::get_html_id($field);
-                $display = array( 'type' => $field['type'], 'default_blank' => true);
-                include(FrmAppHelper::plugin_path() .'/classes/views/frm-fields/show-build.php');
-                return;
-            }
-        }
-
-        $field_name .= '['. $field['id'] .']';
-        $html_id = FrmFieldsHelper::get_html_id($field);
-
-		if ( $field['type'] == 'time' ) {
-			$field['value'] = $field['default_value'];
-			FrmProTimeField::show_time_field( $field, compact( 'html_id', 'field_name' ) );
-		} else {
-			$filename = self::get_filename_for_field( $field['type'] );
-			if ( ! empty( $filename ) ) {
-				include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/' . $filename . '.php' );
-			}
-		}
-    }
-
-	/**
-	 * Get the name of the file to include for this field type
-	 * @since 2.02
-	 */
-	private static function get_filename_for_field( $type ) {
-		$default = array( 'phone', 'tag', 'date', 'number', 'password', 'image' );
-		$has_file = array( 'data', 'file', 'form', 'end_divider', 'html', 'rte', 'hidden', 'user_id', 'scale' );
-
-		$filename = '';
-		if ( in_array( $type, $has_file ) ) {
-			$filename = 'back-end/field-' . $type;
-		} elseif ( in_array( $type, $default ) ) {
-			$filename = 'back-end/field-default';
-		}
-
-		return $filename;
-	}
-
-	public static function &label_position( $position ) {
-		_deprecated_function( __METHOD__, '2.05', 'FrmFieldsHelper::label_position' );
-		return $position;
-	}
-
     public static function build_field_class($classes, $field) {
-        if ( 'end_divider' == $field['type'] ) {
-            //disable hover if parent section is repeatable
-            //$classes = str_replace(' ui-state-default ', ' ui-state-disabled ', $classes);
-        } else if ('divider' == $field['type'] ) {
-            $classes = str_replace(' frm_not_divider ', ' ', $classes);
-            if ( $field['repeat'] ) {
-                $classes .= ' repeat_section';
-            } else {
-                $classes .= ' no_repeat_section';
-            }
-        }
-
         if ( 'inline' == $field['conf_field'] ) {
             $classes .= ' frm_conf_inline';
         } else if ( 'below' == $field['conf_field'] ) {
@@ -178,170 +67,6 @@ class FrmProFieldsController{
         }
 
         return $classes;
-    }
-
-    public static function display_field_options($display){
-        $display['logic'] = true;
-		$display['autopopulate'] = false;
-        $display['default_value'] = false;
-        $display['calc'] = false;
-        $display['visibility'] = true;
-		$display['conf_field'] = false;
-
-        if ( $display['type'] == 'number' ) {
-            $display['calc'] = true;
-			$frm_settings = FrmAppHelper::get_settings();
-			if ( $frm_settings->use_html ) {
-				$display['max']  = false;
-			}
-        }
-
-		$autopopulate_field_types = FrmProLookupFieldsController::get_autopopulate_field_types();
-		if ( in_array( $display['type'], $autopopulate_field_types ) ) {
-			$display['autopopulate'] = true;
-		}
-
-        $default_unique = array(
-            'default_value' => true,
-            'unique'        => true,
-        );
-
-        $size_unique = array(
-            'size'          => true,
-            'unique'        => true,
-        );
-
-        $invalid_field = $size_unique + array(
-            'clear_on_focus'=> true,
-            'invalid'       => true,
-            'read_only'     => true,
-        );
-
-        $no_visibility = array(
-            'default_blank' => false,
-            'required'      => false,
-            'visibility'    => false,
-        );
-
-        $no_vis_desc = $no_visibility + array(
-            'description'   => false,
-            'label_position'=> false,
-        );
-
-        $settings = array(
-            'radio'             => $default_unique + array(
-                'default_blank' => false,
-                'read_only'     => true,
-            ),
-            'scale'             => $default_unique + array(
-                'default_blank' => false,
-            ),
-            'select'            => array(
-                'default_value' => true,
-                'read_only'     => true,
-                'unique'        => true,
-            ),
-            'text'              => array(
-                'calc'          => true,
-                'read_only'     => true,
-                'unique'        => true,
-            ),
-            'user_id'           => $no_vis_desc + array(
-                'default_value' => true,
-                'logic'         => false,
-            ),
-            'hidden'            => $no_vis_desc + array(
-                'calc'          => true,
-                'logic'         => false,
-                'unique'        => true,
-            ),
-            'form'              => $no_vis_desc,
-            'html'              => $no_vis_desc,
-            'divider'           => $no_visibility,
-            'end_divider'       => $no_vis_desc + array(
-                'label'         => false,
-                'logic'         => false,
-            ),
-            'break'             => $no_vis_desc + array(
-                'css'           => false,
-                'options'       => true,
-            ),
-            'file'              => array(
-                'default_value' => true,
-                'invalid'       => true,
-                'read_only'     => true,
-            ),
-            'url'               => $invalid_field,
-            'website'           => $invalid_field,
-            'phone'             => $invalid_field,
-            'image'             => $invalid_field,
-            'date'              => $invalid_field,
-            'number'            => $invalid_field,
-            'email'             => $invalid_field + array(
-                'conf_field'    => true,
-            ),
-            'password'          => $invalid_field + array(
-                'conf_field'    => true,
-            ),
-            'time'              => $size_unique + array(
-                'default_value' => true,
-				'invalid'       => true,
-            ),
-            'rte'               => $size_unique + array(
-                'default_blank' => false
-            ),
-			'lookup'            => FrmProLookupFieldsController::add_standard_field_options(),
-        );
-
-        $settings['checkbox'] = $settings['radio'];
-        $settings['textarea'] = $settings['text'];
-
-        if ( isset($settings[$display['type']]) ) {
-            $display = array_merge($display, $settings[$display['type']]);
-            return $display;
-        }
-
-        if ( $display['type'] == 'data' && isset( $display['field_data']['data_type'] ) ) {
-            $display['default_value'] = true;
-            $display['read_only'] = true;
-            $display['unique'] = true;
-
-            if ( $display['field_data']['data_type'] == 'data' ) {
-                $display['required'] = false;
-                $display['default_blank'] = false;
-                $display['read_only'] = false;
-                $display['unique'] = false;
-            } else if ( $display['field_data']['data_type'] == 'select' ) {
-                $display['size'] = true;
-            }
-        }
-
-        return $display;
-    }
-
-    public static function form_fields($field, $field_name, $atts) {
-        global $frm_vars;
-
-        $frm_settings = FrmAppHelper::get_settings();
-
-        $errors = isset($atts['errors']) ? $atts['errors'] : array();
-        $entry_id = isset($frm_vars['editing_entry']) ? $frm_vars['editing_entry'] : false;
-        $html_id = $atts['html_id'];
-
-        if ( $field['type'] == 'form' && $field['form_select'] ) {
-			$dup_fields = FrmField::getAll( array( 'fi.form_id' => (int) $field['form_select'], 'fi.type not' => array( 'break', 'captcha') ) );
-        } else if ( 'file' == $field['type'] ) {
-            $file_name = str_replace('item_meta['. $field['id'] .']', 'file'. $field['id'], $field_name);
-            if ( $file_name == $field_name ) {
-                // this is a repeating field
-                $repeat_meta = explode('-', $html_id);
-                $repeat_meta = end($repeat_meta);
-                $file_name = 'file'. $field['id'] .'-'. $repeat_meta;
-                unset($repeat_meta);
-            }
-        }
-
-        require(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/form-fields.php');
     }
 
     public static function input_html( $field, $echo = true ) {
@@ -366,9 +91,7 @@ class FrmProFieldsController{
 
 		self::add_html5_input_attributes( $field, $add_html );
 
-		$add_html .= FrmProFieldsHelper::setup_input_masks( $field );
-
-		self::add_pattern_attribute( $field, $add_html );
+		$add_html .= self::setup_input_masks( $field );
 
 		if ( $echo ) {
             echo $add_html;
@@ -376,6 +99,23 @@ class FrmProFieldsController{
 
         return $add_html;
     }
+
+	public static function setup_input_masks( $field ) {
+		$html = '';
+		$text_lookup = $field['type'] == 'lookup' && $field['data_type'] == 'text';
+		$is_format_field = in_array( $field['type'], array( 'phone', 'text' ) ) || $text_lookup;
+		if ( FrmProField::is_format_option_true_with_no_regex( $field ) && $is_format_field ) {
+			$html = self::setup_input_mask( $field['format'] );
+		}
+
+		return $html;
+	}
+
+	public static function setup_input_mask( $format ) {
+		global $frm_input_masks;
+		$frm_input_masks[] = true;
+		return ' data-frmmask="'. esc_attr( preg_replace( '/\d/', '9', $format ) ) .'"';
+	}
 
 	/**
 	 * Add readonly/disabled input attributes
@@ -390,9 +130,7 @@ class FrmProFieldsController{
 
 			if ( ( isset( $frm_vars['readonly'] ) && $frm_vars['readonly'] == 'disabled' ) || ( current_user_can( 'frm_edit_entries' ) && FrmAppHelper::is_admin() ) ) {
 				//not read only
-			}else if ( $field['type'] == 'select' ) {
-				$add_html .= ' disabled="disabled" ';
-			} else if ( in_array( $field[ 'type' ], array( 'radio', 'checkbox' ) ) ) {
+			} elseif ( in_array( $field[ 'type' ], array( 'select', 'radio', 'checkbox', 'time' ) ) ) {
 				$add_html .= ' disabled="disabled" ';
 			} else {
 				$add_html .= ' readonly="readonly" ';
@@ -441,29 +179,12 @@ class FrmProFieldsController{
 					$field['step'] = 1;
 				}
 				$add_html .= ' min="' . esc_attr( $field['minnum'] ) . '" max="' . esc_attr( $field['maxnum'] ) . '" step="' . esc_attr( $field['step'] ) . '"';
-			} else if ( in_array( $field['type'], array( 'url', 'email', 'image' ) ) ) {
+			} elseif ( in_array( $field['type'], array( 'url', 'email' ) ) ) {
 				if ( ( ! isset($frm_vars['novalidate']) || ! $frm_vars['novalidate'] ) && ( $field['type'] != 'email' || ( isset($field['value']) && $field['default_value'] == $field['value'] ) ) ) {
 					// add novalidate for drafts
 					$frm_vars['novalidate'] = true;
 				}
 			}
-		}
-	}
-
-	/**
-	 * Add pattern attribute
-	 *
-	 * @since 2.02.06
-	 * @param array $field
-	 * @param string $add_html
-	 */
-	private static function add_pattern_attribute( $field, &$add_html ) {
-		$has_format = FrmField::is_option_true_in_array( $field, 'format' );
-		$format_field = $field['type'] == 'text' || ( $field['type'] == 'lookup' &&  $field['data_type'] == 'text' );
-		if ( $field['type'] == 'phone' || ( $has_format && $format_field ) ) {
-			$format = FrmEntryValidate::phone_format( $field );
-			$format = substr( $format, 2, -1 );
-			$add_html .= ' pattern="' . esc_attr( $format ) . '"';
 		}
 	}
 
@@ -483,13 +204,11 @@ class FrmProFieldsController{
 	}
 
     public static function add_field_class($class, $field){
-		if ( $field['type'] == 'scale' && FrmField::is_option_true( $field, 'star' ) ) {
-            $class .= ' star';
-        } else if ( $field['type'] == 'date' && ! FrmField::is_read_only( $field ) ) {
+		if ( $field['type'] == 'date' && ! FrmField::is_read_only( $field ) ) {
             $class .= ' frm_date';
 		} else if ( $field['type'] == 'file' && FrmField::is_option_true( $field, 'multiple' ) ) {
             $class .= ' frm_multiple_file';
-        } elseif ( $field['type'] == 'time' && isset( $field['options']['H'] ) ) {
+        } elseif ( $field['type'] == 'time' && ( isset( $field['options']['H'] ) || isset( $field['combo_name'] ) ) ) {
         	$class .= ' auto_width frm_time_select';
         }
 
@@ -531,8 +250,8 @@ class FrmProFieldsController{
     public static function add_separate_value_opt_label($field){
         $class = $field['separate_value'] ? '' : ' frm_hidden';
         echo '<div class="frm-show-click">';
-        echo '<div class="field_'. $field['id'] .'_option_key frm_option_val_label' . $class . '" >'. __( 'Option Label', 'formidable' ) .'</div>';
-        echo '<div class="field_'. $field['id'] .'_option_key frm_option_key_label' . $class . '" >'. __( 'Saved Value', 'formidable' ) .'</div>';
+        echo '<div class="field_'. $field['id'] .'_option_key frm_option_val_label' . $class . '" >'. __( 'Option Label', 'formidable-pro' ) .'</div>';
+        echo '<div class="field_'. $field['id'] .'_option_key frm_option_key_label' . $class . '" >'. __( 'Saved Value', 'formidable-pro' ) .'</div>';
         echo '</div>';
     }
 
@@ -558,14 +277,14 @@ class FrmProFieldsController{
 		        $selected_field = $field[ 'form_select' ];
 	        }
 
-	        include(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/options-form-before.php');
+	        include(FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/options-form-before.php');
         }
 
-	    include(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/back-end/options-before.php');
+	    include(FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/back-end/options-before.php');
     }
 
     public static function options_form_top($field, $display, $values) {
-        require(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/options-form-top.php');
+        require(FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/options-form-top.php');
     }
 
 	public static function options_form( $field, $display, $values ) {
@@ -573,9 +292,15 @@ class FrmProFieldsController{
 			return;
 		}
 
+		FrmProFieldsHelper::fill_default_field_display( $display );
+
         global $frm_vars;
 
         $frm_settings = FrmAppHelper::get_settings();
+
+		if ( isset( $display['toggle_labels'] ) && $display['toggle_labels'] ) {
+			include( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/back-end/toggle-labels.php' );
+		}
 
         $form_fields = false;
         if ( $display['logic'] && ! empty( $field['hide_field'] ) && is_array( $field['hide_field'] ) ) {
@@ -593,12 +318,13 @@ class FrmProFieldsController{
             $mimes = self::get_mime_options( $field );
         }
 
-		if ( $display['type'] == 'radio' || $display['type'] == 'checkbox' || ( $display['type'] == 'data' && in_array( $display['field_data']['data_type'], array( 'radio', 'checkbox' ) ) ) ) {
-			include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/alignment.php' );
+		$data_type = FrmField::get_option( $display['field_data'], 'data_type' );
+		if ( $display['type'] == 'radio' || $display['type'] == 'checkbox' || ( $display['type'] == 'data' && in_array( $data_type, array( 'radio', 'checkbox' ) ) ) ) {
+			include( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/back-end/alignment.php' );
 		}
 
 		if ( in_array( $display['type'], array( 'radio', 'checkbox', 'select' ) ) && ( ! isset( $field['post_field'] ) || ( $field['post_field'] != 'post_category' ) ) ) {
-		    include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/separate-values.php' );
+		    include( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/back-end/separate-values.php' );
 		}
 
 		$include_file_for_field = array(
@@ -608,17 +334,16 @@ class FrmProFieldsController{
 			'date'        => 'calendar',
 			'time'        => 'clock-settings',
 			'file'        => 'file-options',
-			'number'      => 'number-range',
 			'scale'       => 'scale-options',
-			'html'        => 'html-content',
+			'star'        => 'star-options',
 			'form'        => 'insert-form',
 		);
 		if ( isset( $include_file_for_field[ $field['type'] ] ) ) {
-			include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/' . $include_file_for_field[ $field['type'] ] . '.php' );
+			include( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/back-end/' . $include_file_for_field[ $field['type'] ] . '.php' );
 		}
 
 		if ( $display['type'] == 'select' || $field['type'] == 'data' ) {
-		    include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/multi-select.php' );
+		    include( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/back-end/multi-select.php' );
 		}
 
 		$include_file_for_display = array(
@@ -629,12 +354,12 @@ class FrmProFieldsController{
 
 		foreach ( $include_file_for_display as $option => $file ) {
 			if ( $display[ $option ] ) {
-			    include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/' . $file . '.php' );
+			    include( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/back-end/' . $file . '.php' );
 			}
 		}
 
-		if ( $display['default_value'] || $display['calc'] || $display['autopopulate'] ) {
-		    include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/dynamic-values.php' );
+		if ( $display['default_value'] || $display['calc'] || ( isset( $display['autopopulate'] ) && $display['autopopulate'] ) ) {
+		    include( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/back-end/dynamic-values.php' );
 		}
     }
 
@@ -645,7 +370,8 @@ class FrmProFieldsController{
 	 * @param array $field
 	 */
 	public static function show_format_option( $field ) {
-		include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/value-format.php' );
+		_deprecated_function( __FUNCTION__, '3.0', 'FrmFieldsController::show_format_option' );
+		FrmFieldsController::show_format_option( $field );
 	}
 
 	/**
@@ -655,7 +381,7 @@ class FrmProFieldsController{
 	 * @param array $field
 	 */
 	public static function show_visibility_option( $field ) {
-		include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/visibility.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/back-end/visibility.php' );
 	}
 
 	/**
@@ -670,7 +396,7 @@ class FrmProFieldsController{
 			$form_id = isset( $field['parent_form_id'] ) ? $field['parent_form_id'] : $field['form_id'];
 			$form_fields = FrmField::get_all_for_form( $form_id );
 		}
-		include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/logic.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/back-end/logic.php' );
 	}
 
 	/**
@@ -681,7 +407,7 @@ class FrmProFieldsController{
 	 * @param array $display
 	 */
 	public static function show_dynamic_values_options( $field, $display ) {
-		include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/dynamic-values.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/back-end/dynamic-values.php' );
 	}
 
 	private static function get_mime_options( $field ) {
@@ -712,12 +438,12 @@ class FrmProFieldsController{
             $selected_field = '';
 			$fields = FrmField::get_all_for_form( $form_id );
             if ($fields)
-                require(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/field-selection.php');
+                require(FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/field-selection.php');
         } else {
             $selected_field = $form_id;
 
             if ( $selected_field == 'taxonomy' ) {
-                echo '<span class="howto">'. __( 'Select a taxonomy on the Form Actions tab of the Form Settings page', 'formidable' ) .'</span>';
+                echo '<span class="howto">'. __( 'Select a taxonomy on the Form Actions tab of the Form Settings page', 'formidable-pro' ) .'</span>';
                 echo '<input type="hidden" name="field_options[form_select_'. $current_field_id .']" value="taxonomy" />';
             }
         }
@@ -871,7 +597,10 @@ class FrmProFieldsController{
 			if ( $is_editing ) {
 				$optional_on_edit = apply_filters( 'frm_optional_fields_on_edit', array( 'password', 'credit_card' ) );
 				if ( in_array( $field['type'], (array) $optional_on_edit ) ) {
-					$required = false;
+					$entry = FrmEntry::getOne( $frm_vars['editing_entry'] );
+					if ( $entry && $entry->form_id === $field['form_id'] && ! $entry->is_draft ) {
+						$required = false;
+					}
 				}
 			}
 		}
@@ -936,7 +665,7 @@ class FrmProFieldsController{
 		$on_current_page = ( $on_current_page == 'true' );
 
 		if ( $on_current_page && FrmProFieldsHelper::is_field_visible_to_user( $current ) ) {
-			if ( $value && ! empty( $value ) ) {
+			if ( FrmAppHelper::is_not_empty_value( $value ) && $value !== false ) {
 				echo apply_filters( 'frm_show_it', "<p class='frm_show_it'>" . $value . "</p>\n", $value, array( 'field' => $data_field, 'value' => $meta_value, 'entry_id' => $entry_id ) );
 			}
 			echo '<input type="hidden" id="' . esc_attr( $html_id ) . '" name="' . esc_attr( $field_name ) . '" value="' . esc_attr( $value ) . '" ' . do_action( 'frm_field_input_html', $current_field, false ) . '/>';
@@ -998,16 +727,23 @@ class FrmProFieldsController{
 		self::get_dependent_dynamic_field_value( $args['prev_val'], $field );
 
 		// Set up HTML ID and HTML name
-		$html_id = '';
-		$field_name = 'item_meta';
-		FrmProFieldsHelper::get_html_id_from_container( $field_name, $html_id, $field, $args['container_id'] );
+		$input_args = array(
+			'field_name'    => 'item_meta',
+			'field_id'      => $args['field_data']->id,
+			'field_plus_id' => '',
+			'section_id'    => '',
+			'html_id'       => '',
+		);
+
+		FrmProFieldsHelper::get_html_id_from_container( $input_args['field_name'], $input_args['html_id'], $field, $args['container_id'] );
 
 		if ( FrmField::is_multiple_select( $args['field_data'] ) ) {
-			$field_name .= '[]';
+			$input_args['field_name'] .= '[]';
 		}
 
-		$auto_width = (isset($field['size']) && $field['size'] > 0) ? 'class="auto_width"' : '';
-		require(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/data-options.php');
+		$field_obj = FrmFieldFactory::get_field_type( 'data', $field );
+		echo $field_obj->include_front_field_input( $input_args, array() );
+
 		wp_die();
     }
 
@@ -1052,7 +788,7 @@ class FrmProFieldsController{
 		// change the form_select value so the filter doesn't override the values
 		$args['field_data']->field_options['form_select'] = 'filtered_'. $args['field_data']->field_options['form_select'];
 
-		$field = apply_filters( 'frm_setup_new_fields_vars', $field, $args['field_data'], array() );
+		FrmFieldsHelper::prepare_new_front_field( $field, $args['field_data'] );
 
 		// Sort the options
 		$pass_args = array( 'metas' => $metas, 'field' => $linked_field, 'dynamic_field' => $field );
@@ -1081,7 +817,8 @@ class FrmProFieldsController{
 			}
 		}
 
-		$field = apply_filters( 'frm_setup_new_fields_vars', $field, $args['field_data'], array() );
+		FrmFieldsHelper::prepare_new_front_field( $field, $args['field_data'] );
+
 		$cat_ids = array_keys($field['options']);
 
 		$cat_args = array( 'include' => implode(',', $cat_ids), 'hide_empty' => false);
@@ -1158,13 +895,13 @@ class FrmProFieldsController{
 		global $current_screen;
 		if ( $current_screen && 'upload' == $current_screen->base && current_user_can('frm_edit_entries') ) {
 			echo '<label for="frm-attachment-filter" class="screen-reader-text">';
-			echo __( 'Show form uploads', 'formidable' );
+			echo __( 'Show form uploads', 'formidable-pro' );
 			echo '</label>';
 
 			$filtered = FrmAppHelper::get_param( 'frm-attachment-filter', '', 'get', 'absint' );
 			echo '<select name="frm-attachment-filter" id="frm-attachment-filter">';
-			echo '<option value="">' . __( 'Hide form uploads', 'formidable' ) . '</option>';
-			echo '<option value="1" ' . selected( $filtered, 1 ) . '>' . __( 'Show form uploads', 'formidable' ) . '</option>';
+			echo '<option value="">' . __( 'Hide form uploads', 'formidable-pro' ) . '</option>';
+			echo '<option value="1" ' . selected( $filtered, 1 ) . '>' . __( 'Show form uploads', 'formidable-pro' ) . '</option>';
 			echo '</select>';
 		}
 	}
@@ -1226,8 +963,8 @@ class FrmProFieldsController{
 		$response = FrmProFileField::ajax_upload();
 
 		if ( ! empty( $response['errors'] ) ) {
-			status_header(401);
-			$status = 401;
+			status_header( 403 );
+			$status = 403;
 			echo implode( ' ', $response['errors'] );
 		} else {
 			$status = 200;
@@ -1259,7 +996,7 @@ class FrmProFieldsController{
             $field['hide_field_cond'][$meta_name] = '==';
         }
 
-        include(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/_logic_row.php');
+        include(FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/_logic_row.php');
         wp_die();
 	}
 
@@ -1414,7 +1151,7 @@ class FrmProFieldsController{
             }
 
 			$values['id'] = $this_form_id;
-            FrmFieldsController::include_single_field($field_id, $values);
+			FrmFieldsController::load_single_field($field_id, $values);
         }
 
         if ( ! $ended ) {
@@ -1427,6 +1164,23 @@ class FrmProFieldsController{
     }
 
 	/**
+	 *
+	 * Update the repeating form name when a repeating section name is updated
+	 *
+	 * @since 3.0.03
+	 *
+	 * @param array $values
+	 * @return array $values
+	 */
+	public static function update_repeater_form_name( $values ) {
+		if ( isset( $values['field_options']['repeat'] ) && $values['field_options']['repeat'] ) {
+			FrmForm::update( $values['field_options']['form_select'], array( 'name' => $values['name'] ) );
+		}
+
+		return $values;
+	}
+
+	/**
 	*
 	* Update the repeating form name when a repeating section name is updated
 	*
@@ -1435,9 +1189,9 @@ class FrmProFieldsController{
 	* @param array $atts
 	*/
 	public static function update_repeating_form_name( $atts ) {
+		_deprecated_function( __FUNCTION__, '3.0.03', 'FrmProFieldsController::update_repeater_form_name' );
 		$field = FrmField::getOne( $atts['id'] );
 		if ( FrmField::is_repeating_field( $field ) ) {
-			// Update the repeating form name
 			FrmForm::update( $field->field_options['form_select'], array( 'name' => $atts['value'] ) );
 		}
 	}
@@ -1479,28 +1233,7 @@ class FrmProFieldsController{
 				'in_embed_form' => isset( $args['in_embed_form'] ) ? $args['in_embed_form'] : '0',
 			);
 
-			$opt_defaults = FrmFieldsHelper::get_default_field_opts( $field_array['type'], $field, true );
-
-			$frm_settings = FrmAppHelper::get_settings();
-			foreach ( $opt_defaults as $opt => $default_opt ) {
-				// How does this work with things like 'size' that are outside of the field_options array?
-				$field_array[ $opt ] = ( isset( $field->field_options[ $opt ] ) ? $field->field_options[ $opt ] : $default_opt );
-				if ( $opt == 'blank' && $field_array[ $opt ] == '' ) {
-					$field_array[ $opt ] = $frm_settings->blank_msg;
-				} else if ( $opt == 'invalid' && $field_array[ $opt ] == '' ) {
-					if ( $field->type == 'captcha' ) {
-						$field_array[ $opt ] = $frm_settings->re_msg;
-					} else {
-						$field_array[ $opt ] = sprintf( __( '%s is invalid', 'formidable' ), $field_array['name'] );
-					}
-				}
-			}
-
-			if ( $field_array['custom_html'] == '' ) {
-				$field_array['custom_html'] = FrmFieldsHelper::get_default_html( $field->type );
-			}
-			$field_array['original_type'] = isset( $field->field_options['original_type'] ) ? $field->field_options['original_type'] : $field->type;
-			$field_array = apply_filters( 'frm_setup_edit_fields_vars', $field_array, $field, $entry->id, $args );
+			FrmFieldsHelper::prepare_edit_front_field( $field_array, $field, $entry->id, $args );
 
 			if ( ! isset( $field_array['unique'] ) || ! $field_array['unique'] ) {
 				$field_array['unique_msg'] = '';
@@ -1558,9 +1291,62 @@ class FrmProFieldsController{
 	}
 
 	/**
+	 * @deprecated 3.0
+	 */
+	public static function show_normal_field( $show ) {
+		_deprecated_function( __METHOD__, '3.0' );
+		return $show;
+	}
+
+	/**
+	 * @deprecated 3.0
+	 */
+	public static function &normal_field_html( $show ) {
+		_deprecated_function( __METHOD__, '3.0' );
+		return $show;
+	}
+
+	/**
+	 * @deprecated 3.0
+	 */
+	public static function show_other() {
+		_deprecated_function( __METHOD__, '3.0' );
+	}
+
+	/**
+	 * @deprecated 3.0
+	 */
+	public static function show( $field, $name = '' ) {
+		_deprecated_function( __FUNCTION__, '3.0', 'FrmFieldType::show_on_form_builder' );
+	}
+
+	/**
+	 * @deprecated 2.05
+	 */
+	public static function &label_position( $position ) {
+		_deprecated_function( __METHOD__, '2.05', 'FrmFieldsHelper::label_position' );
+		return $position;
+	}
+
+	/**
+	 * @deprecated 3.0
+	 */
+	public static function display_field_options( $display ) {
+		_deprecated_function( __FUNCTION__, '3.0', 'FrmFieldType Modals' );
+		return $display;
+	}
+
+	/**
+	 * @deprecated 3.0
+	 */
+	public static function form_fields( $field, $field_name, $atts ) {
+		_deprecated_function( __FUNCTION__, '3.0', 'FrmFieldType Modals' );
+    }
+
+	/**
 	 * @deprecated 2.03.10
 	 */
-	public static function prepare_single_field_for_duplication( $field_values ){
+	public static function prepare_single_field_for_duplication( $field_values ) {
 		_deprecated_function( __FUNCTION__, '2.03.10', 'custom code' );
 
 		return $field_values;

@@ -34,7 +34,7 @@ if ( 'select' == $field['data_type'] ) {
 		// If there are field options, show them in a radio button field
 
 		?><div class="frm_opt_container"><?php
-		require( FrmAppHelper::plugin_path() .'/pro/classes/views/lookup-fields/front-end/radio-rows.php' );
+		require( FrmProAppHelper::plugin_path() . '/classes/views/lookup-fields/front-end/radio-rows.php' );
 		?></div><?php
     }
 } else if ( 'checkbox' == $field['data_type'] ) {
@@ -43,7 +43,7 @@ if ( 'select' == $field['data_type'] ) {
 	if ( ! empty( $field['options'] ) ) {
 
 		?><div class="frm_opt_container"><?php
-		require( FrmAppHelper::plugin_path() .'/pro/classes/views/lookup-fields/front-end/checkbox-rows.php' );
+		require( FrmProAppHelper::plugin_path() . '/classes/views/lookup-fields/front-end/checkbox-rows.php' );
 		?></div><?php
 	}
 } else if ( 'text' == $field['data_type'] ) {

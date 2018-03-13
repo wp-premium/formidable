@@ -4,9 +4,17 @@ $disabled = ( FrmField::is_read_only( $field ) && ! FrmAppHelper::is_admin() ) ?
 
 // Dynamic Dropdowns
 if ( $field['data_type'] == 'select' ) {
-    if ( ! empty( $field['options'] ) ) { ?>
-<select <?php echo $disabled ?> name="<?php echo esc_attr( $field_name ) ?>" id="<?php echo esc_attr( $html_id ) ?>" <?php do_action('frm_field_input_html', $field) ?>>
+    if ( ! empty( $field['options'] ) ) {
+    	if ( $disabled ) {
+    ?>
+<select disabled="disabled" <?php do_action( 'frm_field_input_html', $field ) ?>>
 <?php
+		} else {
+			?>
+<select name="<?php echo esc_attr( $field_name ) ?>" id="<?php echo esc_attr( $html_id ) ?>" <?php do_action( 'frm_field_input_html', $field ) ?>>
+<?php
+		}
+
 		if ( $field['options'] ) {
 			foreach ( $field['options'] as $opt_key => $opt ) {
 $selected = ( $field['value'] == $opt_key || in_array($opt_key, (array) $field['value']) ) ? ' selected="selected"' : ''; ?>
@@ -91,5 +99,3 @@ $selected = ( $field['value'] == $opt_key || in_array($opt_key, (array) $field['
         }
 	}
 }
-
-FrmProFieldsHelper::maybe_get_hidden_dynamic_field_inputs( $field, array( 'disabled' => $disabled, 'field_name' => $field_name, 'html_id' => $html_id ) );

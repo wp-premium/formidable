@@ -18,7 +18,7 @@ if ( isset( $frm_vars['lookup_fields'] ) && ! empty( $frm_vars['lookup_fields'] 
 
 if ( isset($frm_vars['google_graphs']) && ! empty($frm_vars['google_graphs']) ) {
     echo '__FRMTABLES='. json_encode($frm_vars['google_graphs']) .";\n";
-	echo 'frmFrontForm.loadGoogle();' . "\n";
+	echo 'frmProForm.loadGoogle();' . "\n";
 }
 
 FrmProFormsHelper::load_chosen_js( $frm_vars );

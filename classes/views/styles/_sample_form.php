@@ -17,7 +17,8 @@
 <h3 class="frm_form_title"><?php esc_html_e( 'Form Title', 'formidable' ) ?></h3>
 <div class="frm_description"><p><?php esc_html_e( 'This is an example form description for styling purposes.', 'formidable' ) ?></p></div>
 
-<div class="frm_form_field frm_first frm_half form-field <?php echo esc_attr( $pos_class ) ?>">
+<div class="frm_fields_container">
+<div class="frm_form_field frm_half frm_first form-field <?php echo esc_attr( $pos_class ) ?>">
 <label class="frm_primary_label"><?php esc_html_e( 'Text field', 'formidable' ) ?> <span class="frm_required">*</span></label>
 <input type="text" value="<?php esc_attr_e( 'This is sample text', 'formidable' ) ?>"/>
 <div class="frm_description"><?php esc_html_e( 'A field with a description', 'formidable' ) ?></div>
@@ -32,7 +33,7 @@
 	</select>
 </div>
 
-<div class="frm_form_field form-field frm_first frm_third frm_blank_field <?php echo esc_attr( $pos_class ) ?>">
+<div class="frm_form_field form-field frm_third frm_first frm_blank_field <?php echo esc_attr( $pos_class ) ?>">
 <label class="frm_primary_label"><?php esc_html_e( 'Text field with error', 'formidable' ) ?> <span class="frm_required">*</span></label>
 <input type="text" value="<?php esc_attr_e( 'This is sample text', 'formidable' ) ?>"/>
 <div class="frm_error"><?php echo esc_html( $frm_settings->blank_msg ) ?></div>
@@ -48,7 +49,7 @@
 <input type="text" value="<?php esc_attr_e( 'This field is not editable', 'formidable' ) ?>" disabled="disabled" />
 </div>
 
-<div class="frm_form_field form-field frm_first frm_half <?php echo esc_attr( $pos_class ) ?> frm_lite_style">
+<div class="frm_form_field form-field frm_half frm_first <?php echo esc_attr( $pos_class ) ?> frm_lite_style">
 	<label class="frm_primary_label"><?php esc_html_e( 'Text Area', 'formidable' ) ?></label>
 	<textarea></textarea>
 	<div class="frm_description"><?php esc_html_e( 'Another field with a description', 'formidable' ) ?></div>
@@ -57,8 +58,8 @@
 <div class="frm_form_field form-field frm_fourth <?php echo esc_attr( $pos_class ) ?> frm_lite_style">
 	<label class="frm_primary_label"><?php esc_html_e( 'Radio Buttons', 'formidable' ) ?></label>
 	<div class="frm_opt_container">
-		<div class="frm_radio"><input type="radio" /><label><?php esc_html_e( 'Option 1', 'formidable' ) ?></label></div>
-		<div class="frm_radio"><input type="radio" /><label><?php esc_html_e( 'Option 2', 'formidable' ) ?></label></div>
+		<div class="frm_radio"><label><input type="radio" /><?php esc_html_e( 'Option 1', 'formidable' ) ?></label></div>
+		<div class="frm_radio"><label><input type="radio" /><?php esc_html_e( 'Option 2', 'formidable' ) ?></label></div>
 	</div>
 </div>
 
@@ -74,6 +75,7 @@
 
 <div class="frm_submit">
 <input type="submit" disabled="disabled" class="frm_full_opacity" value="<?php esc_attr_e( 'Submit', 'formidable' ) ?>" />
+</div>
 </div>
 
 </fieldset>

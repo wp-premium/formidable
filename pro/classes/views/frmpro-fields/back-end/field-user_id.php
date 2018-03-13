@@ -1,3 +1,2 @@
-<p class="howto frm_clear">
-	<?php esc_html_e( 'Note: This field will not show in the form, but will link the user id to it as long as the user is logged in at the time of form submission.', 'formidable' ) ?>
-</p>
+<?php
+_deprecated_file( basename( __FILE__ ), '3.0', null, 'This file can be found in formidable/classes/views/frm-fields/back-end/field-user-id.php' );

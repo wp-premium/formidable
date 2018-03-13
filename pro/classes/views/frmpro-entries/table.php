@@ -2,7 +2,7 @@
     <thead>
     <tr>
     <?php if ( in_array( 'id', $atts['fields']) ) { ?>
-    <th><?php _e( 'ID', 'formidable' ); ?></th>
+    <th><?php _e( 'ID', 'formidable-pro' ); ?></th>
     <?php }
 	foreach ( $atts['form_cols'] as $col ) { ?>
         <th><?php echo $col->name; ?></th>

@@ -16,7 +16,7 @@ class FrmProStatisticsController {
 		self::format_atts( $atts );
 
 		if ( ! isset( $atts['id'] ) || ! $atts['id'] ) {
-			return __( 'You must include a valid field id or key in your stats shortcode.', 'formidable' );
+			return __( 'You must include a valid field id or key in your stats shortcode.', 'formidable-pro' );
 		}
 
 		return self::get_field_stats( $atts['id'], $atts );
@@ -231,19 +231,14 @@ class FrmProStatisticsController {
 		}
 
 		$meta_values = self::get_meta_values_for_single_field( $field, $atts );
-
 		if ( empty( $meta_values ) ) {
-			if ( $atts['type'] == 'star' ) {
-				$statistic = self::get_stars( $field, 0 );
-			} else {
-				$statistic = 0;
-			}
+			$statistic = 0;
 		} else {
 			$statistic = self::get_stats_from_meta_values( $atts, $meta_values );
+		}
 
-			if ( $atts['type'] == 'star' ) {
-				$statistic = self::get_stars( $field, $statistic );
-			}
+		if ( 'star' === $atts['type'] ) {
+			$statistic = self::get_stars( $field, $statistic );
 		}
 
 		return $statistic;
@@ -285,12 +280,13 @@ class FrmProStatisticsController {
 	 * @param int $stat
 	 * @return string
 	 */
-	private static function get_stars( $field, $stat ) {
-		ob_start();
-		include( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/star_disabled.php' );
-		$contents = ob_get_contents();
-		ob_end_clean();
-		return $contents;
+	private static function get_stars( $field, $value ) {
+		$atts = array( 'html' => true );
+
+		// force star field type to get stats
+		$field->type = 'star';
+
+		return FrmFieldsHelper::get_unfiltered_display_value( compact( 'value', 'field', 'atts' ) );
 	}
 
 	/**
@@ -856,140 +852,5 @@ class FrmProStatisticsController {
 		}
 
 		$field_values = stripslashes_deep( $field_values );
-	}
-
-	public static function show() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::show_reports' );
-		FrmProGraphsController::show_reports();
-	}
-
-	public static function get_daily_entries() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::show_reports' );
-		return '';
-	}
-
-	public static function graph_shortcode( $atts ) {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return FrmProGraphsController::graph_shortcode( $atts );
-	}
-
-	public static function get_google_graph() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function get_graph_values() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function convert_to_google() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function get_fields() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function get_form_posts() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function get_entry_ids() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function get_x_field() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function get_x_axis_inputs() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function get_graph_cols() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function get_graph_options() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function clean_inputs() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function mod_post_inputs() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function mod_x_inputs() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function format_f_inputs() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function get_user_id_values() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function get_final_x_axis_values() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function combine_dates() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function graph_by_period() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function get_multiple_id_values() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function get_x_axis_values() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function get_count_values() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function get_generic_inputs() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function field_opt_order_vals() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
-	}
-
-	public static function get_displayed_values() {
-		_deprecated_function( __FUNCTION__, '2.01.02', 'FrmProGraphsController::graph_shortcode' );
-		return '';
 	}
 }

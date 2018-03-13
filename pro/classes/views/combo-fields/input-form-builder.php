@@ -1,4 +1,4 @@
-<div class="frm_multi_fields_container">
+<div class="frm_multi_fields_container frm_grid_container">
 	<?php foreach ( $sub_fields as $key => $sub_field ) { ?>
 		<div id="frm_field_<?php echo esc_attr( $field['id'] .'-'. $key ) ?>_container" class="frm_form_field form-field <?php
 		echo esc_attr( $sub_field['classes'] ); ?>">

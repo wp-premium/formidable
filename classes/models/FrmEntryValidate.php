@@ -83,22 +83,23 @@ class FrmEntryValidate {
 			$value = reset($value);
 		}
 
-        if ( $posted_field->required == '1' && ! is_array( $value ) && trim( $value ) == '' ) {
+		if ( ! is_array( $value ) ) {
+			$value = trim( $value );
+		}
+
+        if ( $posted_field->required == '1' && FrmAppHelper::is_empty_value( $value ) ) {
 			$errors[ 'field' . $args['id'] ] = FrmFieldsHelper::get_error_msg( $posted_field, 'blank' );
         } else if ( $posted_field->type == 'text' && ! isset( $_POST['item_name'] ) ) {
             $_POST['item_name'] = $value;
         }
 
+		FrmEntriesHelper::set_posted_value( $posted_field, $value, $args );
+
+		self::validate_field_types( $errors, $posted_field, $value, $args );
+
 		if ( $value != '' ) {
-			self::validate_url_field( $errors, $posted_field, $value, $args );
-			self::validate_email_field( $errors, $posted_field, $value, $args );
-			self::validate_number_field( $errors, $posted_field, $value, $args );
 			self::validate_phone_field( $errors, $posted_field, $value, $args );
 		}
-
-        FrmEntriesHelper::set_posted_value($posted_field, $value, $args);
-
-        self::validate_recaptcha($errors, $posted_field, $args);
 
 		$errors = apply_filters( 'frm_validate_' . $posted_field->type . '_field_entry', $errors, $posted_field, $value, $args );
 		$errors = apply_filters( 'frm_validate_field_entry', $errors, $posted_field, $value, $args );
@@ -122,62 +123,46 @@ class FrmEntryValidate {
 		}
 	}
 
-	public static function validate_url_field( &$errors, $field, &$value, $args ) {
-		if ( $value == '' || ! in_array( $field->type, array( 'website', 'url', 'image' ) ) ) {
-            return;
-        }
+	public static function validate_field_types( &$errors, $posted_field, $value, $args ) {
+		$field_obj = FrmFieldFactory::get_field_object( $posted_field );
+		$args['value'] = $value;
+		$args['errors'] = $errors;
 
-        if ( trim($value) == 'http://' ) {
-            $value = '';
-        } else {
-            $value = esc_url_raw( $value );
-			$value = preg_match( '/^(https?|ftps?|mailto|news|feed|telnet):/is', $value ) ? $value : 'http://' . $value;
-        }
-
-        // validate the url format
-		if ( ! preg_match('/^http(s)?:\/\/(?:localhost|(?:[\da-z\.-]+\.[\da-z\.-]+))/i', $value) ) {
-			$errors[ 'field' . $args['id'] ] = FrmFieldsHelper::get_error_msg( $field, 'invalid' );
+		$new_errors = $field_obj->validate( $args );
+		if ( ! empty( $new_errors ) ) {
+			$errors = array_merge( $errors, $new_errors );
 		}
-    }
+	}
+
+	public static function validate_url_field( &$errors, $field, $value, $args ) {
+		_deprecated_function( __FUNCTION__, '3.0', 'FrmFieldType::validate' );
+
+		if ( $value == '' || ! in_array( $field->type, array( 'website', 'url' ) ) ) {
+			return;
+		}
+
+		self::validate_field_types( $errors, $field, $value, $args );
+	}
 
 	public static function validate_email_field( &$errors, $field, $value, $args ) {
-        if ( $value == '' || $field->type != 'email' ) {
-            return;
-        }
+		_deprecated_function( __FUNCTION__, '3.0', 'FrmFieldType::validate' );
 
-        //validate the email format
-        if ( ! is_email($value) ) {
-			$errors[ 'field' . $args['id'] ] = FrmFieldsHelper::get_error_msg( $field, 'invalid' );
-        }
-    }
+		if ( $field->type != 'email' ) {
+			return;
+		}
 
-	public static function validate_number_field( &$errors, $field, &$value, $args ) {
+		self::validate_field_types( $errors, $field, $value, $args );
+	}
+
+	public static function validate_number_field( &$errors, $field, $value, $args ) {
+		_deprecated_function( __FUNCTION__, '3.0', 'FrmFieldType::validate' );
+
 		//validate the number format
 		if ( $field->type != 'number' ) {
 			return;
 		}
 
-		if ( strpos( $value, ',' ) ) {
-			$value = str_replace( ',', '', $value );
-		}
-
-		if ( ! is_numeric( $value) ) {
-			$errors[ 'field' . $args['id'] ] = FrmFieldsHelper::get_error_msg( $field, 'invalid' );
-		}
-
-		// validate number settings
-		if ( $value != '' ) {
-			$frm_settings = FrmAppHelper::get_settings();
-			// only check if options are available in settings
-			if ( $frm_settings->use_html && isset( $field->field_options['minnum'] ) && isset( $field->field_options['maxnum'] ) ) {
-				//minnum maxnum
-				if ( (float) $value < $field->field_options['minnum'] ) {
-					$errors[ 'field' . $args['id'] ] = __( 'Please select a higher number', 'formidable' );
-				} else if ( (float) $value > $field->field_options['maxnum'] ) {
-					$errors[ 'field' . $args['id'] ] = __( 'Please select a lower number', 'formidable' );
-				}
-			}
-		}
+		self::validate_field_types( $errors, $field, $value, $args );
 	}
 
 	public static function validate_phone_field( &$errors, $field, $value, $args ) {
@@ -247,43 +232,13 @@ class FrmEntryValidate {
 	}
 
 	public static function validate_recaptcha( &$errors, $field, $args ) {
-        if ( $field->type != 'captcha' || FrmAppHelper::is_admin() || apply_filters( 'frm_is_field_hidden', false, $field, stripslashes_deep( $_POST ) ) ) {
-            return;
-        }
+		_deprecated_function( __FUNCTION__, '3.0', 'FrmFieldType::validate' );
 
-		$frm_settings = FrmAppHelper::get_settings();
-		if ( empty( $frm_settings->pubkey ) ) {
-			// don't require the captcha if it shouldn't be shown
+		if ( $field->type != 'captcha' ) {
 			return;
 		}
 
-        if ( ! isset($_POST['g-recaptcha-response']) ) {
-            // If captcha is missing, check if it was already verified
-			if ( ! isset( $_POST['recaptcha_checked'] ) || ! wp_verify_nonce( $_POST['recaptcha_checked'], 'frm_ajax' ) ) {
-                // There was no captcha submitted
-				$errors[ 'field' . $args['id'] ] = __( 'The captcha is missing from this form', 'formidable' );
-            }
-            return;
-        }
-
-        $arg_array = array(
-            'body'      => array(
-				'secret'   => $frm_settings->privkey,
-				'response' => $_POST['g-recaptcha-response'],
-				'remoteip' => FrmAppHelper::get_ip_address(),
-			),
-		);
-        $resp = wp_remote_post( 'https://www.google.com/recaptcha/api/siteverify', $arg_array );
-        $response = json_decode(wp_remote_retrieve_body( $resp ), true);
-
-        if ( isset( $response['success'] ) && ! $response['success'] ) {
-            // What happens when the CAPTCHA was entered incorrectly
-			$errors[ 'field' . $args['id'] ] = ( ! isset( $field->field_options['invalid'] ) || $field->field_options['invalid'] == '' ) ? $frm_settings->re_msg : $field->field_options['invalid'];
-        } else if ( is_wp_error( $resp ) ) {
-			$error_string = $resp->get_error_message();
-			$errors[ 'field' . $args['id'] ] = __( 'There was a problem verifying your recaptcha', 'formidable' );
-			$errors[ 'field' . $args['id'] ] .= ' ' . $error_string;
-        }
+		self::validate_field_types( $errors, $field, '', $args );
     }
 
     /**

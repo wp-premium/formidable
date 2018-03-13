@@ -33,6 +33,7 @@ class FrmProPageField {
 		$current_page = 0;
 		$field_id = 0;
 		$page_array = array();
+
 		foreach ( $page_breaks as $page_break ) {
 			if ( FrmProFieldsHelper::is_field_hidden( $page_break, stripslashes_deep( $_POST ) ) ) {
 				continue;
@@ -80,17 +81,18 @@ class FrmProPageField {
 			);
 		}
 
-		return $page_array;
+		self::add_titles_to_array( $form, $page_array );
+
+		return apply_filters( 'frm_rootline_pages', $page_array, compact( 'page_breaks', 'form', 'current_page', 'page_order' ) );
 	}
 
 	private static function show_progress( $args ) {
 		$hide_lines = FrmForm::get_option( array( 'form' => $args['form'], 'option' => 'rootline_lines_off', 'default' => 0 ) );
 		$show_titles = FrmForm::get_option( array( 'form' => $args['form'], 'option' => 'rootline_titles_on', 'default' => 0 ) );
-		$page_titles = FrmForm::get_option( array( 'form' => $args['form'], 'option' => 'rootline_titles', 'default' => array() ) );
 		$hide_numbers = FrmForm::get_option( array( 'form' => $args['form'], 'option' => 'rootline_numbers_off', 'default' => 0 ) );
 		$type = FrmForm::get_option( array( 'form' => $args['form'], 'option' => 'rootline', 'default' => '' ) );
 
-		$title_atts = compact( 'show_titles', 'type', 'page_titles' );
+		$title_atts = compact( 'show_titles', 'type' );
 
 		$current_page = 0;
 		$page_count = count( $args['page_array'] );
@@ -106,7 +108,7 @@ class FrmProPageField {
 			$current_class = ( isset( $page['disabled'] ) ) ? ' frm_current_page' : '';
 			$output .= '<li class="frm_rootline_single' . $current_class . '">';
 
-			$title_atts = array_merge( $title_atts, compact('page', 'page_number') );
+			$title_atts['title'] = $page['aria-label'];
 			$title_atts['position'] = 'before';
 			$output .= self::maybe_get_progress_title( $title_atts );
 
@@ -129,7 +131,7 @@ class FrmProPageField {
 
 		if ( ! $hide_numbers && $type == 'progress' ) {
 			$percent_complete = self::percent_complete( $current_page, $args['page_array'] );
-			$output .= '<div class="frm_percent_complete">' . sprintf( __( '%s Complete', 'formidable' ), $percent_complete ) . '</div>';
+			$output .= '<div class="frm_percent_complete">' . sprintf( __( '%s Complete', 'formidable-pro' ), $percent_complete ) . '</div>';
 			$output .= '<div class="frm_pages_complete">' . self::pages_complete( $current_page, $args['page_array'] ) . '</div>';
 		}
 		$output .= '<div class="frm_clearfix"></div>';
@@ -146,28 +148,42 @@ class FrmProPageField {
 			$show_before = ( $atts['type'] == 'progress' && $atts['position'] == 'before' );
 			$show_after = ( $atts['type'] == 'rootline' && $atts['position'] == 'after' );
 			if ( $show_before || $show_after ) {
-				$title = self::get_progress_title( $atts );
+				$title = self::get_progress_title( $atts['title'] );
 			}
 		}
 		return $title;
 	}
 
-	private static function get_progress_title( $atts ) {
-		$title = self::get_title_for_page( $atts );
-
+	private static function get_progress_title( $title ) {
 		return '<span class="frm_rootline_title">' . strip_tags( $title ) . '</span>';
 	}
 
 	private static function get_title_for_page( $atts ) {
 		$field_id = $atts['page']['data-field'];
-		$default_title = sprintf( __( 'Page %d', 'formidable' ), $atts['page_number'] );
+		$default_title = sprintf( __( 'Page %d', 'formidable-pro' ), $atts['page_number'] );
 		$title = isset( $atts['page_titles'][ $field_id ] ) ? $atts['page_titles'][ $field_id ] : $default_title;
 
 		return $title;
 	}
 
+	private static function add_titles_to_array( $form, &$page_array ) {
+		$page_titles = FrmForm::get_option( array(
+			'form'    => $form,
+			'option'  => 'rootline_titles',
+			'default' => array(),
+		) );
+
+		foreach ( $page_array as $page_number => $page ) {
+			$page_array[ $page_number ]['aria-label'] = self::get_title_for_page( array(
+				'page'        => $page,
+				'page_number' => $page_number,
+				'page_titles' => $page_titles,
+			) );
+		}
+	}
+
 	private static function pages_complete( $current_page, $page_array ) {
-		return sprintf( __( '%1$d of %2$d', 'formidable' ), $current_page, count( $page_array ) );
+		return sprintf( __( '%1$d of %2$d', 'formidable-pro' ), $current_page, count( $page_array ) );
 	}
 
 	private static function percent_complete( $current_page, $page_array ) {
@@ -188,7 +204,7 @@ class FrmProPageField {
 		$defaults = FrmStylesHelper::get_settings_for_output( $default_style );
 
 		echo '<style type="text/css">';
-		include( FrmAppHelper::plugin_path() . '/pro/css/progress.css.php' );
+		include( FrmProAppHelper::plugin_path() . '/css/progress.css.php' );
 		echo '</style>';
 	}
 }

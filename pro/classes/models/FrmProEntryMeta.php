@@ -1,23 +1,6 @@
 <?php
 class FrmProEntryMeta{
 
-    public static function before_save($values) {
-        $field = FrmField::getOne($values['field_id']);
-        if ( ! $field ) {
-            return $values;
-        }
-
-		if ( $field->type == 'date' ) {
-			$values['meta_value'] = FrmProAppHelper::maybe_convert_to_db_date($values['meta_value'], 'Y-m-d');
-		} else if ( $field->type == 'number' && ! is_numeric($values['meta_value']) ) {
-			$values['meta_value'] = (float) $values['meta_value'];
-		} elseif ( $field->type == 'time' ) {
-			$values['meta_value'] = FrmProAppHelper::format_time( $values['meta_value'], 'H:i' );
-		}
-
-        return $values;
-    }
-
 	/**
 	 * @since 2.0.11
 	 */
@@ -79,58 +62,6 @@ class FrmProEntryMeta{
 		return $updated;
 	}
 
-    /**
-     * Add new tags
-     *
-     * @since 2.0
-     * @param array|string $meta_value (the posted value)
-     * @param int $field_id
-     * @param int $entry_id
-     * @return array|string $meta_value
-     *
-     */
-	public static function prepare_data_before_db( $meta_value, $field_id, $entry_id, $atts ) {
-		// If confirmation field or 0 index, exit now
-		if ( ! $atts['field'] ) {
-			return $meta_value;
-		}
-
-		if ( $atts['field']->type == 'tag' ) {
-			self::create_new_tags( $atts['field'], $entry_id, $meta_value );
-		}
-
-		return $meta_value;
-    }
-
-	private static function create_new_tags($field, $entry_id, $meta_value) {
-		$tax_type = ( ! FrmField::is_option_empty( $field, 'taxonomy' ) ) ? $field->field_options['taxonomy'] : 'frm_tag';
-
-		$tags = explode( ',', stripslashes( $meta_value ) );
-        $terms = array();
-
-        if ( isset($_POST['frm_wp_post']) ) {
-            $_POST['frm_wp_post'][$field->id.'=tags_input'] = $tags;
-        }
-
-        if ( $tax_type != 'frm_tag' ) {
-            return;
-        }
-
-        foreach ( $tags as $tag ) {
-            $slug = sanitize_title($tag);
-            if ( ! isset($_POST['frm_wp_post']) ) {
-                if ( ! term_exists($slug, $tax_type) ) {
-                    wp_insert_term( trim($tag), $tax_type, array( 'slug' => $slug));
-                }
-            }
-
-            $terms[] = $slug;
-        }
-
-        wp_set_object_terms($entry_id, $terms, $tax_type);
-
-    }
-
     public static function validate($errors, $field, $value, $args) {
         $field->temp_id = $args['id'];
 
@@ -144,19 +75,6 @@ class FrmProEntryMeta{
 
 			// get any values updated during nested validation
 			FrmEntriesHelper::get_posted_value( $field, $value, $args );
-        } else if ( $field->type == 'user_id' ) {
-            // make sure we have a user ID
-            if ( ! is_numeric($value) ) {
-                $value = FrmAppHelper::get_user_id_param($value);
-                FrmEntriesHelper::set_posted_value($field, $value, $args);
-            }
-
-            //add user id to post variables to be saved with entry
-            $_POST['frm_user_id'] = $value;
-        } else if ( $field->type == 'time' && is_array($value) ) {
-			FrmProTimeField::time_array_to_string( $value );
-
-            FrmEntriesHelper::set_posted_value($field, $value, $args);
         }
 
         // don't validate if going backwards
@@ -179,7 +97,6 @@ class FrmProEntryMeta{
         }
 
         self::validate_no_input_fields($errors, $field);
-		FrmProTimeField::validate_time_field( $errors, $field, $value );
 
         if ( empty($args['parent_field_id']) && ! isset($_POST['item_meta'][$field->id]) ) {
             return $errors;
@@ -207,29 +124,15 @@ class FrmProEntryMeta{
         self::validate_unique_field($errors, $field, $value);
         self::set_post_fields($field, $value, $errors);
 
-        if ( ! FrmProFieldsHelper::is_field_visible_to_user($field) ) {
-            //don't validate admin only fields that can't be seen
-            unset($errors['field'. $field->temp_id]);
-            FrmEntriesHelper::set_posted_value($field, $value, $args);
-            return $errors;
-        }
+		if ( self::has_invisible_errors( $field ) ) {
+			unset($errors['field'. $field->temp_id]);
+		} else {
+			self::validate_confirmation_field($errors, $field, $value, $args);
+		}
 
-		self::validate_confirmation_field($errors, $field, $value, $args);
+		FrmEntriesHelper::set_posted_value( $field, $value, $args );
 
-        //Don't validate the format if field is blank
-        if ( FrmAppHelper::is_empty_value( $value ) ) {
-            FrmEntriesHelper::set_posted_value($field, $value, $args);
-            return $errors;
-        }
-
-        if ( ! is_array($value) ) {
-            $value = trim($value);
-        }
-
-		self::validate_date_field( $errors, $field, $value );
-
-        FrmEntriesHelper::set_posted_value($field, $value, $args);
-        return $errors;
+		return $errors;
     }
 
 	public static function validate_embedded_form( &$errors, $field, $exclude = array() ) {
@@ -291,9 +194,10 @@ class FrmProEntryMeta{
 			$frm_hidden_break = self::is_individual_field_conditionally_hidden( $field );
 
 		} else if ( $field->type == 'divider' ) {
-			global $frm_hidden_divider;
+			global $frm_hidden_divider, $frm_invisible_divider;
 
 			$frm_hidden_divider = self::is_individual_field_conditionally_hidden( $field );
+			$frm_invisible_divider = ! FrmProFieldsHelper::is_field_visible_to_user( $field );
 
 		} else if ( $field->type == 'form' ) {
 			global $frm_hidden_form;
@@ -305,9 +209,9 @@ class FrmProEntryMeta{
 			}
 
 		} else if ( $field->type == 'end_divider' ) {
-			global $frm_hidden_divider;
+			global $frm_hidden_divider, $frm_invisible_divider;
 
-			$frm_hidden_divider = false;
+			$frm_hidden_divider = $frm_invisible_divider = false;
 
 		}
 
@@ -465,20 +369,10 @@ class FrmProEntryMeta{
         }
         
         $entry_id = self::get_validated_entry_id( $field );
-
-        if ( $field->type == 'time' ) {
-            if ( FrmProTimeField::is_datetime_used( $field, $value, $entry_id ) ) {
-            	$errors['field' . $field->temp_id ] = FrmFieldsHelper::get_error_msg( $field, 'unique_msg' );
-            }
-        } else if ( $field->type == 'date' ) {
-            $value = FrmProAppHelper::maybe_convert_to_db_date($value, 'Y-m-d');
-
-            if ( FrmProEntryMetaHelper::value_exists($field->id, $value, $entry_id) ) {
-                $errors['field'. $field->temp_id] = FrmFieldsHelper::get_error_msg($field, 'unique_msg');
-            }
-        } else if ( FrmProEntryMetaHelper::value_exists($field->id, $value, $entry_id) ) {
-            $errors['field'. $field->temp_id] = FrmFieldsHelper::get_error_msg($field, 'unique_msg');
-        }
+		$field_obj = FrmFieldFactory::get_field_object( $field );
+		if ( $field_obj->is_not_unique( $value, $entry_id ) ) {
+			$errors['field' . $field->temp_id ] = FrmFieldsHelper::get_error_msg( $field, 'unique_msg' );
+		}
     }
 
 	public static function get_validated_entry_id( $field ) {
@@ -553,36 +447,6 @@ class FrmProEntryMeta{
 			$errors['fieldconf_' . $field->temp_id ] = FrmFieldsHelper::get_error_msg( $field, 'conf_msg' );
             $errors['field' . $field->temp_id] = '';
         }
-    }
-
-    public static function validate_date_field(&$errors, $field, $value) {
-        if ( $field->type != 'date' ) {
-            return;
-        }
-
-        if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) ) {
-            $frmpro_settings = new FrmProSettings();
-            $formated_date = FrmProAppHelper::convert_date( $value, $frmpro_settings->date_format, 'Y-m-d' );
-
-            //check format before converting
-			if ( $value != date( $frmpro_settings->date_format, strtotime( $formated_date ) ) ) {
-				$allow_it = apply_filters( 'frm_allow_date_mismatch', false, array(
-					'date' => $value, 'formatted_date' => $formated_date,
-				) );
-				if ( ! $allow_it ) {
-					$errors['field' . $field->temp_id ] = FrmFieldsHelper::get_error_msg( $field, 'invalid' );
-				}
-			}
-
-            $value = $formated_date;
-			unset( $formated_date );
-		}
-
-		$date = explode( '-', $value );
-
-		if ( count( $date ) != 3 || ! checkdate( (int) $date[1], (int) $date[2], (int) $date[0] ) ) {
-			$errors['field' . $field->temp_id ] = FrmFieldsHelper::get_error_msg( $field, 'invalid' );
-		}
     }
 
 	public static function skip_required_validation( $field ) {
@@ -780,9 +644,9 @@ class FrmProEntryMeta{
 
 		$operator = self::get_operator_for_query( $args );
 
-		if ( in_array( $field->type, array( 'number', 'scale' ) ) && strpos( $operator, 'LIKE' ) === false ) {
-			// TODO: DRY throughout plugin
-			$operator = ' +0' . $operator;
+		if ( strpos( $operator, 'LIKE' ) === false ) {
+			$num_query = FrmProAppHelper::maybe_query_as_number( $field->type );
+			$operator = $num_query . $operator;
 		}
 
 		if ( ! FrmField::is_option_true( $field, 'post_field' ) ) {
@@ -929,6 +793,17 @@ class FrmProEntryMeta{
 		}
 	}
 
+	/**
+	 * Remove errors for invisible fields and sections
+	 * We shouldn't validate admin only fields that can't be seen
+	 *
+	 * @since 3.0
+	 */
+	private static function has_invisible_errors( $field ) {
+		global $frm_invisible_divider;
+		return ( $frm_invisible_divider || ! FrmProFieldsHelper::is_field_visible_to_user( $field ) );
+	}
+
 	public static function add_repeating_value_to_entry( $field, &$entry ) {
 		// If field is in a repeating section
 		if ( $entry->form_id != $field->form_id ) {
@@ -949,16 +824,51 @@ class FrmProEntryMeta{
 		}
 	}
 
-	public static function validate_number_field( &$errors, $field, $value ) {
-		_deprecated_function( __FUNCTION__, '2.0.18', array( 'FrmEntryValidate::validate_number_field') );
-		FrmEntryValidate::validate_number_field( $errors, $field, $value );
+	/**
+	 * @since 2.0
+	 * @deprecated 3.0
+	 * @param array|string $meta_value (the posted value)
+	 * @param int $field_id
+	 * @param int $entry_id
+	 * @return array|string $meta_value
+	 *
+	 */
+	public static function prepare_data_before_db( $meta_value, $field_id, $entry_id, $atts ) {
+		_deprecated_function( __FUNCTION__, '3.0', 'FrmFieldType::get_value_to_save' );
+		return $meta_value;
 	}
 
-	public static function validate_phone_field( &$errors, $field, $value ) {
-		_deprecated_function( __FUNCTION__, '2.0.18', array( 'FrmEntryValidate::validate_phone_field') );
-		FrmEntryValidate::validate_phone_field( $errors, $field, $value );
+	/**
+	 * @deprecated 3.0
+	 */
+	public static function validate_date_field( &$errors, $field, $value, $args = array() ) {
+		_deprecated_function( __FUNCTION__, '3.0', 'FrmFieldType::validate' );
+
+		if ( $field->type != 'date' ) {
+			return;
+		}
+
+		FrmEntryValidate::validate_field_types( $errors, $field, $value, $args );
 	}
 
+	/**
+	 * @deprecated 3.0
+	 */
+	public static function before_save($values) {
+		_deprecated_function( __FUNCTION__, '3.0', 'FrmFieldType::set_value_before_save' );
+
+		$field = FrmField::getOne( $values['field_id'] );
+		if ( $field ) {
+			$field_obj = FrmFieldFactory::get_field_object( $field );
+			$values['meta_value'] = $field_obj->set_value_before_save( $values['meta_value'] );
+		}
+
+		return $values;
+	}
+
+	/**
+	 * @deprecated 2.02
+	 */
     public static function validate_file_upload( &$errors, $field, $args ) {
         if ( $field->type != 'file' ) {
             return;
@@ -970,6 +880,7 @@ class FrmProEntryMeta{
 
 	/**
 	 * @since 2.0.22
+	 * @deprecated 2.02
 	 */
 	public static function delete_files_with_entry( $entry_id, $entry = false ) {
 		_deprecated_function( __FUNCTION__, '2.02', 'FrmProFileField::delete_files_with_entry' );
@@ -978,6 +889,7 @@ class FrmProEntryMeta{
 
 	/**
 	 * @since 2.0.22
+	 * @deprecated 2.02
 	 */
 	public static function delete_files_from_field( $field, $entry ) {
 		_deprecated_function( __FUNCTION__, '2.02', 'FrmProFileField::delete_files_from_field' );
@@ -988,14 +900,18 @@ class FrmProEntryMeta{
     * Get name of uploaded file
     *
     * @since 2.0
+	* @deprecated 2.02
     *
     */
     public static function get_file_name( $field_id, &$file_name, &$parent_field, &$key_pointer, &$repeating ) {
         _deprecated_function( __FUNCTION__, '2.02' );
     }
 
+	/**
+	 * @deprecated 2.03.02
+	 */
 	public static function get_disallowed_times( $values, &$remove ) {
-		_deprecated_function( __FUNCTION__, '2.03.02', 'FrmProTimeField::get_disallowed_times' );
+		_deprecated_function( __FUNCTION__, '2.03.02', 'FrmFieldType::get_disallowed_times' );
 		FrmProTimeField::get_disallowed_times( $values, $remove );
 	}
 

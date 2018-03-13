@@ -28,14 +28,14 @@
     <div style="margin-left:8px;">
         <a href="javascript:void(0)" class="hide-if-no-js frm_toggle_cf_opts">
             <span class="frm_cancelnew"><?php _e( 'Enter new'); ?></span>
-            <span class="frm_enternew frm_hidden"><?php _e( 'Cancel', 'formidable' ); ?></span>
+            <span class="frm_enternew frm_hidden"><?php _e( 'Cancel', 'formidable-pro' ); ?></span>
         </a>
     </div>
     <?php } ?>
     </td>
-    <td><label class="screen-reader-text" for='meta-256-value'><?php _e( 'Value', 'formidable' ) ?></label>
+    <td><label class="screen-reader-text" for='meta-256-value'><?php _e( 'Value', 'formidable-pro' ) ?></label>
     <select name="<?php echo esc_attr( $action_control->get_field_name( 'post_custom_fields' ) ) ?>[<?php echo esc_attr( $sanitized_name ) ?>][field_id]" class="frm_single_post_field">
-        <option value=""><?php _e( '&mdash; Select Field &mdash;', 'formidable' ); ?></option>
+        <option value=""><?php _e( '&mdash; Select Field &mdash;', 'formidable-pro' ); ?></option>
         <?php
         if ( ! empty($values['fields']) ) {
             if ( ! isset($custom_data['field_id']) ) {

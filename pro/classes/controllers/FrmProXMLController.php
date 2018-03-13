@@ -3,7 +3,7 @@
 class FrmProXMLController{
 
     public static function import_default_templates($files) {
-        $files[] = FrmAppHelper::plugin_path() .'/pro/classes/views/xml/default-templates.xml';
+        $files[] = FrmProAppHelper::plugin_path() . '/classes/views/xml/default-templates.xml';
         return $files;
     }
 
@@ -37,11 +37,11 @@ class FrmProXMLController{
     }
 
     public static function csv_instructions_1(){
-        return __( 'Upload your Formidable XML or CSV file to import forms, entries, and views into this site. <br/><strong>Note: If your imported form/entry/view key and creation date match an item on your site, that item will be updated. You cannot undo this action.</strong>', 'formidable' );
+        return __( 'Upload your Formidable XML or CSV file to import forms, entries, and views into this site. Note: If your imported form/entry/view key and creation date match an item on your site, that item will be updated. You cannot undo this action.', 'formidable-pro' );
     }
 
     public static function csv_instructions_2(){
-        return __( 'Choose a Formidable XML or any CSV file', 'formidable' );
+        return __( 'Choose a Formidable XML or any CSV file', 'formidable-pro' );
     }
 
 	/**
@@ -57,12 +57,12 @@ class FrmProXMLController{
 			$forms = array( $forms );
 		}
 
-        include(FrmAppHelper::plugin_path() .'/pro/classes/views/xml/csv_opts.php');
+        include(FrmProAppHelper::plugin_path() . '/classes/views/xml/csv_opts.php');
     }
 
     public static function xml_export_types($types) {
-        $types['posts'] = __( 'Views', 'formidable' );
-        $types['styles'] = __( 'Styles', 'formidable' );
+        $types['posts'] = __( 'Views', 'formidable-pro' );
+        $types['styles'] = __( 'Styles', 'formidable-pro' );
 
         return $types;
     }
@@ -82,8 +82,8 @@ class FrmProXMLController{
 	}
 
 	public static function csv_row( $row, $atts ) {
-		$row['user_id'] = FrmProFieldsHelper::get_display_name( $atts['entry']->user_id, 'user_login' );
-		$row['updated_by'] = FrmProFieldsHelper::get_display_name( $atts['entry']->updated_by, 'user_login' );
+		$row['user_id'] = FrmFieldsHelper::get_user_display_name( $atts['entry']->user_id, 'user_login' );
+		$row['updated_by'] = FrmFieldsHelper::get_user_display_name( $atts['entry']->updated_by, 'user_login' );
 		self::add_comments_to_csv( $row, $atts );
 		return $row;
 	}
@@ -107,7 +107,7 @@ class FrmProXMLController{
 				$row[ 'comment' . $i ] = $c['comment'];
 				unset( $co );
 
-				$row[ 'comment_user_id' . $i ] = FrmProFieldsHelper::get_display_name( $c['user_id'], 'user_login' );
+				$row[ 'comment_user_id' . $i ] = FrmFieldsHelper::get_user_display_name( $c['user_id'], 'user_login' );
 				unset( $c );
 
 				$row[ 'comment_created_at' . $i ] = FrmAppHelper::get_formatted_time( $comment->created_at, $atts['date_format'], ' ');
@@ -145,11 +145,6 @@ class FrmProXMLController{
 		return $field_value;
 	}
 
-	public static function export_csv( $atts ) {
-		_deprecated_function( __METHOD__, '2.0.19', 'FrmXMLController::' . __FUNCTION__ );
-		FrmXMLController::generate_csv( $atts );
-	}
-
     // map fields from csv
     public static function map_csv_fields() {
         $name = 'frm_import_file';
@@ -166,7 +161,7 @@ class FrmProXMLController{
         }
 
         if ( empty($_POST['form_id']) ) {
-            $errors = array(__( 'All Fields are required', 'formidable' ));
+            $errors = array(__( 'All Fields are required', 'formidable-pro' ));
             FrmXMLController::form($errors);
             return;
         }
@@ -178,7 +173,7 @@ class FrmProXMLController{
         }
 
         if ( empty($filename) ) {
-            $errors = array(__( 'That CSV was not uploaded. Are CSV files allowed on your site?', 'formidable' ));
+            $errors = array(__( 'That CSV was not uploaded. Are CSV files allowed on your site?', 'formidable-pro' ));
             FrmXMLController::form($errors);
             return;
         }
@@ -204,14 +199,14 @@ class FrmProXMLController{
             }
             fclose($f);
         } else {
-            $errors = array(__( 'CSV cannot be opened.', 'formidable' ));
+            $errors = array(__( 'CSV cannot be opened.', 'formidable-pro' ));
             FrmXMLController::form($errors);
             return;
         }
 
         $fields = FrmField::get_all_for_form($form_id);
 
-        include(FrmAppHelper::plugin_path() .'/pro/classes/views/xml/map_csv_fields.php');
+        include(FrmProAppHelper::plugin_path() . '/classes/views/xml/map_csv_fields.php');
     }
 
     public static function import_csv() {
@@ -244,7 +239,7 @@ class FrmProXMLController{
             $url_vars .= "&data_array[$mkey]=$map";
 		}
 
-        include(FrmAppHelper::plugin_path() .'/pro/classes/views/xml/import_csv.php');
+        include(FrmProAppHelper::plugin_path() . '/classes/views/xml/import_csv.php');
     }
 
     public static function import_csv_entries() {

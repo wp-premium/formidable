@@ -2,18 +2,16 @@
 
 class FrmProAppController{
 
+    public static function load_lang() {
+        load_plugin_textdomain( 'formidable-pro', false, FrmProAppHelper::plugin_folder() . '/languages/' );
+    }
+
 	/**
 	 * Use in-plugin translations instead of WP.org
 	 * @since 2.2.8
 	 */
 	public static function load_translation( $mo_file, $domain ) {
-		if ( 'formidable' === $domain ) {
-			$user_local = ( FrmAppHelper::is_admin() && function_exists('get_user_locale') ) ? get_user_locale() : get_locale();
-			$file = FrmAppHelper::plugin_path() . '/languages/formidable-' . $user_local . '.mo';
-			if ( file_exists( $file ) ) {
-				$mo_file = $file;
-			}
-		}
+		_deprecated_function( __FUNCTION__, '3.0' );
 		return $mo_file;
 	}
 
@@ -21,13 +19,62 @@ class FrmProAppController{
         register_taxonomy( 'frm_tag', 'formidable', array(
             'hierarchical' => false,
             'labels' => array(
-                'name' => __( 'Formidable Tags', 'formidable' ),
-                'singular_name' => __( 'Formidable Tag', 'formidable' ),
+                'name' => __( 'Formidable Tags', 'formidable-pro' ),
+                'singular_name' => __( 'Formidable Tag', 'formidable-pro' ),
             ),
             'public' => true,
             'show_ui' => true,
         ) );
     }
+
+	public static function combine_js_files( $files ) {
+		$pro_js = self::get_pro_js_files('.min');
+		foreach ( $pro_js as $js ) {
+			$files[] = FrmProAppHelper::plugin_path() . $js['file'];
+		}
+
+		return $files;
+	}
+
+	public static function register_scripts() {
+		$suffix = FrmAppHelper::js_suffix();
+		if ( empty( $suffix ) || ! FrmFormsController::has_combo_js_file() ) {
+			$pro_js = self::get_pro_js_files();
+			foreach ( $pro_js as $js_key => $js ) {
+				wp_register_script( $js_key, FrmProAppHelper::plugin_url() . $js['file'], $js['requires'], $js['version'], true );
+			}
+		}
+	}
+
+	public static function get_pro_js_files( $suffix = '' ) {
+		$version = FrmAppHelper::plugin_version();
+		if ( $suffix == '' ) {
+			$suffix = FrmAppHelper::js_suffix();
+		}
+
+		return array(
+			'formidablepro' => array(
+				'file'     => '/js/formidablepro' . $suffix . '.js',
+				'requires' => array( 'jquery', 'formidable' ),
+				'version'  => $version,
+			),
+			'dropzone' => array(
+				'file'     => '/js/dropzone.min.js',
+				'requires' => array( 'jquery' ),
+				'version'  => '4.3.0',
+			),
+			'jquery-chosen' => array(
+				'file'     => '/js/chosen.jquery.min.js',
+				'requires' => array( 'jquery' ),
+				'version'  => '1.5.1',
+			),
+			'jquery-maskedinput' => array(
+				'file'     => '/js/jquery.maskedinput.min.js',
+				'requires' => array( 'jquery' ),
+				'version'  => '1.4',
+			),
+		);
+	}
 
 	/**
 	 * @since 2.05.07
@@ -107,23 +154,28 @@ class FrmProAppController{
 	}
 
 	public static function form_nav( $nav, $atts ) {
-		$form_id = $atts['form_id'];
+		$form_id = absint( $atts['form_id'] );
 
 		$nav[] = array(
-			'link'    => admin_url( 'edit.php?post_type=frm_display&form='. absint( $form_id ) .'&show_nav=1' ),
-			'label'   => __( 'Views', 'formidable' ),
+			'link'    => admin_url( 'edit.php?post_type=frm_display&form='. $form_id .'&show_nav=1' ),
+			'label'   => __( 'Views', 'formidable-pro' ),
 			'current' => array(),
 			'page'    => 'frm_display',
 			'permission' => 'frm_edit_displays',
 		);
 
-		$nav[] = array(
-			'link'    => admin_url( 'admin.php?page=formidable&frm_action=reports&form=' . absint( $form_id ) . '&show_nav=1' ),
-			'label'   => __( 'Reports', 'formidable' ),
+		$reports = array(
+			'link'    => admin_url( 'admin.php?page=formidable&frm_action=reports&form=' . $form_id . '&show_nav=1' ),
+			'label'   => __( 'Reports', 'formidable-pro' ),
 			'current' => array( 'reports' ),
 			'page'    => 'formidable',
 			'permission' => 'frm_view_reports',
 		);
+
+		$has_entries = FrmDb::get_var( 'frm_items', array( 'form_id' => $form_id ) );
+		if ( $has_entries ) {
+			$nav[] = $reports;
+		}
 
 		return $nav;
 	}

@@ -43,6 +43,6 @@ class FrmProFieldDynamicValueSelector extends FrmProFieldValueSelector {
 	 * @since 2.03.05
 	 */
 	private function set_blank_option_label() {
-		$this->blank_option_label = $this->source === 'data' ? __( 'Anything', 'formidable' ) : '';
+		$this->blank_option_label = $this->source === 'data' ? __( 'Anything', 'formidable-pro' ) : '';
 	}
 }

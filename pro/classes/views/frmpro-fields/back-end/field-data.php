@@ -1,7 +1,7 @@
 <div class="clear"></div>
 <?php
 if ( ! isset( $field['data_type'] ) || $field['data_type'] == 'data' ) {
-	_e( 'This data is dynamic on change', 'formidable' );
+	_e( 'This data is dynamic on change', 'formidable-pro' );
 } else if ( $field['data_type'] == 'select' ) { ?>
 	<select name="<?php echo esc_attr( $field_name ) ?>" id="<?php echo esc_attr( $field_name ) ?>" <?php
 		echo FrmField::is_multiple_select( $field ) ? 'multiple="multiple" ' : '';
@@ -15,7 +15,7 @@ if ( ! isset( $field['data_type'] ) || $field['data_type'] == 'data' ) {
 				</option>
 			<?php }
 		} else { ?>
-			<option value="">&mdash; <?php _e( 'This data is dynamic on change', 'formidable' ) ?> &mdash;</option>
+			<option value="">&mdash; <?php _e( 'This data is dynamic on change', 'formidable-pro' ) ?> &mdash;</option>
 		<?php } ?>
 	</select>
 <?php
@@ -35,7 +35,7 @@ if ( ! isset( $field['data_type'] ) || $field['data_type'] == 'data' ) {
 			</label><br/>
 		<?php }
 	} else {
-		esc_html_e( 'There are no options', 'formidable' );
+		esc_html_e( 'There are no options', 'formidable-pro' );
 	}
 } else if ($field['data_type'] == 'radio' ) {
 	if ( $field['options'] ) {
@@ -46,10 +46,10 @@ if ( ! isset( $field['data_type'] ) || $field['data_type'] == 'data' ) {
 			<?php
 		}
 	} else {
-		esc_html_e( 'There are no options', 'formidable' );
+		esc_html_e( 'There are no options', 'formidable-pro' );
 	}
 } else {
-	esc_html_e( 'This data is dynamic on change', 'formidable' );
+	esc_html_e( 'This data is dynamic on change', 'formidable-pro' );
 }
 
 if ( isset( $field['post_field'] ) && $field['post_field'] == 'post_category' ) { ?>

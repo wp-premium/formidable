@@ -9,25 +9,22 @@ class FrmProLookupFieldsController{
 	 */
 	public static function get_lookup_field_data_types(){
 		$data_types = array(
-			'select'    => __( 'Dropdown', 'formidable' ),
-			'radio'     => __( 'Radio Buttons', 'formidable' ),
-			'checkbox'  => __( 'Checkboxes', 'formidable' ),
-			'text'      => __( 'Single Line Text', 'formidable' ),
+			'select'    => __( 'Dropdown', 'formidable-pro' ),
+			'radio'     => __( 'Radio Buttons', 'formidable-pro' ),
+			'checkbox'  => __( 'Checkboxes', 'formidable-pro' ),
+			'text'      => __( 'Single Line Text', 'formidable-pro' ),
 		);
 		return $data_types;
 	}
 
 	/**
 	 * Get the data types for Lookup fields, formatted for Insert Field tab
-	 *
+	 * @deprecated 3.0
 	 * @return array $lookup_display_options
 	 */
 	public static function get_lookup_options_for_insert_fields_tab(){
-		$lookup_display_options = array(
-			'name'  => __( 'Lookup', 'formidable' ),
-			'types' => self::get_lookup_field_data_types()
-		);
-		return $lookup_display_options;
+		_deprecated_function( __METHOD__, '3.0', 'FrmProLookupFieldsController::get_lookup_field_data_types' );
+		return self::get_lookup_field_data_types();
 	}
 
 	/**
@@ -35,25 +32,13 @@ class FrmProLookupFieldsController{
 	 * Used on front and back end. Either $values or $field could be false :/
 	 *
 	 * @since 2.01.0
+	 * @deprecated 3.0
 	 * @param array $values
 	 * @param object $field
 	 * @param array $opts
 	 */
 	public static function add_field_options_specific_to_lookup_field( $values, $field, &$opts ) {
-		if ( $field ) {
-			$field_type = isset( $field->field_options['original_type'] ) ? $field->field_options['original_type'] : $field->type;
-		} else {
-			$field_type = $values['type'];
-		}
-
-		if ( $field_type == 'lookup' ) {
-			$opts['watch_lookup'] = array();
-			$opts['get_values_form'] = '';
-			$opts['get_values_field'] = '';
-			$opts['lookup_filter_current_user'] = false;
-			$opts['lookup_placeholder_text'] = '';
-			$opts['lookup_option_order'] = 'ascending';
-		}
+		_deprecated_function( __METHOD__, '3.0', 'FrmProFieldLookup->get_default_field_options' );
 	}
 
 	/**
@@ -118,7 +103,6 @@ class FrmProLookupFieldsController{
 			'text',
 			'email',
 			'url',
-			'image',
 			'time',
 			'user_id',
 			'number',
@@ -139,12 +123,10 @@ class FrmProLookupFieldsController{
 	 * @return array $add_options
 	 */
 	public static function add_standard_field_options() {
-		$add_options = array(
-			'read_only' => true,
-			'unique' => true
-		);
-
-		return $add_options;
+		_deprecated_function( __FUNCTION__, '3.0', 'FrmProFieldLookup->field_settings_for_type' );
+		$lookup = new FrmProFieldLookup();
+		$options = $lookup->field_settings_for_type();
+		return $options;
 	}
 
 	/**
@@ -156,12 +138,12 @@ class FrmProLookupFieldsController{
 	public static function show_get_options_from_above_field_options( $field ) {
 		$lookup_args = self::get_args_for_get_options_from_setting( $field );
 		if ( $field['data_type'] == 'text' ) {
-			$opt_label = __( 'Search values from', 'formidable' );
+			$opt_label = __( 'Search values from', 'formidable-pro' );
 		} else {
-			$opt_label = __( 'Get options from', 'formidable' );
+			$opt_label = __( 'Get options from', 'formidable-pro' );
 		}
 
-		require( FrmAppHelper::plugin_path() .'/pro/classes/views/lookup-fields/back-end/top-options.php' );
+		require( FrmProAppHelper::plugin_path() . '/classes/views/lookup-fields/back-end/top-options.php' );
 	}
 
 	/**
@@ -173,7 +155,7 @@ class FrmProLookupFieldsController{
 	public static function show_lookup_field_options_in_form_builder( $field ) {
 		// Display as
 		$lookup_args['data_types'] = self::get_lookup_field_data_types();
-		require( FrmAppHelper::plugin_path() . '/pro/classes/views/lookup-fields/back-end/display-as.php' );
+		require( FrmProAppHelper::plugin_path() . '/classes/views/lookup-fields/back-end/display-as.php' );
 
 		if ( $field['data_type'] == 'text' ) {
 			// Field size
@@ -181,9 +163,9 @@ class FrmProLookupFieldsController{
 			require( FrmAppHelper::plugin_path() . '/classes/views/frm-fields/back-end/pixels-wide.php' );
 
 			// Filter options
-			require( FrmAppHelper::plugin_path() . '/pro/classes/views/lookup-fields/back-end/filter.php' );
+			require( FrmProAppHelper::plugin_path() . '/classes/views/lookup-fields/back-end/filter.php' );
 
-			FrmProFieldsController::show_format_option( $field );
+			FrmFieldsController::show_format_option( $field );
 		} else {
 
 			if ( $field['data_type'] == 'select' ) {
@@ -191,27 +173,27 @@ class FrmProLookupFieldsController{
 				require( FrmAppHelper::plugin_path() . '/classes/views/frm-fields/back-end/automatic-width.php' );
 
 				// Placeholder text
-				require( FrmAppHelper::plugin_path() . '/pro/classes/views/lookup-fields/back-end/placeholder.php' );
+				require( FrmProAppHelper::plugin_path() . '/classes/views/lookup-fields/back-end/placeholder.php' );
 			}
 
 			if ( in_array( $field['data_type'], array( 'checkbox', 'radio' ) ) ) {
 				// Alignment
-				require( FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/back-end/alignment.php' );
+				require( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/back-end/alignment.php' );
 			}
 
 			// Watch Lookup Fields
 			$lookup_fields = self::get_lookup_fields_for_watch_row( $field );
 			$field['watch_lookup'] = array_filter( $field['watch_lookup'] );
-			require( FrmAppHelper::plugin_path() . '/pro/classes/views/lookup-fields/back-end/watch.php' );
+			require( FrmProAppHelper::plugin_path() . '/classes/views/lookup-fields/back-end/watch.php' );
 
 			// Filter options
-			require( FrmAppHelper::plugin_path() . '/pro/classes/views/lookup-fields/back-end/filter.php' );
+			require( FrmProAppHelper::plugin_path() . '/classes/views/lookup-fields/back-end/filter.php' );
 
 			// Option Order
-			require( FrmAppHelper::plugin_path() . '/pro/classes/views/lookup-fields/back-end/order.php' );
+			require( FrmProAppHelper::plugin_path() . '/classes/views/lookup-fields/back-end/order.php' );
 
 			// Dynamic Default Value
-			require( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-fields/back-end/dynamic-default-value.php' );
+			require( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/back-end/dynamic-default-value.php' );
 		}
 
 		FrmProFieldsController::show_visibility_option( $field );
@@ -228,7 +210,7 @@ class FrmProLookupFieldsController{
 		$lookup_args = self::get_args_for_get_options_from_setting( $field );
 		$lookup_fields = self::get_lookup_fields_for_watch_row( $field );
 
-		require( FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-fields/back-end/autopopulate-values.php' );
+		require( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/back-end/autopopulate-values.php' );
 	}
 
 	/**
@@ -313,7 +295,7 @@ class FrmProLookupFieldsController{
 	 * @param array $field ($field is not empty on page load)
 	 */
 	private static function show_options_for_get_values_field( $form_fields, $field = array() ) {
-		$select_field_text = __( '&mdash; Select Field &mdash;', 'formidable' );
+		$select_field_text = __( '&mdash; Select Field &mdash;', 'formidable-pro' );
 		echo '<option value="">' . esc_html( $select_field_text ) . '</option>';
 
 		$selected_value = empty( $field ) ? '' : $field['get_values_field'];
@@ -366,7 +348,7 @@ class FrmProLookupFieldsController{
 		}
 		$saved_value_array = (array) $field['value'];
 
-		require(FrmAppHelper::plugin_path() .'/pro/classes/views/lookup-fields/back-end/input.php');
+		require(FrmProAppHelper::plugin_path() . '/classes/views/lookup-fields/back-end/input.php');
 	}
 
 	/**
@@ -408,7 +390,7 @@ class FrmProLookupFieldsController{
 		$current_field = FrmField::getOne( $field_id );// Maybe (for efficiency) change this to a specific database call
 		$lookup_fields = self::get_limited_lookup_fields_in_form( $form_id, $current_field->form_id );
 
-		include( FrmAppHelper::plugin_path() .'/pro/classes/views/lookup-fields/back-end/watch-row.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/lookup-fields/back-end/watch-row.php' );
 		wp_die();
 	}
 
@@ -432,7 +414,7 @@ class FrmProLookupFieldsController{
 			// Only show 300 options
 			$all_values = array_slice( $all_values, 0, 300 );
 		} else {
-			$all_values = array( __( 'No options available: please check this field\'s options', 'formidable' ) );
+			$all_values = array( __( 'No options available: please check this field\'s options', 'formidable-pro' ) );
 		}
 
 		return $all_values;
@@ -802,9 +784,9 @@ class FrmProLookupFieldsController{
 
 		if ( 'checkbox' == $field['data_type'] ) {
 			$field_name .= '[]';
-			require( FrmAppHelper::plugin_path() .'/pro/classes/views/lookup-fields/front-end/checkbox-rows.php' );
+			require( FrmProAppHelper::plugin_path() . '/classes/views/lookup-fields/front-end/checkbox-rows.php' );
 		} else {
-			require( FrmAppHelper::plugin_path() .'/pro/classes/views/lookup-fields/front-end/radio-rows.php' );
+			require( FrmProAppHelper::plugin_path() . '/classes/views/lookup-fields/front-end/radio-rows.php' );
 		}
 	}
 
@@ -1115,7 +1097,7 @@ class FrmProLookupFieldsController{
 			$field_name .= '[]';
 		}
 
-		require( FrmAppHelper::plugin_path() .'/pro/classes/views/lookup-fields/front-end/input.php' );
+		require( FrmProAppHelper::plugin_path() . '/classes/views/lookup-fields/front-end/input.php' );
 	}
 
 	/**

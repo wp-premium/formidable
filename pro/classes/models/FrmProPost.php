@@ -150,9 +150,6 @@ class FrmProPost {
 		self::populate_custom_fields( $action, $entry, $fields, $new_post );
 		self::populate_taxonomies( $action, $entry, $fields, $new_post );
 
-		// Reverse compatability for custom code
-		self::populate_from_custom_code($new_post);
-
 		$new_post = apply_filters('frm_new_post', $new_post, compact('form', 'action', 'entry'));
 
 		return $new_post;
@@ -243,7 +240,7 @@ class FrmProPost {
 			$tax_type = ( isset($taxonomy['meta_name']) && ! empty($taxonomy['meta_name']) ) ? $taxonomy['meta_name'] : 'frm_tag';
 			$value = isset($entry->metas[$taxonomy['field_id']]) ? $entry->metas[$taxonomy['field_id']] : '';
 
-			if ( $fields[$taxonomy['field_id']]->type == 'tag' ) {
+			if ( isset( $fields[ $taxonomy['field_id'] ] ) && $fields[ $taxonomy['field_id'] ]->type == 'tag' ) {
 				$value = trim($value);
 				$value = array_map('trim', explode(',', $value));
 
@@ -336,40 +333,6 @@ class FrmProPost {
 		}
 
 		return $value;
-	}
-
-	private static function populate_from_custom_code( &$new_post ) {
-		if ( isset($_POST['frm_wp_post']) ) {
-			_deprecated_argument( 'frm_wp_post', '2.0', 'Use <code>frm_new_post</code> filter instead.' );
-			foreach ( (array) $_POST['frm_wp_post']  as $key => $value ) {
-				list($field_id, $meta_name) = explode('=', $key);
-				if ( ! empty($meta_name) ) {
-					$new_post[$meta_name] = $value;
-				}
-
-				unset($field_id, $meta_name, $key, $value);
-			}
-		}
-
-		if ( isset($_POST['frm_wp_post_custom']) ) {
-			_deprecated_argument( 'frm_wp_post_custom', '2.0', 'Use <code>frm_new_post</code> filter instead.' );
-			foreach ( (array) $_POST['frm_wp_post_custom']  as $key => $value ) {
-				list($field_id, $meta_name) = explode('=', $key);
-				if ( ! empty($meta_name) ) {
-					$new_post['post_custom'][$meta_name] = $value;
-				}
-
-				unset($field_id, $meta_name, $key, $value);
-			}
-		}
-
-		if ( isset($_POST['frm_tax_input']) ) {
-			_deprecated_argument( 'frm_tax_input', '2.0', 'Use <code>frm_new_post</code> filter instead.' );
-			foreach ( (array) $_POST['frm_tax_input']  as $key => $value ) {
-				self::fill_taxonomies($new_post['taxonomies'], $key, $value);
-				unset($key, $value);
-			}
-		}
 	}
 
 	private static function fill_taxonomies(&$taxonomies, $tax_type, $new_value) {
@@ -635,11 +598,8 @@ class FrmProPost {
 
 		// Set up hidden fields for read-only dropdown
 		if ( FrmField::is_read_only( $field ) ) {
-			$hidden_fields = FrmProDropdownFieldsController::get_hidden_fields_with_readonly_values( $field, $args['name'], $args['id'] );
-
 			$dropdown = str_replace( "name='" . $args['name'] . "'", "", $dropdown );
 			$dropdown = str_replace( "id='" . $args['id'] . "'", "", $dropdown );
-			$dropdown = $hidden_fields . $dropdown;
 		}
 
 		self::select_saved_values_in_category_dropdown( $field, $dropdown );

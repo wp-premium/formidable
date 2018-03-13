@@ -1,3 +1,7 @@
+<fieldset>
+<legend class="frm_screen_reader frm_hidden">
+	<?php echo esc_html( $field['name'] ); ?>
+</legend>
 <div class="frm_combo_inputs_container">
 <?php foreach ( $sub_fields as $key => $sub_field ) { ?>
 <div id="frm_field_<?php echo esc_attr( $field['id'] .'-'. $key ) ?>_container" class="frm_form_field form-field <?php
@@ -5,6 +9,9 @@
 	if ( isset( $errors ) ) {
 		FrmProComboFieldsController::maybe_add_error_class( compact( 'field', 'key', 'errors' ) );
 	} ?>">
+	<label for="<?php echo esc_attr( $html_id .'_'. $key ) ?>" class="frm_screen_reader frm_hidden">
+		<?php echo esc_html( isset( $field[ $key . '_desc' ] ) && ! empty( $field[ $key . '_desc' ] ) ? $field[ $key . '_desc' ] : $field['name'] ); ?>
+	</label>
 	<?php if ( $sub_field['type'] == 'select' ) { ?>
 		<select name="<?php echo esc_attr( $field_name ) ?>[<?php echo esc_attr( $key ) ?>]" id="<?php echo esc_attr( $html_id .'_'. $key ) ?>" <?php FrmProComboFieldsController::add_atts_to_input( compact( 'field', 'sub_field', 'key' ) ); ?>>
 			<option value="">
@@ -19,7 +26,7 @@
 	<?php } else { ?>
 	<input type="<?php echo esc_attr( $sub_field['type'] ) ?>" id="<?php echo esc_attr( $html_id . '_' . $key ) ?>" value="<?php echo esc_attr( $field['value'][ $key ] ) ?>" <?php
 	if ( ! isset( $remove_names ) || ! $remove_names ) {
-		echo ' name="' . esc_attr( $field_name ) . '[' . esc_attr( $key ) . ']" ';
+		echo 'name="' . esc_attr( $field_name ) . '[' . esc_attr( $key ) . ']" ';
 	}
 	FrmProComboFieldsController::add_atts_to_input( compact( 'field', 'sub_field', 'key' ) );
 	?> />
@@ -39,3 +46,4 @@
 </div>
 <?php } ?>
 </div>
+</fieldset>

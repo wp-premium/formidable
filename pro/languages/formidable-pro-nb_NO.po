@@ -1,0 +1,3461 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Formidable v2.05\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-02-10 21:26+0000\n"
+"PO-Revision-Date: 2018-02-10 21:26+0000\n"
+"Last-Translator: admin <steph@strategy11.com>\n"
+"Language-Team: Norwegian (Bokmål)\n"
+"Language: nb-NO\n"
+"Plural-Forms: nplurals=2; plural=n != 1\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Generator: Loco - https://localise.biz/\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SearchPath-0: ..\n"
+"X-Poedit-KeywordsList: _:1;gettext:1;dgettext:2;ngettext:1,2;dngettext:2,3;"
+"__:1;_e:1;_c:1;_n:1,2;_n_noop:1,2;_nc:1,2;__ngettext:1,2;__ngettext_noop:1,2;"
+"_x:1,2c;_ex:1,2c;_nx:1,2,4c;_nx_noop:1,2,3c;_n_js:1,2;_nx_js:1,2,3c;"
+"esc_attr__:1;esc_html__:1;esc_attr_e:1;esc_html_e:1;esc_attr_x:1,2c;"
+"esc_html_x:1,2c;comments_number_link:2,3;t:1;st:1;trans:1;transChoice:1,2\n"
+"X-Loco-Target-Locale: nb_NO"
+
+#: formidable-pro.php:86
+msgid "Formidable Forms Pro requires Formidable Forms to be installed."
+msgstr ""
+
+#: classes/controllers/FrmProDisplaysController.php:39
+msgid "Search Views"
+msgstr ""
+
+#: classes/controllers/FrmProDisplaysController.php:40
+msgid "No Views Found."
+msgstr ""
+
+#: classes/controllers/FrmProDisplaysController.php:41
+msgid "Add New View"
+msgstr ""
+
+#: classes/controllers/FrmProDisplaysController.php:42
+msgid "Edit View"
+msgstr ""
+
+#: classes/controllers/FrmProDisplaysController.php:63
+msgid "View all forms"
+msgstr ""
+
+#: classes/controllers/FrmProDisplaysController.php:133
+msgid "Former ID"
+msgstr ""
+
+#: classes/controllers/FrmProDisplaysController.php:274
+msgid "Basic Settings"
+msgstr ""
+
+#: classes/controllers/FrmProDisplaysController.php:279
+msgid "Customization"
+msgstr ""
+
+#: classes/controllers/FrmProDisplaysController.php:739
+msgid "daily"
+msgstr ""
+
+#: classes/controllers/FrmProDisplaysController.php:739
+msgid "weekly"
+msgstr ""
+
+#: classes/controllers/FrmProDisplaysController.php:739
+msgid "month"
+msgstr ""
+
+#: classes/controllers/FrmProDisplaysController.php:739
+msgid "monthly"
+msgstr ""
+
+#: classes/controllers/FrmProDisplaysController.php:739
+msgid "year"
+msgstr ""
+
+#: classes/controllers/FrmProDisplaysController.php:739
+msgid "years"
+msgstr ""
+
+#: classes/controllers/FrmProDisplaysController.php:739
+msgid "yearly"
+msgstr ""
+
+#: classes/controllers/FrmProDisplaysController.php:872
+msgid "There are no views with that ID"
+msgstr ""
+
+#: classes/controllers/FrmProEddController.php:170
+msgid "Click here"
+msgstr ""
+
+#: classes/controllers/FrmProEddController.php:178
+msgid "Formidable Pro is Installed"
+msgstr ""
+
+#: classes/controllers/FrmProEddController.php:182
+msgid "Enter new license"
+msgstr ""
+
+#: classes/controllers/FrmProEddController.php:185
+msgid "Deauthorize this site"
+msgstr ""
+
+#: classes/controllers/FrmProEddController.php:192
+msgid "Account"
+msgstr ""
+
+#: classes/controllers/FrmProEddController.php:209
+msgid "Enter your license number here"
+msgstr ""
+
+#: classes/controllers/FrmProEddController.php:214
+msgid "Use this license to enable Formidable Pro site-wide"
+msgstr ""
+
+#: classes/controllers/FrmProEddController.php:218
+msgid "Save License"
+msgstr ""
+
+#: classes/controllers/FrmProEntriesController.php:106
+msgid "Draft was Successfully Created"
+msgstr ""
+
+#: classes/controllers/FrmProEntriesController.php:143
+msgid "Draft was Successfully Updated"
+msgstr ""
+
+#: classes/controllers/FrmProEntriesController.php:222
+msgid "No form was found"
+msgstr ""
+
+#: classes/controllers/FrmProEntriesController.php:1049
+msgid "Create Entry in Form"
+msgstr ""
+
+#: classes/controllers/FrmProEntriesController.php:1092
+msgid "Copied from Post"
+msgstr ""
+
+#: classes/controllers/FrmProEntriesController.php:1407
+#: classes/views/displays/where_options.php:19
+msgid "Draft"
+msgstr ""
+
+#: classes/controllers/FrmProEntriesController.php:1408
+msgid "Parent Entry ID"
+msgstr ""
+
+#: classes/controllers/FrmProEntriesController.php:1460
+msgid ""
+"There are no matching fields. Please check your formresults shortcode to "
+"make sure you are using the correct form and field IDs."
+msgstr ""
+
+#: classes/controllers/FrmProEntriesController.php:2253
+msgid "You are missing options in your shortcode. A field_id is required."
+msgstr ""
+
+#: classes/controllers/FrmProEntriesController.php:2338
+#: classes/controllers/FrmProEntriesController.php:2599
+msgid "Your entry was successfully deleted"
+msgstr ""
+
+#: classes/controllers/FrmProEntriesController.php:2378
+msgid "You are missing options in your shortcode. field_id is required."
+msgstr ""
+
+#: classes/controllers/FrmProEntriesController.php:2615
+msgid "There was an error deleting that entry"
+msgstr ""
+
+#: classes/controllers/FrmProFieldsController.php:253
+msgid "Option Label"
+msgstr ""
+
+#: classes/controllers/FrmProFieldsController.php:254
+#: classes/controllers/FrmProFormsController.php:516
+msgid "Saved Value"
+msgstr ""
+
+#: classes/controllers/FrmProFieldsController.php:446
+#: classes/views/frmpro-fields/options-form-before.php:31
+msgid "Select a taxonomy on the Form Actions tab of the Form Settings page"
+msgstr ""
+
+#: classes/controllers/FrmProFormActionsController.php:31
+msgid "Send"
+msgstr ""
+
+#: classes/controllers/FrmProFormActionsController.php:32
+msgid "Stop"
+msgstr ""
+
+#: classes/controllers/FrmProFormActionsController.php:33
+msgid "this notification if"
+msgstr ""
+
+#: classes/controllers/FrmProFormActionsController.php:36
+msgid "Don't create"
+msgstr ""
+
+#: classes/controllers/FrmProFormActionsController.php:44
+msgid "Don't do"
+msgstr ""
+
+#: classes/controllers/FrmProFormActionsController.php:45
+msgid "this action if"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:295
+msgid "Login"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:296
+#: classes/controllers/FrmProFormsController.php:530
+msgid "Display Name"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:297
+#: classes/controllers/FrmProFormsController.php:528
+msgid "First Name"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:298
+#: classes/controllers/FrmProFormsController.php:529
+msgid "Last Name"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:300
+msgid "User Meta"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:303
+#: classes/views/frmpro-form-actions/post_options.php:49
+msgid "Post Title"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:304
+msgid "Author Email"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:305
+msgid "Post Meta"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:307
+msgid "Increment"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:308
+msgid "GET/POST"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:308
+msgid ""
+"Replace 'whatever' with the parameter name. In url.com?product=form, the "
+"variable is 'product'. You would use [get param=product] in your field."
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:309
+msgid "SERVER"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:309
+msgid "A variable from the PHP SERVER array."
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:309
+msgid ""
+"Replace 'whatever' with the parameter name. To get the url of the current "
+"page, use [server param=\"REQUEST_URI\"] in your field."
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:460
+msgid "Save Draft"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:492
+msgid "Equals"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:493
+msgid "Does Not Equal"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:494
+msgid "Is Blank"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:495
+msgid "Is Not Blank"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:496
+msgid "Is Like"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:497
+msgid "Is Not Like"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:498
+msgid "Greater Than"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:499
+msgid "Less Than"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:508
+msgid "Clickable Links"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:509
+msgid "Remove Links"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:509
+msgid "Removes the automatic links to category pages"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:510
+msgid "Sanitize"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:511
+msgid "Sanitize URL"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:511
+msgid "Replaces all HTML entities with a URL safe string."
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:512
+msgid "Truncate"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:512
+msgid ""
+"Truncate text with a link to view more. If using Both (dynamic), the link "
+"goes to the detail page. Otherwise, it will show in-place."
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:513
+msgid "More Text"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:514
+msgid "Time Ago"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:515
+msgid "# Format"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:516
+msgid "Show the saved value for fields with separate values."
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:517
+msgid "Remove HTML"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:517
+msgid "Remove all HTML added into your form before display"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:518
+msgid "Keep JS"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:518
+msgid ""
+"Javascript from your form entries are automatically removed. Add this option "
+"only if you trust those submitting entries."
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:531
+msgid "User Login"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:533
+msgid "Avatar"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:534
+msgid "Author Link"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:598
+msgid "Single Entry"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:598
+msgid "Display a Single Entry"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:620
+msgid "Make read-only fields editable"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:628
+msgid "Select a view:"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:638
+msgid "Filter shortcodes within the view content"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:639
+#: classes/views/displays/mb_advanced.php:6
+msgid "Limit"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:640
+msgid "Page size"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:642
+msgid "Entry order"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:654
+msgid "No draft entries"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:655
+msgid "Only draft entries"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:656
+msgid "All entries"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:664
+msgid "Use Formidable styling"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:672
+msgid "The ID of the page with the search results"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:690
+#: classes/views/frmpro-fields/options-form-before.php:19
+#: classes/views/lookup-fields/back-end/get-options-from.php:2
+msgid "Select Form"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:692
+msgid "(no title)"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:703
+msgid "Graph Type"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:713
+msgid "Stepped Area"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:718
+msgid "Data Type"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:720
+msgid "The number of entries"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:721
+msgid "Add the field values together"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:722
+msgid "Average the totaled field values"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:726
+msgid "Width"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:743
+msgid "Insert an entry ID/key:"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:768
+msgid "Field ID/key for labels"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:773
+#: classes/helpers/FrmProFieldsHelper.php:2547
+msgid "List"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:789
+msgid "Link action"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:802
+msgid "An anchor on the page with id=\"[key]\""
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:803
+msgid "The entry in the back-end"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:806
+msgid "URL parameter (?entry=5)"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:811
+#: classes/views/displays/where_row.php:7
+msgid "Entry key"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:815
+msgid "Add HTML classes"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:816
+msgid "Label on first option in the dropdown"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:831
+msgid "Detail Link"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:832
+msgid "Edit Entry Link"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:833
+msgid "Entry Count"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:834
+msgid "Entry Postion"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:835
+msgid "Even/Odd"
+msgstr ""
+
+#: classes/controllers/FrmProFormsController.php:837
+msgid "Calendar Date"
+msgstr ""
+
+#: classes/controllers/FrmProGraphsController.php:19
+msgid "You must include a field id or key in your graph shortcode."
+msgstr ""
+
+#: classes/controllers/FrmProGraphsController.php:1105
+#: classes/views/frmpro-statistics/show.php:55
+msgid "Total"
+msgstr ""
+
+#: classes/controllers/FrmProGraphsController.php:1107
+#: classes/views/frmpro-statistics/show.php:59
+msgid "Average"
+msgstr ""
+
+#: classes/controllers/FrmProGraphsController.php:1663
+#: classes/controllers/FrmProGraphsController.php:1695
+msgid "Creation Date"
+msgstr ""
+
+#: classes/controllers/FrmProGraphsController.php:2182
+msgid "Daily Entries"
+msgstr ""
+
+#: classes/controllers/FrmProGraphsController.php:2190
+msgid "Monthly Entries"
+msgstr ""
+
+#: classes/controllers/FrmProLookupFieldsController.php:13
+#: classes/helpers/FrmProFieldsHelper.php:2545
+#: classes/views/styles/_sample_form.php:14
+msgid "Radio Buttons"
+msgstr ""
+
+#: classes/controllers/FrmProLookupFieldsController.php:15
+msgid "Single Line Text"
+msgstr ""
+
+#: classes/controllers/FrmProStatisticsController.php:19
+msgid "You must include a valid field id or key in your stats shortcode."
+msgstr ""
+
+#: classes/controllers/FrmProStylesController.php:13
+msgid "Section Fields"
+msgstr ""
+
+#: classes/controllers/FrmProStylesController.php:14
+msgid "Date Fields"
+msgstr ""
+
+#: classes/controllers/FrmProStylesController.php:15
+msgid "Progress Bars &amp; Rootline"
+msgstr ""
+
+#: classes/controllers/FrmProXMLController.php:40
+msgid ""
+"Upload your Formidable XML or CSV file to import forms, entries, and views "
+"into this site. Note: If your imported form/entry/view key and creation date "
+"match an item on your site, that item will be updated. You cannot undo this "
+"action."
+msgstr ""
+
+#: classes/controllers/FrmProXMLController.php:44
+msgid "Choose a Formidable XML or any CSV file"
+msgstr ""
+
+#: classes/controllers/FrmProXMLController.php:164
+msgid "All Fields are required"
+msgstr ""
+
+#: classes/controllers/FrmProXMLController.php:176
+msgid "That CSV was not uploaded. Are CSV files allowed on your site?"
+msgstr ""
+
+#: classes/controllers/FrmProXMLController.php:202
+msgid "CSV cannot be opened."
+msgstr ""
+
+#: classes/controllers/FrmUpdatesController.php:27
+msgid "Your Formidable Pro License was Invalid"
+msgstr ""
+
+#: classes/controllers/FrmUpdatesController.php:88
+#: classes/controllers/FrmUpdatesController.php:121
+msgid "Please enter a license number"
+msgstr ""
+
+#: classes/controllers/FrmUpdatesController.php:224
+msgid "expired"
+msgstr ""
+
+#: classes/controllers/FrmUpdatesController.php:224
+msgid "invalid"
+msgstr ""
+
+#: classes/controllers/FrmUpdatesController.php:225
+#, php-format
+msgid "An update is available, but your license is %s."
+msgstr ""
+
+#: classes/controllers/FrmUpdatesController.php:345
+#, php-format
+msgid "There was a %1$s error: %2$s"
+msgstr ""
+
+#: classes/controllers/FrmUpdatesController.php:349
+msgid "Your License Key was invalid"
+msgstr ""
+
+#: classes/helpers/FrmProDisplaysHelper.php:210
+msgid "greater than or equal to"
+msgstr ""
+
+#: classes/helpers/FrmProDisplaysHelper.php:211
+msgid "less than or equal to"
+msgstr ""
+
+#: classes/helpers/FrmProDisplaysHelper.php:213
+msgid "NOT like"
+msgstr ""
+
+#: classes/helpers/FrmProDisplaysHelper.php:216
+msgid "unique (get oldest entries)"
+msgstr ""
+
+#: classes/helpers/FrmProDisplaysHelper.php:217
+msgid "unique (get newest entries)"
+msgstr ""
+
+#: classes/helpers/FrmProEntriesHelper.php:296
+msgid "Resend Email Notifications"
+msgstr ""
+
+#: classes/helpers/FrmProEntriesHelper.php:318
+msgid "Really permanently delete ALL entries in this form?"
+msgstr ""
+
+#: classes/helpers/FrmProEntriesHelper.php:347
+msgid "Download CSV"
+msgstr ""
+
+#: classes/helpers/FrmProEntriesListHelper.php:14
+msgid "Export to CSV"
+msgstr ""
+
+#: classes/helpers/FrmProEntryMetaHelper.php:169
+#, php-format
+msgid "View all posts filed under %s"
+msgstr ""
+
+#: classes/helpers/FrmProFieldsHelper.php:705
+msgid "The entered values do not match"
+msgstr ""
+
+#: classes/helpers/FrmProFieldsHelper.php:1290
+msgid "No Categories"
+msgstr ""
+
+#: classes/helpers/FrmProFieldsHelper.php:2476
+msgid "User IP"
+msgstr ""
+
+#: classes/helpers/FrmProFieldsHelper.php:2478
+#: classes/views/displays/_calendar_options.php:5
+#: classes/views/displays/_calendar_options.php:17
+#: classes/views/displays/order_row.php:5
+msgid "Entry update date"
+msgstr ""
+
+#: classes/helpers/FrmProFieldsHelper.php:2529
+msgid "Add a rotating 'even' or 'odd' class"
+msgstr ""
+
+#: classes/helpers/FrmProFieldsHelper.php:2531
+msgid "Default Email Message"
+msgstr ""
+
+#: classes/helpers/FrmProFormsHelper.php:399
+#: classes/helpers/FrmProFormsHelper.php:642
+msgid "Your draft has been saved."
+msgstr ""
+
+#: classes/models/FrmProDb.php:524
+msgid "Formidable Style"
+msgstr ""
+
+#: classes/models/FrmProDisplay.php:246 classes/views/displays/mb_excerpt.php:2
+msgid ""
+"This is not displayed anywhere, but is just for your reference. (optional)"
+msgstr ""
+
+#: classes/models/FrmProDisplay.php:251
+msgid "Content cannot be blank"
+msgstr ""
+
+#: classes/models/FrmProDisplay.php:255
+msgid "Limit must be a number"
+msgstr ""
+
+#: classes/models/FrmProDisplay.php:260
+msgid "Dynamic Content cannot be blank"
+msgstr ""
+
+#: classes/models/FrmProFieldDynamicValueSelector.php:46
+msgid "Anything"
+msgstr ""
+
+#: classes/models/FrmProFieldUserIDValueSelector.php:21
+msgid "Current User"
+msgstr ""
+
+#: classes/models/FrmProFileField.php:41
+msgid ""
+"Please use the fallback form below to upload your files like in the olden "
+"days."
+msgstr ""
+
+#: classes/models/FrmProFileField.php:401
+msgid "This field is invalid"
+msgstr ""
+
+#: classes/models/FrmProFileField.php:402
+msgid "is invalid"
+msgstr ""
+
+#: classes/models/FrmProPageField.php:163
+#: classes/views/frmpro-forms/form_page_options.php:29
+#, php-format
+msgid "Page %d"
+msgstr ""
+
+#: classes/models/FrmProSettings.php:17
+msgid "Your submission was successfully saved."
+msgstr ""
+
+#: classes/widgets/FrmListEntries.php:6
+msgid "Display a list of Formidable entries"
+msgstr ""
+
+#: classes/widgets/FrmListEntries.php:7
+msgid "Formidable Entries List"
+msgstr ""
+
+#: classes/widgets/FrmListEntries.php:211
+msgid "Use Settings from View"
+msgstr ""
+
+#: classes/widgets/FrmListEntries.php:221
+msgid "Views with a \"Both (Dynamic)\" format will show here."
+msgstr ""
+
+#: classes/widgets/FrmListEntries.php:234
+msgid "Title Field"
+msgstr ""
+
+#: classes/widgets/FrmListEntries.php:251
+msgid "List Entries by Category"
+msgstr ""
+
+#: classes/widgets/FrmListEntries.php:270
+msgid "Show Entry Counts"
+msgstr ""
+
+#: classes/widgets/FrmListEntries.php:273
+msgid "Show Only Category Name"
+msgstr ""
+
+#: classes/widgets/FrmListEntries.php:276
+msgid "Show Entries Beneath Categories"
+msgstr ""
+
+#: classes/widgets/FrmListEntries.php:279
+msgid "Entry Limit (leave blank to list all)"
+msgstr ""
+
+#: classes/models/fields/FrmProFieldCreditCard.php:231
+msgid "Please enter a valid CVC"
+msgstr ""
+
+#: classes/models/fields/FrmProFieldDivider.php:210
+msgid "Toggle fields"
+msgstr ""
+
+#: classes/models/fields/FrmProFieldEndDivider.php:49
+#: classes/views/displays/mb_advanced.php:33
+#: classes/views/displays/mb_advanced.php:53
+#: classes/views/styles/_sample_form.php:30
+msgid "Add"
+msgstr ""
+
+#: classes/views/combo-fields/inplace-sub-label.php:2
+msgid "(Click to add description)"
+msgstr ""
+
+#: classes/views/displays/_calendar_options.php:2
+msgid "Event Date"
+msgstr ""
+
+#: classes/views/displays/_calendar_options.php:13
+msgid "End Date or Day Count"
+msgstr ""
+
+#: classes/views/displays/_calendar_options.php:15
+msgid "No multi-day events"
+msgstr ""
+
+#: classes/views/displays/_calendar_options.php:25
+msgid "Repeat"
+msgstr ""
+
+#: classes/views/displays/_calendar_options.php:25
+msgid ""
+"Select a field from your form that contains values like 1 week, 2 weeks, 1 "
+"year, etc. This will set the repeat period for each event."
+msgstr ""
+
+#: classes/views/displays/_calendar_options.php:27
+msgid "No repeating events"
+msgstr ""
+
+#: classes/views/displays/_calendar_options.php:35
+msgid "End Repeat"
+msgstr ""
+
+#: classes/views/displays/_calendar_options.php:37
+msgid "Never"
+msgstr ""
+
+#: classes/views/displays/mb_advanced.php:7
+msgid ""
+"If you don’t want all your entries displayed, you can insert the number "
+"limit here. Leave blank if you’d like all entries shown."
+msgstr ""
+
+#: classes/views/displays/mb_advanced.php:17
+msgid "Page Size"
+msgstr ""
+
+#: classes/views/displays/mb_advanced.php:30
+msgid "Order"
+msgstr ""
+
+#: classes/views/displays/mb_advanced.php:48
+msgid "Filter Entries"
+msgstr ""
+
+#: classes/views/displays/mb_advanced.php:49
+msgid ""
+"Narrow down which entries will be used. The Unique options uses SQL GROUP BY "
+"to make sure only one entry is shown for each value in the selected field(s)."
+msgstr ""
+
+#: classes/views/displays/mb_advanced.php:81
+msgid "Detail Page Slug"
+msgstr ""
+
+#: classes/views/displays/mb_advanced.php:81
+#, php-format
+msgid ""
+"Example: If parameter name is 'contact', the url would be like %1$s/selected-"
+"page?contact=2. If this entry is linked to a post, the post permalink will "
+"be used instead."
+msgstr ""
+
+#: classes/views/displays/mb_advanced.php:101
+msgid ""
+"Copy these display settings to other blogs when Formidable Pro is activated. "
+"<br/>Note: Use only field keys in the content box(es) above."
+msgstr ""
+
+#: classes/views/displays/mb_dyncontent.php:16
+#: classes/views/displays/mb_dyncontent.php:45
+msgid "optional"
+msgstr ""
+
+#: classes/views/displays/mb_dyncontent.php:24
+msgid ""
+"The HTML for your page. If 'All Entries' is selected above, this content "
+"will be repeated for each entry. The field ID and Key work synonymously, "
+"although there are times one choice may be better. If you are panning to "
+"copy your view settings to other blogs, use the Key since they will be "
+"copied and the ids may differ from blog to blog."
+msgstr ""
+
+#: classes/views/displays/mb_dyncontent.php:30
+msgid "Disable visual editor for this view"
+msgstr ""
+
+#: classes/views/displays/mb_dyncontent.php:32
+msgid ""
+"It is recommended to check this box if you include a <table> tag in the "
+"Before Content box. If you are editing a view and notice the visual tab is "
+"selected and your table HTML is missing, you can switch to the HTML tab, go "
+"up to your url in your browser and hit enter to reload the page. As long as "
+"the settings have not been saved, your old HTML will be back to way it was "
+"before loading it in the visual tab."
+msgstr ""
+
+#: classes/views/displays/mb_dyncontent.php:44
+msgid ""
+"This content will not be repeated. This would be a good place to close any "
+"HTML tags from the Before Content field."
+msgstr ""
+
+#: classes/views/displays/mb_dyncontent.php:55
+#, php-format
+msgid ""
+"The HTML for the entry on the dynamic page. This content will NOT be "
+"repeated, and will only show when the %1$s is clicked."
+msgstr ""
+
+#: classes/views/displays/mb_form_disp_type.php:8
+msgid "View Format"
+msgstr ""
+
+#: classes/views/displays/mb_form_disp_type.php:11
+msgid "All Entries &mdash; list all entries in the specified form"
+msgstr ""
+
+#: classes/views/displays/mb_form_disp_type.php:12
+msgid "Single Entry &mdash; display one entry"
+msgstr ""
+
+#: classes/views/displays/mb_form_disp_type.php:14
+msgid ""
+"Both (Dynamic) &mdash; list the entries that will link to a single entry page"
+msgstr ""
+
+#: classes/views/displays/mb_form_disp_type.php:15
+msgid "Calendar &mdash; insert entries into a calendar"
+msgstr ""
+
+#: classes/views/displays/submitbox_actions.php:2
+msgid "Shortcodes"
+msgstr ""
+
+#: classes/views/displays/submitbox_actions.php:3
+#: classes/views/frmpro-fields/back-end/logic.php:11
+msgid "Show"
+msgstr ""
+
+#: classes/views/displays/submitbox_actions.php:5
+msgid "Insert on a page, post, or text widget"
+msgstr ""
+
+#: classes/views/displays/submitbox_actions.php:12
+msgid "Insert in a template"
+msgstr ""
+
+#: classes/views/displays/submitbox_actions.php:15
+#: classes/views/frmpro-fields/back-end/logic.php:12
+msgid "Hide"
+msgstr ""
+
+#: classes/views/displays/where_row.php:5
+msgid "Entry updated date"
+msgstr ""
+
+#: classes/views/displays/where_row.php:9
+msgid "Parent entry ID"
+msgstr ""
+
+#: classes/views/frmpro-entries/loading.php:4
+msgid "Uploading Files. Please Wait."
+msgstr ""
+
+#: classes/views/frmpro-entries/new-selection.php:2
+#: classes/views/frmpro-entries/new-selection.php:7
+#: classes/views/frmpro-entries/new.php:13
+msgid "Add New Entry"
+msgstr ""
+
+#: classes/views/frmpro-entries/new-selection.php:12
+msgid "Select a form for your new entry."
+msgstr ""
+
+#: classes/views/frmpro-entries/new-selection.php:19
+#: classes/views/frmpro-statistics/select.php:19
+msgid "Go"
+msgstr ""
+
+#: classes/views/frmpro-entries/new.php:20
+msgid "Oops!"
+msgstr ""
+
+#: classes/views/frmpro-entries/new.php:21
+#, php-format
+msgid "You did not add any fields to your form. %1$sGo back%2$s and add some."
+msgstr ""
+
+#: classes/views/frmpro-entries/show.php:2
+msgid "Comments/Notes"
+msgstr ""
+
+#: classes/views/frmpro-entries/show.php:20
+msgid "Add Note/Comment"
+msgstr ""
+
+#: classes/views/frmpro-entries/show.php:31
+msgid "Comment/Note"
+msgstr ""
+
+#: classes/views/frmpro-fields/_logic_row.php:35
+#: classes/views/frmpro-forms/_logic_row.php:28
+msgid "not like"
+msgstr ""
+
+#: classes/views/frmpro-fields/field-selection.php:12
+#: classes/views/lookup-fields/back-end/watch-row.php:10
+msgid "(no label)"
+msgstr ""
+
+#: classes/views/frmpro-fields/options-form-before.php:8
+msgid "&mdash; Select &mdash;"
+msgstr ""
+
+#: classes/views/frmpro-fields/options-form-top.php:9
+msgid "Collapsible: This section will slide open and closed."
+msgstr ""
+
+#: classes/views/frmpro-fields/options-form-top.php:11
+#: classes/views/styles/_section-fields.php:7
+msgid "Collapsible"
+msgstr ""
+
+#: classes/views/frmpro-fields/options-form-top.php:20
+#: classes/views/styles/_section-fields.php:10
+msgid "Repeatable"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/_form_action.php:3
+#: classes/views/frmpro-fields/back-end/logic.php:6
+msgid "Use Conditional Logic"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/_form_action.php:8
+#: classes/views/frmpro-fields/back-end/logic.php:1
+msgid "Conditional Logic"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/_form_action.php:16
+#: classes/views/frmpro-fields/back-end/logic.php:17
+msgid "any"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/_form_action.php:17
+#: classes/views/styles/_section-fields.php:80
+#: classes/views/frmpro-fields/back-end/logic.php:18
+msgid "all"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/_form_action.php:19
+msgid "of the following match"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/_post_taxonomy_row.php:23
+msgid "A New Checkbox Field"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/_post_taxonomy_row.php:61
+msgid "Exclude options"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/_post_taxonomy_row.php:70
+msgid "Check All"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/_post_taxonomy_row.php:78
+#, php-format
+msgid "Check All Level %d"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/_post_taxonomy_row.php:84
+msgid ""
+"NOTE: if the parent is excluded, child categories will be automatically "
+"excluded."
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_action.php:14
+msgid "Create Post"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:4
+msgid "Post Type"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:5
+msgid ""
+"To setup a new custom post type, install and setup a plugin like 'Custom "
+"Post Type UI', then return to this page to select your new custom post type."
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:63
+msgid "Post Content"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:93
+msgid "Customize Content"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:94
+msgid ""
+"The content shown on your single post page. If nothing is entered here, the "
+"regular post content will be used."
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:95
+msgid "Add text, HTML, and fields from your form to build your post content."
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:100
+msgid "Editing this box will update your existing view or create a new one."
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:106
+msgid "Excerpt"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:117
+msgid "Post Password"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:127
+msgid "Slug"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:129
+msgid "Automatically Generate from Post Title"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:137
+msgid "Post Date"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:148
+msgid "Post Status"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:150
+msgid "Create Draft"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:152
+msgid "Automatically Publish"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:153
+msgid "Create New Dropdown Field"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:168
+msgid "Taxonomies/Categories"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:168
+msgid ""
+"Select the field(s) from your form that you would like to populate with your "
+"categories, tags, or other taxonomies."
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:183
+msgid "Custom Fields"
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:183
+msgid ""
+"To set the featured image, use '_thumbnail_id' as the custom field name."
+msgstr ""
+
+#: classes/views/frmpro-form-actions/post_options.php:189
+msgid "Name"
+msgstr ""
+
+#: classes/views/frmpro-forms/add_form_ajax_options.php:5
+msgid "Submit this form with AJAX"
+msgstr ""
+
+#: classes/views/frmpro-forms/add_form_button_options.php:3
+msgid "Update Button Text"
+msgstr ""
+
+#: classes/views/frmpro-forms/add_form_button_options.php:29
+#: classes/views/frmpro-fields/back-end/confirmation.php:8
+msgid "Inline"
+msgstr ""
+
+#: classes/views/frmpro-forms/add_form_msg_options.php:13
+msgid "No one"
+msgstr ""
+
+#: classes/views/frmpro-forms/add_form_msg_options.php:14
+#: classes/views/frmpro-forms/add_form_options.php:14
+#: classes/views/frmpro-forms/add_form_options.php:61
+#: classes/views/frmpro-forms/add_form_options.php:84
+#: classes/views/frmpro-fields/back-end/visibility.php:17
+msgid "Logged-in Users"
+msgstr ""
+
+#: classes/views/frmpro-forms/add_form_options.php:9
+#, php-format
+msgid "Limit form visibility and submission %1$sto:%2$s"
+msgstr ""
+
+#: classes/views/frmpro-forms/add_form_options.php:40
+msgid "Cookie Expiration"
+msgstr ""
+
+#: classes/views/frmpro-forms/add_form_options.php:96
+msgid "Redirect to URL"
+msgstr ""
+
+#: classes/views/frmpro-forms/add_form_options.php:115
+msgid "Allow logged-in users to save drafts"
+msgstr ""
+
+#: classes/views/frmpro-forms/form_page_options.php:2
+msgid "Pagination"
+msgstr ""
+
+#: classes/views/frmpro-forms/form_page_options.php:7
+msgid "Hide Progress bar and Rootline"
+msgstr ""
+
+#: classes/views/frmpro-forms/form_page_options.php:9
+msgid "Show Progress bar"
+msgstr ""
+
+#: classes/views/frmpro-forms/form_page_options.php:12
+msgid "Show Rootline"
+msgstr ""
+
+#: classes/views/frmpro-forms/form_page_options.php:21
+msgid "Show page titles with steps"
+msgstr ""
+
+#: classes/views/frmpro-forms/form_page_options.php:45
+msgid "Hide the page numbers"
+msgstr ""
+
+#: classes/views/frmpro-forms/form_page_options.php:53
+msgid "Hide lines in the rootline or progress bar"
+msgstr ""
+
+#: classes/views/frmpro-forms/instruction_tabs.php:1
+msgid ""
+"Click directly into the input field or open the Field Settings and click on "
+"the Dynamic Default Value option to enable this tab"
+msgstr ""
+
+#: classes/views/frmpro-forms/instruction_tabs.php:1
+msgid "Default Values"
+msgstr ""
+
+#: classes/views/frmpro-forms/instructions.php:3
+msgid ""
+"Click inside the \"Dynamic default value\" field setting or directly on the "
+"input field."
+msgstr ""
+
+#: classes/views/frmpro-forms/instructions.php:4
+msgid ""
+"This box will activate and you can click to insert dynamic default values as "
+"default text to fields in your form."
+msgstr ""
+
+#: classes/views/frmpro-statistics/select.php:7
+msgid "Go to Report"
+msgstr ""
+
+#: classes/views/frmpro-statistics/select.php:12
+msgid "Select a report to view."
+msgstr ""
+
+#: classes/views/frmpro-statistics/show.php:16
+msgid "Total Entries"
+msgstr ""
+
+#: classes/views/frmpro-statistics/show.php:50
+msgid "Response Count"
+msgstr ""
+
+#: classes/views/frmpro-statistics/show.php:68
+msgid "Median"
+msgstr ""
+
+#: classes/views/frmpro-statistics/show.php:81
+msgid "Percent of users submitted"
+msgstr ""
+
+#: classes/views/settings/form.php:9
+msgid "Update Button"
+msgstr ""
+
+#: classes/views/settings/form.php:10
+msgid "The label on the submit button when editing and entry."
+msgstr ""
+
+#: classes/views/settings/form.php:35
+msgid "Date Format"
+msgstr ""
+
+#: classes/views/settings/form.php:36
+msgid "Change the format of the date used in the date field."
+msgstr ""
+
+#: classes/views/settings/form.php:49
+msgid "Admin menu label"
+msgstr ""
+
+#: classes/views/settings/general_style.php:4
+msgid "Fade in forms with conditional logic on page load"
+msgstr ""
+
+#: classes/views/settings/general_style.php:6
+msgid ""
+"If your form is near the top of the page, you may see a flash of the fields "
+"hidden with conditional logic. Check this box to fade in the whole form. "
+"Note: If you have javascript errors on your page, your form will remain "
+"hidden on the page."
+msgstr ""
+
+#: classes/views/settings/general_style.php:14
+msgid ""
+"The styling for the date field calendar. Some users may be using this css on "
+"pages other than just the ones that include a date field."
+msgstr ""
+
+#: classes/views/settings/general_style.php:21
+msgid "Include accordion javascript"
+msgstr ""
+
+#: classes/views/settings/general_style.php:22
+msgid ""
+"Warning: This option will be removed. Please load accordion javascripts from "
+"your theme."
+msgstr ""
+
+#: classes/views/settings/general_style.php:24
+msgid ""
+"If you have manually created an accordion form, be sure to include the "
+"javascript for it."
+msgstr ""
+
+#: classes/views/styles/_progress-bars.php:3
+msgid "BG Color"
+msgstr ""
+
+#: classes/views/styles/_progress-bars.php:8
+msgid "Text Color"
+msgstr ""
+
+#: classes/views/styles/_progress-bars.php:13
+msgid "Active BG"
+msgstr ""
+
+#: classes/views/styles/_progress-bars.php:18
+msgid "Active Text"
+msgstr ""
+
+#: classes/views/styles/_progress-bars.php:23
+msgid "Border Color"
+msgstr ""
+
+#: classes/views/styles/_progress-bars.php:28
+msgid "Border Size"
+msgstr ""
+
+#: classes/views/styles/_progress-bars.php:33
+msgid "Circle Size"
+msgstr ""
+
+#: classes/views/styles/_sample_form.php:3
+msgid "Repeatable Section"
+msgstr ""
+
+#: classes/views/styles/_sample_form.php:8
+msgid "Text Area"
+msgstr ""
+
+#: classes/views/styles/_sample_form.php:10
+msgid "Another field with a description"
+msgstr ""
+
+#: classes/views/styles/_sample_form.php:16
+#: classes/views/styles/_sample_form.php:24
+msgid "Option 1"
+msgstr ""
+
+#: classes/views/styles/_sample_form.php:17
+#: classes/views/styles/_sample_form.php:25
+msgid "Option 2"
+msgstr ""
+
+#: classes/views/styles/_sample_form.php:22
+msgid "Check Boxes"
+msgstr ""
+
+#: classes/views/styles/_sample_form.php:37
+msgid "Collapsible Section"
+msgstr ""
+
+#: classes/views/styles/_section-fields.php:18
+msgid "Color"
+msgstr ""
+
+#: classes/views/styles/_section-fields.php:23
+msgid "Weight"
+msgstr ""
+
+#: classes/views/styles/_section-fields.php:37
+msgid "Padding"
+msgstr ""
+
+#: classes/views/styles/_section-fields.php:42
+msgid "BG color"
+msgstr ""
+
+#: classes/views/styles/_section-fields.php:47
+msgid "Top Margin"
+msgstr ""
+
+#: classes/views/styles/_section-fields.php:51
+msgid "Bottom Margin"
+msgstr ""
+
+#: classes/views/styles/_section-fields.php:56
+msgid "Border"
+msgstr ""
+
+#: classes/views/styles/_section-fields.php:60
+msgid "Thickness"
+msgstr ""
+
+#: classes/views/styles/_section-fields.php:64
+msgid "Style"
+msgstr ""
+
+#: classes/views/styles/_section-fields.php:66
+msgid "solid"
+msgstr ""
+
+#: classes/views/styles/_section-fields.php:67
+msgid "dotted"
+msgstr ""
+
+#: classes/views/styles/_section-fields.php:68
+msgid "dashed"
+msgstr ""
+
+#: classes/views/styles/_section-fields.php:69
+msgid "double"
+msgstr ""
+
+#: classes/views/styles/_section-fields.php:74
+msgid "Border Position"
+msgstr ""
+
+#: classes/views/styles/_section-fields.php:78
+msgid "left"
+msgstr ""
+
+#: classes/views/styles/_section-fields.php:79
+msgid "right"
+msgstr ""
+
+#: classes/views/xml/csv_opts.php:2
+msgid "CSV Delimiter"
+msgstr ""
+
+#: classes/views/xml/csv_opts.php:6
+msgid "Import Into Form"
+msgstr ""
+
+#: classes/views/xml/csv_opts.php:20
+msgid ""
+"Import files. If you would like to import files from your CSV, check this "
+"box."
+msgstr ""
+
+#: classes/views/xml/csv_opts.php:23
+msgid "Note: Only entries can by imported via CSV."
+msgstr ""
+
+#: classes/views/xml/import_csv.php:10
+msgid "Importing CSV"
+msgstr ""
+
+#: classes/views/xml/map_csv_fields.php:10
+msgid "Map Fields"
+msgstr ""
+
+#: classes/views/xml/map_csv_fields.php:50
+msgid "Timestamp"
+msgstr ""
+
+#: classes/views/xml/map_csv_fields.php:50
+#: classes/views/xml/map_csv_fields.php:50
+msgid "Created at"
+msgstr ""
+
+#: classes/views/xml/map_csv_fields.php:51
+#: classes/views/xml/map_csv_fields.php:51
+msgid "Created by"
+msgstr ""
+
+#: classes/views/xml/map_csv_fields.php:52
+msgid "last updated"
+msgstr ""
+
+#: classes/views/xml/map_csv_fields.php:52
+msgid "updated at"
+msgstr ""
+
+#: classes/views/xml/map_csv_fields.php:52
+msgid "Updated at"
+msgstr ""
+
+#: classes/views/xml/map_csv_fields.php:53
+msgid "updated by"
+msgstr ""
+
+#: classes/views/xml/map_csv_fields.php:53
+msgid "Updated by"
+msgstr ""
+
+#: classes/views/xml/map_csv_fields.php:55
+msgid "Is Draft"
+msgstr ""
+
+#: classes/views/xml/map_csv_fields.php:66
+msgid ""
+"Note: If you select a field for the Entry ID, the matching entry with that "
+"ID will be updated."
+msgstr ""
+
+#: classes/views/combo-fields/addresses/back-end-field-opts.php:9
+msgid "Europe"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/alignment.php:1
+msgid "Alignment"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/alignment.php:4
+msgid "Multiple Rows"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/alignment.php:5
+msgid "Single Row"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/autopopulate-values.php:19
+#: classes/views/frmpro-fields/back-end/autopopulate-values.php:22
+#: classes/views/lookup-fields/back-end/watch.php:6
+msgid "Watch Lookup fields"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/calculations.php:2
+msgid "Calculations"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/calculations.php:6
+msgid "Calculate the default value for this field"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/calculations.php:15
+msgid ""
+"When this box is checked, the values from fields in your calculation will be "
+"treated as text and combined literally. When this box is unchecked, only "
+"numbers will be used in the calculation, and any included math operations "
+"will be applied."
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/calendar.php:2
+msgid "Calendar Localization"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/calendar.php:14
+msgid "Year Range"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/calendar.php:15
+msgid ""
+"Use four digit years or +/- years to make it dynamic. For example, use -5 "
+"for the start year and +5 for the end year."
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/clock-settings.php:10
+msgid "hour clock"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/clock-settings.php:13
+msgid "minute step"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/clock-settings.php:16
+msgid "start time"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/clock-settings.php:19
+msgid "end time"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/clock-settings.php:24
+msgid "show a single time dropdown"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/field-data.php:4
+#: classes/views/frmpro-fields/back-end/field-data.php:18
+#: classes/views/frmpro-fields/back-end/field-data.php:52
+msgid "This data is dynamic on change"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/field-data.php:38
+#: classes/views/frmpro-fields/back-end/field-data.php:49
+msgid "There are no options"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/file-options.php:3
+msgid "Multiple files"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/file-options.php:8
+msgid "allow multiple files to be uploaded to this field"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/file-options.php:36
+msgid "Allowed file types"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/file-options.php:40
+msgid "All types"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/file-options.php:45
+msgid "Specify allowed types"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/insert-form.php:1
+msgid "Insert Form"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/logic.php:11
+msgid "Do not skip"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/logic.php:12
+msgid "Skip"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/logic.php:21
+#, php-format
+msgid "next page if %s of the following match:"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/logic.php:21
+#, php-format
+msgid "this field if %s of the following match:"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/multi-select.php:2
+msgid "Multiple select"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/multi-select.php:6
+msgid "enable multiselect"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/multi-select.php:10
+#: classes/views/lookup-fields/back-end/placeholder.php:14
+msgid "enable autocomplete"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/repeat-options.php:15
+msgid ""
+"The maximum number of times the end user is allowed to duplicate this "
+"section of fields in one entry"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/scale-options.php:1
+msgid "Range"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/scale-options.php:9
+msgid "to"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/separate-values.php:3
+msgid "Separate values"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/separate-values.php:4
+#, php-format
+msgid ""
+"Add a separate value to use for calculations, email routing, saving to the "
+"database, and many other uses. The option values are saved while the option "
+"labels are shown in the form. Use [%s] to show the saved value in emails or "
+"views."
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/separate-values.php:9
+msgid "Use separate values"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/star-options.php:4
+msgid "Maximum Rating"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/toggle-labels.php:3
+msgid "Toggle Labels"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/toggle-labels.php:8
+msgid "Show Labels"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/toggle-labels.php:15
+msgid "Active Label"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/toggle-labels.php:26
+msgid "Inactive Label"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/visibility.php:2
+msgid "Visibility"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/visibility.php:3
+msgid ""
+"Determines who can see this field. The selected user role and higher user "
+"roles will be able to see this field. The only exception is logged-out users."
+" Only logged-out users will be able to see the field if that option is "
+"selected."
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/visibility.php:15
+msgid "Everyone"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/visibility.php:18
+msgid "Logged-out Users"
+msgstr ""
+
+#. Name of the plugin
+msgid "Formidable Forms Pro"
+msgstr ""
+
+#. Description of the plugin
+msgid ""
+"Add more power to your forms, and bring your reports and data management to "
+"the front-end."
+msgstr ""
+
+#. URI of the plugin
+#. Author URI of the plugin
+msgid "https://formidableforms.com/"
+msgstr ""
+
+#. Author of the plugin
+msgid "Strategy11"
+msgstr ""
+
+#: classes/controllers/FrmProAddressesController.php:109
+msgid "Line 1"
+msgstr "Linje 1"
+
+#: classes/controllers/FrmProAddressesController.php:110
+msgid "Line 2"
+msgstr "Linje 2"
+
+#: classes/controllers/FrmProAddressesController.php:111
+#: classes/controllers/FrmProAddressesController.php:137
+#: classes/models/fields/FrmProFieldAddress.php:52
+msgid "Country"
+msgstr "Land"
+
+#: classes/controllers/FrmProAddressesController.php:134
+#: classes/models/fields/FrmProFieldAddress.php:49
+msgid "City"
+msgstr "By"
+
+#: classes/controllers/FrmProAddressesController.php:135
+#: classes/models/fields/FrmProFieldAddress.php:50
+msgid "State/Province"
+msgstr "Fylke"
+
+#: classes/controllers/FrmProAddressesController.php:136
+#: classes/models/fields/FrmProFieldAddress.php:51
+msgid "Zip/Postal"
+msgstr "Postnummer"
+
+#: classes/controllers/FrmProAppController.php:22
+msgid "Formidable Tags"
+msgstr "Formidable tagger"
+
+#: classes/controllers/FrmProAppController.php:23
+msgid "Formidable Tag"
+msgstr "Formidable tag"
+
+#: classes/controllers/FrmProAppController.php:161
+#: classes/controllers/FrmProDisplaysController.php:12
+#: classes/controllers/FrmProDisplaysController.php:35
+#: classes/controllers/FrmProDisplaysController.php:50
+#: classes/controllers/FrmProDisplaysController.php:50
+#: classes/controllers/FrmProDisplaysController.php:90
+#: classes/controllers/FrmProDisplaysController.php:361
+#: classes/controllers/FrmProXMLController.php:64
+msgid "Views"
+msgstr "Visninger"
+
+#: classes/controllers/FrmProAppController.php:169
+#: classes/views/frmpro-statistics/select.php:2
+#: classes/views/frmpro-statistics/show.php:4
+msgid "Reports"
+msgstr "Rapporter"
+
+#: classes/controllers/FrmProCreditCardsController.php:50
+msgid "Month"
+msgstr "Måned"
+
+#: classes/controllers/FrmProCreditCardsController.php:55
+msgid "Year"
+msgstr "År"
+
+#: classes/controllers/FrmProCreditCardsController.php:84
+msgid "Expiration Month"
+msgstr "Utløpsmåned"
+
+#: classes/controllers/FrmProCreditCardsController.php:85
+msgid "Expiration Year"
+msgstr "Utløpsår"
+
+#: classes/controllers/FrmProCreditCardsController.php:108
+#: classes/models/fields/FrmProFieldCreditCard.php:46
+msgid "Card number"
+msgstr "Kortnummer"
+
+#: classes/controllers/FrmProCreditCardsController.php:109
+#: classes/models/fields/FrmProFieldCreditCard.php:47
+msgid "CVC"
+msgstr "CVC"
+
+#: classes/controllers/FrmProDisplaysController.php:36
+#: classes/controllers/FrmProDisplaysController.php:37
+#: classes/controllers/FrmProFormsController.php:595
+#: classes/views/displays/submitbox_actions.php:2
+msgid "View"
+msgstr "Vis"
+
+#: classes/controllers/FrmProDisplaysController.php:102
+#: classes/controllers/FrmProDisplaysController.php:102
+#: classes/controllers/FrmProEntriesController.php:1423
+#: classes/helpers/FrmProEntriesHelper.php:246
+#: classes/helpers/FrmProEntriesHelper.php:272
+msgid "Duplicate"
+msgstr "Dupliser"
+
+#: classes/controllers/FrmProDisplaysController.php:124
+msgid "View Title"
+msgstr "Vis tittel"
+
+#: classes/controllers/FrmProDisplaysController.php:127
+msgid "Form"
+msgstr "Skjema"
+
+#: classes/controllers/FrmProDisplaysController.php:128
+msgid "Entry"
+msgstr "Element"
+
+#: classes/controllers/FrmProDisplaysController.php:129
+#: classes/controllers/FrmProDisplaysController.php:275
+#: classes/views/displays/mb_dyncontent.php:23
+msgid "Content"
+msgstr "Innhold"
+
+#: classes/controllers/FrmProDisplaysController.php:130
+#: classes/views/displays/mb_dyncontent.php:55
+msgid "Dynamic Content"
+msgstr "Dynamisk innhold"
+
+#: classes/controllers/FrmProDisplaysController.php:131
+msgid "Date"
+msgstr "Dato"
+
+#: classes/controllers/FrmProDisplaysController.php:132
+#: classes/helpers/FrmProFieldsHelper.php:2495
+#: classes/helpers/FrmProFieldsHelper.php:2511
+#: classes/views/displays/mb_advanced.php:88
+msgid "Key"
+msgstr "Nøkkel"
+
+#: classes/controllers/FrmProDisplaysController.php:134
+msgid "Shortcode"
+msgstr "Shortcode"
+
+#: classes/controllers/FrmProDisplaysController.php:180
+msgid "N/A"
+msgstr "N/A"
+
+#: classes/controllers/FrmProDisplaysController.php:277
+msgid "Advanced Settings"
+msgstr "Avanserte innstillinger"
+
+#: classes/controllers/FrmProDisplaysController.php:739
+msgid "day"
+msgstr "dag"
+
+#: classes/controllers/FrmProDisplaysController.php:739
+msgid "days"
+msgstr "dager"
+
+#: classes/controllers/FrmProDisplaysController.php:739
+msgid "week"
+msgstr "uke"
+
+#: classes/controllers/FrmProDisplaysController.php:739
+msgid "weeks"
+msgstr "uker"
+
+#: classes/controllers/FrmProDisplaysController.php:739
+msgid "months"
+msgstr "måneder"
+
+#: classes/controllers/FrmProEddController.php:136
+#, php-format
+msgid ""
+"Your %1$s license key is missing. Please add it on the %2$sGlobal Settings "
+"page%3$s."
+msgstr ""
+"Din %1$s lisensnøkkel mangler. Vennligst legg den til på siden %2$sGlobale "
+"innstillinger%3$s."
+
+#: classes/controllers/FrmProEddController.php:220
+msgid "or"
+msgstr "eller"
+
+#: classes/controllers/FrmProEddController.php:222
+#: classes/controllers/FrmProEntriesController.php:2149
+#: classes/views/frmpro-entries/sidebar-new.php:7
+#: classes/views/frmpro-entries/sidebar-new.php:7
+#: classes/views/frmpro-form-actions/_custom_field_row.php:31
+msgid "Cancel"
+msgstr "Kanseller"
+
+#: classes/controllers/FrmProEntriesController.php:108
+msgid "Entry was Successfully Created"
+msgstr "Innsendingen ble opprettet"
+
+#: classes/controllers/FrmProEntriesController.php:145
+msgid "Entry was Successfully Updated"
+msgstr "Innsendingen ble oppdatert"
+
+#: classes/controllers/FrmProEntriesController.php:148
+msgid "Back to Entries"
+msgstr "Tilbake til innsendinger"
+
+#: classes/controllers/FrmProEntriesController.php:166
+msgid "Entry was Successfully Duplicated"
+msgstr "Innsendingen ble duplisert"
+
+#: classes/controllers/FrmProEntriesController.php:168
+msgid "There was a problem duplicating that entry"
+msgstr "Det oppstod et problem ved duplisering av denne innsendingen"
+
+#: classes/controllers/FrmProEntriesController.php:195
+msgid "No entries were specified"
+msgstr "Ingen innsending er valgt"
+
+#: classes/controllers/FrmProEntriesController.php:1138
+#: classes/controllers/FrmProEntriesController.php:1166
+msgid "You are trying to access an entry that does not exist."
+msgstr "Du forsøker å se en innsending som ikke eksisterer."
+
+#: classes/controllers/FrmProEntriesController.php:1406
+msgid "Post"
+msgstr "Innlegg"
+
+#: classes/controllers/FrmProEntriesController.php:1444
+#: classes/helpers/FrmProDisplaysHelper.php:73
+msgid "No Entries Found"
+msgstr "Ingen innsendinger funnet"
+
+#: classes/controllers/FrmProEntriesController.php:1445
+#: classes/controllers/FrmProEntriesController.php:1830
+#: classes/controllers/FrmProEntriesController.php:1904
+#: classes/controllers/FrmProEntriesController.php:2300
+msgid "Are you sure you want to delete that entry?"
+msgstr "Er du sikker på at du vil slette elementet?"
+
+#: classes/controllers/FrmProEntriesController.php:1628
+#: classes/controllers/FrmProEntriesController.php:2149
+#: classes/helpers/FrmProAppHelper.php:257
+#: classes/helpers/FrmProEntriesHelper.php:288
+msgid "Edit"
+msgstr "Rediger"
+
+#: classes/controllers/FrmProEntriesController.php:1642
+#: classes/controllers/FrmProEntriesController.php:1887
+msgid "Delete"
+msgstr "Slett"
+
+#: classes/controllers/FrmProEntriesController.php:1780
+#: classes/controllers/FrmProFormsController.php:597
+#: classes/controllers/FrmProFormsController.php:666
+#: classes/helpers/FrmProEntriesListHelper.php:69
+msgid "Search"
+msgstr "Søk"
+
+#: classes/controllers/FrmProEntriesController.php:2245
+#: classes/controllers/FrmProEntriesController.php:2742
+#: classes/models/FrmProSettings.php:18
+msgid "Update"
+msgstr "Oppdater"
+
+#: classes/controllers/FrmProEntriesController.php:2629
+#, php-format
+msgid "Resent to %s"
+msgstr "Send på nytt til %s"
+
+#: classes/controllers/FrmProEntriesController.php:2634
+msgid "Resent to No one! You do not have permission"
+msgstr "Sendt på nytt til Ingen! Du har ikke de nødvendige rettighetene"
+
+#: classes/controllers/FrmProFieldsController.php:898
+#: classes/controllers/FrmProFieldsController.php:904
+msgid "Show form uploads"
+msgstr "Vis opplastinger"
+
+#: classes/controllers/FrmProFieldsController.php:903
+msgid "Hide form uploads"
+msgstr "Skjul opplastinger"
+
+#: classes/controllers/FrmProFormActionsController.php:35
+msgid "Create"
+msgstr "Opprett"
+
+#: classes/controllers/FrmProFormActionsController.php:37
+msgid "this post if"
+msgstr "this post if"
+
+#: classes/controllers/FrmProFormActionsController.php:39
+msgid "Register"
+msgstr "Registrer"
+
+#: classes/controllers/FrmProFormActionsController.php:40
+msgid "Don't register"
+msgstr "Ikke registrer"
+
+#: classes/controllers/FrmProFormActionsController.php:41
+msgid "user if"
+msgstr "user if"
+
+#: classes/controllers/FrmProFormActionsController.php:43
+msgid "Do"
+msgstr "Do"
+
+#: classes/controllers/FrmProFormsController.php:292
+msgid "Current Date"
+msgstr "Nåværende dato"
+
+#: classes/controllers/FrmProFormsController.php:293
+msgid "Current Time"
+msgstr "Nåværende tid"
+
+#: classes/controllers/FrmProFormsController.php:294
+#: classes/controllers/FrmProFormsController.php:532
+msgid "Email"
+msgstr "E-post"
+
+#: classes/controllers/FrmProFormsController.php:299
+#: classes/controllers/FrmProFormsController.php:527
+#: classes/models/FrmProForm.php:276
+msgid "User ID"
+msgstr "BrukerID"
+
+#: classes/controllers/FrmProFormsController.php:301
+msgid "User Role"
+msgstr "Brukerrolle"
+
+#: classes/controllers/FrmProFormsController.php:302
+#: classes/helpers/FrmProFieldsHelper.php:2475
+#: classes/views/displays/where_row.php:8
+#: classes/views/xml/map_csv_fields.php:49
+msgid "Post ID"
+msgstr "InnleggsID"
+
+#: classes/controllers/FrmProFormsController.php:306
+#: classes/views/frmpro-forms/add_form_options.php:31
+#: classes/views/xml/map_csv_fields.php:54
+msgid "IP Address"
+msgstr "IP-adresse"
+
+#: classes/controllers/FrmProFormsController.php:308
+msgid "A variable from the URL or value posted from previous page."
+msgstr "En variabel fra URL eller postet verdi fra forrige side."
+
+#: classes/controllers/FrmProFormsController.php:441
+#: classes/helpers/FrmProFormsHelper.php:403
+msgid "Previous"
+msgstr "Forige"
+
+#: classes/controllers/FrmProFormsController.php:510
+msgid ""
+"Replaces spaces with dashes and lowercases all. Use if adding an HTML class "
+"or ID"
+msgstr ""
+"Bytter ut mellomrom med streker og setter små bokstaver. Bruk hvis HTML "
+"klasse eller ID"
+
+#: classes/controllers/FrmProFormsController.php:514
+msgid "How long ago a date was in minutes, hours, days, months, or years."
+msgstr ""
+"Hvor langt tilbake i tid en dato er i minutter, timer, dager, måneder eller "
+"år."
+
+#: classes/controllers/FrmProFormsController.php:595
+msgid "Insert a View"
+msgstr "Sett inn visning"
+
+#: classes/controllers/FrmProFormsController.php:596
+msgid "Graph"
+msgstr "Graf"
+
+#: classes/controllers/FrmProFormsController.php:596
+msgid "Insert a Graph"
+msgstr "Sett inn en graf"
+
+#: classes/controllers/FrmProFormsController.php:597
+msgid "Add a Search Form"
+msgstr "Legg til søkefelt"
+
+#: classes/controllers/FrmProFormsController.php:599
+msgid "List of Entries"
+msgstr "Liste over elementer"
+
+#: classes/controllers/FrmProFormsController.php:599
+msgid "Display a List of Entries"
+msgstr "Vis en liste over elementer"
+
+#: classes/controllers/FrmProFormsController.php:644
+#: classes/views/frmpro-forms/add_form_button_options.php:27
+msgid "Default"
+msgstr "Standard"
+
+#: classes/controllers/FrmProFormsController.php:645
+#: classes/views/displays/order_row.php:14
+msgid "Ascending"
+msgstr "Økende"
+
+#: classes/controllers/FrmProFormsController.php:646
+#: classes/views/displays/order_row.php:15
+msgid "Descending"
+msgstr "Synkende"
+
+#: classes/controllers/FrmProFormsController.php:651
+#: classes/controllers/FrmProFormsController.php:817
+msgid "Include draft entries"
+msgstr "Inkluder kladder"
+
+#: classes/controllers/FrmProFormsController.php:667
+msgid "Customize search button"
+msgstr "Tilpass søkeknappen"
+
+#: classes/controllers/FrmProFormsController.php:687
+msgid "Select a form and field:"
+msgstr "Velg et skjema eller felt:"
+
+#: classes/controllers/FrmProFormsController.php:705
+msgid "Column"
+msgstr "Søyle"
+
+#: classes/controllers/FrmProFormsController.php:706
+msgid "Horizontal Bar"
+msgstr "Horisontal linje"
+
+#: classes/controllers/FrmProFormsController.php:707
+msgid "Pie"
+msgstr "Pai"
+
+#: classes/controllers/FrmProFormsController.php:708
+msgid "Line"
+msgstr "Linje"
+
+#: classes/controllers/FrmProFormsController.php:709
+msgid "Area"
+msgstr "Område"
+
+#: classes/controllers/FrmProFormsController.php:710
+msgid "Scatter"
+msgstr "Spre"
+
+#: classes/controllers/FrmProFormsController.php:711
+msgid "Histogram"
+msgstr "Histogram"
+
+#: classes/controllers/FrmProFormsController.php:712
+msgid "Table"
+msgstr "Tabell"
+
+#: classes/controllers/FrmProFormsController.php:714
+msgid "Geographical Map"
+msgstr "Geografisk kart"
+
+#: classes/controllers/FrmProFormsController.php:725
+msgid "Height"
+msgstr "Høyde"
+
+#: classes/controllers/FrmProFormsController.php:727
+#: classes/controllers/FrmProFormsController.php:758
+msgid "Background color"
+msgstr "Bakgrunnsfarge"
+
+#: classes/controllers/FrmProFormsController.php:728
+msgid "Graph title"
+msgstr "Graftittel"
+
+#: classes/controllers/FrmProFormsController.php:729
+msgid "Title font size"
+msgstr "Tittel fontstørrelse"
+
+#: classes/controllers/FrmProFormsController.php:730
+msgid "Title font name"
+msgstr "Tittel fontnavn"
+
+#: classes/controllers/FrmProFormsController.php:732
+msgid "Turn your pie graph three-dimensional"
+msgstr "Gjør kakediagrammet tredimensjonalt"
+
+#: classes/controllers/FrmProFormsController.php:735
+msgid ""
+"When using dates for the x_axis parameter, you can include dates with a zero "
+"value."
+msgstr ""
+"Ved bruk av datoer for x_axis parameteren, kan du benytte datoer med "
+"nullverdi."
+
+#: classes/controllers/FrmProFormsController.php:736
+msgid "Include a legend with the graph"
+msgstr "Inkludér en forklaring til grafen."
+
+#: classes/controllers/FrmProFormsController.php:750
+msgid "Include user info like browser and IP"
+msgstr "Inkluder brukerinfo som nettleser og IP"
+
+#: classes/controllers/FrmProFormsController.php:751
+msgid "Include rows for blank fields"
+msgstr "Inluder rader med blanke felt"
+
+#: classes/controllers/FrmProFormsController.php:752
+msgid "Do not include any HTML"
+msgstr "Ikke inkluder noe HTML"
+
+#: classes/controllers/FrmProFormsController.php:753
+msgid "Use RTL format"
+msgstr "Bruk RTL-format"
+
+#: classes/controllers/FrmProFormsController.php:754
+msgid "Font size"
+msgstr "Fontstørrelse"
+
+#: classes/controllers/FrmProFormsController.php:755
+msgid "Text color"
+msgstr "Tekstfarge"
+
+#: classes/controllers/FrmProFormsController.php:756
+msgid "Border width"
+msgstr "Rammevidde"
+
+#: classes/controllers/FrmProFormsController.php:757
+msgid "Border color"
+msgstr "Rammefarge"
+
+#: classes/controllers/FrmProFormsController.php:759
+msgid "Alternate background color"
+msgstr "Vekslende bakgrunnsfarge"
+
+#: classes/controllers/FrmProFormsController.php:771
+msgid "Display format"
+msgstr "Visningsformat"
+
+#: classes/controllers/FrmProFormsController.php:774
+msgid "Drop down"
+msgstr "Nedtrekksmeny"
+
+#: classes/controllers/FrmProFormsController.php:775
+msgid "Expanding archive"
+msgstr "Ekspanderende arkiv"
+
+#: classes/controllers/FrmProFormsController.php:780
+msgid "Privacy"
+msgstr "Privatliv"
+
+#: classes/controllers/FrmProFormsController.php:782
+msgid "Only include the entries the current user created"
+msgstr "Inkluder kun elementer den nåværende brukeren har laget"
+
+#: classes/controllers/FrmProFormsController.php:783
+msgid "Include all entries"
+msgstr "Inkluder alle elementer"
+
+#: classes/controllers/FrmProFormsController.php:786
+msgid "The ID of the page to link to"
+msgstr "ID-en til siden å linke til"
+
+#: classes/controllers/FrmProFormsController.php:791
+msgid "Edit if allowed"
+msgstr "Endre hvis tillatt"
+
+#: classes/controllers/FrmProFormsController.php:792
+msgid "View only"
+msgstr "Kun visning"
+
+#: classes/controllers/FrmProFormsController.php:795
+msgid "Delete link label"
+msgstr "Slett lenkemerkelapp"
+
+#: classes/controllers/FrmProFormsController.php:796
+msgid "Delete confirmation message"
+msgstr "Slett bekreftelsesmelding"
+
+#: classes/controllers/FrmProFormsController.php:799
+msgid "Send users to"
+msgstr "Send brukere til"
+
+#: classes/controllers/FrmProFormsController.php:801
+msgid "A page"
+msgstr "En side"
+
+#: classes/controllers/FrmProFormsController.php:809
+msgid "Identify the entry by"
+msgstr "Identifiser element etter"
+
+#: classes/controllers/FrmProFormsController.php:812
+#: classes/helpers/FrmProEntriesListHelper.php:62
+#: classes/helpers/FrmProEntriesListHelper.php:73
+#: classes/helpers/FrmProFieldsHelper.php:2473
+#: classes/views/displays/order_row.php:3
+#: classes/views/displays/where_row.php:6
+#: classes/views/xml/map_csv_fields.php:56
+#: classes/views/xml/map_csv_fields.php:56
+msgid "Entry ID"
+msgstr "ElementID"
+
+#: classes/controllers/FrmProFormsController.php:836
+msgid "Draft status"
+msgstr "Kladd"
+
+#: classes/controllers/FrmProGraphsController.php:84
+msgid ""
+"Using multiple values in the id graph parameter has been removed as of "
+"version 2.02.04"
+msgstr ""
+"Bruk av flere verdier i id graph parameteren ble fjernet i versjon 2.02.04"
+
+#: classes/controllers/FrmProGraphsController.php:247
+msgid "No data"
+msgstr "Ingen data"
+
+#: classes/controllers/FrmProGraphsController.php:600
+#: classes/controllers/FrmProGraphsController.php:1109
+#: classes/controllers/FrmProGraphsController.php:1696
+msgid "Submissions"
+msgstr "Innsendinger"
+
+#: classes/controllers/FrmProGraphsController.php:1124
+msgid "Fields"
+msgstr "Felt"
+
+#: classes/controllers/FrmProGraphsController.php:1665
+msgid "Updated At"
+msgstr "Oppdatert"
+
+#: classes/controllers/FrmProGraphsController.php:1669
+msgid "Invalid x-axis"
+msgstr "Ugyldig x-akse"
+
+#: classes/controllers/FrmProGraphsController.php:1873
+msgid "Q1"
+msgstr "Q1"
+
+#: classes/controllers/FrmProGraphsController.php:1875
+msgid "Q2"
+msgstr "Q2"
+
+#: classes/controllers/FrmProGraphsController.php:1877
+msgid "Q3"
+msgstr "Q3"
+
+#: classes/controllers/FrmProGraphsController.php:1879
+msgid "Q4"
+msgstr "Q4"
+
+#: classes/controllers/FrmProLookupFieldsController.php:12
+#: classes/helpers/FrmProFieldsHelper.php:2544
+msgid "Dropdown"
+msgstr "Nedtrekksmeny"
+
+#: classes/controllers/FrmProLookupFieldsController.php:14
+#: classes/helpers/FrmProFieldsHelper.php:2546
+msgid "Checkboxes"
+msgstr "Avkrysningsbokser"
+
+#: classes/controllers/FrmProLookupFieldsController.php:141
+msgid "Search values from"
+msgstr "Søk etter verdier fra"
+
+#: classes/controllers/FrmProLookupFieldsController.php:143
+msgid "Get options from"
+msgstr "Få innstillinger fra"
+
+#: classes/controllers/FrmProLookupFieldsController.php:298
+#: classes/views/frmpro-fields/field-selection.php:2
+#: classes/views/frmpro-form-actions/_custom_field_row.php:38
+#: classes/views/lookup-fields/back-end/watch-row.php:3
+msgid "&mdash; Select Field &mdash;"
+msgstr "&mdash; Velg felt &mdash;"
+
+#: classes/controllers/FrmProLookupFieldsController.php:417
+msgid "No options available: please check this field's options"
+msgstr ""
+"Ingen innstillinger tilgjengelig: vennligst sjekk feltets innstillinger"
+
+#: classes/controllers/FrmProStylesController.php:117
+msgid "Your styling settings have been deleted."
+msgstr "Dine stilinnstillinger er slettet."
+
+#: classes/controllers/FrmProXMLController.php:65
+msgid "Styles"
+msgstr "Stiler"
+
+#: classes/controllers/FrmUpdatesController.php:330
+#, php-format
+msgid ""
+"You had an error communicating with the Formidable Forms API. %1$sClick "
+"here%2$s for more information."
+msgstr ""
+"Det oppstod en feil i kommunikasjonen med Formidable Forms' API. %1$sKlikk "
+"her%2$s for mer informasjon."
+
+#: classes/controllers/FrmUpdatesController.php:335
+msgid "You had an HTTP error connecting to the Formidable Forms API"
+msgstr ""
+"Det oppstod en HTTP error ved forsøk på å koble til Formidable Forms' API"
+
+#: classes/controllers/FrmUpdatesController.php:353
+msgid "A Formidable Forms update is available, but your license is invalid."
+msgstr ""
+"En oppdatering til Formidable Forms er tilgjengelig, men lisensen din er "
+"ugyldig."
+
+#: classes/helpers/FrmProAppHelper.php:668
+msgid "Previous Page"
+msgstr "Forrige side"
+
+#: classes/helpers/FrmProAppHelper.php:672
+msgid "Next Page"
+msgstr "Neste side"
+
+#: classes/helpers/FrmProDisplaysHelper.php:206
+#: classes/views/frmpro-fields/_logic_row.php:30
+#: classes/views/frmpro-forms/_logic_row.php:23
+msgid "equal to"
+msgstr "identisk med"
+
+#: classes/helpers/FrmProDisplaysHelper.php:207
+#: classes/views/frmpro-fields/_logic_row.php:31
+#: classes/views/frmpro-forms/_logic_row.php:24
+msgid "NOT equal to"
+msgstr "IKKE identisk med"
+
+#: classes/helpers/FrmProDisplaysHelper.php:208
+#: classes/views/frmpro-fields/_logic_row.php:32
+#: classes/views/frmpro-forms/_logic_row.php:25
+msgid "greater than"
+msgstr "større enn"
+
+#: classes/helpers/FrmProDisplaysHelper.php:209
+#: classes/views/frmpro-fields/_logic_row.php:33
+#: classes/views/frmpro-forms/_logic_row.php:26
+msgid "less than"
+msgstr "mindre enn"
+
+#: classes/helpers/FrmProDisplaysHelper.php:212
+#: classes/views/frmpro-fields/_logic_row.php:34
+#: classes/views/frmpro-forms/_logic_row.php:27
+msgid "like"
+msgstr "lik"
+
+#: classes/helpers/FrmProDisplaysHelper.php:214
+msgid "starts with"
+msgstr "starter med"
+
+#: classes/helpers/FrmProDisplaysHelper.php:215
+msgid "ends with"
+msgstr "slutter med"
+
+#: classes/helpers/FrmProEntriesHelper.php:234
+msgid "Add New"
+msgstr "Legg til ny"
+
+#: classes/helpers/FrmProEntriesHelper.php:319
+msgid "Delete ALL Entries"
+msgstr "Slett alle innsendinger"
+
+#: classes/helpers/FrmProEntriesListHelper.php:60
+#: classes/helpers/FrmProEntriesListHelper.php:71
+msgid "All Fields"
+msgstr "Alle felter"
+
+#: classes/helpers/FrmProEntriesListHelper.php:61
+#: classes/helpers/FrmProEntriesListHelper.php:72
+#: classes/helpers/FrmProFieldsHelper.php:2477
+#: classes/views/displays/_calendar_options.php:4
+#: classes/views/displays/_calendar_options.php:16
+#: classes/views/displays/order_row.php:4
+#: classes/views/displays/where_row.php:4
+msgid "Entry creation date"
+msgstr "Elementets opprettelsesdato"
+
+#: classes/helpers/FrmProFieldsHelper.php:2042
+msgid "Confirm"
+msgstr "Bekreft"
+
+#: classes/helpers/FrmProFieldsHelper.php:2222
+msgid "Edit Uploaded File"
+msgstr "Endre opplastet fil"
+
+#: classes/helpers/FrmProFieldsHelper.php:2471
+#: classes/views/frmpro-fields/back-end/calculations.php:18
+msgid "Select a value to insert into the box below"
+msgstr "Velg en verdi å sette inn i boksen nedenfor"
+
+#: classes/helpers/FrmProFieldsHelper.php:2474
+#: classes/views/xml/map_csv_fields.php:57
+#: classes/views/xml/map_csv_fields.php:57
+msgid "Entry Key"
+msgstr "Elementnøkkel"
+
+#: classes/helpers/FrmProFieldsHelper.php:2480
+msgid "Form Fields"
+msgstr "Skjemafelter"
+
+#: classes/helpers/FrmProFieldsHelper.php:2494
+#: classes/helpers/FrmProFieldsHelper.php:2510
+#: classes/views/displays/mb_advanced.php:87
+#: classes/views/frmpro-entries/table.php:5
+msgid "ID"
+msgstr "ID"
+
+#: classes/helpers/FrmProFieldsHelper.php:2497
+msgid "Thumbnail"
+msgstr "Miniatyrbilde"
+
+#: classes/helpers/FrmProFieldsHelper.php:2498
+msgid "Medium"
+msgstr "Medium"
+
+#: classes/helpers/FrmProFieldsHelper.php:2499
+msgid "Large"
+msgstr "Stor"
+
+#: classes/helpers/FrmProFieldsHelper.php:2500
+msgid "Full Size"
+msgstr "Full størrelse"
+
+#: classes/helpers/FrmProFieldsHelper.php:2522
+msgid "Helpers"
+msgstr "Hjelpere"
+
+#: classes/helpers/FrmProFieldsHelper.php:2523
+msgid "Admin link to edit the entry"
+msgstr "Adminlenke for å endre element"
+
+#: classes/helpers/FrmProFieldsHelper.php:2525
+msgid "Link to view single page if showing dynamic entries"
+msgstr "Lenke for å vise single page hvis dynamiske elementer vises"
+
+#: classes/helpers/FrmProFieldsHelper.php:2533
+msgid "Site URL"
+msgstr "Nettsteds-URL"
+
+#: classes/helpers/FrmProFieldsHelper.php:2534
+msgid "Site Name"
+msgstr "Sidenavn"
+
+#: classes/models/FrmProDisplay.php:243
+msgid "Name cannot be blank"
+msgstr "Navnet kan ikke være blankt"
+
+#: classes/models/FrmProFileField.php:39
+msgid "Drop files here to upload"
+msgstr "Slipp filer her for å laste opp"
+
+#: classes/models/FrmProFileField.php:40
+msgid "Your browser does not support drag and drop file uploads."
+msgstr "Nettleseren din støtter ikke dra- og slipp-opplasting"
+
+#: classes/models/FrmProFileField.php:42 classes/models/FrmProFileField.php:293
+#: classes/models/FrmProFileField.php:304
+#, php-format
+msgid "That file is too big. It must be less than %sMB."
+msgstr "Denne filen er for stor. Den må være mindre enn %sMB."
+
+#: classes/models/FrmProFileField.php:44
+#, php-format
+msgid "Server responded with %s code."
+msgstr "Serveren responderte med kode %s."
+
+#: classes/models/FrmProFileField.php:45
+msgid "Cancel upload"
+msgstr "Avbryt opplasting"
+
+#: classes/models/FrmProFileField.php:46
+msgid "Are you sure you want to cancel this upload?"
+msgstr "Er du sikker på at du vil avbryte opplastingen?"
+
+#: classes/models/FrmProFileField.php:47
+#: classes/views/frmpro-fields/front-end/file.php:55
+msgid "Remove file"
+msgstr "Fjern fil"
+
+#: classes/models/FrmProFileField.php:48 classes/models/FrmProFileField.php:334
+#, php-format
+msgid "You have uploaded too many files. You may only include %d file(s)."
+msgstr "Du har lastet opp for mange filer. Du kan kun velge %d fil(er)."
+
+#: classes/models/FrmProFileField.php:405
+msgid "Sorry, this file type is not permitted."
+msgstr "Beklager, denne filtypen er ikke tillatt."
+
+#: classes/models/FrmProFileField.php:495
+msgid "File upload failed"
+msgstr "Filopplasting feilet"
+
+#: classes/models/FrmProForm.php:61
+#, php-format
+msgid "Unable to write to %s to protect your uploads."
+msgstr "Kunne ikke skrive til %s for å beskytte opplastinger."
+
+#: classes/models/FrmProForm.php:122
+msgid "Single Post"
+msgstr "Single post"
+
+#: classes/models/FrmProForm.php:130
+msgid "Used for the single post page"
+msgstr "Brukes på single post siden"
+
+#: classes/models/FrmProForm.php:179
+msgid "Status"
+msgstr "Status"
+
+#: classes/models/FrmProPageField.php:134
+#: classes/views/styles/_sample_form.php:66
+#, php-format
+msgid "%s Complete"
+msgstr "%s Gjennomført"
+
+#: classes/models/FrmProPageField.php:186
+#: classes/views/styles/_sample_form.php:67
+#, php-format
+msgid "%1$d of %2$d"
+msgstr "%1$d av %2$d"
+
+#: classes/models/FrmProSettings.php:19
+msgid "You have already submitted that form"
+msgstr "Du har allerede sendt inn dette skjemaet"
+
+#: classes/widgets/FrmListEntries.php:208
+msgid "Title"
+msgstr "Tittel"
+
+#: classes/widgets/FrmListEntries.php:223
+msgid "Page"
+msgstr "Side"
+
+#: classes/widgets/FrmListEntries.php:254
+msgid "Category Field"
+msgstr "Kategorifelt"
+
+#: classes/models/fields/FrmProFieldAddress.php:206
+msgid "This value is invalid"
+msgstr "Verdien er ugyldig"
+
+#: classes/models/fields/FrmProFieldBreak.php:27
+msgid "Next"
+msgstr "Neste"
+
+#: classes/models/fields/FrmProFieldCreditCard.php:154
+msgid "That credit card number is invalid"
+msgstr "Kredittkortnummeret er ugyldig"
+
+#: classes/models/fields/FrmProFieldCreditCard.php:218
+msgid "That credit card is expired"
+msgstr "Kredittkortet er utløpt"
+
+#: classes/models/fields/FrmProFieldEndDivider.php:50
+#: classes/views/styles/_sample_form.php:29
+msgid "Remove"
+msgstr "Fjern"
+
+#: classes/views/displays/mb_advanced.php:18
+msgid ""
+"The number of entries to show per page. Leave blank to not use pagination."
+msgstr ""
+"Antallet elementer som skal vises pr side. La det stå tomt for å ikke "
+"benytte sideinndeling."
+
+#: classes/views/displays/mb_advanced.php:27
+msgid "Sort & Filter"
+msgstr "Sorter & filtrer"
+
+#: classes/views/displays/mb_advanced.php:68
+msgid "No Entries Message"
+msgstr "Ingen elementer melding"
+
+#: classes/views/displays/mb_advanced.php:76
+msgid "Advanced"
+msgstr "Avansert"
+
+#: classes/views/displays/mb_advanced.php:85
+msgid "Parameter Value"
+msgstr "Parameterverdi"
+
+#: classes/views/displays/mb_advanced.php:98
+msgid "Copy"
+msgstr "Kopier"
+
+#: classes/views/displays/mb_dyncontent.php:4
+#: classes/views/displays/mb_dyncontent.php:4
+#: classes/views/displays/mb_dyncontent.php:5
+msgid "Detail Page"
+msgstr "Detaljside"
+
+#: classes/views/displays/mb_dyncontent.php:4
+#: classes/views/displays/mb_dyncontent.php:4
+msgid "Listing Page"
+msgstr "Listeside"
+
+#: classes/views/displays/mb_dyncontent.php:8
+msgid ""
+"This page lists multiple entries. Link to a single entry/detail page using "
+"[detaillink]"
+msgstr ""
+"Denne siden lister flere elementer. Lenke til et enkelt element/detaljside "
+"ved å bruke [detaillink]"
+
+#: classes/views/displays/mb_dyncontent.php:9
+msgid "This is the detail page for a single entry in this form"
+msgstr "Dette er detaljsiden for et enkelt element i skjemaet"
+
+#: classes/views/displays/mb_dyncontent.php:15
+msgid "Before Content"
+msgstr "Før innhold"
+
+#: classes/views/displays/mb_dyncontent.php:16
+msgid ""
+"This content will not be repeated. This would be a good place to put any "
+"HTML table tags."
+msgstr ""
+"Dette innholdet vil ikke gjentas. Dette er et fint sted å legge til HTML "
+"tabell-tagger."
+
+#: classes/views/displays/mb_dyncontent.php:43
+msgid "After Content"
+msgstr "Etter innhold"
+
+#: classes/views/displays/mb_form_disp_type.php:3
+msgid "Use Entries from Form"
+msgstr "Bruk elementer fra skjema"
+
+#: classes/views/displays/order_row.php:6
+msgid "Random"
+msgstr "Tilfeldig"
+
+#: classes/views/displays/submitbox_actions.php:6
+msgid "Save to get ID"
+msgstr "Lagre for å få ID"
+
+#: classes/views/displays/where_options.php:18
+msgid "Draft or complete entry"
+msgstr "Kladd eller komplett innlegg"
+
+#: classes/views/displays/where_options.php:20
+msgid "Complete entry"
+msgstr "Komplett innlegg"
+
+#: classes/views/displays/where_options.php:25
+msgid "Date options: 'NOW' or a date in yyyy-mm-dd format."
+msgstr "Datovalg: 'NOW' eller en dato i yyyy-mm-dd format."
+
+#: classes/views/displays/where_row.php:10
+msgid "Entry status"
+msgstr "Innleggsstatus"
+
+#: classes/views/displays/where_row.php:15
+msgid "IP"
+msgstr "IP"
+
+#: classes/views/displays/where_row.php:17
+#: classes/views/frmpro-fields/_logic_row.php:26
+#: classes/views/frmpro-forms/_logic_row.php:20
+msgid "is"
+msgstr "er"
+
+#: classes/views/frmpro-entries/_sidebar-shared-pub.php:3
+#, php-format
+msgid "Emails: %1$s"
+msgstr "E-poster: %1$s"
+
+#: classes/views/frmpro-entries/_sidebar-shared-pub.php:3
+msgid "Resend"
+msgstr "Resend"
+
+#: classes/views/frmpro-entries/edit.php:10
+msgid "Edit Entry"
+msgstr "Endre element"
+
+#: classes/views/frmpro-entries/show.php:34
+msgid "Submit"
+msgstr "Send"
+
+#: classes/views/frmpro-entries/sidebar-edit.php:14
+msgid "Save"
+msgstr "Lagre"
+
+#: classes/views/frmpro-fields/options-form-before.php:6
+msgid "Load Options From"
+msgstr "Hent innstillinger fra"
+
+#: classes/views/frmpro-fields/options-form-before.php:9
+msgid "Form Entries"
+msgstr "Skjemaelementer"
+
+#: classes/views/frmpro-fields/options-form-before.php:14
+msgid "Category/Taxonomy"
+msgstr "Kategori/Taxonomy"
+
+#: classes/views/frmpro-fields/options-form-top.php:18
+msgid "Repeatable: This section can be repeated when viewing your form."
+msgstr "Repeterende: Denne seksjonen kan repeteres når skjemaet vises."
+
+#: classes/views/frmpro-fields/other-option.php:10
+msgid "(Blank)"
+msgstr "(Blank)"
+
+#: classes/views/frmpro-form-actions/_custom_field_row.php:36
+#: classes/views/frmpro-form-actions/post_options.php:190
+msgid "Value"
+msgstr "Verdi"
+
+#: classes/views/frmpro-form-actions/_post_taxonomy_row.php:11
+#: classes/views/frmpro-form-actions/_post_taxonomy_select.php:3
+msgid "&mdash; Select a Taxonomy &mdash;"
+msgstr "&mdash; Velg en taksonomi &mdash;"
+
+#: classes/views/frmpro-form-actions/_post_taxonomy_row.php:22
+msgid "&mdash; Select a Field &mdash;"
+msgstr "&mdash; Velg et felt &mdash;"
+
+#: classes/views/frmpro-form-actions/_post_taxonomy_select.php:12
+msgid "No taxonomies available"
+msgstr "Ingen taxonomier tilgjengelig"
+
+#: classes/views/frmpro-form-actions/post_options.php:68
+msgid "Use a single field"
+msgstr "Bruk et enkelt felt"
+
+#: classes/views/frmpro-form-actions/post_options.php:69
+msgid "Customize post content"
+msgstr "Tilpass innholdet"
+
+#: classes/views/frmpro-form-actions/post_options.php:82
+msgid "Create new view"
+msgstr "Opprett ny visning"
+
+#: classes/views/frmpro-form-actions/post_options.php:109
+#: classes/views/frmpro-form-actions/post_options.php:119
+#: classes/views/styles/_date-fields.php:15
+#: classes/views/frmpro-fields/back-end/confirmation.php:5
+msgid "None"
+msgstr "Ingen"
+
+#: classes/views/frmpro-form-actions/post_options.php:139
+msgid "Date of entry submission"
+msgstr "Dato for elementinnsending"
+
+#: classes/views/frmpro-form-actions/post_options.php:151
+msgid "Pending"
+msgstr "Venter"
+
+#: classes/views/frmpro-forms/add_form_ajax_options.php:7
+msgid "Submit the form without refreshing the page."
+msgstr "Send inn skjemaet uten å laste siden på nytt."
+
+#: classes/views/frmpro-forms/add_form_button_options.php:13
+msgid "Previous Button Text"
+msgstr "Forrige knappetekst"
+
+#: classes/views/frmpro-forms/add_form_button_options.php:23
+msgid "Submit Button Alignment"
+msgstr "Innsendingsknapp justering"
+
+#: classes/views/frmpro-forms/add_form_button_options.php:28
+msgid "Center"
+msgstr "Midtstill"
+
+#: classes/views/frmpro-forms/add_form_msg_options.php:3
+msgid "On Update"
+msgstr "Ved oppdatering"
+
+#: classes/views/frmpro-forms/add_form_msg_options.php:9
+msgid "Saved Draft"
+msgstr "Lagret utkast"
+
+#: classes/views/frmpro-forms/add_form_options.php:1
+msgid "Permissions"
+msgstr "Rettigheter"
+
+#: classes/views/frmpro-forms/add_form_options.php:2
+msgid "Determine who can see, submit, and edit form entries."
+msgstr "Avgjør hvem som kan se, sende eller endre skjemaelementer."
+
+#: classes/views/frmpro-forms/add_form_options.php:24
+#, php-format
+msgid "Limit number of form entries %1$sto one per:%2$s"
+msgstr "Begrens antallet skjemainnlegg %1$stil én per:%2$s"
+
+#: classes/views/frmpro-forms/add_form_options.php:29
+msgid "Logged-in User"
+msgstr "Innlogget bruker"
+
+#: classes/views/frmpro-forms/add_form_options.php:33
+msgid "Saved Cookie"
+msgstr "Lagret cookie"
+
+#: classes/views/frmpro-forms/add_form_options.php:41
+msgid "hours"
+msgstr "timer"
+
+#: classes/views/frmpro-forms/add_form_options.php:50
+msgid "Allow front-end editing of entries"
+msgstr "Tillatt front-end endring av elementer"
+
+#: classes/views/frmpro-forms/add_form_options.php:57
+msgid "Role required to edit one's own entries:"
+msgstr "Rolle påkrevet for å endre sine egne elementer:"
+
+#: classes/views/frmpro-forms/add_form_options.php:76
+msgid "Role required to edit other users' entries:"
+msgstr "Rolle påkrevet for å endre andre brukeres elementer:"
+
+#: classes/views/frmpro-forms/add_form_options.php:92
+msgid "On Update:"
+msgstr "Ved oppdatering:"
+
+#: classes/views/frmpro-forms/add_form_options.php:95
+msgid "Show Message"
+msgstr "Vis beskjed"
+
+#: classes/views/frmpro-forms/add_form_options.php:97
+msgid "Show Page Content"
+msgstr "Vis sideinnhold"
+
+#: classes/views/frmpro-forms/add_form_options.php:105
+msgid "Use Content from Page"
+msgstr "Bruk innhold fra side"
+
+#: classes/views/frmpro-forms/add_form_options.php:125
+msgid "Protect all files uploaded in this form"
+msgstr "Beskytt alle filer opplastet med dette skjemaet"
+
+#: classes/views/frmpro-forms/add_form_options.php:138
+msgid "Copy this form to other blogs when Formidable Forms is activated"
+msgstr ""
+"Kopier dette skjemaet til andre blogger når Formidable Forms er aktivert"
+
+#: classes/views/frmpro-forms/form_page_options.php:27
+#: classes/views/frmpro-forms/form_page_options.php:29
+#: classes/views/frmpro-forms/form_page_options.php:35
+#, php-format
+msgid "Page %d title"
+msgstr "Side %d tittel"
+
+#: classes/views/frmpro-statistics/show.php:13
+msgid "Statistics"
+msgstr "Statistikk"
+
+#: classes/views/frmpro-statistics/show.php:19
+msgid "Browse"
+msgstr "Browse"
+
+#: classes/views/frmpro-statistics/show.php:24
+msgid "Users Submitted"
+msgstr "Brukere lagt til"
+
+#: classes/views/settings/form.php:2
+msgid "Edit Message"
+msgstr "Rediger melding"
+
+#: classes/views/settings/form.php:3
+msgid "The default message seen when after an entry is updated."
+msgstr "Standardmeldingen som sees når et element er oppdatert."
+
+#: classes/views/settings/form.php:17
+msgid "Login Message"
+msgstr "Innloggingsmelding"
+
+#: classes/views/settings/form.php:18
+msgid ""
+"The message seen when a user who is not logged-in views a form only logged-"
+"in users can submit."
+msgstr ""
+"Meldingen som vises når en ikke innlogget bruker viser et skjema kun "
+"innloggede brukere kan sende inn."
+
+#: classes/views/settings/form.php:24
+msgid "Previously Submitted Message"
+msgstr "Tidligere innsendt melding"
+
+#: classes/views/settings/form.php:25
+msgid ""
+"The message seen when a user attempts to submit a form for a second time if "
+"submissions are limited."
+msgstr ""
+"Meldingen som vises når en bruker forsøker å sende inn et skjema for andre "
+"gang og innsendingen er begrenset."
+
+#: classes/views/settings/form.php:32
+msgid "Miscellaneous"
+msgstr "Diverse"
+
+#: classes/views/settings/form.php:54
+msgid "Use this menu name site-wide"
+msgstr "Bruk dette menynavnet på hele nettstedet"
+
+#: classes/views/settings/general_style.php:12
+msgid "Include the jQuery CSS on ALL pages"
+msgstr "Inkluder jQuery CSS på ALLE sider"
+
+#: classes/views/settings/license_box.php:5
+msgid "Formidable Forms License"
+msgstr "Formidable Forms lisens"
+
+#: classes/views/styles/_date-fields.php:7
+msgid "Theme"
+msgstr "Tema"
+
+#: classes/views/styles/_section-fields.php:4
+msgid "Headings"
+msgstr "Overskrifter"
+
+#: classes/views/styles/_section-fields.php:32
+msgid "Size"
+msgstr "Størrelse"
+
+#: classes/views/styles/_section-fields.php:76
+msgid "top"
+msgstr "topp"
+
+#: classes/views/styles/_section-fields.php:77
+msgid "bottom"
+msgstr "bunn"
+
+#: classes/views/styles/_section-fields.php:90
+#: classes/views/styles/_section-fields.php:108
+#: classes/views/frmpro-fields/back-end/repeat-buttons.php:4
+msgid "Icons"
+msgstr "Ikoner"
+
+#: classes/views/styles/_section-fields.php:95
+msgid "Icon Position"
+msgstr "Ikonplassering"
+
+#: classes/views/styles/_section-fields.php:97
+msgid "After Heading"
+msgstr "Etter heading"
+
+#: classes/views/styles/_section-fields.php:98
+msgid "Before Heading"
+msgstr "Før heading"
+
+#: classes/views/styles/_style_switcher.php:6
+#, php-format
+msgid ""
+"Edit your style below, or %1$screate a new style%2$s or %3$sduplicate the "
+"current style%4$s."
+msgstr ""
+"Endre stil nedenfor eller %1$slag en ny stil%2$s eller %3$sdupliser "
+"nåværende stil%4$s."
+
+#: classes/views/styles/_style_switcher.php:14
+msgid "Select a style to edit:"
+msgstr "Velg en stil å endre:"
+
+#: classes/views/styles/_style_switcher.php:18
+msgid "default"
+msgstr "standard"
+
+#: classes/views/styles/_style_switcher.php:22
+msgid "Select"
+msgstr "Velg"
+
+#: classes/views/styles/_style_switcher.php:29
+#, php-format
+msgid "or %1$screate a new style%2$s"
+msgstr "eller %1$slag en ny stil%2$s"
+
+#: classes/views/styles/_style_switcher.php:34
+#, php-format
+msgid "or %1$screate a new style%2$s or %3$sduplicate the current style%4$s."
+msgstr "eller %1$slag en ny stil%2$s eller %3$sdupliser nåværende stil%4$s."
+
+#: classes/views/xml/import_csv.php:2 classes/views/xml/map_csv_fields.php:2
+msgid "Import/Export"
+msgstr "Importer/eksporter"
+
+#: classes/views/xml/import_csv.php:12
+#, php-format
+msgid "%1$s entries are importing"
+msgstr "%1$s innsendinger importeres"
+
+#: classes/views/xml/map_csv_fields.php:64
+msgid "Import"
+msgstr "Importer"
+
+#: classes/views/combo-fields/addresses/back-end-field-opts.php:3
+msgid "Address Type"
+msgstr "Adressetype"
+
+#: classes/views/combo-fields/addresses/back-end-field-opts.php:7
+msgid "International"
+msgstr "Internasjonal"
+
+#: classes/views/combo-fields/addresses/back-end-field-opts.php:8
+msgid "United States"
+msgstr "USA"
+
+#: classes/views/combo-fields/addresses/back-end-field-opts.php:10
+msgid "Other - exclude country field"
+msgstr "Andre - ekskludér landefelt"
+
+#: classes/views/combo-fields/credit-cards/back-end-field-opts.php:3
+msgid "Credit Card Security"
+msgstr "Kort Sikkerhet"
+
+#: classes/views/combo-fields/credit-cards/back-end-field-opts.php:4
+msgid ""
+"By default, only the last four digits of a credit card number will be saved. "
+"We recommend that you save as little credit card information on your site as "
+"possible."
+msgstr ""
+"Som standard vil kun de siste fire sifferne av kredittkortnummeret lagres. "
+"Vi anbefaler at du lagrer så lite kredittkortinformasjon på sidene dine som "
+"mulig."
+
+#: classes/views/combo-fields/credit-cards/back-end-field-opts.php:8
+msgid "Save only the last 4 digits"
+msgstr "Lagre kun de siste fire sifferne"
+
+#: classes/views/combo-fields/credit-cards/back-end-field-opts.php:9
+msgid "Do not store the card number"
+msgstr "Ikke lagre kortnummeret"
+
+#: classes/views/combo-fields/credit-cards/back-end-field-opts.php:10
+msgid "Store the whole card number (not recommended)"
+msgstr "Lagre hele kortnummeret (ikke anbefalt)"
+
+#: classes/views/combo-fields/credit-cards/back-end-field-opts.php:11
+msgid "Do not store or POST card values"
+msgstr "Ikke lagre eller publisér kortdata"
+
+#: classes/views/frmpro-fields/back-end/autopopulate-values.php:2
+msgid "Lookup value"
+msgstr "Oppslagsverdi"
+
+#: classes/views/frmpro-fields/back-end/autopopulate-values.php:6
+msgid "Dynamically retrieve the value from a Lookup field"
+msgstr "Motta dynamisk verdi fra et oppslagsfelt"
+
+#: classes/views/frmpro-fields/back-end/autopopulate-values.php:12
+msgid "Get value from"
+msgstr "Motta verdi fra"
+
+#: classes/views/frmpro-fields/back-end/autopopulate-values.php:40
+#: classes/views/lookup-fields/back-end/filter.php:2
+msgid "Filter options"
+msgstr "Filterinnstillinger"
+
+#: classes/views/frmpro-fields/back-end/autopopulate-values.php:44
+msgid "Get only the most recent value"
+msgstr "Få kun den siste verdien"
+
+#: classes/views/frmpro-fields/back-end/calculations.php:14
+msgid "This calculation is copying text"
+msgstr "Denne kalkuleringen kopierer tekst"
+
+#: classes/views/frmpro-fields/back-end/calculations.php:24
+msgid "decimal places"
+msgstr "antall desimaler"
+
+#: classes/views/frmpro-fields/back-end/calendar.php:18
+msgid "Start Year"
+msgstr "Start år"
+
+#: classes/views/frmpro-fields/back-end/calendar.php:21
+msgid "End Year"
+msgstr "Slutt år"
+
+#: classes/views/frmpro-fields/back-end/clock-settings.php:3
+msgid "Clock Settings"
+msgstr "Klokkeinnstillinger"
+
+#: classes/views/frmpro-fields/back-end/confirmation.php:1
+msgid "Confirmation Field"
+msgstr "Bekreftelsesfelt"
+
+#: classes/views/frmpro-fields/back-end/confirmation.php:11
+msgid "Below Field"
+msgstr "Felt nedenfor"
+
+#: classes/views/frmpro-fields/back-end/dynamic-default-value.php:2
+msgid "Dynamic default value"
+msgstr "Dynamisk standardverdi"
+
+#: classes/views/frmpro-fields/back-end/dynamic-default-value.php:3
+msgid ""
+"Set a dynamic default value in your field with a shortcode like [get "
+"param=whatever] or [frm-field-value field_id=x user_id=current]. If using "
+"[get param=whatever], the retrieved value must match one of the options in "
+"the field in order for that option to be selected."
+msgstr ""
+"Sett en dynamisk standardverdi i feltet med en shortcode som [get "
+"param=whatever] eller [frm-field-value field_id=x user_id=current]. Bruker "
+"du [get param=whatever], må den mottatte verdien matche én av innstillingene "
+"i feltet for å bli valgt."
+
+#: classes/views/frmpro-fields/back-end/dynamic-field.php:1
+#: classes/views/lookup-fields/back-end/display-as.php:3
+msgid "Display as"
+msgstr "Vis som"
+
+#: classes/views/frmpro-fields/back-end/dynamic-field.php:14
+msgid "Entries"
+msgstr "Innsendinger"
+
+#: classes/views/frmpro-fields/back-end/dynamic-field.php:18
+msgid ""
+"Limit selection choices to those created by the user filling out this form"
+msgstr ""
+"Begrens valgmulighetene til dem opprettet av brukeren som fyller ut skjemaet"
+
+#: classes/views/frmpro-fields/back-end/dynamic-values.php:4
+msgid "Dynamic Values"
+msgstr "Dynamiske verdier"
+
+#: classes/views/frmpro-fields/back-end/field-file.php:4
+#: classes/views/frmpro-fields/front-end/file.php:67
+msgid "Drop a file here or click to upload"
+msgstr "Slipp en fil her eller klikk for å laste opp"
+
+#: classes/views/frmpro-fields/back-end/field-file.php:6
+#: classes/views/frmpro-fields/front-end/file.php:70
+#, php-format
+msgid "Maximum upload size: %sMB"
+msgstr "Maksimal filstørrelse: %sMB"
+
+#: classes/views/frmpro-fields/back-end/field-form.php:5
+msgid "Select a form to import below"
+msgstr "Velg skjema å importere nedenfor"
+
+#: classes/views/frmpro-fields/back-end/field-rte.php:2
+msgid ""
+"These buttons are for illustrative purposes only. They will be functional in "
+"your form."
+msgstr ""
+"Disse knappene er kun illustrasjoner. De vil være fungerere i skjemaet ditt."
+
+#: classes/views/frmpro-fields/back-end/file-options.php:14
+msgid "Delete files"
+msgstr "Slett filer"
+
+#: classes/views/frmpro-fields/back-end/file-options.php:19
+msgid "permanently delete old files when replaced or when the entry is deleted"
+msgstr ""
+"Slett gamle filer permanent når de erstattes eller hvis innlegget slettes"
+
+#: classes/views/frmpro-fields/back-end/file-options.php:25
+msgid "Email Attachment"
+msgstr "E-postvedlegg"
+
+#: classes/views/frmpro-fields/back-end/file-options.php:30
+msgid "attach this file to the email notification"
+msgstr "legg ved denne filen til e-postvarselet"
+
+#: classes/views/frmpro-fields/back-end/file-options.php:63
+msgid "File Limits"
+msgstr "Filbegrensninger"
+
+#: classes/views/frmpro-fields/back-end/file-options.php:64
+#, php-format
+msgid ""
+"Set the file size limit for each file uploaded. Your server settings allow a "
+"maximum of %d MB."
+msgstr ""
+"Sett maksimal filstørrelse for hver opplastede fil. Dine serverinnstillinger "
+"tillatter maksimalt %d MB."
+
+#: classes/views/frmpro-fields/back-end/file-options.php:69
+msgid "MB in size"
+msgstr "MB i størrelse"
+
+#: classes/views/frmpro-fields/back-end/file-options.php:74
+msgid "number of files"
+msgstr "antall filer"
+
+#: classes/views/frmpro-fields/back-end/repeat-buttons.php:1
+msgid "Repeat Links"
+msgstr "Repeteringslenker"
+
+#: classes/views/frmpro-fields/back-end/repeat-buttons.php:5
+msgid "Text links"
+msgstr "Tekstlinker"
+
+#: classes/views/frmpro-fields/back-end/repeat-buttons.php:6
+msgid "Text links with icons"
+msgstr "Tekstlinker med ikoner"
+
+#: classes/views/frmpro-fields/back-end/repeat-buttons.php:11
+msgid "Add New Label"
+msgstr "Legg til ny merkelapp"
+
+#: classes/views/frmpro-fields/back-end/repeat-buttons.php:17
+msgid "Remove Label"
+msgstr "Fjern merkelapp"
+
+#: classes/views/frmpro-fields/back-end/repeat-options.php:2
+msgid "Repeat Layout"
+msgstr "Repeter layout"
+
+#: classes/views/frmpro-fields/back-end/repeat-options.php:5
+msgid "Default: No automatic formatting"
+msgstr "Default. Ingen automatisk formatering"
+
+#: classes/views/frmpro-fields/back-end/repeat-options.php:6
+msgid "Inline: Display each field and label in one row"
+msgstr "Inline: Vis hvert felt og merkelapp på én rad"
+
+#: classes/views/frmpro-fields/back-end/repeat-options.php:7
+msgid "Grid: Display labels as headings above rows of fields"
+msgstr "Grid: Vis merkelapper som overskrifter over rader med felter"
+
+#: classes/views/frmpro-fields/back-end/repeat-options.php:13
+msgid "Repeat Limit"
+msgstr "Repeteringsgrense"
+
+#: classes/views/frmpro-fields/front-end/file.php:68
+msgid "Choose File"
+msgstr "Velg fil"
+
+#: classes/views/lookup-fields/back-end/filter.php:6
+msgid "Limit options to those created by the current user"
+msgstr "Begrens innstillingene til dem opprettet av nåværende bruker."
+
+#: classes/views/lookup-fields/back-end/filter.php:8
+msgid "Does not apply to administrators."
+msgstr "Gjelder ikke administratorer."
+
+#: classes/views/lookup-fields/back-end/input.php:27
+msgid "No options found"
+msgstr "Ingen innstillinger funnet"
+
+#: classes/views/lookup-fields/back-end/input.php:29
+msgid "Options will populate dynamically in form"
+msgstr "Innstillinger vil populeres dynamisk i skjema"
+
+#: classes/views/lookup-fields/back-end/order.php:2
+msgid "Option order"
+msgstr "Innstillingsrekkefølge"
+
+#: classes/views/lookup-fields/back-end/order.php:3
+msgid "Set the order for the values in your Lookup Field."
+msgstr "Sett rekkefølgen på verdier i ditt Lookup felt."
+
+#: classes/views/lookup-fields/back-end/order.php:7
+msgid "Ascending (A-Z)"
+msgstr "Stigende (A-Å)"
+
+#: classes/views/lookup-fields/back-end/order.php:8
+msgid "Descending (Z-A)"
+msgstr "Synkende (Å-A)"
+
+#: classes/views/lookup-fields/back-end/order.php:9
+msgid "No order set"
+msgstr "Ingen rekkefølge satt"
+
+#: classes/views/lookup-fields/back-end/placeholder.php:2
+msgid "Placeholder text"
+msgstr "Plassholdertekst"
+
+#: classes/views/lookup-fields/back-end/placeholder.php:3
+msgid "Set the placeholder text for your Lookup field."
+msgstr "Sett plassholderteksten for ditt Lookup felt."
+
+#: classes/views/lookup-fields/back-end/placeholder.php:10
+msgid "Autocomplete"
+msgstr "Autofullfør"
+
+#: classes/views/lookup-fields/back-end/watch.php:2
+msgid "Watch"
+msgstr "Følg"

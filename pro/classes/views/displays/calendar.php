@@ -31,29 +31,41 @@ for ( $i = $week_begins; $i < ( $maxday+$startday ); $i++ ) {
 	if ( $i >= $startday ) {
         ?><div class="frmcal_num"><?php echo esc_html( $day ) ?></div></div> <div class="frmcal-content">
 <?php
-        if ( isset($daily_entries[$i]) && ! empty($daily_entries[$i]) ) {
-            foreach ( $daily_entries[$i] as $entry ) {
-                //Set up current entry date for [event_date] shortcode
-                $current_entry_date = $year . '-' . $month . '-' . ( $day < 10 ? '0' . $day : $day );
+		if ( isset( $daily_entries[ $i ] ) && ! empty( $daily_entries[ $i ] ) ) {
 
-                if ( isset($used_entries[$entry->id]) ) {
-                    $this_content = FrmProContent::replace_calendar_date_shortcode($used_entries[$entry->id], $current_entry_date);
-                    echo '<div class="frm_cal_multi_'. $entry->id .'">'. $this_content .'</div>';
-                } else {
-                    // switch [event_date] to [calendar_date] so it can be replaced on each individual date instead of each entry
-                    $new_content = str_replace( array( '[event_date]', '[event_date '), array( '[calendar_date]', '[calendar_date '), $new_content);
-                    $this_content = apply_filters('frm_display_entry_content', $new_content, $entry, $shortcodes, $view, 'all', '', array( 'event_date' => $current_entry_date));
+			//Set up current entry date for [event_date] shortcode
+			$current_entry_date = $year . '-' . $month . '-' . ( $day < 10 ? '0' . $day : $day );
 
-                    $used_entries[$entry->id] = $this_content;
-                    $this_content = FrmProContent::replace_calendar_date_shortcode($this_content, $current_entry_date);
-                    echo $this_content;
+			$pass_atts = array(
+				'event_date' => $current_entry_date,
+				'day_count'  => count( $daily_entries[ $i ] ),
+				'view'       => $view,
+			);
+			do_action( 'frm_before_day_content', $pass_atts );
 
-                    unset($this_content);
-                }
-            }
-        }
-    }
-    ?></div>
+			foreach ( $daily_entries[ $i ] as $entry ) {
+
+				if ( isset( $used_entries[ $entry->id ] ) ) {
+					$this_content = FrmProContent::replace_calendar_date_shortcode( $used_entries[ $entry->id ], $current_entry_date );
+					echo '<div class="frm_cal_multi_' . $entry->id . '">' . $this_content . '</div>';
+				} else {
+					// switch [event_date] to [calendar_date] so it can be replaced on each individual date instead of each entry
+					$new_content = str_replace( array( '[event_date]', '[event_date '), array( '[calendar_date]', '[calendar_date ' ), $new_content );
+					$this_content = apply_filters( 'frm_display_entry_content', $new_content, $entry, $shortcodes, $view, 'all', '', array(
+						'event_date' => $current_entry_date,
+					) );
+
+					$used_entries[ $entry->id ] = $this_content;
+					echo FrmProContent::replace_calendar_date_shortcode( $this_content, $current_entry_date );
+				}
+
+				unset( $this_content );
+			}
+
+			do_action( 'frm_after_day_content', $pass_atts );
+		}
+	}
+	?></div>
 </td>
 <?php
 	if ( $pos == $week_ends ) {

@@ -21,7 +21,9 @@ class FrmProTimeFieldsController {
 		$values['date_key'] = str_replace( 'field_', '', $values['date_field'] );
 
 		$remove = array();
-		FrmProTimeField::get_disallowed_times( $values, $remove );
+
+		$field_obj = FrmFieldFactory::get_field_type( 'time', $values );
+		$field_obj->get_disallowed_times( $values, $remove );
 
 		foreach ( $remove as $key => $time_to_remove ) {
 			$remove[] = FrmProAppHelper::format_time( $time_to_remove, 'g:i A' );

@@ -240,24 +240,24 @@ class FrmProDisplay{
         $errors = array();
 
 		if ( $values['post_title'] == '' ) {
-			$errors[] = __( 'Name cannot be blank', 'formidable' );
+			$errors[] = __( 'Name cannot be blank', 'formidable-pro' );
 		}
 
-        if ( $values['excerpt'] == __( 'This is not displayed anywhere, but is just for your reference. (optional)', 'formidable' ) ) {
+        if ( $values['excerpt'] == __( 'This is not displayed anywhere, but is just for your reference. (optional)', 'formidable-pro' ) ) {
 			$_POST['excerpt'] = '';
 		}
 
 		if ( $values['content'] == '' ) {
-			$errors[] = __( 'Content cannot be blank', 'formidable' );
+			$errors[] = __( 'Content cannot be blank', 'formidable-pro' );
 		}
 
         if ( ! empty($values['options']['limit']) && ! is_numeric($values['options']['limit']) ) {
-            $errors[] = __( 'Limit must be a number', 'formidable' );
+            $errors[] = __( 'Limit must be a number', 'formidable-pro' );
         }
 
 		if ( $values['show_count'] == 'dynamic' ) {
 			if ( $values['dyncontent'] == '' ) {
-                $errors[] = __( 'Dynamic Content cannot be blank', 'formidable' );
+                $errors[] = __( 'Dynamic Content cannot be blank', 'formidable-pro' );
 			}
         }
 
