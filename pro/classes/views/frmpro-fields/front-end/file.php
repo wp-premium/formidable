@@ -47,12 +47,12 @@ if ( FrmField::is_read_only( $field ) ) {
 				<div class="dz-details">
 					<div class="dz-filename">
 						<span data-dz-name="">
-							<a href="<?php echo esc_attr( $file['file_url'] ) ?>"><?php echo esc_html( $file['name'] ) ?></a>
+							<a href="<?php echo esc_attr( $file['file_url'] ) ?>" target="_blank" rel="noopener"><?php echo esc_html( $file['name'] ) ?></a>
 						</span>
 					</div>
 				</div>
 				<a class="dz-remove frm_remove_link" href="javascript:undefined;" data-frm-remove="<?php echo esc_attr( $field_name ) ?>">
-					<?php esc_html_e( 'Remove file', 'formidable' ) ?>
+					<?php esc_html_e( 'Remove file', 'formidable-pro' ) ?>
 				</a>
 				<?php if ( $is_multiple ) { ?>
 				<input type="hidden" name="<?php echo esc_attr( $field_name ); ?>[]" value="<?php echo esc_attr( $file['id'] ) ?>" />
@@ -60,14 +60,14 @@ if ( FrmField::is_read_only( $field ) ) {
 			</div>
 		<?php } ?>
 		<div class="frm_clearfix <?php echo is_admin() ? 'clear' : ''; ?>"></div>
-		<?php include_once( FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-entries/loading.php' ); ?>
+		<?php include_once( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-entries/loading.php' ); ?>
 	</div>
 	<div class="dz-message needsclick">
 		<span class="frm_icon_font frm_upload_icon"></span>
-		<span class="frm_upload_text"><?php esc_html_e( 'Drop a file here or click to upload', 'formidable' ) ?></span>
-		<span class="frm_compact_text"><?php esc_html_e( 'Choose File', 'formidable' ); ?></span>
+		<span class="frm_upload_text"><?php esc_html_e( 'Drop a file here or click to upload', 'formidable-pro' ) ?></span>
+		<span class="frm_compact_text"><?php esc_html_e( 'Choose File', 'formidable-pro' ); ?></span>
 		<div class="frm_small_text">
-			<?php echo esc_html( sprintf( __( 'Maximum upload size: %sMB', 'formidable' ), $file_settings['maxFilesize'] ) ) ?>
+			<?php echo esc_html( sprintf( __( 'Maximum upload size: %sMB', 'formidable-pro' ), $file_settings['maxFilesize'] ) ) ?>
 		</div>
 	</div>
 </div>

@@ -23,16 +23,16 @@ if ( $hide_field && ! $sel ) {
 <script type="text/javascript">jQuery(document).ready(function(){frmAdminBuild.triggerRemoveLogic(<?php echo (int) $field['id'] ?>, '<?php echo esc_attr( $meta_name ) ?>');});</script>
 <?php
 }
-_e( 'is', 'formidable' );
+_e( 'is', 'formidable-pro' );
 $field['hide_field_cond'][$meta_name] = htmlspecialchars_decode($field['hide_field_cond'][$meta_name]); ?>
 
 <select name="field_options[hide_field_cond_<?php echo esc_attr( $field['id'] ) ?>][]">
-    <option value="==" <?php selected($field['hide_field_cond'][$meta_name], '==') ?>><?php _e( 'equal to', 'formidable' ) ?></option>
-    <option value="!=" <?php selected($field['hide_field_cond'][$meta_name], '!=') ?>><?php _e( 'NOT equal to', 'formidable' ) ?> &nbsp;</option>
-    <option value=">" <?php selected($field['hide_field_cond'][$meta_name], '>') ?>><?php _e( 'greater than', 'formidable' ) ?></option>
-    <option value="<" <?php selected($field['hide_field_cond'][$meta_name], '<') ?>><?php _e( 'less than', 'formidable' ) ?></option>
-    <option value="LIKE" <?php selected($field['hide_field_cond'][$meta_name], 'LIKE') ?>><?php _e( 'like', 'formidable' ) ?></option>
-    <option value="not LIKE" <?php selected($field['hide_field_cond'][$meta_name], 'not LIKE') ?>><?php _e( 'not like', 'formidable' ) ?> &nbsp;</option>
+    <option value="==" <?php selected($field['hide_field_cond'][$meta_name], '==') ?>><?php _e( 'equal to', 'formidable-pro' ) ?></option>
+    <option value="!=" <?php selected($field['hide_field_cond'][$meta_name], '!=') ?>><?php _e( 'NOT equal to', 'formidable-pro' ) ?> &nbsp;</option>
+    <option value=">" <?php selected($field['hide_field_cond'][$meta_name], '>') ?>><?php _e( 'greater than', 'formidable-pro' ) ?></option>
+    <option value="<" <?php selected($field['hide_field_cond'][$meta_name], '<') ?>><?php _e( 'less than', 'formidable-pro' ) ?></option>
+    <option value="LIKE" <?php selected($field['hide_field_cond'][$meta_name], 'LIKE') ?>><?php _e( 'like', 'formidable-pro' ) ?></option>
+    <option value="not LIKE" <?php selected($field['hide_field_cond'][$meta_name], 'not LIKE') ?>><?php _e( 'not like', 'formidable-pro' ) ?> &nbsp;</option>
 </select>
 
 <span id="frm_show_selected_values_<?php echo esc_attr( $field['id'] .'_'. $meta_name ) ?>">
@@ -47,6 +47,6 @@ $field['hide_field_cond'][$meta_name] = htmlspecialchars_decode($field['hide_fie
 	FrmFieldsHelper::display_field_value_selector( $selector_field_id, $selector_args );
 ?>
 </span>
-<a href="javascript:void(0)" class="frm_remove_tag frm_icon_font" data-removeid="frm_logic_<?php echo esc_attr( $field['id'] .'_'. $meta_name ) ?>"></a>
+<a href="javascript:void(0)" class="frm_remove_tag frm_icon_font" data-removeid="frm_logic_<?php echo esc_attr( $field['id'] .'_'. $meta_name ) ?>" data-showlast="#logic_<?php echo esc_attr( $field['id'] ) ?>" data-hidelast="#frm_logic_rows_<?php echo absint( $field['id'] ) ?>"></a>
 <a href="javascript:void(0)" class="frm_add_tag frm_icon_font frm_add_logic_row"></a>
 </div>

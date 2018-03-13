@@ -42,10 +42,7 @@
     padding:0 0 0 8px;
     height:25px;
     background:-webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(20%, #ffffff), color-stop(50%, #f6f6f6), color-stop(52%, #eeeeee), color-stop(100%, #f4f4f4));
-    background:-webkit-linear-gradient(top, #ffffff 20%, #f6f6f6 50%, #eeeeee 52%, #f4f4f4 100%);
-    background:-moz-linear-gradient(top, #ffffff 20%, #f6f6f6 50%, #eeeeee 52%, #f4f4f4 100%);
-    background:-o-linear-gradient(top, #ffffff 20%, #f6f6f6 50%, #eeeeee 52%, #f4f4f4 100%);
-    background:linear-gradient(top, #ffffff 20%, #f6f6f6 50%, #eeeeee 52%, #f4f4f4 100%);
+    background:linear-gradient(to top, #ffffff 20%, #f6f6f6 50%, #eeeeee 52%, #f4f4f4 100%);
     background-clip:padding-box;
     box-shadow:0 0 3px white inset, 0 1px 1px rgba(0, 0, 0, 0.1);
     text-decoration:none;
@@ -73,7 +70,7 @@
     width:12px;
     height:12px;
     font-size:1px;
-    background:url('<?php echo FrmAppHelper::relative_plugin_url() ?>/pro/images/chosen-sprite.png') -42px 1px no-repeat;
+    background:url('<?php echo FrmProAppHelper::relative_plugin_url() ?>/images/chosen-sprite.png') -42px 1px no-repeat;
 }
 
 .with_frm_style .chosen-container-single .chosen-single abbr:hover{
@@ -94,7 +91,7 @@
 }
 
 .with_frm_style .chosen-container-single .chosen-single div b{
-    background:url('<?php echo FrmAppHelper::relative_plugin_url() ?>/pro/images/chosen-sprite.png') no-repeat 0 2px;
+    background:url('<?php echo FrmProAppHelper::relative_plugin_url() ?>/images/chosen-sprite.png') no-repeat 0 2px;
     display:block;
     width:100%;
     height:100%;
@@ -115,8 +112,8 @@
     width:100% !important;
     max-width:100% !important;
     height:auto;
-    background:white url('<?php echo FrmAppHelper::relative_plugin_url() ?>/pro/images/chosen-sprite.png') no-repeat 100% -20px;
-    background:url('<?php echo FrmAppHelper::relative_plugin_url() ?>/pro/images/chosen-sprite.png') no-repeat 100% -20px;
+    background:white url('<?php echo FrmProAppHelper::relative_plugin_url() ?>/images/chosen-sprite.png') no-repeat 100% -20px;
+    background:url('<?php echo FrmProAppHelper::relative_plugin_url() ?>/images/chosen-sprite.png') no-repeat 100% -20px;
     font-size:1em;
     font-family:sans-serif;
     line-height:normal;
@@ -259,7 +256,7 @@
     display:block;
     width:12px;
     height:12px;
-    background:url('<?php echo FrmAppHelper::relative_plugin_url() ?>/pro/images/chosen-sprite.png') -42px 1px no-repeat;
+    background:url('<?php echo FrmProAppHelper::relative_plugin_url() ?>/images/chosen-sprite.png') -42px 1px no-repeat;
     font-size:1px;
 }
 
@@ -293,12 +290,12 @@
     cursor:default;
 }
 
-.with_frm_style .chosen-container-active .chosen-single{
+.with_frm_style .chosen-container-single.chosen-container-active .chosen-single{
     border:1px solid #5897fb;
     box-shadow:0 0 5px rgba(0, 0, 0, 0.3);
 }
 
-.with_frm_style .chosen-container-active.chosen-with-drop .chosen-single{
+.with_frm_style .chosen-container-single.chosen-container-active.chosen-with-drop .chosen-single{
     border:1px solid #aaa;
     -moz-border-radius-bottomright:0;
     border-bottom-right-radius:0;
@@ -307,12 +304,12 @@
     box-shadow:0 1px 0 #fff inset;
 }
 
-.with_frm_style .chosen-container-active.chosen-with-drop .chosen-single div{
+.with_frm_style .chosen-container-single.chosen-container-active.chosen-with-drop .chosen-single div{
     border-left:none;
     background:transparent;
 }
 
-.with_frm_style .chosen-container-active.chosen-with-drop .chosen-single div b{
+.with_frm_style .chosen-container-single.chosen-container-active.chosen-with-drop .chosen-single div b{
     background-position:-18px 2px;
 }
 
@@ -399,7 +396,7 @@
 
 .with_frm_style .chosen-rtl .chosen-search input[type="text"]{
     padding:4px 5px 4px 20px;
-    background:white url('<?php echo FrmAppHelper::relative_plugin_url() ?>/pro/images/chosen-sprite.png') no-repeat -30px -20px;background:url('<?php echo FrmAppHelper::relative_plugin_url() ?>/pro/images/chosen-sprite.png') no-repeat -30px -20px;
+    background:white url('<?php echo FrmProAppHelper::relative_plugin_url() ?>/images/chosen-sprite.png') no-repeat -30px -20px;background:url('<?php echo FrmProAppHelper::relative_plugin_url() ?>/images/chosen-sprite.png') no-repeat -30px -20px;
     direction:rtl;
 }
 
@@ -420,7 +417,7 @@
     .with_frm_style .chosen-container-multi .chosen-choices .search-choice .search-choice-close,
     .with_frm_style .chosen-container .chosen-results-scroll-down span,
     .with_frm_style .chosen-container .chosen-results-scroll-up span{
-        background-image:url('<?php echo FrmAppHelper::relative_plugin_url() ?>/pro/images/chosen-sprite2x.png') !important;
+        background-image:url('<?php echo FrmProAppHelper::relative_plugin_url() ?>/images/chosen-sprite2x.png') !important;
         background-size:52px 37px !important;
         background-repeat:no-repeat !important;
     }

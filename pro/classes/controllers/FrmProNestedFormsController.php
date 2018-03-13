@@ -599,19 +599,10 @@ class FrmProNestedFormsController {
 			$count ++;
 		}
 
-		$classes = array(
-			2 => 'half',
-			3 => 'third',
-			4 => 'fourth',
-			5 => 'fifth',
-			6 => 'sixth',
-			7 => 'seventh',
-			8 => 'eighth',
-		);
+		$field_class = self::grid_field_class( $count, $format );
+		$section_classes = self::repeat_container_classes( $format, $args );
 
-		$field_class = ( ! empty( $format ) && isset( $classes[ $count ] ) ) ? $classes[ $count ] : '';
-
-		echo '<div id="frm_section_' . $args['parent_field']['id'] . '-' . $args['i'] . '" class="frm_repeat_' . ( empty( $format ) ? 'sec' : $format ) . ' frm_repeat_' . $args['parent_field']['id'] . ( $args['row_count'] === 0 ? ' frm_first_repeat' : '' ) . '">' . "\n";
+		echo '<div id="frm_section_' . $args['parent_field']['id'] . '-' . $args['i'] . '" class="' . esc_attr( $section_classes ) . '">' . "\n";
 
 		self::add_hidden_repeat_row_id( $args );
 		self::add_default_item_meta_field( $args );
@@ -630,10 +621,9 @@ class FrmProNestedFormsController {
 
 			if ( ! empty( $field_class ) ) {
 				if ( 1 == $field_num ) {
-					$subfield['classes'] .= ' frm_first frm_' . $field_class;
-				} else {
-					$subfield['classes'] .= ' frm_' . $field_class;
+					$subfield['classes'] .= ' frm_first';
 				}
+				self::add_class_to_field( $field_class, 'field', $subfield['classes'] );
 			}
 
 			$field_num ++;
@@ -643,27 +633,25 @@ class FrmProNestedFormsController {
 				$label_pos = 'hidden';
 			}
 
-			$field_args = array(
-				'field_name'    => $subfield_name,
-				'field_id'      => $subfield_id,
-				'field_plus_id' => $subfield_plus_id,
-				'section_id'    => $args['parent_field']['id'],
-			);
-
-			if ( apply_filters( 'frm_show_normal_field_type', true, $subfield['type'] ) ) {
-				echo FrmFieldsHelper::replace_shortcodes( $subfield['custom_html'], $subfield, $args['errors'], $args['form'], $field_args );
-			} else {
-				do_action( 'frm_show_other_field_type', $subfield, $args['form'], $field_args );
-			}
-
 			// Track whether field is in an embedded form
 			if ( 'form' == $args['parent_field']['type'] ) {
 				// TODO: Check if this is needed
 				$subfield['in_embed_form'] = $args['parent_field']['id'];
 			}
 
+			$field_args = array(
+				'field_name'    => $subfield_name,
+				'field_id'      => $subfield_id,
+				'field_plus_id' => $subfield_plus_id,
+				'section_id'    => $args['parent_field']['id'],
+				'errors'        => $args['errors'],
+				'form'          => $args['form'],
+				'parent_form_id' => $args['parent_field']['form_id'],
+			);
+			$field_obj = FrmFieldFactory::get_field_type( $subfield['type'], $subfield );
+			$field_obj->show_field( $field_args );
+
 			unset( $subfield_name, $subfield_id );
-			do_action( 'frm_get_field_scripts', $subfield, $args['form'], $args['parent_field']['form_id'] );
 		}
 
 		if ( ! $args['repeat'] ) {
@@ -680,6 +668,66 @@ class FrmProNestedFormsController {
 
 		// Close frm_repeat div
 		echo '</div>' . "\n";
+	}
+
+	/**
+	 * @since 3.0
+	 *
+	 * @return string|array
+	 */
+	private static function grid_field_class( $count, $format ) {
+		if ( empty( $format ) ) {
+			return '';
+		}
+
+		$frm_settings = FrmAppHelper::get_settings();
+		if ( $frm_settings->old_css ) {
+			$classes = array(
+				2 => '_half',
+				3 => '_third',
+				4 => '_fourth',
+				5 => '_fifth',
+				6 => '_sixth',
+				7 => '_seventh',
+				8 => '_eighth',
+			);
+			$class = ( isset( $classes[ $count ] ) ) ? $classes[ $count ] : '';
+		} else {
+			if ( 2 == $count ) {
+				$class = array( 10, 2);
+			} elseif ( $count < 13 ) {
+				$field_width = floor( 12 / ( $count ) );
+				$submit_width = 12 - ( $field_width * ( $count - 1 ) );
+				$class = array( $field_width, $submit_width );
+			} else {
+				$class = '';
+			}
+		}
+
+		return $class;
+	}
+
+	private static function add_class_to_field( $add_class, $type, &$classes ) {
+		if ( is_array( $add_class ) ) {
+			$position = 'button' === $type ? 1 : 0;
+			$classes .= ' frm' . $add_class[ $position ];
+		} else {
+			$classes .= ' frm' . $add_class;
+		}
+	}
+
+	/**
+	 * @since 3.0
+	 *
+	 * @return string
+	 */
+	private static function repeat_container_classes( $format, $args ) {
+		$section_classes = array(
+			'frm_repeat_' . ( empty( $format ) ? 'sec' : $format ),
+			'frm_repeat_' . $args['parent_field']['id'] . ( $args['row_count'] === 0 ? ' frm_first_repeat' : '' ),
+			'frm_grid_container',
+		);
+		return implode( ' ', $section_classes );
 	}
 
 	/**
@@ -755,9 +803,9 @@ class FrmProNestedFormsController {
 			}
 		}
 
-		$prepared_field = apply_filters( 'frm_setup_new_fields_vars', $field_array, $end_field, array() );
+		FrmFieldsHelper::prepare_new_front_field( $field_array, $end_field );
 
-		return $prepared_field;
+		return $field_array;
 	}
 
 	/**
@@ -805,7 +853,9 @@ class FrmProNestedFormsController {
 		}
 
 		$classes = 'frm_form_field frm_' . $args['label_pos'] . '_container frm_repeat_buttons';
-		$classes .= empty( $args['field_class'] ) ? '' : ' frm_' . $args['field_class'];
+
+		self::add_class_to_field( $args['field_class'], 'button', $classes );
+
 		// Get classes for end divider
 		$classes .= ( $end && isset( $end['classes'] ) ) ? ' ' . $end['classes'] : '';
 
@@ -815,8 +865,8 @@ class FrmProNestedFormsController {
 			$triggers .= '<label class="frm_primary_label">&nbsp;</label>';
 		}
 
-		$triggers .= '<a href="#" class="frm_add_form_row' . esc_attr( $args['add_classes'] ) . '" data-parent="' . esc_attr( $args['parent_field']['id'] ) . '">' . $args['add_icon'] . $args['add_label'] . '</a>' . "\n";
-		$triggers .= '<a href="#" class="frm_remove_form_row' . esc_attr( $args['remove_classes'] ) . '" data-key="' . esc_attr( $args['i'] ) . '" data-parent="' . esc_attr( $args['parent_field']['id'] ) . '">' . $args['remove_icon'] . $args['remove_label'] . '</a> ';
+		$triggers .= '<a href="#" class="frm_add_form_row' . esc_attr( $args['add_classes'] ) . '" data-parent="' . esc_attr( $args['parent_field']['id'] ) . '" aria-label="' . esc_attr( $defaults['add_label'] ) . '">' . $args['add_icon'] . $args['add_label'] . '</a>' . "\n";
+		$triggers .= '<a href="#" class="frm_remove_form_row' . esc_attr( $args['remove_classes'] ) . '" data-key="' . esc_attr( $args['i'] ) . '" data-parent="' . esc_attr( $args['parent_field']['id'] ) . '" aria-label="' . esc_attr( $defaults['remove_label'] ) . '">' . $args['remove_icon'] . $args['remove_label'] . '</a> ';
 
 		$triggers .= '</div>';
 

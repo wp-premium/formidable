@@ -20,8 +20,12 @@ class FrmProCopiesController{
 	 * @since 2.05.09
 	 */
 	public static function maybe_install_import() {
+		global $frm_vars;
+
 		$importing = defined( 'WP_IMPORTING' ) && WP_IMPORTING;
-		if ( $importing ) {
+		$upgrading = isset( $frm_vars['doing_upgrade'] ) ? $frm_vars['doing_upgrade'] : false;
+
+		if ( $importing || $upgrading ) {
 			$install_complete = get_option( 'frmpro_db_version' );
 			if ( ! $install_complete ) {
 				self::install();
@@ -53,7 +57,7 @@ class FrmProCopiesController{
 
 		self::maybe_install_import();
 
-		$form_key = FrmForm::getKeyByID( $id );
+		$form_key = FrmForm::get_key_by_id( $id );
 		if ( 'contact' === $form_key ) {
 			// don't copy the form that is already autocreated
 			return;

@@ -5,56 +5,31 @@
  */
 class FrmProFieldValue extends FrmFieldValue {
 
-	private $is_empty_container = false;
-
-	/**
-	 * @since 2.05
-	 * @var array
-	 */
-	private $exclude_fields = array();
-
 	/**
 	 * FrmFieldValue constructor.
 	 *
 	 * @param stdClass $field
 	 * @param stdClass $entry
-	 * @param array $atts
 	 */
-	public function __construct( $field, $entry, $atts = array() ) {
-		$this->init_exclude_fields( $atts );
-
-		parent::__construct( $field, $entry, $atts );
-
-		$this->init_is_empty_container();
-	}
-
-	/**
-	 * Initialize the exclude fields property
-	 * This is only for repeating sections and embedded form field values
-	 *
-	 * @since 2.05
-	 *
-	 * @param array $atts
-	 */
-	protected function init_exclude_fields( $atts ) {
-		if ( isset( $atts['exclude_fields'] ) ) {
-			$this->exclude_fields = $atts['exclude_fields'];
-		}
+	public function __construct( $field, $entry ) {
+		parent::__construct( $field, $entry );
 	}
 
 	/**
 	 * Initialize the saved_value property
 	 *
 	 * @since 2.04
+	 *
+	 * @param stdClass $entry
 	 */
-	protected function init_saved_value() {
+	protected function init_saved_value( $entry ) {
 
-		if ( $this->entry->form_id != $this->field->form_id ) {
+		if ( $entry->form_id != $this->field->form_id ) {
 			//If parent entry ID and child repeating field
 
 			$where = array(
 				'form_id' => $this->field->form_id,
-				'parent_item_id' => $this->entry->id,
+				'parent_item_id' => $entry->id,
 			);
 			$child_entry_ids = FrmDb::get_col( 'frm_items', $where );
 
@@ -63,82 +38,63 @@ class FrmProFieldValue extends FrmFieldValue {
 
 				foreach ( $child_entry_ids as $child_entry_id ) {
 					$child_entry = FrmEntry::getOne( $child_entry_id, true );
-					$current_field_value = new FrmProFieldValue( $this->field, $child_entry, array( 'source' => $this->source ) );
+					$current_field_value = new FrmProFieldValue( $this->field, $child_entry );
 					$this->saved_value[ $child_entry_id ] = $current_field_value->get_saved_value();
 				}
 			}
 
-		} else if ( $this->field->type === 'html' ) {
-
-			$this->saved_value = $this->field->description;
-			$this->clean_saved_value();
-
 		} else if ( isset( $this->field->field_options['post_field'] ) && $this->field->field_options['post_field'] ){
 
-			$this->saved_value = $this->get_post_value();
+			$this->saved_value = $this->get_post_value( $entry );
 			$this->clean_saved_value();
 
 		} else {
 
-			parent::init_saved_value();
+			parent::init_saved_value( $entry );
 
 		}
 	}
 
-	// TODO: make this reusable
 	/**
 	 * Initialize a field's displayed value
 	 *
 	 * @since 2.04
+	 *
+	 * @param array $atts
 	 */
-	protected function init_displayed_value() {
+	public function prepare_displayed_value( $atts = array() ) {
+		// TODO: Pick up on making this work well
+		// TODO: maybe move these various functions into FrmFieldType classes
 		$this->displayed_value = $this->saved_value;
 
 		if ( $this->has_child_entries() ) {
-			$this->displayed_value = array();
-			foreach ( $this->saved_value as $child_id ) {
-				$child_values = new FrmProEntryValues( $child_id, array( 'source' => $this->source, 'exclude_fields' => $this->exclude_fields ) );
-				$this->displayed_value[ $child_id ] = $child_values->get_field_values();
-			}
-
+			$this->prepare_displayed_value_for_field_with_child_entries( $atts );
 		} else {
 
-			// TODO: improve organization and readability
+			// TODO: all display value generation should be handled in one classes or subclasses
 			$this->generate_post_field_displayed_value();
-			$this->generate_displayed_value_for_field_type();
+			$this->generate_displayed_value_for_field_type( $atts );
 			$this->filter_array_displayed_value();
 			$this->get_option_label_for_saved_value();
-			$this->filter_displayed_value();
+			$this->filter_displayed_value( $atts );
 		}
 	}
 
-	/**
-	 * Initialize the is_empty_container property
-	 *
-	 * @since 2.04
-	 */
-	private function init_is_empty_container() {
+	protected function prepare_displayed_value_for_field_with_child_entries( $atts = array() ) {
+		$this->displayed_value = array();
 
-		// TODO: get this working reliably
-
-		if ( $this->field->type === 'form' || FrmField::is_repeating_field( $this->field ) ) {
-
-			$this->is_empty_container = ! $this->has_child_entries();
-
-		} else if ( $this->field->type === 'divider' ) {
-
-			// TODO: how to determine if divider has values inside of it?
-			$this->is_empty_container = true;
+		if ( isset( $atts['include_fields'] ) ) {
+			$atts['include_fields'] = '';
 		}
-	}
 
-	/**
-	 * Set the is_empty_container property
-	 *
-	 * @since 2.04
-	 */
-	public function set_is_empty_container( $is_empty ) {
-		$this->is_empty_container = $is_empty;
+		if ( isset( $atts['fields'] ) ) {
+			$atts['fields'] = '';
+		}
+
+		foreach ( $this->saved_value as $child_id ) {
+			$child_values = new FrmProEntryValues( $child_id, $atts );
+			$this->displayed_value[ $child_id ] = $child_values->get_field_values();
+		}
 	}
 
 	/**
@@ -146,15 +102,17 @@ class FrmProFieldValue extends FrmFieldValue {
 	 *
 	 * @since 2.04
 	 *
+	 * @param stdClass $entry
+	 *
 	 * @return mixed
 	 */
-	private function get_post_value() {
+	protected function get_post_value( $entry ) {
 		$pass_args = array(
 			'links' => false,
 			'truncate' => false,
 		);
 
-		return FrmProEntryMetaHelper::get_post_or_meta_value( $this->entry, $this->field, $pass_args );
+		return FrmProEntryMetaHelper::get_post_or_meta_value( $entry, $this->field, $pass_args );
 	}
 
 	/* Check if an embedded form or repeating section has child entries
@@ -167,27 +125,12 @@ class FrmProFieldValue extends FrmFieldValue {
 
 		if ( $this->field->type === 'form' || FrmField::is_repeating_field( $this->field ) ) {
 
-			if ( ! empty( $this->saved_value ) && is_array( $this->saved_value ) ) {
+			if ( FrmAppHelper::is_not_empty_value( $this->saved_value ) ) {
 				$has_child_entries = true;
 			}
-
 		}
 
 		return $has_child_entries;
-
-	}
-
-	/**
-	 * Determine if a field is an empty container, meaning it is a divider or embedded form with no values submitted in it
-	 *
-	 * @since 2.04
-	 *
-	 * @return bool
-	 */
-	public function is_empty_container() {
-		// TODO: Maybe change to is_empty_section?
-
-		return $this->is_empty_container;
 
 	}
 
@@ -198,51 +141,11 @@ class FrmProFieldValue extends FrmFieldValue {
 	 *
 	 * @return mixed
 	 */
-	private function generate_post_field_displayed_value() {
+	protected function generate_post_field_displayed_value() {
 		if ( FrmField::is_option_true( $this->field, 'post_field' ) ) {
-			$this->displayed_value = FrmProEntryMetaHelper::get_post_or_meta_value( $this->entry, $this->field, array( 'truncate' => true ) );
+			$entry = FrmEntry::getOne( $this->entry_id, true );
+			$this->displayed_value = FrmProEntryMetaHelper::get_post_or_meta_value( $entry, $this->field, array( 'truncate' => true ) );
 			$this->displayed_value = maybe_unserialize( $this->displayed_value );
-		}
-	}
-
-	/**
-	 * Get the displayed value for different field types
-	 *
-	 * @since 2.04
-	 *
-	 * @return mixed
-	 */
-	private function generate_displayed_value_for_field_type() {
-
-		switch ( $this->field->type ) {
-			case 'user_id':
-				$this->displayed_value = FrmProFieldsHelper::get_display_name( $this->displayed_value );
-				break;
-			case 'data':
-				if ( is_array( $this->displayed_value ) ) {
-
-					$new_value = array();
-					foreach ( $this->displayed_value as $val ) {
-						$new_value[] = FrmProFieldsHelper::get_data_value( $val, $this->field );
-					}
-
-					$this->displayed_value = $new_value;
-				} else {
-					$this->displayed_value = FrmProFieldsHelper::get_data_value( $this->displayed_value, $this->field );
-				}
-				break;
-			case 'file':
-				$this->displayed_value = FrmProFieldsHelper::get_file_name( $this->displayed_value, true, ', ' );
-				if ( FrmField::is_option_true( $this->field, 'multiple' ) ) {
-					$this->displayed_value = explode( ', ', $this->displayed_value );
-				}
-				break;
-			case 'date':
-				$this->displayed_value = FrmProFieldsHelper::get_date( $this->displayed_value );
-				break;
-			case 'time':
-				$this->displayed_value = FrmProFieldsHelper::get_time_display_value( $this->displayed_value, array(), $this->field );
-				break;
 		}
 	}
 
@@ -251,7 +154,7 @@ class FrmProFieldValue extends FrmFieldValue {
 	 *
 	 * @since 2.04
 	 */
-	private function filter_array_displayed_value() {
+	protected function filter_array_displayed_value() {
 		if ( is_array( $this->displayed_value ) ) {
 			$new_value = '';
 			foreach ( $this->displayed_value as $val ) {
@@ -275,8 +178,7 @@ class FrmProFieldValue extends FrmFieldValue {
 	 *
 	 * @since 2.04
 	 */
-	private function get_option_label_for_saved_value() {
+	protected function get_option_label_for_saved_value() {
 		$this->displayed_value = FrmProEntriesController::get_option_label_for_saved_value( $this->displayed_value, $this->field, array() );
 	}
-
 }

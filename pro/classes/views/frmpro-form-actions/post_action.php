@@ -11,7 +11,7 @@ class FrmProPostAction extends FrmFormAction {
             'force_event' => true,
 		);
 
-		parent::__construct( 'wppost', __( 'Create Post', 'formidable' ), $action_ops );
+		parent::__construct( 'wppost', __( 'Create Post', 'formidable-pro' ), $action_ops );
 	}
 
 	function form( $form_action, $args = array() ) {

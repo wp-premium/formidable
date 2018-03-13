@@ -2,29 +2,54 @@
 
 class FrmProDb{
 
-	public static $db_version = 39;
+	public static $db_version = 60;
+
+	/**
+	 * @since 3.0.02
+	 */
+	public static $plug_version = '3.0.06';
 
 	/**
 	 * @since 2.3
 	 */
-	public static function needs_upgrade( $needs_upgrade ) {
+	public static function needs_upgrade( $needs_upgrade = false ) {
 		if ( ! $needs_upgrade ) {
-			$db_version = (int) get_option( 'frmpro_db_version' );
-			$needs_upgrade = ( $db_version < self::$db_version );
+			if ( is_callable( 'FrmAppHelper::compare_for_update' ) ) {
+				$needs_upgrade = FrmAppHelper::compare_for_update( array(
+					'option'             => 'frmpro_db_version',
+					'new_db_version'     => self::$db_version,
+					'new_plugin_version' => self::$plug_version,
+				) );
+			} else {
+				// deprecated
+				$db_version = get_option( 'frmpro_db_version' );
+				if ( strpos( $db_version, '-' ) === false ) {
+					$needs_upgrade = true;
+				} else {
+					$last_upgrade = explode( '-', $db_version );
+					$needs_db_upgrade = (int) $last_upgrade[1] < (int) self::$db_version;
+					$new_version = version_compare( $last_upgrade[0], self::$plug_version, '<' );
+					$needs_upgrade = $needs_db_upgrade || $new_version;
+				}
+			}
 		}
 		return $needs_upgrade;
 	}
 
 	public static function upgrade() {
-        $db_version = self::$db_version; // this is the version of the database we're moving to
-        $old_db_version = get_option('frmpro_db_version');
+		if ( ! self::needs_upgrade() ) {
+			return;
+		}
 
-        if ( $db_version == $old_db_version ) {
-            return;
-        }
+		$db_version = self::$db_version; // this is the version of the database we're moving to
+		$old_db_version = get_option( 'frmpro_db_version' );
+		if ( strpos( $old_db_version, '-' ) ) {
+			$last_upgrade = explode( '-', $old_db_version );
+			$old_db_version = (int) $last_upgrade[1];
+		}
 
-        if ( $old_db_version ) {
-			$migrations = array( 16, 17, 25, 27, 28, 29, 30, 31, 32, 34, 36, 37, 39 );
+		if ( $old_db_version && is_numeric( $old_db_version ) ) {
+			$migrations = array( 16, 17, 25, 27, 28, 29, 30, 31, 32, 34, 36, 37, 39, 43, 44, 50 );
 			foreach ( $migrations as $migration ) {
 				if ( $db_version >= $migration && $old_db_version < $migration ) {
 					call_user_func( array( __CLASS__, 'migrate_to_' . $migration ) );
@@ -34,7 +59,9 @@ class FrmProDb{
 
 		FrmProCopiesController::install();
 
-		update_option('frmpro_db_version', $db_version);
+		update_option( 'frmpro_db_version', self::$plug_version . '-' . self::$db_version );
+
+		FrmAppHelper::save_combined_js();
 
         /**** ADD DEFAULT TEMPLATES ****/
         if ( class_exists('FrmXMLController') ) {
@@ -73,6 +100,94 @@ class FrmProDb{
 	 */
 	public static function before_free_version_db_upgrade() {
 		FrmProContent::add_rewrite_endpoint();
+	}
+
+	/**
+	 * Attempt to move formidable/pro to formidable-pro and activate
+	 * @since 3.0
+	 */
+	public static function migrate_to_50() {
+		$pro_folder = substr( untrailingslashit( FrmProAppHelper::plugin_path() ), -4 );
+
+		if ( '/pro' === $pro_folder ) {
+			// setup $wp_filesystem
+			new FrmCreateFile( array(
+				'file_name' => '',
+			) );
+
+			$plugin_helper = new FrmProInstallPlugin( array(
+				'plugin_file' => 'formidable-pro/formidable-pro.php',
+			) );
+
+			if ( $plugin_helper->is_active() ) {
+				return;
+			}
+
+			$attempted = get_option( 'frm_attempt_copy' );
+			if ( false !== $attempted ) {
+				// let's be sure this doesn't get run again
+				return;
+			}
+
+			update_option( 'frm_attempt_copy', true );
+
+			if ( $plugin_helper->is_installed() ) {
+				$plugin_helper->activate_plugin();
+			} else {
+
+				// copy to new plugin folder
+				$new_plugin = WP_PLUGIN_DIR . '/formidable-pro/';
+
+				global $wp_filesystem;
+				$m = $wp_filesystem->mkdir( $new_plugin );
+
+				$result = copy_dir( FrmProAppHelper::plugin_path(), $new_plugin );
+
+				if ( true === $result ) {
+					$plugin_helper->activate_plugin();
+				}
+			}
+		}
+	}
+
+	/**
+	 * Separate star from scale field
+	 * @since 3.0
+	 */
+	public static function migrate_to_44() {
+		$image_fields = FrmDb::get_results( 'frm_fields', array( 'type' => array( 'scale', '10radio' ) ), 'id, field_options, form_id' );
+
+		foreach ( $image_fields as $field ) {
+			$field_options = maybe_unserialize( $field->field_options );
+			if ( isset( $field_options['star'] ) && $field_options['star'] ) {
+				$options = array(
+					'form_id'       => $field->form_id,
+					'type'          => 'star',
+				);
+				FrmField::update( $field->id, $options );
+			}
+		}
+	}
+
+	/**
+	 * Switch image field to url
+	 * @since 3.0
+	 */
+	public static function migrate_to_43() {
+		// Get all image fields
+		$image_fields = FrmDb::get_results( 'frm_fields', array( 'type' => 'image' ), 'id, field_options, form_id' );
+
+		foreach ( $image_fields as $field ) {
+			$field_options = maybe_unserialize( $field->field_options );
+			$field_options['show_image'] = 1;
+			$options = array(
+				'form_id'       => $field->form_id,
+				'field_options' => $field_options,
+				'type'          => 'url',
+			);
+
+			FrmField::update( $field->id, $options );
+		}
 	}
 
 	/**
@@ -419,7 +534,7 @@ class FrmProDb{
     private static function migrate_to_27() {
         $new_post = array(
             'post_type'     => FrmStylesController::$post_type,
-            'post_title'    => __( 'Formidable Style', 'formidable' ),
+            'post_title'    => __( 'Formidable Style', 'formidable-pro' ),
             'post_status'   => 'publish',
             'post_content'  => array(),
             'menu_order'    => 1, //set as default

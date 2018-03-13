@@ -121,7 +121,11 @@ class FrmProFormsHelper{
 		$load_lang = false;
 
 		$datepicker_js = array();
-        foreach ( $frm_vars['datepicker_loaded'] as $date_field_id => $options ) {
+		foreach ( $frm_vars['datepicker_loaded'] as $date_field_id => $options ) {
+			if ( empty( $date_field_id ) ) {
+				continue;
+			}
+
             if ( strpos($date_field_id, '^') === 0 ) {
                 // this is a repeating field
                 $trigger_id = 'input[id^="'. str_replace('^', '', esc_attr( $date_field_id ) ) .'"]';
@@ -351,7 +355,7 @@ echo $custom_options;
 	 * @return bool
 	 */
 	private static function has_variable_html_id( $field ) {
-		if ( in_array( $field->type, array( 'radio', 'scale', 'checkbox' ) )
+		if ( in_array( $field->type, array( 'radio', 'scale', 'star', 'checkbox' ) )
 		     || ( $field->type == 'lookup' && in_array( $field->field_options['data_type'], array( 'radio', 'checkbox' ) ) )
 		) {
 			return true;
@@ -392,12 +396,12 @@ echo $custom_options;
             'edit_value' => $frmpro_settings->update_value, 'edit_msg' => $frmpro_settings->edit_msg,
             'edit_action' => 'message', 'edit_url' => '', 'edit_page_id' => 0,
             'logged_in' => 0, 'logged_in_role' => '', 'editable' => 0, 'save_draft' => 0,
-            'draft_msg' => __( 'Your draft has been saved.', 'formidable' ),
+            'draft_msg' => __( 'Your draft has been saved.', 'formidable-pro' ),
             'editable_role' => '', 'open_editable_role' => '-1',
             'copy' => 0, 'single_entry' => 0, 'single_entry_type' => 'user',
             'success_page_id' => '', 'success_url' => '', 'ajax_submit' => 0,
-            'cookie_expiration' => 8000, 'prev_value' => __( 'Previous', 'formidable' ),
-			'submit_align' => '', 'js_validate' => 0,
+            'cookie_expiration' => 8000, 'prev_value' => __( 'Previous', 'formidable-pro' ),
+			'submit_align' => '',
 			'protect_files' => 0, 'rootline' => '',
 			'rootline_titles_on' => 0, 'rootline_titles' => array(),
 			'rootline_lines_off' => 0, 'rootline_numbers_off' => 0,
@@ -635,7 +639,7 @@ echo $custom_options;
             return;
         }
 
-        $message = isset($form->options['draft_msg']) ? $form->options['draft_msg'] : __( 'Your draft has been saved.', 'formidable' );
+        $message = isset($form->options['draft_msg']) ? $form->options['draft_msg'] : __( 'Your draft has been saved.', 'formidable-pro' );
     }
 
     public static function get_draft_button( $form, $class = '', $html = '', $button_type = 'save_draft' ) {

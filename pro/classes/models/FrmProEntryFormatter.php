@@ -6,38 +6,10 @@
 class FrmProEntryFormatter extends FrmEntryFormatter {
 
 	/**
-	 * @var FrmEntryValues
+	 * @var FrmProEntryValues
 	 * @since 2.04
 	 */
 	protected $entry_values = null;
-
-	/**
-	 * @var array
-	 * @since 2.04
-	 */
-	protected $skip_fields = array(
-		'captcha',
-		'break',
-		'divider',
-		'end_divider',
-		'html',
-		'form',
-		'password',
-		'credit_card',
-	);
-
-	/**
-	 * FrmProEntryFormat constructor
-	 *
-	 * @since 2.04
-	 *
-	 * @param array $atts
-	 */
-	public function __construct( $atts ) {
-		parent::__construct( $atts );
-
-		$this->init_include_extras( $atts );
-	}
 
 	/**
 	 * Set the entry_values property
@@ -47,8 +19,28 @@ class FrmProEntryFormatter extends FrmEntryFormatter {
 	 * @param array $atts
 	 */
 	protected function init_entry_values( $atts ) {
-		$atts['source'] = 'entry_formatter';
-		$this->entry_values = new FrmProEntryValues( $this->entry->id, $atts );
+		$entry_atts = $this->prepare_entry_attributes( $atts );
+		$this->entry_values = new FrmProEntryValues( $this->entry->id, $entry_atts );
+	}
+
+	/**
+	 * Which fields to exclude
+	 *
+	 * @since 3.0
+	 */
+	protected function skip_fields() {
+		$skip_fields = parent::skip_fields();
+
+		$skip_pro_fields = array(
+			'break',
+			'divider',
+			'end_divider',
+			'form',
+			'password',
+			'credit_card',
+		);
+
+		return array_merge( $skip_fields, $skip_pro_fields );
 	}
 
 	/**
@@ -59,19 +51,31 @@ class FrmProEntryFormatter extends FrmEntryFormatter {
 	 * @param array $atts
 	 */
 	protected function init_include_extras( $atts ) {
-		if ( isset( $atts['include_extras'] ) && $atts['include_extras'] ) {
-			$type_array = array_map( 'strtolower', array_map( 'trim', explode( ',', $atts['include_extras'] ) ) );
+		parent::init_include_extras( $atts );
 
-			foreach ( $type_array as $field_type ) {
-				if ( in_array( $field_type, array( 'section', 'heading' ) ) ) {
-					$this->include_extras[] = 'divider';
-				} else if ( $field_type == 'page' ) {
-					$this->include_extras[] = 'break';
-				} else {
-					$this->include_extras[] = $field_type;
-				}
-			};
+		foreach ( $this->include_extras as $key => $field_type ) {
+			if ( in_array( $field_type, array( 'section', 'heading' ) ) ) {
+				$this->include_extras[ $key ] = 'divider';
+			} else if ( $field_type == 'page' ) {
+				$this->include_extras[ $key ] = 'break';
+			}
 		}
+	}
+
+	/**
+	 * Initialize the single_cell_fields property
+	 *
+	 * @since 3.0
+	 */
+	protected function init_single_cell_fields() {
+		parent::init_single_cell_fields();
+
+		$single_cell_fields = array(
+			'break',
+			'divider',
+		);
+
+		$this->single_cell_fields = array_merge( $this->single_cell_fields, $single_cell_fields );
 	}
 
 	/**
@@ -83,15 +87,82 @@ class FrmProEntryFormatter extends FrmEntryFormatter {
 	 * @param string $content
 	 */
 	protected function add_field_value_to_content( $field_value, &$content ) {
+		$field_type = $field_value->get_field_type();
+
 		if ( $field_value->has_child_entries() ) {
 			$this->add_rows_for_field_with_child_entries( $field_value, $content );
 
-		} else if ( $this->is_extra_field( $field_value ) ) {
-			$this->add_row_for_extra_field( $field_value, $content );
+		} else if ( $field_type === 'divider' ) {
+			$this->add_section_to_content( $field_value, $content );
+
+		} else if ( $field_type === 'end_divider' ) {
+			$this->remove_section_placeholder( $content );
 
 		} else {
-			$this->add_row_for_standard_field( $field_value, $content );
+			parent::add_field_value_to_content( $field_value, $content );
 		}
+	}
+
+	/**
+	 * Add a section heading to the content
+	 *
+	 * @since 3.0
+	 *
+	 * @param FrmProFieldValue $field_value
+	 * @param string $content
+	 */
+	protected function add_section_to_content( $field_value, &$content ) {
+		if ( $this->is_extra_field_included( $field_value ) ) {
+			$content .= $this->section_placeholder();
+			parent::add_field_value_to_content( $field_value, $content );
+		}
+	}
+
+	/**
+	 * Split the content at section placeholder and piece back together
+	 *
+	 * @since 3.0
+	 *
+	 * @param string $content
+	 */
+	protected function remove_section_placeholder( &$content ) {
+		$section_pos = strpos( $content, $this->section_placeholder() );
+
+		if ( $section_pos !== false ) {
+			$section_substring = substr( $content, $section_pos );
+
+			// Remove section substring from content
+			$content = str_replace( $section_substring, '', $content );
+
+			// Clean up section substring
+			$section_substring = str_replace( $this->section_placeholder(), '', $section_substring );
+
+			if ( $this->section_heading_has_children( $section_substring ) ) {
+
+				// Add section substring to content
+				$content .= $section_substring;
+			}
+		}
+	}
+
+	/**
+	 * @param $section_substring
+	 *
+	 * @since 3.0
+	 *
+	 * @param string $section_substring
+	 * @return bool
+	 */
+	protected function section_heading_has_children( $section_substring ) {
+		$has_children = false;
+
+		if ( $this->format === 'plain_text_block' ) {
+			$has_children = substr_count( $section_substring, "\r\n" ) > 2;
+		} else if ( $this->format === 'table' ) {
+			$has_children = substr_count( $section_substring, '<tr' ) > 1;
+		}
+
+		return $has_children;
 	}
 
 	/**
@@ -102,54 +173,13 @@ class FrmProEntryFormatter extends FrmEntryFormatter {
 	 * @param FrmProFieldValue $field_value
 	 * @param string $content
 	 */
-	private function add_rows_for_field_with_child_entries( $field_value, &$content ) {
+	protected function add_rows_for_field_with_child_entries( $field_value, &$content ) {
 		$child_content = '';
 		$this->append_child_entry_values( $field_value, $child_content );
 
 		if ( $child_content !== '' ) {
 			$this->append_parent_values( $field_value, $content );
 			$content .= $child_content;
-		}
-	}
-
-	/**
-	 * Add an extra field to plain text or html table content
-	 *
-	 * @since 2.04
-	 *
-	 * @param FrmProFieldValue $field_value
-	 * @param string $content
-	 */
-	private function add_row_for_extra_field( $field_value, &$content ) {
-		if ( ! $this->include_field_in_content( $field_value ) ) {
-			return;
-		}
-
-		if ( $this->format === 'plain_text_block' ) {
-			$this->add_plain_text_row_for_included_extra( $field_value, $content );
-		} else if ( $this->format === 'table' ) {
-			$this->add_html_row_for_included_extra( $field_value, $content );
-		}
-	}
-
-	/**
-	 * Add a standard row to plain text or html table content
-	 *
-	 * @since 2.04
-	 *
-	 * @param FrmProFieldValue $field_value
-	 * @param string $content
-	 */
-	private function add_row_for_standard_field( $field_value, &$content ) {
-		if ( ! $this->include_field_in_content( $field_value ) ) {
-			return;
-		}
-
-		if ( $this->format === 'plain_text_block' ) {
-			$this->add_plain_text_row( $field_value->get_field_label(), $field_value->get_displayed_value(), $content );
-		} else if ( $this->format === 'table' ) {
-			$value_args = $this->package_value_args( $field_value );
-			$this->add_html_row( $value_args, $content );
 		}
 	}
 
@@ -161,7 +191,7 @@ class FrmProEntryFormatter extends FrmEntryFormatter {
 	 * @param FrmProFieldValue $field_value
 	 * @param string $content
 	 */
-	private function append_parent_values( $field_value, &$content ) {
+	protected function append_parent_values( $field_value, &$content ) {
 		if ( $this->include_field_in_content( $field_value ) ) {
 
 			if ( $this->is_plain_text ) {
@@ -175,32 +205,6 @@ class FrmProEntryFormatter extends FrmEntryFormatter {
 	}
 
 	/**
-	 * Add a single cell row to an HTML table
-	 *
-	 * @since 2.04
-	 *
-	 * @param string $display_value
-	 * @param string $content
-	 */
-	private function add_single_cell_html_row( $display_value, &$content ) {
-		$display_value = $this->prepare_display_value_for_html_table( $display_value );
-
-		$content .= $this->table_generator->generate_single_cell_table_row( $display_value );
-	}
-
-	/**
-	 * Add a single value plain text row
-	 *
-	 * @since 2.04
-	 *
-	 * @param string $display_value
-	 * @param string $content
-	 */
-	private function add_single_value_plain_text_row( $display_value, &$content ) {
-		$content .= $this->prepare_display_value_for_plain_text_content( $display_value );
-	}
-
-	/**
 	 * Append child entry values to table or plain text content
 	 *
 	 * @since 2.04
@@ -208,49 +212,14 @@ class FrmProEntryFormatter extends FrmEntryFormatter {
 	 * @param FrmProFieldValue $field_value
 	 * @param string $content
 	 */
-	private function append_child_entry_values( $field_value, &$content ) {
+	protected function append_child_entry_values( $field_value, &$content ) {
 		foreach ( $field_value->get_displayed_value() as $child_id => $field_values ) {
 
 			foreach ( $field_values as $child_field_id => $child_field_info ) {
+				$child_field_info->prepare_displayed_value( $this->atts );
+
 				$this->add_field_value_to_content( $child_field_info, $content );
 			}
-		}
-	}
-
-	/**
-	 * Add a row to table for included extra
-	 *
-	 * @since 2.04
-	 *
-	 * @param FrmProFieldValue $field_value
-	 * @param string $content
-	 */
-	private function add_html_row_for_included_extra( $field_value, &$content ) {
-		$this->prepare_html_display_value_for_extra_fields( $field_value, $display_value );
-
-		if ( in_array( $field_value->get_field_type(), array( 'break', 'divider', 'html' ) ) ) {
-			$this->add_single_cell_html_row( $display_value, $content );
-		} else {
-			$value_args = $this->package_value_args( $field_value );
-			$this->add_html_row( $value_args, $content );
-		}
-	}
-
-	/**
-	 * Add a plain text row for included extra
-	 *
-	 * @since 2.04
-	 *
-	 * @param FrmProFieldValue $field_value
-	 * @param string $content
-	 */
-	private function add_plain_text_row_for_included_extra( $field_value, &$content ) {
-		$this->prepare_plain_text_display_value_for_extra_fields( $field_value, $display_value );
-
-		if ( in_array( $field_value->get_field_type(), array( 'break', 'divider', 'html' ) ) ) {
-			$this->add_single_value_plain_text_row( $display_value, $content );
-		} else {
-			$this->add_plain_text_row( $field_value->get_field_label(), $display_value, $content );
 		}
 	}
 
@@ -262,7 +231,7 @@ class FrmProEntryFormatter extends FrmEntryFormatter {
 	 * @param FrmProFieldValue $field_value
 	 * @param mixed $display_value
 	 */
-	private function prepare_html_display_value_for_extra_fields( $field_value, &$display_value ) {
+	protected function prepare_html_display_value_for_extra_fields( $field_value, &$display_value ) {
 		switch ( $field_value->get_field_type() ) {
 
 			case 'break':
@@ -274,7 +243,7 @@ class FrmProEntryFormatter extends FrmEntryFormatter {
 				break;
 
 			default:
-				$display_value = $field_value->get_displayed_value();
+				parent::prepare_html_display_value_for_extra_fields( $field_value, $display_value );
 		}
 	}
 
@@ -286,41 +255,20 @@ class FrmProEntryFormatter extends FrmEntryFormatter {
 	 * @param FrmProFieldValue $field_value
 	 * @param mixed $display_value
 	 */
-	private function prepare_plain_text_display_value_for_extra_fields( $field_value, &$display_value ) {
-		$field_type = $field_value->get_field_type();
-		if ( $field_type === 'break' ) {
-			$display_value = "\r\n\r\n";
-		} else if ( $field_type === 'divider' ) {
-			$display_value = "\r\n" . $field_value->get_field_label() . "\r\n";
-		} else {
-			$display_value = $field_value->get_displayed_value() . "\r\n";
+	protected function prepare_plain_text_display_value_for_extra_fields( $field_value, &$display_value ) {
+		switch ( $field_value->get_field_type() ) {
+
+			case 'break':
+				$display_value = "\r\n\r\n";
+				break;
+
+			case 'divider':
+				$display_value = "\r\n" . $field_value->get_field_label() . "\r\n";
+				break;
+
+			default:
+				parent::prepare_plain_text_display_value_for_extra_fields( $field_value, $display_value );
 		}
-	}
-
-	/**
-	 * Check if an extra field is included
-	 *
-	 * @since 2.04
-	 *
-	 * @param FrmProFieldValue $field_value
-	 *
-	 * @return bool
-	 */
-	protected function is_extra_field_included( $field_value ) {
-
-		if ( in_array( $field_value->get_field_type(), $this->include_extras ) ) {
-
-			if ( $field_value->is_empty_container() && ! $this->include_blank ) {
-				$include = false;
-			} else {
-				$include = true;
-			}
-
-		} else {
-			$include = false;
-		}
-
-		return $include;
 	}
 
 	/**
@@ -335,29 +283,43 @@ class FrmProEntryFormatter extends FrmEntryFormatter {
 		$field_key = $this->get_key_or_id( $field_value );
 		$field_type = $field_value->get_field_type();
 
-		if ( $field_type == 'form' ) {
+		$add_child_array = ( 'divider' === $field_type || ( 'form' === $field_type && $this->atts['child_array'] ) ) && $field_value->has_child_entries();
+
+		if ( $add_child_array ) {
+			$this->push_children_to_array( compact( 'field_value', 'field_key' ), $output );
+
+		} elseif ( 'form' === $field_type ) {
 			$child_values = $field_value->get_displayed_value();
-			$child_values = reset( $child_values );
-			$this->push_field_values_to_array( $child_values, $output );
-
-		} else if ( $field_type == 'divider' && $field_value->has_child_entries() ) {
-			$output[ $field_key ] = array(
-				'form' => $field_value->get_field_option('form_select'),
-			);
-
-			$count = 0;
-			foreach ( $field_value->get_displayed_value() as $entry_id => $row_values ) {
-				$index = 'i' . $entry_id;
-				$output[ $field_key ][ $index ] = array();
-				$this->push_field_values_to_array( $row_values, $output[ $field_key ][ $index ] );
-
-				$this->push_repeating_field_values_to_array( $row_values, $count, $output );
-
-				$count++;
+			if ( ! empty( $child_values ) ) {
+				$child_values = reset( $child_values );
+				$this->push_field_values_to_array( $child_values, $output );
 			}
 
 		} else {
 			parent::push_single_field_to_array( $field_value, $output );
+		}
+	}
+
+	/**
+	 * @since 3.0
+	 */
+	private function push_children_to_array( $field_info, &$output ) {
+		$field_key = $field_info['field_key'];
+		$field_value = $field_info['field_value'];
+
+		$output[ $field_key ] = array(
+			'form' => $field_value->get_field_option('form_select'),
+		);
+
+		$count = 0;
+		foreach ( $field_value->get_displayed_value() as $entry_id => $row_values ) {
+			$index = 'i' . $entry_id;
+			$output[ $field_key ][ $index ] = array();
+			$this->push_field_values_to_array( $row_values, $output[ $field_key ][ $index ] );
+
+			$this->push_repeating_field_values_to_array( $row_values, $count, $output );
+
+			$count++;
 		}
 	}
 
@@ -370,7 +332,7 @@ class FrmProEntryFormatter extends FrmEntryFormatter {
 	 * @param int $index
 	 * @param array $output
 	 */
-	private function push_repeating_field_values_to_array( $row_values, $index, &$output ) {
+	protected function push_repeating_field_values_to_array( $row_values, $index, &$output ) {
 
 		foreach ( $row_values as $field_value ) {
 			/* @var FrmProFieldValue $field_value */
@@ -406,7 +368,7 @@ class FrmProEntryFormatter extends FrmEntryFormatter {
 	 *
 	 * @return bool
 	 */
-	private function include_repeating_field_in_array( $field_value ) {
+	protected function include_repeating_field_in_array( $field_value ) {
 		if ( $this->is_extra_field( $field_value ) ) {
 			$include = $this->is_extra_field_included( $field_value );
 		} else {
@@ -436,4 +398,14 @@ class FrmProEntryFormatter extends FrmEntryFormatter {
 		return $display_value;
 	}
 
+	/**
+	 * Section placeholder string
+	 *
+	 * @since 3.0
+	 *
+	 * @return string
+	 */
+	protected function section_placeholder() {
+		return '{section_placeholder}';
+	}
 }

@@ -60,4 +60,41 @@ class FrmProFieldFactory {
 
 		return $settings;
 	}
+
+	/**
+	 * @since 3.0
+	 */
+	public static function get_field_type_class( $class, $field_type ) {
+		if ( empty( $class ) ) {
+			$type_classes = array(
+				'address'  => 'FrmProFieldAddress',
+				'break'    => 'FrmProFieldBreak',
+				'credit_card' => 'FrmProFieldCreditCard',
+				'data'     => 'FrmProFieldData',
+				'date'     => 'FrmProFieldDate',
+				'divider'  => 'FrmProFieldDivider',
+				'end_divider' => 'FrmProFieldEndDivider',
+				'file'     => 'FrmProFieldFile',
+				'form'     => 'FrmProFieldForm',
+				'lookup'   => 'FrmProFieldLookup',
+				'password' => 'FrmProFieldPassword',
+				'range'    => 'FrmProFieldRange',
+				'rte'      => 'FrmProFieldRte',
+				'scale'    => 'FrmProFieldScale',
+				'star'     => 'FrmProFieldStar',
+				'tag'      => 'FrmProFieldTag',
+				'time'     => 'FrmProFieldTime',
+				'toggle'   => 'FrmProFieldToggle',
+			);
+
+			$class = isset( $type_classes[ $field_type ] ) ? $type_classes[ $field_type ] : '';
+		} elseif ( strpos( $class, 'FrmField' ) === 0  ) {
+			$new_class = str_replace( 'FrmField', 'FrmProField', $class );
+			if ( class_exists( $new_class ) ) {
+				$class = $new_class;
+			}
+		}
+
+		return $class;
+	}
 }

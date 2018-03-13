@@ -1,6 +1,2 @@
-<div class="frm_html_field_placeholder">
-<div class="howto button-secondary frm_html_field">
-	<?php esc_html_e( 'This is a placeholder for your custom HTML.', 'formidable' ) ?><br/>
-	<?php esc_html_e( 'You can edit this content in the field options.', 'formidable' ) ?>
-</div>
-</div>
+<?php
+_deprecated_file( basename( __FILE__ ), '3.0', null, 'This file can be found in formidable/classes/views/frm-fields/back-end/field-html.php' );

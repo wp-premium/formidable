@@ -24,7 +24,7 @@ class FrmUpdatesController{
     function __construct(){
 		_deprecated_function( __FUNCTION__, '2.3' );
 
-        $this->pro_error_message_str = __( 'Your Formidable Pro License was Invalid', 'formidable' );
+        $this->pro_error_message_str = __( 'Your Formidable Pro License was Invalid', 'formidable-pro' );
 
         // Retrieve Pro Credentials
         if (is_multisite() && get_site_option($this->pro_wpmu_store)){
@@ -85,7 +85,7 @@ class FrmUpdatesController{
         }
 
         if ( empty( $license ) ) {
-            return array( 'auth' => false, 'response' => __( 'Please enter a license number', 'formidable' ));
+            return array( 'auth' => false, 'response' => __( 'Please enter a license number', 'formidable-pro' ));
 		}
 
         $domain = home_url();
@@ -118,7 +118,7 @@ class FrmUpdatesController{
             return array( 'auth' => $auth, 'response' => $act);
         }
 
-        return array( 'auth' => false, 'response' => __( 'Please enter a license number', 'formidable' ));
+        return array( 'auth' => false, 'response' => __( 'Please enter a license number', 'formidable-pro' ));
     }
 
 	/**
@@ -221,8 +221,8 @@ class FrmUpdatesController{
 				$plugin_update->package = $version_info['url'];
 			} else {
                 //new version available, but no permission
-                $expired = isset($version_info['expired']) ? __( 'expired', 'formidable' ) : __( 'invalid', 'formidable' );
-				$plugin_update->upgrade_notice = sprintf( __( 'An update is available, but your license is %s.', 'formidable' ), $expired );
+                $expired = isset($version_info['expired']) ? __( 'expired', 'formidable-pro' ) : __( 'invalid', 'formidable-pro' );
+				$plugin_update->upgrade_notice = sprintf( __( 'An update is available, but your license is %s.', 'formidable-pro' ), $expired );
 				add_filter( 'frm_pro_update_msg', array( &$this, 'no_permission_msg' ) );
             }
 
@@ -327,12 +327,12 @@ class FrmUpdatesController{
         $body = wp_remote_retrieve_body( $resp );
 
         if(is_wp_error($resp)){
-            $message = sprintf(__( 'You had an error communicating with the Formidable Forms API. %1$sClick here%2$s for more information.', 'formidable' ), '<a href="https://formidableforms.com/knowledgebase/why-cant-i-activate-formidable-pro/" target="_blank">', '</a>');
+            $message = sprintf(__( 'You had an error communicating with the Formidable Forms API. %1$sClick here%2$s for more information.', 'formidable-pro' ), '<a href="https://formidableforms.com/knowledgebase/why-cant-i-activate-formidable-pro/" target="_blank">', '</a>');
             if(is_wp_error($resp))
                 $message .= ' '. $resp->get_error_message();
             return $message;
         }else if($body == 'error' || is_wp_error($body)){
-            return __( 'You had an HTTP error connecting to the Formidable Forms API', 'formidable' );
+            return __( 'You had an HTTP error connecting to the Formidable Forms API', 'formidable-pro' );
         }else{
             $json_res = json_decode($body, true);
             if ( null !== $json_res ) {
@@ -342,14 +342,14 @@ class FrmUpdatesController{
                     return $json_res;
                 }
             }else if(isset($resp['response']) && isset($resp['response']['code'])){
-                return sprintf(__( 'There was a %1$s error: %2$s', 'formidable' ), $resp['response']['code'], $resp['response']['message'] .' '. $resp['body']);
+                return sprintf(__( 'There was a %1$s error: %2$s', 'formidable-pro' ), $resp['response']['code'], $resp['response']['message'] .' '. $resp['body']);
             }
         }
 
-        return __( 'Your License Key was invalid', 'formidable' );
+        return __( 'Your License Key was invalid', 'formidable-pro' );
     }
 
     function no_permission_msg(){
-        return __( 'A Formidable Forms update is available, but your license is invalid.', 'formidable' );
+        return __( 'A Formidable Forms update is available, but your license is invalid.', 'formidable-pro' );
     }
 }

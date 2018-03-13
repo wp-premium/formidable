@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class FrmProContent
+ */
 class FrmProContent {
 	
 	public static function replace_shortcodes( $content, $entry, $shortcodes, $display = false, $show = 'one', $odd = '', $args = array() ) {
@@ -30,7 +33,8 @@ class FrmProContent {
 		$foreach = preg_match( '/^\[foreach/s', $shortcodes[0][ $short_key ] ) ? true : false;
 		$atts = FrmShortcodeHelper::get_shortcode_attribute_array( $shortcodes[3][ $short_key ] );
 
-		$tag = FrmFieldsHelper::get_shortcode_tag( $shortcodes, $short_key, compact('conditional', 'foreach') );
+		$tag = FrmShortcodeHelper::get_shortcode_tag( $shortcodes, $short_key, compact('conditional', 'foreach') );
+
 		if ( strpos( $tag, '-' ) ) {
 			$switch_tags = array(
 				'post-id', 'created-at', 'updated-at',
@@ -43,10 +47,29 @@ class FrmProContent {
 			unset( $switch_tags );
 		}
 
+		$no_field_id = array( 'key', 'ip', 'siteurl', 'sitename', 'admin_email' );
+		if ( in_array( $tag, $no_field_id ) ) {
+			// don't check for a field for default values not covered below
+			return;
+		}
+
 		$tags = array(
-			'event_date', 'entry_count', 'detaillink', 'editlink', 'deletelink',
-			'created_at', 'updated_at', 'created_by', 'updated_by',
-			'evenodd', 'post_id', 'parent_id', 'id', 'is_draft',
+			'created_at',
+			'created_by',
+			'deletelink',
+			'detaillink',
+			'editlink',
+			'entry_count',
+			'entry_position',
+			'evenodd',
+			'event_date',
+			'get',
+			'id',
+			'is_draft',
+			'parent_id',
+			'post_id',
+			'updated_at',
+			'updated_by',
 		);
 
 		if ( in_array( $tag, $tags ) ) {
@@ -60,6 +83,11 @@ class FrmProContent {
 
 		$field = FrmField::getOne( $tag );
 		if ( ! $field ) {
+			return;
+		}
+
+		$is_parent_value = $field->form_id != $entry->form_id && isset( $args['foreach_loop'] ) && $args['foreach_loop'];
+		if ( $is_parent_value ) {
 			return;
 		}
 
@@ -84,6 +112,7 @@ class FrmProContent {
 		if ( $field->type == 'address' && ! isset( $atts['blank'] ) ) {
 			$atts['blank'] = 1;
 		}
+
 		$atts['entry_id'] = $entry->id;
 		$atts['entry_key'] = $entry->item_key;
 		$atts['post_id'] = $entry->post_id;
@@ -100,6 +129,7 @@ class FrmProContent {
 
 			if ( ! $keep_array && $field->type != 'file' ) {
 				$replace_with = FrmAppHelper::array_flatten( $replace_with );
+				$replace_with = array_filter( $replace_with, array( 'FrmProContent', 'is_not_empty' ) );
 				$replace_with = implode( $sep, $replace_with );
 			} else if ( empty( $replace_with ) ) {
 				$replace_with = '';
@@ -126,6 +156,13 @@ class FrmProContent {
 			self::trigger_shortcode_atts( $atts, $display, $args, $replace_with );
 			$content = str_replace( $shortcodes[0][ $short_key ], $replace_with, $content );
 		}
+	}
+
+	/**
+	 * @since 3.0.04
+	 */
+	public static function is_not_empty( $val ) {
+		return $val !== '';
 	}
 
 	public static function replace_calendar_date_shortcode( $content, $date ) {
@@ -331,6 +368,18 @@ class FrmProContent {
 		}
 	}
 
+	public static function do_shortcode_get( &$content, $atts, $shortcodes, $short_key, $args ) {
+
+		$replace_with = FrmFieldsHelper::process_get_shortcode( $atts );
+
+		if ( $args['conditional'] ) {
+			$atts['short_key'] = $shortcodes[0][ $short_key ];
+			self::check_conditional_shortcode( $content, $replace_with, $atts, $args['tag'], 'if' );
+		} else {
+			$content = str_replace( $shortcodes[0][ $short_key ], $replace_with, $content );
+		}
+	}
+
 	public static function do_shortcode_updated_at( &$content, $atts, $shortcodes, $short_key, $args ) {
 		self::do_shortcode_created_at( $content, $atts, $shortcodes, $short_key, $args );
 	}
@@ -371,6 +420,23 @@ class FrmProContent {
 			self::check_conditional_shortcode( $content, $args['entry']->is_draft, $atts, 'is_draft' );
 		} else {
 			$content = str_replace( $shortcodes[0][ $short_key ], $args['entry']->is_draft, $content );
+		}
+	}
+
+	/**
+	 * @since 3.0
+	 */
+	public static function do_shortcode_entry_position( &$content, $atts, $shortcodes, $short_key, $args ) {
+		if ( ! isset( $args['count'] ) ) {
+			$args['count'] = 1;
+		}
+
+		if ( $args['conditional'] ) {
+			$atts['short_key'] = $shortcodes[0][ $short_key ];
+
+			self::check_conditional_shortcode( $content, $args['count'], $atts, $args['tag'] );
+		} else {
+			$content = str_replace( $shortcodes[0][ $short_key ], $args['count'], $content );
 		}
 	}
 
@@ -417,8 +483,9 @@ class FrmProContent {
 			}
 
 			$total_len = ( $end_pos + $end_pos_len ) - $start_pos;
+			$is_empty = ( $replace_with === '' || is_null( $replace_with ) || false === $replace_with );
 
-			if ( $replace_with === ''    ) {
+			if ( $is_empty ) {
 				$content = substr_replace( $content, '', $start_pos, $total_len );
 			} else if ( 'foreach' == $condition ) {
 				$content_len = $end_pos - ( $start_pos + $start_pos_len );
@@ -491,6 +558,12 @@ class FrmProContent {
 			if ( isset( $atts['not_equal'] ) && $atts['not_equal'] == 'current' ) {
 				$atts['not_equal'] = get_current_user_id();
 			}
+
+			if ( isset( $atts['show'] ) ) {
+				$atts['blank'] = isset( $atts['blank'] ) ? $atts['blank'] : 1;
+				$replace_with = FrmFieldsHelper::get_display_value( $replace_with, $field, $atts );
+			}
+
 		} elseif ( self::is_timestamp_tag( $tag ) || ( $field && $field->type == 'date' ) ) {
 			self::prepare_date_for_eval( $conditions, $tag, $atts );
 		} elseif ( $field && $field->type == 'time' ) {
@@ -562,6 +635,10 @@ class FrmProContent {
 		foreach ( $conditions as $condition ) {
 			if ( ! isset( $atts[ $condition ] ) ) {
 				continue;
+			}
+
+			if ( 'param' == $atts[ $condition ] ) {
+				$atts[ $condition ] = FrmFieldsHelper::process_get_shortcode( $atts );
 			}
 
 			$function = 'eval_' . $condition . '_condition';

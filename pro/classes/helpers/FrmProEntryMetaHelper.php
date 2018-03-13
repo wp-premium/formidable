@@ -2,11 +2,6 @@
 
 class FrmProEntryMetaHelper{
 
-    public static function display_value( $value, $field, $atts = array() ) {
-        _deprecated_function( __FUNCTION__, '2.0', 'FrmEntriesHelper::display_value');
-        return FrmEntriesHelper::display_value($value, $field, $atts);
-    }
-
     public static function get_sub_meta_values($entries, $field, $atts = array()) {
         $values = array();
         foreach ( $entries as $entry ) {
@@ -171,7 +166,7 @@ class FrmProEntryMetaHelper{
     private static function get_term_with_link( $tag, $tax, &$names, $atts ) {
         $tag_name = $tag->name;
         if ( $atts['links'] ) {
-			$tag_name = '<a href="' . esc_url( get_term_link( $tag, $tax ) ) . '" title="' . esc_attr( sprintf( __( 'View all posts filed under %s', 'formidable' ), $tag_name ) ) . '">' . $tag_name . '</a>';
+			$tag_name = '<a href="' . esc_url( get_term_link( $tag, $tax ) ) . '" title="' . esc_attr( sprintf( __( 'View all posts filed under %s', 'formidable-pro' ), $tag_name ) ) . '">' . $tag_name . '</a>';
         }
         $names[] = $tag_name;
     }

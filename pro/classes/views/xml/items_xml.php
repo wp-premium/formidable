@@ -28,8 +28,8 @@ foreach ( $entries as $entry ) {
 		<post_id><?php echo absint( $entry->post_id ) ?></post_id>
 		<ip><?php echo esc_html( $entry->ip ) ?></ip>
 		<is_draft><?php echo absint( $entry->is_draft ) ?></is_draft>
-		<user_id><?php echo FrmXMLHelper::cdata(FrmProFieldsHelper::get_display_name($entry->user_id, 'user_login')); ?></user_id>
-		<updated_by><?php echo FrmXMLHelper::cdata(FrmProFieldsHelper::get_display_name($entry->updated_by, 'user_login')); ?></updated_by>
+		<user_id><?php echo FrmXMLHelper::cdata( FrmFieldsHelper::get_user_display_name( $entry->user_id, 'user_login' ) ); ?></user_id>
+		<updated_by><?php echo FrmXMLHelper::cdata( FrmFieldsHelper::get_user_display_name( $entry->updated_by, 'user_login' ) ); ?></updated_by>
 		<parent_item_id><?php echo absint( $entry->parent_item_id ) ?></parent_item_id>
 
 <?php

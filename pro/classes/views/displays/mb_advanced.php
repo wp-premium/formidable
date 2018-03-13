@@ -3,8 +3,8 @@
 <table class="form-table frm-no-margin">
     <tr class="limit_container <?php echo ( $post->frm_show_count == 'calendar' || $post->frm_show_count == 'one' ) ? 'frm_hidden' : ''; ?>">
         <td class="frm_left_label">
-            <label><?php _e( 'Limit', 'formidable' ); ?>
-				<span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php esc_attr_e( 'If you don’t want all your entries displayed, you can insert the number limit here. Leave blank if you’d like all entries shown.', 'formidable' ) ?>"></span>
+            <label><?php _e( 'Limit', 'formidable-pro' ); ?>
+				<span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php esc_attr_e( 'If you don’t want all your entries displayed, you can insert the number limit here. Leave blank if you’d like all entries shown.', 'formidable-pro' ) ?>"></span>
 			</label>
         </td>
         <td>
@@ -14,8 +14,8 @@
 
     <tr class="limit_container <?php echo ( $post->frm_show_count == 'calendar' || $post->frm_show_count == 'one' ) ? 'frm_hidden' : ''; ?>">
         <td>
-            <label><?php _e( 'Page Size', 'formidable' ); ?>
-				<span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php esc_attr_e( 'The number of entries to show per page. Leave blank to not use pagination.', 'formidable' ) ?>"></span>
+            <label><?php _e( 'Page Size', 'formidable-pro' ); ?>
+				<span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php esc_attr_e( 'The number of entries to show per page. Leave blank to not use pagination.', 'formidable-pro' ) ?>"></span>
 			</label>
         </td>
         <td>
@@ -24,14 +24,14 @@
     </tr>
 </table>
 
-<h3><?php _e( 'Sort & Filter', 'formidable' ) ?></h3>
+<h3><?php _e( 'Sort & Filter', 'formidable-pro' ) ?></h3>
 <table class="form-table frm-no-margin">
     <tr class="form-field" id="order_by_container">
-        <td class="frm_left_label"><?php _e( 'Order', 'formidable' ); ?></td>
+        <td class="frm_left_label"><?php _e( 'Order', 'formidable-pro' ); ?></td>
         <td>
-            <div id="frm_order_options" class="frm_add_remove" style="padding-bottom:8px;">
-				<a href="javascript:void(0)" class="frm_add_order_row button <?php echo esc_attr( empty( $post->frm_order_by ) ? '' : 'frm_hidden' ); ?>">+ <?php _e( 'Add', 'formidable' ) ?></a>
-                <div class="frm_logic_rows">
+            <div id="frm_order_options" class="frm_repeat_rows" style="padding-bottom:8px;">
+				<a href="javascript:void(0)" class="frm_add_order_row button <?php echo esc_attr( empty( $post->frm_order_by ) ? '' : 'frm_hidden' ); ?>">+ <?php _e( 'Add', 'formidable-pro' ) ?></a>
+                <div class="frm_logic_rows frm_add_remove">
             <?php
 			foreach ( $post->frm_order_by as $order_key => $order_by_field ) {
 				if ( isset( $post->frm_order[ $order_key ] ) && isset( $post->frm_order_by[ $order_key ] ) ) {
@@ -45,13 +45,13 @@
     </tr>
 
     <tr class="form-field" id="where_container">
-        <td><?php _e( 'Filter Entries', 'formidable' ); ?>
-            <span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php esc_attr_e( 'Narrow down which entries will be used. The Unique options uses SQL GROUP BY to make sure only one entry is shown for each value in the selected field(s).', 'formidable' ) ?>"></span>
+        <td><?php _e( 'Filter Entries', 'formidable-pro' ); ?>
+            <span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php esc_attr_e( 'Narrow down which entries will be used. The Unique options uses SQL GROUP BY to make sure only one entry is shown for each value in the selected field(s).', 'formidable-pro' ) ?>"></span>
         </td>
         <td>
-            <div id="frm_where_options" class="frm_add_remove">
-				<a href="javascript:void(0)" class="frm_add_where_row button <?php echo esc_attr( empty( $post->frm_where ) ? '' : 'frm_hidden' ); ?>">+ <?php _e( 'Add', 'formidable' ) ?></a>
-                <div class="frm_logic_rows">
+            <div id="frm_where_options" class="frm_repeat_rows">
+				<a href="javascript:void(0)" class="frm_add_where_row button <?php echo esc_attr( empty( $post->frm_where ) ? '' : 'frm_hidden' ); ?>">+ <?php _e( 'Add', 'formidable-pro' ) ?></a>
+                <div class="frm_logic_rows frm_add_remove">
             <?php
 				foreach ( $post->frm_where as $where_key => $where_field ) {
 					if ( isset( $post->frm_where_is[ $where_key ] ) && isset( $post->frm_where_val[ $where_key ] ) ) {
@@ -65,7 +65,7 @@
     </tr>
 
     <tr class="form-field">
-        <td><?php _e( 'No Entries Message', 'formidable' ); ?></td>
+        <td><?php _e( 'No Entries Message', 'formidable-pro' ); ?></td>
         <td>
             <textarea id="empty_msg" name="options[empty_msg]" class="frm_98_width"><?php echo FrmAppHelper::esc_textarea($post->frm_empty_msg) ?></textarea>
         </td>
@@ -73,19 +73,19 @@
 </table>
 
 <?php if ( is_multisite() && current_user_can( 'setup_network' ) ) { ?>
-<h3><?php _e( 'Advanced', 'formidable' ) ?></h3>
+<h3><?php _e( 'Advanced', 'formidable-pro' ) ?></h3>
 <?php } ?>
 
 <table class="form-table frm-no-margin">
     <tr class="hide_dyncontent <?php echo in_array($post->frm_show_count, array( 'dynamic', 'calendar')) ? '' : 'frm_hidden'; ?>">
-        <td><?php _e( 'Detail Page Slug', 'formidable' ); ?> <span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php printf(__( 'Example: If parameter name is \'contact\', the url would be like %1$s/selected-page?contact=2. If this entry is linked to a post, the post permalink will be used instead.', 'formidable' ), FrmAppHelper::site_url()) ?>" ></span></td>
+        <td><?php _e( 'Detail Page Slug', 'formidable-pro' ); ?> <span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php printf(__( 'Example: If parameter name is \'contact\', the url would be like %1$s/selected-page?contact=2. If this entry is linked to a post, the post permalink will be used instead.', 'formidable-pro' ), FrmAppHelper::site_url()) ?>" ></span></td>
         <td>
                 <input type="text" id="param" name="param" value="<?php echo esc_attr($post->frm_param) ?>">
 
-                <?php _e( 'Parameter Value', 'formidable' ); ?>:
+                <?php _e( 'Parameter Value', 'formidable-pro' ); ?>:
                 <select id="type" name="type">
-                    <option value="id" <?php selected($post->frm_type, 'id') ?>><?php _e( 'ID', 'formidable' ); ?></option>
-                    <option value="display_key" <?php selected($post->frm_type, 'display_key') ?>><?php _e( 'Key', 'formidable' ); ?></option>
+                    <option value="id" <?php selected($post->frm_type, 'id') ?>><?php _e( 'ID', 'formidable-pro' ); ?></option>
+                    <option value="display_key" <?php selected($post->frm_type, 'display_key') ?>><?php _e( 'Key', 'formidable-pro' ); ?></option>
                 </select>
             <?php //} ?>
         </td>
@@ -95,10 +95,10 @@
 	if ( is_multisite() ) {
 		if ( current_user_can( 'setup_network' ) ) { ?>
         <tr class="form-field">
-            <td><?php _e( 'Copy', 'formidable' ); ?></td>
+            <td><?php _e( 'Copy', 'formidable-pro' ); ?></td>
             <td>
                 <label for="copy"><input type="checkbox" id="copy" name="options[copy]" value="1" <?php checked($post->frm_copy, 1) ?> />
-                <?php _e( 'Copy these display settings to other blogs when Formidable Pro is activated. <br/>Note: Use only field keys in the content box(es) above.', 'formidable' ) ?></label>
+                <?php _e( 'Copy these display settings to other blogs when Formidable Pro is activated. <br/>Note: Use only field keys in the content box(es) above.', 'formidable-pro' ) ?></label>
             </td>
         </tr>
 		<?php } else if ( $post->frm_copy ) { ?>

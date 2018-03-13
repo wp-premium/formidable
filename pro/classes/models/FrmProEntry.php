@@ -12,17 +12,18 @@ class FrmProEntry{
 		$args = compact( 'fields', 'form', 'title', 'description', 'entry_id' );
 
 		if ( $switching_pages && ! FrmProFormsHelper::saving_draft() ) {
-            $errors = '';
-            $fields = FrmFieldsHelper::get_form_fields($form->id);
-            $submit = isset($form->options['submit_value']) ? $form->options['submit_value'] : $frm_settings->submit_value;
-            $values = $fields ? FrmEntriesHelper::setup_new_vars($fields, $form) : array();
 
 			$autosave = FrmAppHelper::get_post_param( 'frm_autosaving', '', 'absint' );
 			if ( $autosave && $entry_id ) {
-				$args['fields'] = $fields;
+				// load next page of draft entry
 				$args['function'] = 'show_form_after_first_save_draft_click';
 				self::show_entry_for_edit( $args );
 			} else {
+				// load next page for new entry
+				$errors = '';
+				$submit = isset( $form->options['submit_value'] ) ? $form->options['submit_value'] : $frm_settings->submit_value;
+				$values = $fields ? FrmEntriesHelper::setup_new_vars( $fields, $form ) : array();
+
 				require( FrmAppHelper::plugin_path() .'/classes/views/frm-entries/new.php' );
 				add_filter('frm_continue_to_create', '__return_false');
 			}
@@ -115,8 +116,10 @@ class FrmProEntry{
                 $old_ids = array();
             }
 
-			unset( $field_values['form'] );
-			unset( $field_values['row_ids'] );
+			if ( is_array( $field_values ) ) {
+				unset( $field_values['form'] );
+				unset( $field_values['row_ids'] );
+			}
 
             $sub_ids = array();
 
@@ -308,11 +311,6 @@ class FrmProEntry{
 		$entries = FrmEntry::getAll( array( 'parent_item_id' => $entry_id ), '', '', $meta, false );
         return $entries;
     }
-
-	public static function save_post( $action, $entry, $form ) {
-		_deprecated_function( __FUNCTION__, '2.0.9', 'FrmProPost::save_post' );
-		return FrmProPost::save_post( $action, $entry, $form );
-	}
 
     /**
      *
@@ -541,7 +539,9 @@ class FrmProEntry{
             //if field is custom field
 			if ( $o_field->field_options['post_field'] == 'post_custom' ) {
                 $query['select'] .= $wpdb->prepare(' LEFT JOIN '. $wpdb->postmeta .' pm'. $o_key .' ON pm'. $o_key .'.post_id=it.post_id AND pm'. $o_key .'.meta_key = %s ', $o_field->field_options['custom_field']);
-				$query['order'] .= 'CASE when pm'. $o_key .'.meta_value IS NULL THEN 1 ELSE 0 END, pm'. $o_key .'.meta_value ' . ( in_array($o_field->type, array( 'number', 'scale')) ? '+0 ' : '') . $order .', ';
+				$query['order'] .= 'CASE when pm' . $o_key . '.meta_value IS NULL THEN 1 ELSE 0 END, pm' . $o_key . '.meta_value ';
+				$query['order'] .= FrmProAppHelper::maybe_query_as_number( $o_field->type );
+				$query['order'] .= $order . ', ';
             } else if ( $o_field->field_options['post_field'] != 'post_category' ) {
                 //if field is a non-category post field
                 $query['select'] .= $first_order ? ' INNER ' : ' LEFT ';
@@ -552,7 +552,9 @@ class FrmProEntry{
         } else if ( is_numeric($args['order_by_array'][$o_key]) ) {
             //if ordering by a normal, non-post field
             $query['select'] .= $wpdb->prepare(' LEFT JOIN '. $wpdb->prefix .'frm_item_metas em'. $o_key .' ON em'. $o_key .'.item_id=it.id AND em'. $o_key .'.field_id=%d ', $o_field->id);
-            $query['order'] .= 'CASE when em'. $o_key .'.meta_value IS NULL THEN 1 ELSE 0 END, em'. $o_key .'.meta_value '. ( in_array($o_field->type, array( 'number', 'scale')) ? '+0 ' : '') . $order .', ';
+			$query['order'] .= 'CASE when em' . $o_key . '.meta_value IS NULL THEN 1 ELSE 0 END, em' . $o_key . '.meta_value ';
+			$query['order'] .= FrmProAppHelper::maybe_query_as_number( $o_field->type );
+			$query['order'] .= $order . ', ';
 
 			//Meta value is only necessary for time field reordering and only if time field is first ordering field
 			//Check if time field (for time field ordering)
@@ -564,23 +566,11 @@ class FrmProEntry{
         }
     }
 
-	public static function pre_validate( $errors, $values ) {
-		_deprecated_function( __FUNCTION__, '2.0.8', 'FrmProFormsHelper::can_submit_form_now' );
-		return FrmProFormsHelper::can_submit_form_now( $errors, $values );
-    }
-
-	public static function setup_post($action, $entry, $form) {
-		_deprecated_function( __FUNCTION__, '2.0.9', array( 'FrmProPost::save_post') );
-		return FrmProPost::setup_post( $action, $entry, $form );
-	}
-
-	public static function create_post($entry, $form, $action = false) {
-		_deprecated_function( __FUNCTION__, '2.0.9', array( 'FrmProPost::create_post') );
-		return FrmProPost::create_post($entry, $form, $action );
-	}
-
-	public static function insert_post( $entry, $new_post, $post, $form = false, $action = false ) {
-		_deprecated_function( __FUNCTION__, '2.0.9', array( 'FrmProPost::insert_post') );
-		return FrmProPost::insert_post( $entry, $new_post, $post, $form, $action );
+	/**
+	 * @since 3.0
+	 */
+	public static function is_draft( $entry_id ) {
+		$entry = FrmEntry::getOne( $entry_id );
+		return ( $entry && $entry->is_draft );
 	}
 }

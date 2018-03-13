@@ -1,4 +1,2 @@
-<input type="text" id="<?php echo esc_attr( $html_id ) ?>" name="<?php echo esc_attr( $field_name ) ?>" value="<?php echo esc_attr( $field['default_value'] ); ?>" class="dyn_default_value" />
-<p class="howto frm_clear">
-	<?php esc_html_e( 'Note: This field will not show in the form. Enter the value to be hidden.', 'formidable' ) ?>
-</p>
+<?php
+_deprecated_file( basename( __FILE__ ), '3.0', null, 'This file can be found in formidable/classes/views/frm-fields/back-end/field-hidden.php' );
