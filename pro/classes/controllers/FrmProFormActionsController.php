@@ -5,7 +5,7 @@ class FrmProFormActionsController{
     public static function register_actions($actions) {
         $actions['wppost'] = 'FrmProPostAction';
 
-        include_once(FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-form-actions/post_action.php');
+        include_once(FrmProAppHelper::plugin_path() . '/classes/views/frmpro-form-actions/post_action.php');
 
         return $actions;
     }
@@ -24,30 +24,30 @@ class FrmProFormActionsController{
         global $wpdb;
         extract($atts);
 
-        $show_logic = ( ! empty($form_action->post_content['conditions']) && count($form_action->post_content['conditions']) > 2 ) ? true : false;
+        $show_logic = self::has_valid_conditions( $form_action->post_content['conditions'] );
 
         // Text for different actions
         if ( $form_action->post_excerpt == 'email' ) {
-            $send = __( 'Send', 'formidable' );
-            $stop = __( 'Stop', 'formidable' );
-            $this_action_if = __( 'this notification if', 'formidable' );
+            $send = __( 'Send', 'formidable-pro' );
+            $stop = __( 'Stop', 'formidable-pro' );
+            $this_action_if = __( 'this notification if', 'formidable-pro' );
         } if ( $form_action->post_excerpt == 'wppost' ) {
-            $send = __( 'Create', 'formidable' );
-            $stop = __( 'Don\'t create', 'formidable' );
-            $this_action_if = __( 'this post if', 'formidable' );
+            $send = __( 'Create', 'formidable-pro' );
+            $stop = __( 'Don\'t create', 'formidable-pro' );
+            $this_action_if = __( 'this post if', 'formidable-pro' );
         } else if ( $form_action->post_excerpt == 'register' ) {
-            $send = __( 'Register', 'formidable' );
-            $stop = __( 'Don\'t register', 'formidable' );
-            $this_action_if = __( 'user if', 'formidable' );
+            $send = __( 'Register', 'formidable-pro' );
+            $stop = __( 'Don\'t register', 'formidable-pro' );
+            $this_action_if = __( 'user if', 'formidable-pro' );
         } else {
-            $send = __( 'Do', 'formidable' );
-            $stop = __( 'Don\'t do', 'formidable' );
-            $this_action_if = __( 'this action if', 'formidable' );
+            $send = __( 'Do', 'formidable-pro' );
+            $stop = __( 'Don\'t do', 'formidable-pro' );
+            $this_action_if = __( 'this action if', 'formidable-pro' );
         }
 
         $form_fields = $atts['values']['fields'];
         unset($atts['values']['fields']);
-        include(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-form-actions/_form_action.php');
+        include(FrmProAppHelper::plugin_path() . '/classes/views/frmpro-form-actions/_form_action.php');
     }
 
     public static function _logic_row(){
@@ -61,16 +61,65 @@ class FrmProFormActionsController{
 
         $form = FrmForm::getOne($form_id);
 
-        FrmProFormsController::include_logic_row( array(
-            'form_id' => $form->id,
-            'form' => $form,
-            'meta_name' => $meta_name,
+		FrmProFormsController::include_logic_row( array(
+			'form_id'   => $form->id,
+			'form'      => $form,
+			'meta_name' => $meta_name,
 			'condition' => array( 'hide_field_cond' => '==', 'hide_field' => '' ),
-            'key' => $key,
-            'name'  => 'frm_' . $type .'_action['. $key .'][post_content][conditions]['. $meta_name .']',
-        ));
+			'key'       => $key,
+			'name'      => 'frm_' . $type .'_action[' . $key . '][post_content][conditions][' . $meta_name . ']',
+			'hidelast'  => '#frm_logic_rows_' . $key,
+			'showlast'  => '#logic_link_' . $key,
+		) );
 
         wp_die();
+	}
+
+	/**
+	 * Before the form action is saved, check for logic that
+	 * needs to be removed.
+	 *
+	 * @since 3.0
+	 */
+	public static function remove_incomplete_logic( $settings ) {
+		if ( isset( $settings['post_content']['conditions'] ) ) {
+			self::remove_logic_without_field( $settings['post_content']['conditions'] );
+		}
+
+		return $settings;
+	}
+
+	/**
+	 * If a condition doesn't include a selected field, remove it
+	 *
+	 * @since 3.0
+	 */
+	private static function remove_logic_without_field( &$conditions ) {
+		if ( empty( $conditions ) ) {
+			return;
+		}
+
+		foreach ( $conditions as $k => $condition ) {
+			if ( ! is_numeric( $k ) ) {
+				continue;
+			}
+
+			if ( empty( $condition['hide_field'] ) ) {
+				unset( $conditions[ $k ] );
+			}
+		}
+	}
+
+	/**
+	 * If logic includes rows with a field selected, it is value
+	 *
+	 * @since 3.0
+	 *
+	 * @return bool
+	 */
+	private static function has_valid_conditions( $conditions ) {
+		self::remove_logic_without_field( $conditions );
+		return count( $conditions ) > 2;
 	}
 
     public static function fill_action_options($action, $type) {
@@ -99,11 +148,8 @@ class FrmProFormActionsController{
 	 * @since 2.0.23
 	 */
 	public static function maybe_trigger_draft_actions( $event, $args ) {
-		if ( isset( $args['entry_id'] ) ){
-			$entry = FrmEntry::getOne( $args['entry_id'] );
-			if ( $entry && $entry->is_draft ) {
-				$event = 'draft';
-			}
+		if ( isset( $args['entry_id'] ) && FrmProEntry::is_draft( $args['entry_id'] ) ) {
+			$event = 'draft';
 		}
 		return $event;
 	}
@@ -142,7 +188,7 @@ class FrmProFormActionsController{
 
 		$cf_keys = self::get_post_meta_keys();
 
-        include(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-form-actions/_custom_field_row.php');
+        include(FrmProAppHelper::plugin_path() . '/classes/views/frmpro-form-actions/_custom_field_row.php');
         wp_die();
     }
 
@@ -208,7 +254,7 @@ class FrmProFormActionsController{
         }
 
         $echo = false;
-        include(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-form-actions/_post_taxonomy_row.php');
+        include(FrmProAppHelper::plugin_path() . '/classes/views/frmpro-form-actions/_post_taxonomy_row.php');
         wp_die();
     }
 
@@ -221,7 +267,7 @@ class FrmProFormActionsController{
         $taxonomies = get_object_taxonomies($post_type);
 
         // Get the HTML for the options
-        include(FrmAppHelper::plugin_path() . '/pro/classes/views/frmpro-form-actions/_post_taxonomy_select.php');
+        include(FrmProAppHelper::plugin_path() . '/classes/views/frmpro-form-actions/_post_taxonomy_select.php');
         wp_die();
     }
 

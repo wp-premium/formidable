@@ -7,6 +7,10 @@
     white-space: nowrap;
 }
 
+.with_frm_style .frm_time_wrap{
+	white-space:nowrap;
+}
+
 .with_frm_style select.frm_time_select{
 	white-space:pre;
 	display:inline;
@@ -19,6 +23,14 @@
 
 .with_frm_style .frm_repeat_inline{
 	clear:both;
+}
+
+.frm_invisible_section .frm_form_field,
+.frm_invisible_section{
+	display:none !important;
+	visibility:hidden !important;
+	height:0;
+	margin:0;
 }
 
 .frm_form_field .frm_repeat_sec .frm_add_form_row,
@@ -44,9 +56,30 @@
 .frm_form_field div.frm_repeat_grid .frm_add_form_row,
 .frm_form_field div.frm_repeat_inline .frm_add_form_row,
 .frm_section_heading div.frm_repeat_sec:last-child .frm_add_form_row {
-	display: inline;
+	display: inline-block;
 	visibility: visible;
 	pointer-events: auto;
+}
+
+.frm_repeat_inline .frm_repeat_buttons a.frm_icon_font{
+	vertical-align: sub;
+}
+
+.frm_repeat_inline .frm_repeat_buttons a.frm_icon_font:before{
+    vertical-align: text-top;
+}
+
+.frm_repeat_grid .frm_button,
+.frm_repeat_inline .frm_button,
+.frm_repeat_sec .frm_button{
+	display: inline-block;
+	line-height:1.3;
+}
+
+.frm_repeat_sec .frm_button .frm_icon_font:before,
+.frm_repeat_grid .frm_button .frm_icon_font:before,
+.frm_repeat_inline .frm_button .frm_icon_font:before{
+    line-height:1.3;
 }
 
 .frm_form_field .frm_repeat_grid .frm_form_field label.frm_primary_label{
@@ -62,73 +95,95 @@
     z-index:999999 !important;
 }
 
-.frm_form_fields div.rating-cancel{
-    display:none !important;
+/* Radio Scale */
+
+.with_frm_style .frm_scale{
+	margin-right:10px;
+	text-align:center;
+	float:left;
 }
 
-.frm_form_fields div.rating-cancel,
-.frm_form_fields div.star-rating{
-    float:left;
-    width:17px;
-    height:17px;
-	font-size:16px;
-    line-height:normal;
-    cursor:pointer;
-    display:block;
-    background:transparent;
-    overflow:hidden;
+.with_frm_style .frm_scale input{
+	display:block;
+	margin:0;
+}
+
+/* Star ratings */
+
+.frm-star-group input {
+	display: none !important;
+}
+
+.frm-star-group .star-rating,
+.frm-star-group input + label {
+	float:left;
+	width:20px;
+	height:20px;
+	font-size:20px;
+	line-height:1.4em;
+	cursor:pointer;
+	display:block;
+	background:transparent;
+	overflow:hidden !important;
 	clear:none;
+	font-style:normal;
 }
 
-.frm_form_fields div.rating-cancel a:before{
-    font:16px/1 'dashicons';
-    content:'\f460';
-    color:#CDCDCD;
+.frm-star-group input + label:before,
+.frm-star-group .star-rating:before{
+	font-family:'s11-fp';
+	content:'\e9d7';
+	color:#F0AD4E;
+	display: inline-block;
 }
 
-.frm_form_fields div.star-rating:before,
-.frm_form_fields div.star-rating a:before{
-    font:16px/1 'dashicons';
-    content:'\f154';
-    color:#F0AD4E;
+.frm-star-group input[type=radio]:checked + label:before,
+.frm-star-group:not(.frm-star-hovered) input[type=radio]:checked + label:before{
+	color:#F0AD4E;
 }
 
-.frm_form_fields div.rating-cancel a,
-.frm_form_fields div.star-rating a{
-    display:block;
-    width:16px;
-    height:100%;
-    border:0;
+.frm-star-group:not(.frm-star-hovered) input[type=radio]:checked + label:before,
+.frm-star-group input + label:hover:before,
+.frm-star-group:hover input + label:hover:before,
+.frm-star-group .star-rating-on:before,
+.frm-star-group .star-rating-hover:before{
+	content:'\e9d9';
+	color:#F0AD4E;
 }
 
-.frm_form_fields div.star-rating-on:before,
-.frm_form_fields div.star-rating-on a:before{
-    content:'\f155';
+.frm-star-group .frm_half_star:before{
+	content:'\e9d8';
 }
 
-.frm_form_fields div.star-rating-hover:before,
-.frm_form_fields div.star-rating-hover a:before{
-    content:'\f155';
+.frm-star-group .star-rating-readonly{
+	cursor:default !important;
 }
 
-.frm_form_fields div.frm_half_star:before,
-.frm_form_fields div.frm_half_star a:before{
-    content:'\f459';
+/* Other input */
+.with_frm_style .frm_other_input.frm_other_full{
+	margin-top:10px;
 }
 
-.frm_form_fields div.rating-cancel.star-rating-hover a:before{
-    color:#B63E3F;
+.frm_left_container .frm_other_input{
+	grid-column:2;
 }
 
-.frm_form_fields div.star-rating-readonly,
-.frm_form_fields div.star-rating-readonly a{
-    cursor:default !important;
+.frm_inline_container.frm_other_container .frm_other_input,
+.frm_left_container.frm_other_container .frm_other_input{
+	margin-left:5px;
 }
 
-.frm_form_fields div.star-rating{
-    overflow:hidden!important;
+.frm_right_container.frm_other_container .frm_other_input{
+	margin-right:5px;
 }
 
+.frm_inline_container.frm_other_container select ~ .frm_other_input,
+.frm_right_container.frm_other_container select ~ .frm_other_input,
+.frm_left_container.frm_other_container select ~ .frm_other_input{
+	margin:0;
+}
+
+/* Pagination */
 .frm_pagination_cont ul.frm_pagination{
     display:inline-block;
     list-style:none;
@@ -225,7 +280,7 @@ table.frmcal-calendar .frmcal_date{
 }
 
 table.frmcal-calendar .frmcal-today .frmcal_date{
-    background-color:<?php echo esc_html( $defaults['bg_color_active'] ) ?>;
+    background-color:#<?php echo esc_html( $defaults['bg_color_active'] ) ?>;
     padding:0 5px;
     text-align:right;
     -moz-box-shadow:0 2px 5px #<?php echo esc_html( $defaults['border_color_active'] ) ?>;
@@ -242,3 +297,146 @@ table.frmcal-calendar .frmcal-today .frmcal_date{
     padding:2px 4px;
 }
 /* End Calendar Styling */
+
+/* Start Toggle Styling */
+.frm_switch_opt {
+	padding:0 8px 0 0;
+	white-space:normal;
+	display:inline;
+	vertical-align: middle;
+}
+
+.frm_on_label{
+	color: #008ec2;
+	padding:0 0 0 8px;
+}
+
+.frm_switch {
+	position: relative;
+	display: inline-block;
+	width: 40px;
+	height: 25px;
+	vertical-align: middle;
+}
+
+.frm_switch input {
+	display:none !important;
+}
+
+.frm_slider {
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: #ccc;
+	transition: .4s;
+	border-radius: 30px;
+}
+
+.frm_slider:before {
+	border-radius: 50%;
+	position: absolute;
+	content: "";
+	height: 23px;
+	width: 23px;
+	left: 1px;
+	bottom: 1px;
+	background-color: white;
+	transition: .4s;
+	box-shadow:0 2px 5px #999;
+}
+
+input:checked + .frm_slider {
+	background-color: #008ec2;
+}
+
+input:focus + .frm_slider {
+	box-shadow: 0 0 1px #008ec2;
+}
+
+input:checked + .frm_slider:before {
+	transform: translateX(15px);
+}
+
+/* Range slider */
+
+<?php
+$bg_color = '#ccc' . $important;
+$thumb_color = '#008ec2' . $important;
+$text_color = '#ffffff' . $important;
+?>
+.with_frm_style .frm_range_value{
+	display:inline-block;
+}
+
+.with_frm_style input[type=range] {
+	-webkit-appearance: none;
+	box-shadow:none !important;
+	border:none !important;
+	cursor: pointer;
+	padding:0 <?php echo esc_html( $important ) ?>;
+	background:transparent !important;
+	display: block;
+	width: 100%;
+	margin: 7px 0 10px;
+	font-size:14px;
+}
+
+.with_frm_style input[type=range]:active,
+.with_frm_style input[type=range]:focus {
+	outline: none;
+	box-shadow:none !important;
+	background:transparent !important;
+}
+
+.with_frm_style .frm_range_container{
+	text-align:center;
+}
+
+.with_frm_style input[type=range]::-webkit-slider-runnable-track {
+	<?php
+	echo $border = 'border-radius: 0;
+	border: none;
+	height: 4px;
+	background-color: ' . esc_html( $bg_color ) . ';';
+	echo $track = 'animate: 0.2s;';
+	?>
+}
+.with_frm_style input[type=range]::-moz-range-track {
+	<?php echo $border . $track ?>
+	border-color: transparent;
+	border-width: 39px 0;
+	color: transparent;
+}
+.with_frm_style input[type=range]::-ms-fill-lower {
+	<?php echo $border . $track ?>
+}
+.with_frm_style input[type=range]::-ms-fill-upper {
+	<?php echo $border . $track ?>
+}
+
+.with_frm_style input[type=range]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	-webkit-border-radius: 20px;
+	<?php
+	echo $thumb_size = 'height: 2em;
+	width: 2em;';
+	echo $thumb = 'border-radius: 20px;
+	border: 1px solid rgba(' . esc_html( FrmStylesHelper::hex2rgb( '#008ec2' ) ) . ',0.6);
+	color:'. esc_html( $text_color ) . ';
+	background-color: ' . esc_html( $thumb_color ) . ';
+	cursor: pointer;';
+	?>
+	margin-top: -.9em;
+}
+
+.with_frm_style input[type=range]::-moz-range-thumb {
+	<?php echo $thumb_size . $thumb; ?>
+	-moz-border-radius: 20px;
+}
+
+.with_frm_style input[type=range]::-ms-thumb {
+	<?php echo $thumb_size . $thumb; ?>
+}

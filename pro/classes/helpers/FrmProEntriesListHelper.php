@@ -9,9 +9,9 @@ class FrmProEntriesListHelper extends FrmEntriesListHelper {
             unset($actions['bulk_delete']);
         }
 
-        //$actions['bulk_export'] = __( 'Export to XML', 'formidable' );
+        //$actions['bulk_export'] = __( 'Export to XML', 'formidable-pro' );
 		if ( $this->params['form'] ) {
-			$actions['bulk_csv'] = __( 'Export to CSV', 'formidable' );
+			$actions['bulk_csv'] = __( 'Export to CSV', 'formidable-pro' );
 		}
 
         return $actions;
@@ -51,26 +51,26 @@ class FrmProEntriesListHelper extends FrmEntriesListHelper {
         }
 
 ?>
-<div class="search-box frm_sidebar">
+<div class="search-box">
 	<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ) ?>"><?php echo esc_attr( $text ); ?>:</label>
 	<input type="text" id="<?php echo esc_attr( $input_id ) ?>" name="s" value="<?php echo esc_attr( $search_str ); ?>" />
 	<?php
 	if ( isset( $field_list ) && ! empty( $field_list ) ) { ?>
 	<select name="fid" class="hide-if-js">
-		<option value="">&mdash; <?php _e( 'All Fields', 'formidable' ) ?> &mdash;</option>
-		<option value="created_at" <?php selected( $fid, 'created_at' ) ?>><?php _e( 'Entry creation date', 'formidable' ) ?></option>
-		<option value="id" <?php selected( $fid, 'id' ) ?>><?php _e( 'Entry ID', 'formidable' ) ?></option>
+		<option value="">&mdash; <?php _e( 'All Fields', 'formidable-pro' ) ?> &mdash;</option>
+		<option value="created_at" <?php selected( $fid, 'created_at' ) ?>><?php _e( 'Entry creation date', 'formidable-pro' ) ?></option>
+		<option value="id" <?php selected( $fid, 'id' ) ?>><?php _e( 'Entry ID', 'formidable-pro' ) ?></option>
 		<?php foreach ( $field_list as $f ) { ?>
 		<option value="<?php echo ( $f->type == 'user_id' ) ? 'user_id' : $f->id ?>" <?php selected( $fid, $f->id ) ?>><?php echo FrmAppHelper::truncate( $f->name, 30 );  ?></option>
 		<?php } ?>
 	</select>
 
 	<div class="button dropdown hide-if-no-js">
-		<a href="#" id="frm-fid-search" class="frm-dropdown-toggle" data-toggle="dropdown"><?php _e( 'Search', 'formidable' ) ?> <b class="caret"></b></a>
+		<a href="#" id="frm-fid-search" class="frm-dropdown-toggle" data-toggle="dropdown"><?php _e( 'Search', 'formidable-pro' ) ?> <b class="caret"></b></a>
 		<ul class="frm-dropdown-menu pull-right" id="frm-fid-search-menu" role="menu" aria-labelledby="frm-fid-search">
-			<li><a href="#" id="fid-">&mdash; <?php _e( 'All Fields', 'formidable' ) ?> &mdash;</a></li>
-			<li><a href="#" id="fid-created_at"><?php _e( 'Entry creation date', 'formidable' ) ?></a></li>
-			<li><a href="#" id="fid-id"><?php _e( 'Entry ID', 'formidable' ) ?></a></li>
+			<li><a href="#" id="fid-">&mdash; <?php _e( 'All Fields', 'formidable-pro' ) ?> &mdash;</a></li>
+			<li><a href="#" id="fid-created_at"><?php _e( 'Entry creation date', 'formidable-pro' ) ?></a></li>
+			<li><a href="#" id="fid-id"><?php _e( 'Entry ID', 'formidable-pro' ) ?></a></li>
 			<?php
 			foreach ( $field_list as $f ) { ?>
 			<li><a href="#" id="fid-<?php echo ( $f->type == 'user_id' ) ? 'user_id' : $f->id ?>"><?php echo FrmAppHelper::truncate( $f->name, 30 ); ?></a></li>

@@ -2,6 +2,22 @@
 
 class FrmProAppHelper{
 
+    public static function plugin_folder() {
+        return basename( self::plugin_path() );
+    }
+
+    public static function plugin_path() {
+        return dirname( dirname( dirname( __FILE__ ) ) );
+    }
+
+    public static function plugin_url() {
+		return plugins_url( '', self::plugin_path() . '/formidable-pro.php' );
+    }
+
+	public static function relative_plugin_url() {
+		return str_replace( array( 'https:', 'http:' ), '', self::plugin_url() );
+	}
+
     /**
      * Get the Pro settings
      *
@@ -63,7 +79,7 @@ class FrmProAppHelper{
 
 		if ( $time !== '' ) {
 			if ( $format == 'h:i A' ) {
-				// for reverse compatability
+				// for reverse compatibility
 				$format = 'g:i A';
 			}
 			$time = date( $format, strtotime( $time ) );
@@ -238,7 +254,7 @@ class FrmProAppHelper{
 	public static function get_edit_link( $id ) {
         $output = '';
     	if ( current_user_can('administrator') ) {
-			$output = '<a href="' . esc_url( admin_url( 'admin.php?page=formidable-entries&frm_action=edit&id=' . $id ) ) . '">' . __( 'Edit', 'formidable' ) . '</a>';
+			$output = '<a href="' . esc_url( admin_url( 'admin.php?page=formidable-entries&frm_action=edit&id=' . $id ) ) . '">' . __( 'Edit', 'formidable-pro' ) . '</a>';
         }
 
     	return $output;
@@ -456,7 +472,8 @@ class FrmProAppHelper{
     private static function filter_entry_ids( $args, $where_field, $entry_ids, &$new_ids ) {
 		$where_statement = array( 'fi.id' => (int) $args['where_opt'] );
 
-		$field_key = 'meta_value ' . ( in_array( $where_field->type, array( 'number', 'scale') ) ? ' +0 ' : '' ) . FrmDb::append_where_is( $args['temp_where_is'] );
+		$num_query = self::maybe_query_as_number( $where_field->type );
+		$field_key = 'meta_value ' . $num_query . FrmDb::append_where_is( $args['temp_where_is'] );
 		$nested_where = array( $field_key => $args['where_val'] );
         if ( isset($args['where_val_esc']) && $args['where_val_esc'] != $args['where_val'] ) {
 			$nested_where['or'] = 1;
@@ -492,6 +509,13 @@ class FrmProAppHelper{
             $new_ids = array_diff( (array) $entry_ids, $new_ids );
         }
     }
+
+	/**
+	 * @since 3.0
+	 */
+	public static function maybe_query_as_number( $type ) {
+		return ( in_array( $type, array( 'number', 'scale', 'star' ) ) ? ' +0 ' : '' );
+	}
 
     /**
      * if there are posts linked to entries for this form
@@ -568,7 +592,8 @@ class FrmProAppHelper{
 				$query_key = sanitize_title( $where_field->field_options['post_field'] );
             }
 
-			$query_key .= ( in_array( $where_field->type, array( 'number', 'scale' ) ) ? ' +0 ' : ' ' ) . FrmDb::append_where_is( $args['where_is'] );
+			$query_key .= self::maybe_query_as_number( $where_field->type );
+			$query_key .= FrmDb::append_where_is( $args['where_is'] );
 			$query[ $query_key ] = $args['where_val'];
 
 			$add_posts = FrmDb::get_col( $get_table, $query, $get_field, $filter_args );
@@ -640,11 +665,11 @@ class FrmProAppHelper{
     }
 
 	public static function gen_prev_label() {
-        return apply_filters( 'genesis_prev_link_text', '&#x000AB;' . __( 'Previous Page', 'formidable' ) );
+        return apply_filters( 'genesis_prev_link_text', '&#x000AB;' . __( 'Previous Page', 'formidable-pro' ) );
     }
 
 	public static function gen_next_label() {
-        return apply_filters( 'genesis_next_link_text', __( 'Next Page', 'formidable' ) . '&#x000BB;' );
+        return apply_filters( 'genesis_next_link_text', __( 'Next Page', 'formidable-pro' ) . '&#x000BB;' );
     }
 
 	public static function gen_prev_class( $class ) {

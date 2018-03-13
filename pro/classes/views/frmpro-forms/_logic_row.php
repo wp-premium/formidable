@@ -17,15 +17,15 @@
         unset($ff);
         } ?>
 </select>
-<?php _e( 'is', 'formidable' ); ?>
+<?php _e( 'is', 'formidable-pro' ); ?>
 
 <select name="<?php echo esc_attr( $names['hide_field_cond'] ) ?>">
-    <option value="==" <?php selected($condition['hide_field_cond'], '==') ?>><?php _e( 'equal to', 'formidable' ) ?></option>
-    <option value="!=" <?php selected($condition['hide_field_cond'], '!=') ?>><?php _e( 'NOT equal to', 'formidable' ) ?> &nbsp;</option>
-    <option value=">" <?php selected($condition['hide_field_cond'], '>') ?>><?php _e( 'greater than', 'formidable' ) ?></option>
-    <option value="<" <?php selected($condition['hide_field_cond'], '<') ?>><?php _e( 'less than', 'formidable' ) ?></option>
-    <option value="LIKE" <?php selected($condition['hide_field_cond'], 'LIKE') ?>><?php _e( 'like', 'formidable' ) ?></option>
-    <option value="not LIKE" <?php selected($condition['hide_field_cond'], 'not LIKE') ?>><?php _e( 'not like', 'formidable' ) ?> &nbsp;</option>
+    <option value="==" <?php selected($condition['hide_field_cond'], '==') ?>><?php _e( 'equal to', 'formidable-pro' ) ?></option>
+    <option value="!=" <?php selected($condition['hide_field_cond'], '!=') ?>><?php _e( 'NOT equal to', 'formidable-pro' ) ?> &nbsp;</option>
+    <option value=">" <?php selected($condition['hide_field_cond'], '>') ?>><?php _e( 'greater than', 'formidable-pro' ) ?></option>
+    <option value="<" <?php selected($condition['hide_field_cond'], '<') ?>><?php _e( 'less than', 'formidable-pro' ) ?></option>
+    <option value="LIKE" <?php selected($condition['hide_field_cond'], 'LIKE') ?>><?php _e( 'like', 'formidable-pro' ) ?></option>
+    <option value="not LIKE" <?php selected($condition['hide_field_cond'], 'not LIKE') ?>><?php _e( 'not like', 'formidable-pro' ) ?> &nbsp;</option>
 </select>
 
 <span id="frm_show_selected_values_<?php echo esc_attr( $key . '_' . $meta_name ) ?>">
@@ -41,6 +41,6 @@
     FrmFieldsHelper::display_field_value_selector( $selector_field_id, $selector_args );
 ?>
 </span>
-<a href="javascript:void(0)" class="frm_remove_tag frm_icon_font" data-removeid="<?php echo esc_attr( $id ) ?>" <?php echo ! empty( $showlast ) ? 'data-showlast="' . esc_attr( $showlast ) . '"' : ''; ?>></a>
+<a href="javascript:void(0)" class="frm_remove_tag frm_icon_font" data-removeid="<?php echo esc_attr( $id ) ?>" <?php echo ! empty( $showlast ) ? 'data-showlast="' . esc_attr( $showlast ) . '"' : ''; ?> <?php echo empty( $hidelast ) ? '' : 'data-hidelast="' . esc_attr( $hidelast ) . '"'; ?>></a>
 <a href="javascript:void(0)" class="frm_add_tag frm_icon_font frm_add_<?php echo esc_attr( $type ) ?>_logic" data-emailkey="<?php echo esc_attr( $key ) ?>"></a>
 </div>

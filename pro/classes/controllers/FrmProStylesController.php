@@ -10,9 +10,9 @@ class FrmProStylesController extends FrmStylesController{
     }
 
 	public static function add_style_boxes( $boxes ) {
-		$boxes['section-fields'] = __( 'Section Fields', 'formidable' );
-		$boxes['date-fields']   = __( 'Date Fields', 'formidable' );
-		$boxes['progress-bars'] = __( 'Progress Bars &amp; Rootline', 'formidable' );
+		$boxes['section-fields'] = __( 'Section Fields', 'formidable-pro' );
+		$boxes['date-fields']   = __( 'Date Fields', 'formidable-pro' );
+		$boxes['progress-bars'] = __( 'Progress Bars &amp; Rootline', 'formidable-pro' );
 
 		add_filter( 'frm_style_settings_progress-bars', 'FrmProStylesController::progress_settings_file' );
 		add_filter( 'frm_style_settings_date-fields', 'FrmProStylesController::date_settings_file' );
@@ -114,7 +114,7 @@ class FrmProStylesController extends FrmStylesController{
         $frm_style = new FrmStyle();
         $frm_style->destroy($id);
 
-        $message = __( 'Your styling settings have been deleted.', 'formidable' );
+        $message = __( 'Your styling settings have been deleted.', 'formidable-pro' );
 
         self::edit('default', $message);
     }
@@ -131,13 +131,44 @@ class FrmProStylesController extends FrmStylesController{
 
 	public static function include_front_css( $args ) {
 		$defaults = $args['defaults'];
-		include( FrmAppHelper::plugin_path() . '/pro/css/pro_fields.css.php' );
-		include( FrmAppHelper::plugin_path() . '/pro/css/chosen.css.php' );
-		include( FrmAppHelper::plugin_path() . '/pro/css/dropzone.css' );
-		include( FrmAppHelper::plugin_path() . '/pro/css/progress.css.php' );
+		$important = self::is_important( $defaults );
+
+		include( FrmProAppHelper::plugin_path() . '/css/pro_fields.css.php' );
+		include( FrmProAppHelper::plugin_path() . '/css/chosen.css.php' );
+		include( FrmProAppHelper::plugin_path() . '/css/dropzone.css' );
+		include( FrmProAppHelper::plugin_path() . '/css/progress.css.php' );
+	}
+
+	/**
+	 * @since 3.0
+	 */
+	public static function include_pro_fields_ajax_css() {
+		header('Content-type: text/css');
+
+		$frm_style = new FrmStyle();
+		$defaults = $frm_style->get_defaults();
+		$important = self::is_important( $defaults );
+
+		include( FrmProAppHelper::plugin_path() . '/css/pro_fields.css.php' );
+	}
+
+	public static function output_single_style( $settings ) {
+		$important = empty( $settings['important_style'] ) ? '' : ' !important';
+
+		// calculate the top position based on field padding
+		$top_pad = explode( ' ', $settings['field_pad'] );
+		$top_pad = reset( $top_pad ); // the top padding is listed first
+		$pad_unit = preg_replace( '/[0-9]+/', '', $top_pad ); //px, em, rem...
+		$top_margin = (int) str_replace( $pad_unit, '', $top_pad ) / 2;
+
+		include( FrmProAppHelper::plugin_path() . '/css/single-style.css.php' );
 	}
 
 	private static function view_folder() {
-		return FrmAppHelper::plugin_path() . '/pro/classes/views/styles';
+		return FrmProAppHelper::plugin_path() . '/classes/views/styles';
+	}
+
+	private static function is_important( $defaults ) {
+		return ( isset( $defaults['important_style'] ) && ! empty( $defaults['important_style'] ) ) ? ' !important' : '';
 	}
 }

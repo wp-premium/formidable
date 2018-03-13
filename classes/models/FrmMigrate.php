@@ -21,25 +21,27 @@ class FrmMigrate {
 	public function upgrade( $old_db_version = false ) {
 		do_action( 'frm_before_install' );
 
-		global $wpdb;
-		//$frm_db_version is the version of the database we're moving to
-		$frm_db_version = FrmAppHelper::$db_version;
-		$old_db_version = (float) $old_db_version;
-		if ( ! $old_db_version ) {
-			$old_db_version = get_option('frm_db_version');
-		}
+		global $wpdb, $frm_vars;
 
-		if ( $frm_db_version != $old_db_version ) {
+		$frm_vars['doing_upgrade'] = true;
+
+		$needs_upgrade = FrmAppController::compare_for_update( array(
+			'option'             => 'frm_db_version',
+			'new_db_version'     => FrmAppHelper::$db_version,
+			'new_plugin_version' => FrmAppHelper::plugin_version(),
+		) );
+
+		if ( $needs_upgrade ) {
 			// update rewrite rules for views and other custom post types
 			flush_rewrite_rules();
 
 			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
 			$this->create_tables();
-			$this->migrate_data($frm_db_version, $old_db_version);
+			$this->migrate_data( $old_db_version );
 
 			/***** SAVE DB VERSION *****/
-			update_option('frm_db_version', $frm_db_version);
+			update_option( 'frm_db_version', FrmAppHelper::plugin_version() . '-' . FrmAppHelper::$db_version );
 
 			/**** ADD/UPDATE DEFAULT TEMPLATES ****/
 			FrmXMLController::add_default_templates();
@@ -51,8 +53,12 @@ class FrmMigrate {
 
 		do_action('frm_after_install');
 
+		$frm_vars['doing_upgrade'] = false;
+
+		FrmAppHelper::save_combined_js();
+
 		/**** update the styling settings ****/
-		if ( is_admin() && function_exists( 'get_filesystem_method' ) ) {
+		if ( function_exists( 'get_filesystem_method' ) ) {
 			$frm_style = new FrmStyle();
 			$frm_style->update( 'default' );
 		}
@@ -164,7 +170,7 @@ class FrmMigrate {
     }
 
 	private function maybe_create_contact_form() {
-		$template_id = FrmForm::getIdByKey( 'contact' );
+		$template_id = FrmForm::get_id_by_key( 'contact' );
 		if ( $template_id ) {
 			$form_id = FrmForm::duplicate( $template_id, false, true );
 			if ( $form_id ) {
@@ -177,19 +183,31 @@ class FrmMigrate {
 		}
 	}
 
-    /**
-     * @param integer $frm_db_version
-	 * @param int $old_db_version
-     */
-	private function migrate_data( $frm_db_version, $old_db_version ) {
-		$migrations = array( 4, 6, 11, 16, 17, 23, 25 );
-        foreach ( $migrations as $migration ) {
-            if ( $frm_db_version >= $migration && $old_db_version < $migration ) {
+	/**
+	 * @param int|string $old_db_version
+	 */
+	private function migrate_data( $old_db_version ) {
+		if ( ! $old_db_version ) {
+			$old_db_version = get_option( 'frm_db_version' );
+		}
+		if ( strpos( $old_db_version, '-' ) ) {
+			$last_upgrade = explode( '-', $old_db_version );
+			$old_db_version = (int) $last_upgrade[1];
+		}
+
+		if ( ! is_numeric( $old_db_version ) ) {
+			// bail if we don't know the previous version
+			return;
+		}
+
+		$migrations = array( 16, 11, 16, 17, 23, 25, 86 );
+		foreach ( $migrations as $migration ) {
+			if ( FrmAppHelper::$db_version >= $migration && $old_db_version < $migration ) {
 				$function_name = 'migrate_to_' . $migration;
-                $this->$function_name();
-            }
-        }
-    }
+				$this->$function_name();
+			}
+		}
+	}
 
     public function uninstall() {
 		if ( ! current_user_can( 'administrator' ) ) {
@@ -244,6 +262,88 @@ class FrmMigrate {
     }
 
 	/**
+	 * Reverse migration 17 -- Divide by 9
+	 * @since 3.0.05
+	 */
+	private function migrate_to_86() {
+
+		$fields = $this->get_fields_with_size();
+
+		foreach ( (array) $fields as $f ) {
+			$f->field_options = maybe_unserialize( $f->field_options );
+			$size = $f->field_options['size'];
+			$this->maybe_convert_migrated_size( $size );
+
+			if ( $size === $f->field_options['size'] ) {
+				continue;
+			}
+
+			$f->field_options['size'] = $size;
+			FrmField::update( $f->id, array( 'field_options' => $f->field_options ) );
+			unset( $f );
+		}
+
+		// reverse the extra size changes in widgets
+		$widgets = get_option( 'widget_frm_show_form' );
+		if ( empty( $widgets ) ) {
+			return;
+		}
+
+		$this->revert_widget_field_size();
+	}
+
+	private function get_fields_with_size() {
+		$field_types = array( 'textarea', 'text', 'number', 'email', 'url', 'rte', 'date', 'phone', 'password', 'image', 'tag', 'file' );
+		$query = array(
+			'type' => $field_types,
+			'field_options like' => 's:4:"size";',
+			'field_options not like' => 's:4:"size";s:0:',
+		);
+
+		return FrmDb::get_results( $this->fields, $query, 'id, field_options' );
+	}
+
+	/**
+	 * reverse the extra size changes in widgets
+	 * @since 3.0.05
+	 */
+	private function revert_widget_field_size() {
+		$widgets = get_option( 'widget_frm_show_form' );
+		if ( empty( $widgets ) ) {
+			return;
+		}
+
+		$widgets = maybe_unserialize( $widgets );
+		foreach ( $widgets as $k => $widget ) {
+			if ( ! is_array( $widget ) || ! isset( $widget['size'] ) ) {
+				continue;
+			}
+
+			$this->maybe_convert_migrated_size( $widgets[ $k ]['size'] );
+		}
+		update_option( 'widget_frm_show_form', $widgets );
+	}
+
+	/**
+	 * Divide by 9 to reverse the multiplication
+	 * @since 3.0.05
+	 */
+	private function maybe_convert_migrated_size( &$size ) {
+		$has_px_size = ! empty( $size ) && strpos( $size, 'px' );
+		if ( ! $has_px_size ) {
+			return;
+		}
+
+		$int_size = str_replace( 'px', '', $size );
+		if ( ! is_numeric( $int_size ) || (int) $int_size < 900 ) {
+			return;
+		}
+
+		$pixel_conversion = 9;
+		$size = round( (int) $int_size / $pixel_conversion );
+	}
+
+	/**
 	 * Migrate old styling settings. If sites are using the old
 	 * default 400px field width, switch it to 100%
 	 *
@@ -280,64 +380,56 @@ class FrmMigrate {
 		}
 	}
 
-    /**
-     * Change field size from character to pixel -- Multiply by 9
-     */
-    private function migrate_to_17() {
-        global $wpdb;
+	/**
+	 * Change field size from character to pixel -- Multiply by 9
+	 */
+	private function migrate_to_17() {
+		$fields = $this->get_fields_with_size();
+
+		foreach ( $fields as $f ) {
+			$f->field_options = maybe_unserialize( $f->field_options );
+			if ( empty( $f->field_options['size'] ) || ! is_numeric( $f->field_options['size'] ) ) {
+				continue;
+			}
+
+			$this->convert_character_to_px( $f->field_options['size'] );
+
+			FrmField::update( $f->id, array( 'field_options' => $f->field_options ) );
+			unset( $f );
+		}
+
+		$this->adjust_widget_size();
+	}
+
+	/**
+	 * Change the characters in widgets to pixels
+	 */
+	private function adjust_widget_size() {
+		$widgets = get_option( 'widget_frm_show_form' );
+		if ( empty( $widgets ) ) {
+			return;
+		}
+
+		$widgets = maybe_unserialize( $widgets );
+		foreach ( $widgets as $k => $widget ) {
+			if ( ! is_array( $widget ) || ! isset( $widget['size'] ) ) {
+				continue;
+			}
+			$this->convert_character_to_px( $widgets[ $k ]['size'] );
+		}
+		update_option( 'widget_frm_show_form', $widgets );
+	}
+
+	private function convert_character_to_px( &$size ) {
 		$pixel_conversion = 9;
-
-        // Get query arguments
-		$field_types = array( 'textarea', 'text', 'number', 'email', 'url', 'rte', 'date', 'phone', 'password', 'image', 'tag', 'file' );
-		$query = array(
-			'type' => $field_types,
-			'field_options like' => 's:4:"size";',
-			'field_options not like' => 's:4:"size";s:0:',
-		);
-
-        // Get results
-		$fields = FrmDb::get_results( $this->fields, $query, 'id, field_options' );
-
-        $updated = 0;
-        foreach ( $fields as $f ) {
-            $f->field_options = maybe_unserialize($f->field_options);
-            if ( empty($f->field_options['size']) || ! is_numeric($f->field_options['size']) ) {
-                continue;
-            }
-
-			$f->field_options['size'] = round( $pixel_conversion * (int) $f->field_options['size'] );
-            $f->field_options['size'] .= 'px';
-            $u = FrmField::update( $f->id, array( 'field_options' => $f->field_options ) );
-            if ( $u ) {
-                $updated++;
-            }
-            unset($f);
-        }
-
-        // Change the characters in widgets to pixels
-        $widgets = get_option('widget_frm_show_form');
-        if ( empty($widgets) ) {
-            return;
-        }
-
-        $widgets = maybe_unserialize($widgets);
-        foreach ( $widgets as $k => $widget ) {
-            if ( ! is_array($widget) || ! isset($widget['size']) ) {
-                continue;
-            }
-			$size = round( $pixel_conversion * (int) $widget['size'] );
-            $size .= 'px';
-			$widgets[ $k ]['size'] = $size;
-        }
-        update_option('widget_frm_show_form', $widgets);
-    }
+		$size = round( $pixel_conversion * (int) $size );
+		$size .= 'px';
+	}
 
     /**
      * Migrate post and email notification settings into actions
      */
     private function migrate_to_16() {
-        global $wpdb;
-
         $forms = FrmDb::get_results( $this->forms, array(), 'id, options, is_template, default_template' );
 
         /**
@@ -417,54 +509,6 @@ DEFAULT_HTML;
 				$wpdb->update( $this->forms, array( 'options' => serialize( $form->options ) ), array( 'id' => $form->id ) );
             }
             unset($form);
-        }
-        unset($forms);
-    }
-
-    private function migrate_to_6() {
-        global $wpdb;
-
-		$no_save = array_merge( FrmField::no_save_fields(), array( 'form', 'hidden', 'user_id' ) );
-		$fields = FrmDb::get_results( $this->fields, array( 'type NOT' => $no_save ), 'id, field_options' );
-
-        $default_html = <<<DEFAULT_HTML
-<div id="frm_field_[id]_container" class="form-field [required_class] [error_class]">
-    <label class="frm_pos_[label_position]">[field_name]
-        <span class="frm_required">[required_label]</span>
-    </label>
-    [input]
-    [if description]<div class="frm_description">[description]</div>[/if description]
-</div>
-DEFAULT_HTML;
-
-        $old_default_html = <<<DEFAULT_HTML
-<div id="frm_field_[id]_container" class="form-field [required_class] [error_class]">
-    <label class="frm_pos_[label_position]">[field_name]
-        <span class="frm_required">[required_label]</span>
-    </label>
-    [input]
-    [if description]<p class="frm_description">[description]</p>[/if description]
-</div>
-DEFAULT_HTML;
-
-        $new_default_html = FrmFieldsHelper::get_default_html('text');
-        foreach ( $fields as $field ) {
-            $field->field_options = maybe_unserialize($field->field_options);
-			$html = FrmField::get_option( $field, 'custom_html' );
-			if ( $html == $default_html || $html == $old_default_html ) {
-                $field->field_options['custom_html'] = $new_default_html;
-				$wpdb->update( $this->fields, array( 'field_options' => maybe_serialize( $field->field_options ) ), array( 'id' => $field->id ) );
-            }
-            unset($field);
-        }
-        unset($default_html, $old_default_html, $fields);
-    }
-
-    private function migrate_to_4() {
-        global $wpdb;
-		$user_ids = FrmEntryMeta::getAll( array( 'fi.type' => 'user_id' ) );
-        foreach ( $user_ids as $user_id ) {
-			$wpdb->update( $this->entries, array( 'user_id' => $user_id->meta_value ), array( 'id' => $user_id->item_id ) );
         }
     }
 }

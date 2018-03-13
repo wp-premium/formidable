@@ -36,16 +36,16 @@ class FrmProFileField {
 				'parentFormID'      => isset( $field['parent_form_id'] ) ? $field['parent_form_id'] : $field['form_id'],
 				'fieldName'   => $atts['field_name'],
 				'mockFiles'   => array(),
-				'defaultMessage' => __( 'Drop files here to upload', 'formidable' ),
-				'fallbackMessage' => __( 'Your browser does not support drag and drop file uploads.', 'formidable' ),
-				'fallbackText' => __( 'Please use the fallback form below to upload your files like in the olden days.', 'formidable' ),
-				'fileTooBig' => sprintf( __( 'That file is too big. It must be less than %sMB.', 'formidable' ), '{{maxFilesize}}' ),
+				'defaultMessage' => __( 'Drop files here to upload', 'formidable-pro' ),
+				'fallbackMessage' => __( 'Your browser does not support drag and drop file uploads.', 'formidable-pro' ),
+				'fallbackText' => __( 'Please use the fallback form below to upload your files like in the olden days.', 'formidable-pro' ),
+				'fileTooBig' => sprintf( __( 'That file is too big. It must be less than %sMB.', 'formidable-pro' ), '{{maxFilesize}}' ),
 				'invalidFileType'  => self::get_invalid_file_type_message( $field['name'], $field['invalid'] ),
-				'responseError'    => sprintf( __( 'Server responded with %s code.', 'formidable' ), '{{statusCode}}' ),
-				'cancel'           => __( 'Cancel upload', 'formidable' ),
-				'cancelConfirm'    => __( 'Are you sure you want to cancel this upload?', 'formidable' ),
-				'remove'           => __( 'Remove file', 'formidable' ),
-				'maxFilesExceeded' => sprintf( __( 'You have uploaded too many files. You may only include %d file(s).', 'formidable' ), $max ),
+				'responseError'    => sprintf( __( 'Server responded with %s code.', 'formidable-pro' ), '{{statusCode}}' ),
+				'cancel'           => __( 'Cancel upload', 'formidable-pro' ),
+				'cancelConfirm'    => __( 'Are you sure you want to cancel this upload?', 'formidable-pro' ),
+				'remove'           => __( 'Remove file', 'formidable-pro' ),
+				'maxFilesExceeded' => sprintf( __( 'You have uploaded too many files. You may only include %d file(s).', 'formidable-pro' ), $max ),
 			);
 
 			if ( strpos( $the_id, '-i' ) ) {
@@ -149,10 +149,7 @@ class FrmProFileField {
 	public static function no_js_validate( $errors, $field, $values, $args ) {
 		$field->temp_id = $args['id'];
 
-		$args['file_name'] = 'file' . $field->id;
-		if ( isset( $args['key_pointer'] ) && ( $args['key_pointer'] || $args['key_pointer'] === 0 ) ) {
-			$args['file_name'] .= '-' . $args['key_pointer'];
-		}
+		$args['file_name'] = self::get_file_name( $field, $args );
 
 		if ( isset( $_FILES[ $args['file_name'] ] ) ) {
 			self::validate_file_upload( $errors, $field, $args, $values );
@@ -160,6 +157,20 @@ class FrmProFileField {
 		}
 
 		return $errors;
+	}
+
+	/**
+	 * @since 3.0
+	 *
+	 * @param object $field
+	 * @param array $args
+	 */
+	private static function get_file_name( $field, $args ) {
+		$file_name = 'file' . $field->id;
+		if ( isset( $args['key_pointer'] ) && ( $args['key_pointer'] || $args['key_pointer'] === 0 ) ) {
+			$file_name .= '-' . $args['key_pointer'];
+		}
+		return $file_name;
 	}
 
 	/**
@@ -209,14 +220,32 @@ class FrmProFileField {
 		return $errors;
 	}
 
+	/**
+	 * If blank errors are set, remove them if a file was uploaded in the field.
+	 * It still needs some checks in case there are multiple file fields
+	 *
+	 * @since 3.0.03
+	 */
+	public static function remove_error_message( $errors, $field, $value, $args ) {
+		if ( ! isset( $errors['field' . $field->temp_id ] ) || $errors['field' . $field->temp_id ] != FrmFieldsHelper::get_error_msg( $field, 'blank' ) ) {
+			return $errors;
+		}
+
+		$file_name = self::get_file_name( $field, $args );
+		$file_uploads = $_FILES[ $file_name ];
+		if ( self::file_was_selected( $file_uploads ) ) {
+			unset( $errors['field' . $field->temp_id ] );
+		}
+
+		return $errors;
+	}
+
 	public static function validate_file_upload( &$errors, $field, $args, $values = array() ) {
 		$file_uploads = $_FILES[ $args['file_name'] ];
 
 		if ( self::file_was_selected( $file_uploads ) ) {
-			// If blank errors are set, remove them since a file was uploaded in this field
-			if ( isset( $errors['field' . $field->temp_id ] ) ) {
-				unset( $errors['field' . $field->temp_id ] );
-			}
+
+			add_filter( 'frm_validate_file_field_entry', 'FrmProFileField::remove_error_message', 10, 4 );
 
 			self::validate_file_size( $errors, $field, $args );
 			self::validate_file_count( $errors, $field, $args, $values );
@@ -261,7 +290,7 @@ class FrmProFileField {
 
 			// check allowed file size
 			if ( ! empty( $file_uploads['error'] ) && in_array( 1, (array) $file_uploads['error'] ) ) {
-				$errors['field' . $field->temp_id ] = __( 'That file is too big. It must be less than %sMB.', 'formidable' );
+				$errors['field' . $field->temp_id ] = __( 'That file is too big. It must be less than %sMB.', 'formidable-pro' );
 			}
 
 			if ( empty( $name ) ) {
@@ -272,7 +301,7 @@ class FrmProFileField {
 			$this_file_size = $this_file_size / 1000000; // compare in MB
 
 			if ( $this_file_size > $size_limit ) {
-				$errors['field' . $field->temp_id ] = sprintf( __( 'That file is too big. It must be less than %sMB.', 'formidable' ), $size_limit );
+				$errors['field' . $field->temp_id ] = sprintf( __( 'That file is too big. It must be less than %sMB.', 'formidable-pro' ), $size_limit );
 			}
 
 			unset( $name );
@@ -302,7 +331,7 @@ class FrmProFileField {
 
 		$total_upload_count = self::get_new_and_old_file_count( $field, $args, $values );
 		if ( $total_upload_count > $file_count_limit ) {
-			$errors['field' . $field->temp_id ] = sprintf( __( 'You have uploaded too many files. You may only include %d file(s).', 'formidable' ), $file_count_limit );
+			$errors['field' . $field->temp_id ] = sprintf( __( 'You have uploaded too many files. You may only include %d file(s).', 'formidable-pro' ), $file_count_limit );
 		}
 	}
 
@@ -369,11 +398,11 @@ class FrmProFileField {
 	 */
 	private static function get_invalid_file_type_message( $field_name, $field_invalid_msg ) {
 		$default_invalid_messages = array( '' );
-		$default_invalid_messages[] = __( 'This field is invalid', 'formidable' );
-		$default_invalid_messages[] = $field_name . ' ' . __( 'is invalid', 'formidable' );
+		$default_invalid_messages[] = __( 'This field is invalid', 'formidable-pro' );
+		$default_invalid_messages[] = $field_name . ' ' . __( 'is invalid', 'formidable-pro' );
 		$is_default_message = in_array( $field_invalid_msg, $default_invalid_messages );
 
-		$invalid_type = __( 'Sorry, this file type is not permitted.', 'formidable' );
+		$invalid_type = __( 'Sorry, this file type is not permitted.', 'formidable-pro' );
 		$invalid_message = $is_default_message ? $invalid_type : $field_invalid_msg;
 
 		return $invalid_message;
@@ -390,21 +419,11 @@ class FrmProFileField {
      *
      */
 	public static function prepare_data_before_db( $meta_value, $field_id, $entry_id, $atts ) {
-		// If confirmation field or 0 index, exit now
-		if ( ! $atts['field'] ) {
-			return $meta_value;
-		}
-
-		if ( $atts['field']->type == 'file' ) {
-			// Upload files and get new meta value for file upload fields
-			$meta_value = self::prepare_file_upload_meta( $meta_value, $atts['field'], $entry_id );
-
-			if ( is_array( $meta_value ) ) {
-				$meta_value = array_map( 'intval', array_filter( $meta_value ) );
-			}
-		}
-
-		return $meta_value;
+		_deprecated_function( __FUNCTION__, '3.0', 'FrmFieldType::get_value_to_save' );
+		$atts['field_id'] = $field_id;
+		$atts['entry_id'] = $entry_id;
+		$field_obj = FrmFieldFactory::get_field_object( $atts['field'] );
+		return $field_obj->get_value_to_save( $meta_value, $atts );
     }
 
 	/**
@@ -416,7 +435,7 @@ class FrmProFileField {
 	* @param integer $entry_id
 	* @return array|string $meta_value
 	*/
-	private static function prepare_file_upload_meta( $prev_value, $field, $entry_id ) {
+	public static function prepare_file_upload_meta( $prev_value, $field, $entry_id ) {
 		// remove temp tag on uploads
 		self::remove_meta_from_media( $prev_value );
 
@@ -473,7 +492,7 @@ class FrmProFileField {
 		$new_media_ids = self::upload_file( $file_name );
 
 		if ( empty( $new_media_ids ) ) {
-			$response['errors'][] = __( 'File upload failed', 'formidable' );
+			$response['errors'][] = __( 'File upload failed', 'formidable-pro' );
 		} else {
 			self::add_meta_to_media( $new_media_ids, 'temporary' );
 			$response['media_ids'] = $response['media_ids'] + (array) $new_media_ids;

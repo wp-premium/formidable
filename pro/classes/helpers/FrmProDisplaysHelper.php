@@ -70,7 +70,7 @@ class FrmProDisplaysHelper{
             'after_content' => '', 'dyncontent' => '', 'param' => 'entry',
 			'type' => '', 'show_count' => 'all', 'no_rt' => 0,
             'order_by' => array(), 'order' => array(), 'limit' => '', 'page_size' => '',
-            'empty_msg' => __( 'No Entries Found', 'formidable' ), 'copy' => 0,
+            'empty_msg' => __( 'No Entries Found', 'formidable-pro' ), 'copy' => 0,
 			'where' => array(), 'where_is' => array(), 'where_val' => array(),
 			'group_by' => array(),
         );
@@ -114,40 +114,61 @@ class FrmProDisplaysHelper{
         );
 
         $form_id = (int) $form_id;
-        $form_ids = array( $form_id );
+		$form_ids = self::linked_form_ids( $form_id );
 
-        //get linked form ids
-        $fields = FrmProFormsHelper::has_repeat_field($form_id, false);
-        foreach ( $fields as $field ) {
-			if ( FrmField::is_option_true( $field, 'form_select' ) ) {
-                $form_ids[] = $field->field_options['form_select'];
-                $tagregexp[] = $field->id;
-                $tagregexp[] = $field->field_key;
-            }
-            unset($field);
-        }
+		$field_query = array(
+			'form_id' => $form_ids,
+			'or'      => 1,
+		);
+		$field_keys = FrmDb::get_col( 'frm_fields', $field_query, 'field_key' );
 
-        foreach ( $form_ids as $form_id ) {
-            $fields = FrmField::get_all_for_form($form_id, '', 'include');
-            foreach ( $fields as $field ) {
-                $tagregexp[] = $field->id;
-                $tagregexp[] = $field->field_key;
-            }
-        }
+		$tagregexp = array_merge( $tagregexp, $field_keys );
+		$tagregexp = implode( '|', $tagregexp ) . '|';
+		$tagregexp .= FrmFieldsHelper::allowed_shortcodes();
 
-        $tagregexp = implode('|', $tagregexp) .'|';
-        $tagregexp .= FrmFieldsHelper::allowed_shortcodes();
+		self::maybe_increase_regex_limit();
 
-		if ( strlen( $tagregexp ) > 15000 ) {
-			$tagregexp = '[A-Za-z0-9\-\_]+';
-		}
-
-        preg_match_all("/\[(if |foreach )?($tagregexp)\b(.*?)(?:(\/))?\](?:(.+?)\[\/\2\])?/s", $content, $matches, PREG_PATTERN_ORDER);
+		preg_match_all( "/\[(if |foreach )?(\d+|$tagregexp)\b(.*?)(?:(\/))?\](?:(.+?)\[\/\2\])?/s", $content, $matches, PREG_PATTERN_ORDER );
 
 		$matches[0] = self::organize_and_filter_shortcodes( $matches[0] );
 
         return $matches;
     }
+
+	/**
+	 * Get the ids of any child forms (repeat or embedded)
+	 *
+	 * @since 3.0
+	 */
+	private static function linked_form_ids( $form_id ) {
+		$linked_field_query = array(
+			'form_id' => $form_id,
+			'type'    => array( 'divider', 'form' ),
+		);
+		$fields = FrmDb::get_col( 'frm_fields', $linked_field_query, 'field_options' );
+
+		$form_ids = array( $form_id );
+		foreach ( $fields as $field_options ) {
+			$field_options = maybe_unserialize( $field_options );
+			if ( isset( $field_options['form_select'] ) && ! empty( $field_options['form_select'] ) ) {
+				$form_ids[] = $field_options['form_select'];
+			}
+			unset( $field_options );
+		}
+
+		return $form_ids;
+	}
+
+	/**
+	 * make sure the backtrack limit is as least at the default
+	 * @since 3.0
+	 */
+	private static function maybe_increase_regex_limit() {
+	    $backtrack_limit = ini_get( 'pcre.backtrack_limit' );
+	    if ( $backtrack_limit < 1000000 ) {
+		    ini_set( 'pcre.backtrack_limit', 1000000 );
+	    }
+	}
 
 	/**
 	 * Put conditionals and foreach first
@@ -182,18 +203,18 @@ class FrmProDisplaysHelper{
 
 	public static function where_is_options() {
 		return array(
-			'='               => __( 'equal to', 'formidable' ),
-			'!='              => __( 'NOT equal to', 'formidable' ),
-			'>'               => __( 'greater than', 'formidable' ),
-			'<'               => __( 'less than', 'formidable' ),
-			'>='              => __( 'greater than or equal to', 'formidable' ),
-			'<='              => __( 'less than or equal to', 'formidable' ),
-			'LIKE'            => __( 'like', 'formidable' ),
-			'not LIKE'        => __( 'NOT like', 'formidable' ),
-			'LIKE%'           => __( 'starts with', 'formidable' ),
-			'%LIKE'           => __( 'ends with', 'formidable' ),
-			'group_by'        => __( 'unique (get oldest entries)', 'formidable' ),
-			'group_by_newest' => __( 'unique (get newest entries)', 'formidable' ),
+			'='               => __( 'equal to', 'formidable-pro' ),
+			'!='              => __( 'NOT equal to', 'formidable-pro' ),
+			'>'               => __( 'greater than', 'formidable-pro' ),
+			'<'               => __( 'less than', 'formidable-pro' ),
+			'>='              => __( 'greater than or equal to', 'formidable-pro' ),
+			'<='              => __( 'less than or equal to', 'formidable-pro' ),
+			'LIKE'            => __( 'like', 'formidable-pro' ),
+			'not LIKE'        => __( 'NOT like', 'formidable-pro' ),
+			'LIKE%'           => __( 'starts with', 'formidable-pro' ),
+			'%LIKE'           => __( 'ends with', 'formidable-pro' ),
+			'group_by'        => __( 'unique (get oldest entries)', 'formidable-pro' ),
+			'group_by_newest' => __( 'unique (get newest entries)', 'formidable-pro' ),
 		);
 	}
 }

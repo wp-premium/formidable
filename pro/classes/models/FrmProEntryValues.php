@@ -20,26 +20,6 @@ class FrmProEntryValues extends FrmEntryValues {
 	 */
 	private $current_embedded_form = null;
 
-	public function __construct( $entry_id, $atts = array() ) {
-		parent::__construct( $entry_id, $atts );
-	}
-
-	/**
-	 * Set the field values
-	 *
-	 * @since 2.04
-	 */
-	protected function init_field_values() {
-		foreach ( $this->fields as $field ) {
-
-			$this->set_current_container( $field );
-
-			if ( $this->is_field_included( $field ) ) {
-				$this->add_field_values( $field );
-			}
-		}
-	}
-
 	/**
 	 * Set/clear the current section or embedded form
 	 *
@@ -71,6 +51,9 @@ class FrmProEntryValues extends FrmEntryValues {
 	 * @return bool
 	 */
 	protected function is_field_included( $field ) {
+		if ( $field->type !== 'end_divider' ) {
+			$this->set_current_container( $field );
+		}
 
 		if ( ! empty( $this->include_fields ) ) {
 			$is_included = $this->is_self_or_parent_in_array( $field, $this->include_fields );
@@ -78,6 +61,10 @@ class FrmProEntryValues extends FrmEntryValues {
 			$is_included = ! $this->is_self_or_parent_in_array( $field, $this->exclude_fields );
 		} else {
 			$is_included = true;
+		}
+
+		if ( $field->type === 'end_divider' ) {
+			$this->set_current_container( $field );
 		}
 
 		return $is_included;
@@ -117,37 +104,8 @@ class FrmProEntryValues extends FrmEntryValues {
 	protected function add_field_values( $field ) {
 		$atts = array(
 			'exclude_fields' => $this->exclude_fields,
-			'source' => $this->source,
-			);
+		);
 
 		$this->field_values[ $field->id ] = new FrmProFieldValue( $field, $this->entry, $atts );
-
-		$this->update_is_empty_flag_on_parent_container( $field->id );
 	}
-
-	/**
-	 * Update the is_empty_container flag on a parent field
-	 *
-	 * @since 2.04
-	 *
-	 * @param int|string $field_id
-	 */
-	private function update_is_empty_flag_on_parent_container( $field_id ) {
-		if ( ! is_object( $this->current_section ) && ! is_object( $this->current_embedded_form ) ) {
-			return;
-		}
-
-		$displayed_value = $this->field_values[ $field_id ]->get_displayed_value();
-
-		if ( $displayed_value !== '' && ! empty( $displayed_value ) ) {
-			if ( is_object( $this->current_section ) && $field_id != $this->current_section->id ) {
-				$this->field_values[ $this->current_section->id ]->set_is_empty_container( false );
-			}
-
-			if ( is_object( $this->current_embedded_form ) && $field_id != $this->current_embedded_form->id ) {
-				$this->field_values[ $this->current_embedded_form->id ]->set_is_empty_container( false );
-			}
-		}
-	}
-
 }

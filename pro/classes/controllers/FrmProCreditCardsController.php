@@ -22,20 +22,13 @@ class FrmProCreditCardsController extends FrmProComboFieldsController {
 		$sub_fields = self::get_sub_fields( $field );
 		$remove_names = ( $field['save_cc'] == -1 );
 
-		include( FrmAppHelper::plugin_path() .'/pro/classes/views/combo-fields/input.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/combo-fields/input.php' );
 	}
 
 	public static function show_in_form_builder( $field, $name = '', $null = null ) {
-		if ( ! is_array( $field['default_value'] ) ) {
-			$field['default_value'] = self::empty_value_array();
-		}
-		$defaults = self::empty_value_array();
-		self::fill_values( $field['default_value'], $defaults );
-
-		$field['value'] = $field['default_value'];
-		$sub_fields = self::get_sub_fields( $field );
-
-		parent::show_in_form_builder( $field, $name, $sub_fields );
+		_deprecated_function( __METHOD__, '3.0', 'FrmFieldType::show_on_form_builder' );
+		$field_type = FrmFieldFactory::get_field_type( 'address', $field );
+		return $field_type->show_on_form_builder( $name );
 	}
 
 	public static function get_sub_fields( $field ) {
@@ -52,17 +45,17 @@ class FrmProCreditCardsController extends FrmProComboFieldsController {
 				),
 			),
 			'month' => array(
-				'type' => 'select', 'classes' => 'frm_first frm_fourth frm_cc_exp_month',
+				'type' => 'select', 'classes' => 'frm_third frm_first frm_cc_exp_month',
 				'label' => 1, 'options' => range( 1, 12 ),
-				'placeholder' => __( 'Month', 'formidable' ),
+				'placeholder' => __( 'Month', 'formidable-pro' ),
 			),
 			'year'  => array(
-				'type' => 'select', 'classes' => 'frm_fourth frm_cc_exp_year',
+				'type' => 'select', 'classes' => 'frm_third frm_cc_exp_year',
 				'label' => 1, 'options' => range( date('Y'), date('Y') + 10 ),
-				'placeholder' => __( 'Year', 'formidable' ),
+				'placeholder' => __( 'Year', 'formidable-pro' ),
 			),
 			'cvc'  => array(
-				'type' => $html5_type, 'classes' => 'frm_half frm_cc_cvc', 'label' => 1,
+				'type' => $html5_type, 'classes' => 'frm_third frm_cc_cvc', 'label' => 1,
 				'atts' => array(
 					'spellcheck' => 'off', 'autocapitalize' => 'off',
 					'maxlength' => 4, 'autocorrect' => 'off', 'autocomplete' => 'off',
@@ -74,43 +67,22 @@ class FrmProCreditCardsController extends FrmProComboFieldsController {
 		return $fields;
 	}
 
-	public static function add_default_options( $options ) {
-		$options['save_cc'] = 4;
-
-		$default_labels = self::empty_value_array();
-		foreach ( $default_labels as $key => $label ) {
-			$options[ $key . '_desc' ] = $label;
-		}
-
-		return $options;
-	}
-
 	public static function form_builder_options( $field, $display, $values ) {
-		include( FrmAppHelper::plugin_path() .'/pro/classes/views/combo-fields/credit-cards/back-end-field-opts.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/combo-fields/credit-cards/back-end-field-opts.php' );
 	}
 
 	public static function display_value( $value ) {
-		if ( ! is_array( $value ) ) {
-			return $value;
-		}
-
-		$new_value = '';
-		if ( isset( $value['month'] ) && ! empty( $value['month'] ) ) {
-			if ( ! empty( $value['cc'] ) ) {
-				$new_value = $value['cc'] . ' <br/>';
-			}
-
-			$new_value .= $value['month'] . '/' . $value['year'];
-		}
-		return $new_value;
+		_deprecated_function( __FUNCTION__, '3.0', 'FrmProFieldCreditCard->get_display_value' );
+		$field_obj = FrmFieldFactory::get_field_type( 'credit_card' );
+		return $field_obj->get_display_value( $value );
 	}
 
 	public static function add_csv_columns( $headings, $atts ) {
 		if ( $atts['field']->type == 'credit_card' ) {
 
 			$default_labels = self::default_labels();
-			$default_labels['month'] = __( 'Expiration Month', 'formidable' );
-			$default_labels['year'] = __( 'Expiration Year', 'formidable' );
+			$default_labels['month'] = __( 'Expiration Month', 'formidable-pro' );
+			$default_labels['year'] = __( 'Expiration Year', 'formidable-pro' );
 
 			$values = self::empty_value_array();
 			foreach ( $values as $heading => $value ) {
@@ -133,8 +105,8 @@ class FrmProCreditCardsController extends FrmProComboFieldsController {
 
 	private static function default_labels() {
 		$options = array(
-			'cc'  => __( 'Card number', 'formidable' ),
-			'cvc' => __( 'CVC', 'formidable' ),
+			'cc'  => __( 'Card number', 'formidable-pro' ),
+			'cvc' => __( 'CVC', 'formidable-pro' ),
 		);
 		return $options;
 	}

@@ -9,41 +9,17 @@ class FrmProField {
 
 		self::switch_in_section_field_option( $field_data );
 
-        $defaults = array(
-            'number' => array( 'maxnum'    => 9999999 ),
-            'date'  => array( 'max'   => '10' ),
-            'rte'   => array( 'max'   => 7 ),
-            'end_divider' => array( 'format' => 'both' ), // set icon format
-        );
-
-        if ( isset($defaults[$field_data['type']]) ) {
-            $field_data['field_options'] = array_merge($field_data['field_options'], $defaults[$field_data['type']]);
-            return $field_data;
-        }
-
 		switch( $field_data['type'] ) {
-            case 'scale':
-                $field_data['options'] = serialize(range(1,10));
-                $field_data['field_options']['minnum'] = 1;
-                $field_data['field_options']['maxnum'] = 10;
-                break;
             case 'select':
                 $width = FrmStylesController::get_style_val('auto_width', $field_data['form_id']);
                 $field_data['field_options']['size'] = $width;
                 break;
-            case 'user_id':
-                $field_data['name'] = __( 'User ID', 'formidable' );
-                break;
             case 'divider':
-                $field_data['field_options']['label'] = 'top';
                 if ( isset($field_data['field_options']['repeat']) && $field_data['field_options']['repeat'] ) {
                     // create the repeatable form
                     $field_data['field_options']['form_select'] = self::create_repeat_form( 0, array( 'parent_form_id' => $field_data['form_id'], 'field_name' => $field_data['name'] ) );
                 }
                 break;
-            case 'break':
-                $field_data['name'] = __( 'Next', 'formidable' );
-            break;
         }
         return $field_data;
     }
@@ -66,17 +42,19 @@ class FrmProField {
 		}
 	}
 
+	/**
+	 * @since 3.0
+	 *
+	 * @param array $settings
+	 * @return array
+	 */
+	public static function skip_update_field_setting( $settings ) {
+		unset( $settings['post_field'], $settings['custom_field'] );
+		unset( $settings['taxonomy'], $settings['exclude_cat'] );
+		return $settings;
+	}
+
 	public static function update( $field_options, $field, $values ) {
-		$defaults = FrmProFieldsHelper::get_default_field_opts( false, $field );
-		unset( $defaults['post_field'], $defaults['custom_field'], $defaults['taxonomy'], $defaults['exclude_cat'] );
-
-        $defaults['minnum'] = 0;
-        $defaults['maxnum'] = 9999;
-
-		foreach ( $defaults as $opt => $default ) {
-			$field_options[ $opt ] = isset( $values['field_options'][ $opt . '_' . $field->id ] ) ? $values['field_options'][ $opt . '_' . $field->id ] : $default;
-            unset( $opt, $default );
-        }
 
 		foreach ( $field_options['hide_field'] as $i => $f ) {
 			if ( empty( $f ) ) {
@@ -91,13 +69,13 @@ class FrmProField {
 		if ( $field->type == 'hidden' && isset($field_options['required']) && $field_options['required'] ) {
             $field_options['required'] = false;
         } else if ( $field->type == 'file' ) {
-        	self::format_mime_types( $field_options );
+        	self::format_mime_types( $field_options, $field->id );
         }
 
         return $field_options;
     }
 
-	private static function format_mime_types( &$options ) {
+	private static function format_mime_types( &$options, $field_id ) {
 		$file_options = isset( $options['ftypes'] ) ? $options['ftypes'] : array();
 		if ( ! empty( $file_options ) ) {
 			$mime_array = array();
@@ -107,6 +85,7 @@ class FrmProField {
 				$mime_array[ $values[0] ] = $values[1];
 			}
 			$options['ftypes'] = $mime_array;
+			$_POST['field_options'][ 'ftypes_' . $field_id ] = $mime_array;
 		}
 	}
 
@@ -370,5 +349,25 @@ class FrmProField {
 	*/
 	public static function get_cat_id_from_text( $cat_name ) {
 		return get_cat_ID( $cat_name );
+	}
+
+
+	/**
+	 * Check if the format option isset and true without a regular expression
+	 *
+	 * @since 2.02.06
+	 * @param array|object $field
+	 * @return bool
+	 */
+	public static function is_format_option_true_with_no_regex( $field ) {
+		$has_non_regex_format = false;
+
+		if ( is_array( $field ) ) {
+			$has_non_regex_format = FrmField::is_option_true_in_array( $field, 'format' ) && strpos( $field['format'], '^' ) !== 0;
+		} else {
+			FrmField::is_option_true_in_object( $field, 'format' ) && strpos( $field->field_options['format'], '^' ) !== 0;
+		}
+
+		return $has_non_regex_format;
 	}
 }

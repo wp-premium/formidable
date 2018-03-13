@@ -1,9 +1,8 @@
 <?php
 
-$message = __( 'The formidable/pro/classes/views/field-values.php template is deprecated as of version 2.03.05. Please use the FrmFieldsHelper::display_field_value_selector method instead.', 'formidable' );
-trigger_error( $message );
+_deprecated_file( basename( __FILE__ ), '2.03.05', null, 'FrmFieldsHelper::display_field_value_selector' );
 
-// TODO: remove this file by August 2017. The code below is purely for reverse compatibility.
+// The code below is purely for reverse compatibility.
 
 // Get selector field ID
 if ( ! isset( $new_field ) || ! $new_field ) {

@@ -16,7 +16,7 @@ class FrmProGraphsController {
 		self::format_atts( $atts );
 
 		if ( empty( $atts['fields'] ) && empty( $atts['form'] ) ) {
-			return __( 'You must include a field id or key in your graph shortcode.', 'formidable' );
+			return __( 'You must include a field id or key in your graph shortcode.', 'formidable-pro' );
 		}
 
 		$graph_data = self::generate_google_graph_data( $atts );
@@ -81,7 +81,7 @@ class FrmProGraphsController {
 			$id_array = explode( ',', $atts['id'] );
 
 			if ( count( $id_array ) > 1 ) {
-				_e( 'Using multiple values in the id graph parameter has been removed as of version 2.02.04', 'formidable' );
+				_e( 'Using multiple values in the id graph parameter has been removed as of version 2.02.04', 'formidable-pro' );
 			}
 
 			$id = reset( $id_array ) . ',';
@@ -244,7 +244,7 @@ class FrmProGraphsController {
 			'is_stacked' => false,
 			'pie_hole' => '',
 			'curve_type' => '',
-			'no_data' => __( 'No data', 'formidable' ),
+			'no_data' => __( 'No data', 'formidable-pro' ),
 		);
 
 		return $defaults;
@@ -440,13 +440,13 @@ class FrmProGraphsController {
 	 * @return string
 	 */
 	private static function get_graph_type( $atts ) {
-		$type = lcfirst( $atts['type'] );
+		$type = strtolower( $atts['type'] );
 
 		if ( 'bar' === $type ) {
 			$type = 'column';
 		} else if ( 'hbar' === $type ) {
 			$type = 'bar';
-		} else if ( $type == 'stepped_area' ) {
+		} else if ( $type == 'stepped_area' || $type == 'steppedarea' ) {
 			$type = 'steppedArea';
 		}
 
@@ -597,7 +597,7 @@ class FrmProGraphsController {
 		} else if ( ! empty( $atts['fields'] ) ) {
 			// Title is field name if single field, otherwise set to "Submissions"
 			if ( count( $atts['fields'] ) > 1 ) {
-				$title = __( 'Submissions', 'formidable' );
+				$title = __( 'Submissions', 'formidable-pro' );
 			} else {
 				$first_field = reset( $atts['fields'] );
 				$title = preg_replace( "/&#?[a-z0-9]{2,8};/i", "", FrmAppHelper::truncate( $first_field->name, $atts['truncate'], 0 ) );
@@ -1102,11 +1102,11 @@ class FrmProGraphsController {
 		if ( isset( $atts['tooltip_label'] ) ) {
 			$tooltip_text = $atts['tooltip_label'];
 		} else if ( 'total' == $atts['data_type'] ) {
-			$tooltip_text = __( 'Total', 'formidable' );
+			$tooltip_text = __( 'Total', 'formidable-pro' );
 		} else if ( 'average' == $atts['data_type'] ) {
-			$tooltip_text = __( 'Average', 'formidable' );
+			$tooltip_text = __( 'Average', 'formidable-pro' );
 		} else {
-			$tooltip_text = __( 'Submissions', 'formidable' );
+			$tooltip_text = __( 'Submissions', 'formidable-pro' );
 		}
 
 		return $tooltip_text;
@@ -1121,7 +1121,7 @@ class FrmProGraphsController {
 	 */
 	private static function get_data_for_multi_field_graph( $atts ) {
 		$tooltip_text = self::get_tooltip_text( $atts );
-		$graph_data = array(  array( __( 'Fields', 'formidable' ), $tooltip_text ) );
+		$graph_data = array(  array( __( 'Fields', 'formidable-pro' ), $tooltip_text ) );
 
 		foreach ( $atts['fields'] as $field ) {
 			$meta_values = self::get_meta_values_for_single_field( $field, $atts );
@@ -1509,9 +1509,9 @@ class FrmProGraphsController {
 	 */
 	private static function order_x_axis_values( $atts, &$x_axis_data ) {
 		if ( self::is_created_at_or_updated_at( $atts['x_axis'] ) || self::is_date_field( $atts['x_axis_field'] ) ) {
-			usort( $x_axis_data, 'self::date_compare' );
+			usort( $x_axis_data, array( 'FrmProGraphsController', 'date_compare' ) );
 		} else if ( is_object( $atts['x_axis_field'] ) && $atts['x_axis_field']->type == 'number' ) {
-			usort( $x_axis_data, 'self::number_compare' );
+			usort( $x_axis_data, array( 'FrmProGraphsController', 'number_compare' ) );
 		}
 	}
 
@@ -1660,13 +1660,13 @@ class FrmProGraphsController {
 	 */
 	private static function get_first_row_labels_for_x_axis_graph( $atts ) {
 		if ( 'created_at' === $atts['x_axis_field'] ) {
-			$x_label = __( 'Creation Date', 'formidable' );
+			$x_label = __( 'Creation Date', 'formidable-pro' );
 		} else if ( 'updated_at' === $atts['x_axis_field'] ) {
-			$x_label = __( 'Updated At', 'formidable' );
+			$x_label = __( 'Updated At', 'formidable-pro' );
 		} else if ( is_object( $atts['x_axis_field'] ) ) {
 			$x_label = $atts['x_axis_field']->name;
 		} else {
-			$x_label = __( 'Invalid x-axis', 'formidable' );
+			$x_label = __( 'Invalid x-axis', 'formidable-pro' );
 		}
 
 		$first_row = array( $x_label );
@@ -1692,8 +1692,8 @@ class FrmProGraphsController {
 	 * @return array
 	 */
 	private static function get_first_row_labels_for_form_graph() {
-		$x_label = __( 'Creation Date', 'formidable' );
-		return array( $x_label, __( 'Submissions', 'formidable' ) );
+		$x_label = __( 'Creation Date', 'formidable-pro' );
+		return array( $x_label, __( 'Submissions', 'formidable-pro' ) );
 	}
 
 	/**
@@ -1870,13 +1870,13 @@ class FrmProGraphsController {
 		$value = date( 'Y-m-d', strtotime( $date ) );
 
 		if ( preg_match('/-(01|02|03)-/', $value ) ) {
-			$value = __( 'Q1', 'formidable' ) . ' ' . date('Y', strtotime($value));
+			$value = __( 'Q1', 'formidable-pro' ) . ' ' . date('Y', strtotime($value));
 		} else if ( preg_match('/-(04|05|06)-/', $value) ) {
-			$value = __( 'Q2', 'formidable' ) . ' ' . date('Y', strtotime($value));
+			$value = __( 'Q2', 'formidable-pro' ) . ' ' . date('Y', strtotime($value));
 		} else if ( preg_match('/-(07|08|09)-/', $value) ) {
-			$value = __( 'Q3', 'formidable' ) . ' ' . date('Y', strtotime($value));
+			$value = __( 'Q3', 'formidable-pro' ) . ' ' . date('Y', strtotime($value));
 		} else if ( preg_match('/-(10|11|12)-/', $value) ) {
-			$value = __( 'Q4', 'formidable' ) . ' ' . date('Y', strtotime($value));
+			$value = __( 'Q4', 'formidable-pro' ) . ' ' . date('Y', strtotime($value));
 		}
 
 		return $value;
@@ -1902,9 +1902,9 @@ class FrmProGraphsController {
 			} else if ( $field->field_options['separate_value'] || FrmField::is_option_true( $field, 'other' ) ) {
 				$displayed_value = self::get_option_label_for_value( $field, $value );
 			} else if ( $field->type == 'user_id' ) {
-				$displayed_value = FrmProFieldsHelper::get_display_name( $value, 'display_name' );
+				$displayed_value = FrmFieldsHelper::get_user_display_name( $value, 'display_name' );
 			} else if ( $field->type == 'data' && $field->field_options['form_select'] != 'taxonomy' ) {
-				$displayed_value = FrmProFieldsHelper::get_data_display_value( $value, array(), $field );
+				$displayed_value = FrmFieldsHelper::get_unfiltered_display_value( compact( 'value', 'field' ) );
 			} else if ( FrmField::is_option_true_in_array( $field->field_options, 'post_field' ) && $field->field_options['post_field'] == 'post_category' && $field->field_options['taxonomy'] ) {
 				$displayed_value = FrmProPost::get_taxonomy_term_name_from_id( $value, $field->field_options['taxonomy'] );
 			} else if ( is_numeric( $value ) ) {
@@ -2103,7 +2103,7 @@ class FrmProGraphsController {
 		$form = self::get_form_for_reports();
 
 		if ( ! $form ) {
-			require(FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-statistics/select.php');
+			require(FrmProAppHelper::plugin_path() . '/classes/views/frmpro-statistics/select.php');
 			return;
 		}
 
@@ -2113,7 +2113,19 @@ class FrmProGraphsController {
 
 		$entries = FrmDb::get_col( 'frm_items', array( 'form_id' => $form->id ), 'created_at' );
 
-		include( FrmAppHelper::plugin_path() .'/pro/classes/views/frmpro-statistics/show.php' );
+		foreach ( $fields as $field ) {
+			if ( ! isset( $data[ $field->id ] ) ) {
+				continue;
+			}
+
+			if ( 'user_id' === $field->type ) {
+				$user_ids = FrmDb::get_col( $wpdb->users, array(), 'ID', 'display_name ASC' );
+				$submitted_user_ids = FrmEntryMeta::get_entry_metas_for_field( $field->id, '', '', array( 'unique' => true ) );
+				break;
+			}
+		}
+
+		include( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-statistics/show.php' );
 	}
 
 	/**
@@ -2167,7 +2179,7 @@ class FrmProGraphsController {
 			'y_min' => 0,
 		);
 
-		$atts = $common_atts + array( 'title' => __( 'Daily Entries', 'formidable' ), 'created_at_greater_than' => '-1 month' );
+		$atts = $common_atts + array( 'title' => __( 'Daily Entries', 'formidable-pro' ), 'created_at_greater_than' => '-1 month' );
 
 		$data['time'] = self::graph_shortcode( $atts );
 
@@ -2175,7 +2187,7 @@ class FrmProGraphsController {
 				'created_at_greater_than' => '-1 year',
 				'created_at_less_than' => '+1 month',
 				'group_by' => 'month',
-				'title' => __( 'Monthly Entries', 'formidable' ),
+				'title' => __( 'Monthly Entries', 'formidable-pro' ),
 			);
 		$data['month'] = self::graph_shortcode( $atts );
 

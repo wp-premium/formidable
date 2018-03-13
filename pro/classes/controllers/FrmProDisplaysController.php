@@ -9,7 +9,7 @@ class FrmProDisplaysController {
 
 	public static function register_post_types() {
 		register_post_type( self::$post_type, array(
-			'label' => __( 'Views', 'formidable' ),
+			'label' => __( 'Views', 'formidable-pro' ),
 			'description' => '',
 			'public' => apply_filters( 'frm_public_views', true ),
 			'show_ui' => true,
@@ -32,14 +32,14 @@ class FrmProDisplaysController {
 			),
 			'has_archive' => false,
 			'labels' => array(
-				'name' => __( 'Views', 'formidable' ),
-				'singular_name' => __( 'View', 'formidable' ),
-				'menu_name' => __( 'View', 'formidable' ),
+				'name' => __( 'Views', 'formidable-pro' ),
+				'singular_name' => __( 'View', 'formidable-pro' ),
+				'menu_name' => __( 'View', 'formidable-pro' ),
 				'edit' => __( 'Edit' ),
-				'search_items' => __( 'Search Views', 'formidable' ),
-				'not_found' => __( 'No Views Found.', 'formidable' ),
-				'add_new_item' => __( 'Add New View', 'formidable' ),
-				'edit_item' => __( 'Edit View', 'formidable' )
+				'search_items' => __( 'Search Views', 'formidable-pro' ),
+				'not_found' => __( 'No Views Found.', 'formidable-pro' ),
+				'add_new_item' => __( 'Add New View', 'formidable-pro' ),
+				'edit_item' => __( 'Edit View', 'formidable-pro' )
 			)
 		) );
 	}
@@ -47,7 +47,7 @@ class FrmProDisplaysController {
 	public static function menu() {
 		FrmAppHelper::force_capability( 'frm_edit_displays' );
 
-		add_submenu_page( 'formidable', 'Formidable | ' . __( 'Views', 'formidable' ), __( 'Views', 'formidable' ), 'frm_edit_displays', 'edit.php?post_type=frm_display' );
+		add_submenu_page( 'formidable', 'Formidable | ' . __( 'Views', 'formidable-pro' ), __( 'Views', 'formidable-pro' ), 'frm_edit_displays', 'edit.php?post_type=frm_display' );
 	}
 
 	public static function highlight_menu() {
@@ -60,7 +60,7 @@ class FrmProDisplaysController {
 			return;
 		}
 		$form_id = FrmAppHelper::simple_get( 'form', 'absint' );
-		echo FrmFormsHelper::forms_dropdown( 'form', $form_id, array( 'blank' => __( 'View all forms', 'formidable' ) ) );
+		echo FrmFormsHelper::forms_dropdown( 'form', $form_id, array( 'blank' => __( 'View all forms', 'formidable-pro' ) ) );
 	}
 
 	public static function filter_forms( $query ) {
@@ -81,27 +81,17 @@ class FrmProDisplaysController {
 			return $views;
 		}
 
-		$form = ( isset( $_REQUEST['form'] ) && is_numeric( $_REQUEST['form'] ) ) ? $_REQUEST['form'] : false;
-		if ( !$form ) {
-			return $views;
+		$form = ( isset( $_REQUEST['form'] ) && is_numeric( $_REQUEST['form'] ) ) ? absint( $_REQUEST['form'] ) : 0;
+		if ( $form ) {
+			$form = FrmForm::getOne( $form );
 		}
 
-		$form = FrmForm::getOne( $form );
-		if ( !$form ) {
-			return $views;
-		}
-
-		echo '<div id="poststuff">';
-		echo '<div id="post-body" class="metabox-holder columns-2">';
-		echo '<div id="post-body-content">';
-		FrmAppController::get_form_nav( $form, true, 'hide' );
-		echo '</div>';
+		FrmAppHelper::get_admin_header( array(
+			'label' => __( 'Views', 'formidable-pro' ),
+			'new_link' => admin_url('post-new.php?post_type=frm_display'),
+			'form'  => $form,
+		) );
 		echo '<div class="clear"></div>';
-		echo '</div>';
-		echo '<div id="titlediv"><input id="title" type="text" value="' . esc_attr( $form->name == '' ? __( '(no title)' ) : $form->name ) . '" readonly="readonly" disabled="disabled" /></div>';
-		echo '</div>';
-
-		echo '<style type="text/css">p.search-box{margin-top:-91px;}</style>';
 
 		return $views;
 
@@ -109,7 +99,7 @@ class FrmProDisplaysController {
 
 	public static function post_row_actions( $actions, $post ) {
 		if ( $post->post_type == self::$post_type ) {
-			$actions['duplicate'] = '<a href="' . esc_url( admin_url( 'post-new.php?post_type=frm_display&copy_id=' . $post->ID ) ) . '" title="' . esc_attr( __( 'Duplicate', 'formidable' ) ) . '">' . __( 'Duplicate', 'formidable' ) . '</a>';
+			$actions['duplicate'] = '<a href="' . esc_url( admin_url( 'post-new.php?post_type=frm_display&copy_id=' . $post->ID ) ) . '" title="' . esc_attr( __( 'Duplicate', 'formidable-pro' ) ) . '">' . __( 'Duplicate', 'formidable-pro' ) . '</a>';
 		}
 		return $actions;
 	}
@@ -131,17 +121,17 @@ class FrmProDisplaysController {
 	public static function manage_columns( $columns ) {
 		unset( $columns['title'], $columns['date'] );
 
-		$columns['title'] = __( 'View Title', 'formidable' );
+		$columns['title'] = __( 'View Title', 'formidable-pro' );
 		$columns['id'] = 'ID';
 		$columns['description'] = __( 'Description' );
-		$columns['form_id'] = __( 'Form', 'formidable' );
-		$columns['show_count'] = __( 'Entry', 'formidable' );
-		$columns['content'] = __( 'Content', 'formidable' );
-		$columns['dyncontent'] = __( 'Dynamic Content', 'formidable' );
-		$columns['date'] = __( 'Date', 'formidable' );
-		$columns['name'] = __( 'Key', 'formidable' );
-		$columns['old_id'] = __( 'Former ID', 'formidable' );
-		$columns['shortcode'] = __( 'Shortcode', 'formidable' );
+		$columns['form_id'] = __( 'Form', 'formidable-pro' );
+		$columns['show_count'] = __( 'Entry', 'formidable-pro' );
+		$columns['content'] = __( 'Content', 'formidable-pro' );
+		$columns['dyncontent'] = __( 'Dynamic Content', 'formidable-pro' );
+		$columns['date'] = __( 'Date', 'formidable-pro' );
+		$columns['name'] = __( 'Key', 'formidable-pro' );
+		$columns['old_id'] = __( 'Former ID', 'formidable-pro' );
+		$columns['shortcode'] = __( 'Shortcode', 'formidable-pro' );
 
 		return $columns;
 	}
@@ -187,7 +177,7 @@ class FrmProDisplaysController {
 				break;
 			case 'old_id':
 				$old_id = get_post_meta( $id, 'frm_old_id', true );
-				$val = ( $old_id ) ? $old_id : __( 'N/A', 'formidable' );
+				$val = ( $old_id ) ? $old_id : __( 'N/A', 'formidable-pro' );
 				break;
 			case 'name':
 			case 'content':
@@ -227,7 +217,7 @@ class FrmProDisplaysController {
 			return;
 		}
 
-		include( FrmAppHelper::plugin_path() . '/pro/classes/views/displays/submitbox_actions.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/displays/submitbox_actions.php' );
 	}
 
 	public static function default_content( $content, $post ) {
@@ -281,12 +271,12 @@ class FrmProDisplaysController {
 			return;
 		}
 
-		add_meta_box( 'frm_form_disp_type', __( 'Basic Settings', 'formidable' ), 'FrmProDisplaysController::mb_form_disp_type', self::$post_type, 'normal', 'high' );
-		add_meta_box( 'frm_dyncontent', __( 'Content', 'formidable' ), 'FrmProDisplaysController::mb_dyncontent', self::$post_type, 'normal', 'high' );
+		add_meta_box( 'frm_form_disp_type', __( 'Basic Settings', 'formidable-pro' ), 'FrmProDisplaysController::mb_form_disp_type', self::$post_type, 'normal', 'high' );
+		add_meta_box( 'frm_dyncontent', __( 'Content', 'formidable-pro' ), 'FrmProDisplaysController::mb_dyncontent', self::$post_type, 'normal', 'high' );
 		add_meta_box( 'frm_excerpt', __( 'Description' ), 'FrmProDisplaysController::mb_excerpt', self::$post_type, 'normal', 'high' );
-		add_meta_box( 'frm_advanced', __( 'Advanced Settings', 'formidable' ), 'FrmProDisplaysController::mb_advanced', self::$post_type, 'advanced' );
+		add_meta_box( 'frm_advanced', __( 'Advanced Settings', 'formidable-pro' ), 'FrmProDisplaysController::mb_advanced', self::$post_type, 'advanced' );
 
-		add_meta_box( 'frm_adv_info', __( 'Customization', 'formidable' ), 'FrmProDisplaysController::mb_adv_info', self::$post_type, 'side', 'low' );
+		add_meta_box( 'frm_adv_info', __( 'Customization', 'formidable-pro' ), 'FrmProDisplaysController::mb_adv_info', self::$post_type, 'side', 'low' );
 	}
 
 	public static function save_post( $post_id ) {
@@ -354,30 +344,36 @@ class FrmProDisplaysController {
 
 		$use_dynamic_content = in_array( $post->frm_show_count, array( 'dynamic', 'calendar' ) );
 
-		include( FrmAppHelper::plugin_path() . '/pro/classes/views/displays/mb_dyncontent.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/displays/mb_dyncontent.php' );
 	}
 
 	public static function mb_excerpt( $post ) {
-		include( FrmAppHelper::plugin_path() . '/pro/classes/views/displays/mb_excerpt.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/displays/mb_excerpt.php' );
 
 		//add form nav via javascript
 		$form = get_post_meta( $post->ID, 'frm_form_id', true );
 		if ( $form ) {
-			echo '<div id="frm_nav_container" class="frm_hidden" style="margin-top:-10px">';
-			FrmAppController::get_form_nav( $form, true, 'hide' );
-			echo '<div class="clear"></div>';
-			echo '</div>';
+			$form = FrmForm::getOne( $form );
 		}
+
+		echo '<div id="frm_nav_container" class="frm_hidden" style="margin-top:-10px">';
+		FrmAppHelper::get_admin_header( array(
+			'label'    => __( 'Views', 'formidable-pro' ),
+			'new_link' => admin_url('post-new.php?post_type=frm_display'),
+			'form'     => $form,
+		) );
+		echo '<div class="clear"></div>';
+		echo '</div>';
 	}
 
 	public static function mb_form_disp_type( $post ) {
 		FrmProDisplaysHelper::prepare_duplicate_view( $post );
-		include( FrmAppHelper::plugin_path() . '/pro/classes/views/displays/mb_form_disp_type.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/displays/mb_form_disp_type.php' );
 	}
 
 	public static function mb_advanced( $post ) {
 		FrmProDisplaysHelper::prepare_duplicate_view( $post );
-		include( FrmAppHelper::plugin_path() . '/pro/classes/views/displays/mb_advanced.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/displays/mb_advanced.php' );
 	}
 
 	public static function mb_adv_info( $post ) {
@@ -417,18 +413,20 @@ class FrmProDisplaysController {
 			return self::get_display_data( $post, $content, false );
 		}
 
-		if ( is_singular() && post_password_required() ) {
+		$requires_password = is_singular() && post_password_required();
+		$is_single_page = is_single() || is_page();
+		if ( $requires_password || ! $is_single_page || ! in_the_loop() ) {
 			return $content;
 		}
 
 		$display_id = get_post_meta( $post->ID, 'frm_display_id', true );
 
-		if ( !$display_id || ( !is_single() && !is_page() ) ) {
+		if ( ! $display_id ) {
 			return $content;
 		}
 
 		$display = FrmProDisplay::getOne( $display_id );
-		if ( !$display ) {
+		if ( ! $display ) {
 			return $content;
 		}
 
@@ -438,17 +436,17 @@ class FrmProDisplaysController {
 			$display = FrmProDisplaysHelper::setup_edit_vars( $display, false );
 		}
 
-		if ( !$frm_displayed ) {
+		if ( ! $frm_displayed ) {
 			$frm_displayed = array();
 		}
 
 		//make sure this isn't loaded multiple times but still works with themes and plugins that call the_content multiple times
-		if ( !in_the_loop() || in_array( $display->ID, (array)$frm_displayed ) ) {
+		if ( in_array( $display->ID, (array) $frm_displayed ) ) {
 			return $content;
 		}
 
 		//get the entry linked to this post
-		if ( ( is_single() || is_page() ) && $post->post_type != self::$post_type ) {
+		if ( $post->post_type != self::$post_type ) {
 
 			$entry = FrmDb::get_row( 'frm_items', array( 'post_id' => $post->ID ), 'id, item_key' );
 			if ( !$entry ) {
@@ -479,7 +477,7 @@ class FrmProDisplaysController {
 
 	public static function add_order_row( $order_key = '', $form_id = '', $order_by = '', $order = '' ) {
 		$order_key = (int)$order_key;
-		require( FrmAppHelper::plugin_path() . '/pro/classes/views/displays/order_row.php' );
+		require( FrmProAppHelper::plugin_path() . '/classes/views/displays/order_row.php' );
 	}
 
 	public static function get_where_row() {
@@ -491,7 +489,7 @@ class FrmProDisplaysController {
 
 	public static function add_where_row( $where_key = '', $form_id = '', $where_field = '', $where_is = '', $where_val = '' ) {
 		$where_key = (int)$where_key;
-		require( FrmAppHelper::plugin_path() . '/pro/classes/views/displays/where_row.php' );
+		require( FrmProAppHelper::plugin_path() . '/classes/views/displays/where_row.php' );
 	}
 
 	public static function get_where_options() {
@@ -511,7 +509,7 @@ class FrmProDisplaysController {
 			}
 		}
 
-		require( FrmAppHelper::plugin_path() . '/pro/classes/views/displays/where_options.php' );
+		require( FrmProAppHelper::plugin_path() . '/classes/views/displays/where_options.php' );
 	}
 
 	/**
@@ -545,7 +543,7 @@ class FrmProDisplaysController {
 		$next_year = date( 'Y', strtotime( '+1 month', $this_time ) );
 
 		ob_start();
-		include( FrmAppHelper::plugin_path() . '/pro/classes/views/displays/calendar-header.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/displays/calendar-header.php' );
 		$content .= ob_get_contents();
 		ob_end_clean();
 		return $content;
@@ -629,7 +627,7 @@ class FrmProDisplaysController {
 		$used_entries = array();
 
 		ob_start();
-		include( FrmAppHelper::plugin_path() . '/pro/classes/views/displays/calendar.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/displays/calendar.php' );
 		$content = ob_get_contents();
 		ob_end_clean();
 		return $content;
@@ -738,7 +736,7 @@ class FrmProDisplaysController {
 
 		//If site is not set to English, convert day(s), week(s), month(s), and year(s) (in repeat_period string) to English
 		//Check for a few common repeat periods like daily, weekly, monthly, and yearly as well
-		$t_strings = array( __( 'day', 'formidable' ), __( 'days', 'formidable' ), __( 'daily', 'formidable' ), __( 'week', 'formidable' ), __( 'weeks', 'formidable' ), __( 'weekly', 'formidable' ), __( 'month', 'formidable' ), __( 'months', 'formidable' ), __( 'monthly', 'formidable' ), __( 'year', 'formidable' ), __( 'years', 'formidable' ), __( 'yearly', 'formidable' ) );
+		$t_strings = array( __( 'day', 'formidable-pro' ), __( 'days', 'formidable-pro' ), __( 'daily', 'formidable-pro' ), __( 'week', 'formidable-pro' ), __( 'weeks', 'formidable-pro' ), __( 'weekly', 'formidable-pro' ), __( 'month', 'formidable-pro' ), __( 'months', 'formidable-pro' ), __( 'monthly', 'formidable-pro' ), __( 'year', 'formidable-pro' ), __( 'years', 'formidable-pro' ), __( 'yearly', 'formidable-pro' ) );
 		$t_strings = apply_filters( 'frm_recurring_strings', $t_strings, $display );
 		$e_strings = array( 'day', 'days', '1 day', 'week', 'weeks', '1 week', 'month', 'months', '1 month', 'year', 'years', '1 year' );
 		if ( $t_strings != $e_strings ) {
@@ -806,7 +804,7 @@ class FrmProDisplaysController {
 		}
 
 		ob_start();
-		include( FrmAppHelper::plugin_path() . '/pro/classes/views/displays/calendar-footer.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/displays/calendar-footer.php' );
 		$content = ob_get_contents();
 		ob_end_clean();
 		return $content;
@@ -821,7 +819,7 @@ class FrmProDisplaysController {
 			$post->frm_form_id = (int)$_POST['form_id'];
 			$post->frm_edate_field_id = $post->frm_date_field_id = '';
 			$post->frm_repeat_event_field_id = $post->frm_repeat_edate_field_id = '';
-			include( FrmAppHelper::plugin_path() . '/pro/classes/views/displays/_calendar_options.php' );
+			include( FrmProAppHelper::plugin_path() . '/classes/views/displays/_calendar_options.php' );
 		}
 
 		wp_die();
@@ -847,6 +845,7 @@ class FrmProDisplaysController {
 			'user_id' => false, 'limit' => '', 'page_size' => '',
 			'order_by' => '', 'order' => '', 'get' => '', 'get_value' => '',
 			'drafts' => 'default',
+			'wpautop' => '',
 		);
 
 		$sc_atts = shortcode_atts( $defaults, $atts );
@@ -870,7 +869,7 @@ class FrmProDisplaysController {
 		}
 
 		if ( ! $display ) {
-			return __( 'There are no views with that ID', 'formidable' );
+			return __( 'There are no views with that ID', 'formidable-pro' );
 		}
 
 		return self::get_view_data( $display, '', array(
@@ -882,16 +881,8 @@ class FrmProDisplaysController {
 			'order'     => sanitize_text_field( $atts['order'] ),
 			'drafts'    => sanitize_title( $atts['drafts'] ),
 			'entry_id'  => sanitize_text_field( $atts['entry_id'] ),
+			'wpautop'   => sanitize_text_field( $atts['wpautop'] ),
 		) );
-	}
-
-	public static function custom_display( $id ) {
-		_deprecated_function( __FUNCTION__, '2.0.25', 'FrmProDisplaysController::get_view_data' );
-		if ( $view = FrmProDisplay::getOne( $id, false, false, array( 'check_post' => true ) ) ) {
-			return self::get_view_data( $view, '', array() );
-		} else {
-			return '';
-		}
 	}
 
 	// TODO: Deprecate this function
@@ -932,8 +923,6 @@ class FrmProDisplaysController {
 		} else {
 			$view_content = self::get_detail_page_content( $view, $atts );
 		}
-
-		self::do_all_shortcodes_except_formidable( $view_content );
 
 		self::maybe_filter_content( $atts, $view_content );
 
@@ -2419,7 +2408,6 @@ class FrmProDisplaysController {
 
 		if ( $filtered_content != $unfiltered_content ) {
 			$inner_content = $filtered_content;
-			FrmProFieldsHelper::replace_non_standard_formidable_shortcodes( array(), $inner_content );
 		} else {
 			$odd = 'odd';
 			$count = 0;
@@ -2431,16 +2419,32 @@ class FrmProDisplaysController {
 					$args['count'] = $count;
 
 					$new_content = apply_filters( 'frm_display_entry_content', $unfiltered_content, $entry, $shortcodes, $view, 'all', $odd, $args );
-					FrmProFieldsHelper::replace_non_standard_formidable_shortcodes( array(), $new_content );
+					self::replace_entry_position_shortcode( compact( 'entry', 'view' ), $args, $new_content );
+
 					$inner_content .= $new_content;
 
 					$odd = ( $odd == 'odd' ) ? 'even' : 'odd';
 				}
+
 				unset( $entry, $entries );
 			}
 		}
 
+		FrmProFieldsHelper::replace_non_standard_formidable_shortcodes( array(), $inner_content );
+
 		return $inner_content;
+	}
+
+	/**
+	 * Filter out entry_number shortcode when we have the entry position in the view
+	 *
+	 * @since 2.05.06
+	 */
+	private static function replace_entry_position_shortcode( $entry_args, $args, &$content ) {
+		preg_match_all( "/\[(if )?(entry_position)\b(.*?)(?:(\/))?\](?:(.+?)\[\/\2\])?/s", $content, $shortcodes, PREG_PATTERN_ORDER );
+		foreach ( $shortcodes[0] as $short_key => $tag ) {
+			FrmProContent::replace_single_shortcode( $shortcodes, $short_key, $tag, $entry_args['entry'], $entry_args['view'], $args, $content );
+		}
 	}
 
 	/**
@@ -2544,8 +2548,8 @@ class FrmProDisplaysController {
 			$page_last_record = FrmAppHelper::get_last_record_num( $record_count, $current_page, $view->frm_page_size );
 			$page_first_record = FrmAppHelper::get_first_record_num( $record_count, $current_page, $view->frm_page_size );
 			$page_param = 'frm-page-'. $view->ID;
-			$args = compact( 'current_page', 'record_count', 'page_count', 'page_last_record', 'page_first_record', 'page_param' );
-			$pagination = FrmAppHelper::get_file_contents( FrmAppHelper::plugin_path() .'/pro/classes/views/displays/pagination.php', $args );
+			$args = compact( 'current_page', 'record_count', 'page_count', 'page_last_record', 'page_first_record', 'page_param', 'view' );
+			$pagination = FrmAppHelper::get_file_contents( FrmProAppHelper::plugin_path() . '/classes/views/displays/pagination.php', $args );
 		}
 
 		return $pagination;
@@ -2591,20 +2595,6 @@ class FrmProDisplaysController {
 	}
 
 	/**
-	 * Do all shortcode except [formidable id=x]
-	 * This helps prevent double-filtering of forms
-	 * Also, it probably needs to be kept around for reverse compatibility
-	 *
-	 * @param $view_content
-	 */
-	private static function do_all_shortcodes_except_formidable( &$view_content ) {
-		global $frm_vars;
-		$frm_vars['skip_shortcode'] = true;
-		$view_content = do_shortcode( $view_content );
-		$frm_vars['skip_shortcode'] = false;
-	}
-
-	/**
 	 * Apply the filters normally run on the_content if filter=1 is set
 	 *
 	 * @since 2.0.23
@@ -2613,13 +2603,36 @@ class FrmProDisplaysController {
 	 * @param array $atts
 	 */
 	private static function maybe_filter_content( $atts, &$content ) {
-		if ( $atts['filter'] == 'limited' ) {
+		self::set_filter_needed( $atts, $content );
+
+		if ( 'limited' === $atts['filter'] ) {
 			self::filter_embeds( $content );
-			self::add_content_filters();
+			self::add_content_filters( $atts );
 
 			$content = apply_filters( 'frm_the_content', $content );
-		} elseif ( $atts['filter'] ) {
+
+			self::remove_content_filters();
+
+		} elseif ( ! empty( $atts['filter'] ) ) {
 			$content = apply_filters( 'the_content', $content );
+		}
+	}
+
+	/**
+	 * If filter has not been specified, check for known shortcodes.
+	 * If a shortcode is included, filter it without adding p tags.
+	 *
+	 * @since 3.0.3
+	 */
+	private static function set_filter_needed( &$atts, $content ) {
+		if ( empty( $atts['filter'] ) ) {
+			$shortcodes = 'formidable|frm-stats|frm-field-value|display-frm-data|frm-set-get|formresults|frm-search|frm-entry-links|frm-edit-|frm-show-entry|frm-alt-color|frm-graph|gallery';
+			if ( preg_match( "/\[($shortcodes)/s", $content ) ) {
+				$atts['filter'] = 'limited';
+				if ( ! isset( $atts['wpautop'] ) || $atts['wpautop'] === '' ) {
+					$atts['wpautop'] = '0';
+				}
+			}
 		}
 	}
 
@@ -2640,7 +2653,7 @@ class FrmProDisplaysController {
 	 *
 	 * @since 2.05
 	 */
-	private static function add_content_filters() {
+	private static function add_content_filters( $atts ) {
 		if ( has_filter( 'frm_the_content', 'do_shortcode' ) ) {
 			// don't add the filters a second time
 			return;
@@ -2650,13 +2663,31 @@ class FrmProDisplaysController {
 			add_filter( 'frm_the_content', 'wptexturize' );
 		}
 
-		if ( has_filter('the_content', 'wpautop' ) ) {
+		$cancel_autop = isset( $atts['wpautop'] ) && $atts['wpautop'] === '0';
+		$do_autop = has_filter( 'the_content', 'wpautop' ) || ( isset( $atts['wpautop'] ) && $atts['wpautop'] === '1' );
+		if ( $do_autop && ! $cancel_autop ) {
 			add_filter( 'frm_the_content', 'wpautop' );
 		}
 
 		add_filter( 'frm_the_content', 'wp_make_content_images_responsive' );
 		add_filter( 'frm_the_content', 'shortcode_unautop' );
 		add_filter( 'frm_the_content', 'do_shortcode', 11 );
+	}
+
+	/**
+	 * Remove the filters that were added so they won't
+	 * affect another view/form
+	 *
+	 * @since 3.0
+	 */
+	private static function remove_content_filters() {
+		if ( has_filter( 'frm_the_content', 'do_shortcode' ) ) {
+			remove_filter( 'frm_the_content', 'wptexturize' );
+			remove_filter( 'frm_the_content', 'wpautop' );
+			remove_filter( 'frm_the_content', 'wp_make_content_images_responsive' );
+			remove_filter( 'frm_the_content', 'shortcode_unautop' );
+			remove_filter( 'frm_the_content', 'do_shortcode', 11 );
+		}
 	}
 
 	/**
@@ -2729,11 +2760,5 @@ class FrmProDisplaysController {
 			$frm_vars['views_loaded'] = array();
 		}
 		$frm_vars['views_loaded'][ $view->ID ] = $view->post_title;
-	}
-
-	public static function filter_after_content( $content, $display, $show, $atts ) {
-		_deprecated_function( __FUNCTION__, '2.0.23', 'FrmProDisplaysController::replace_entry_count_shortcode()' );
-		self::replace_entry_count_shortcode( $atts, $content );
-		return $content;
 	}
 }

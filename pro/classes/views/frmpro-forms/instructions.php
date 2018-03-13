@@ -1,5 +1,9 @@
 <div id="frm-dynamic-values" class="tabs-panel frm_hidden" style="max-height:none;">
-	<p class="howto"><?php _e( 'Add dynamic default values as default text to fields in your form', 'formidable' ) ?>
+	<ol class="howto">
+		<li><?php _e( 'Click inside the "Dynamic default value" field setting or directly on the input field.', 'formidable-pro' ) ?></li>
+		<li><?php _e( 'This box will activate and you can click to insert dynamic default values as default text to fields in your form.', 'formidable-pro' ) ?></li>
+	</ol>
+
     <ul class="frm_code_list" style="margin-bottom:0;">
         <?php
         $col = 'one';

@@ -231,36 +231,70 @@ class FrmProEntriesHelper{
             $form_id = is_numeric($form) ? $form : $form->id;
             $link .= '&form='. $form_id;
         }
-        $link .= '" class="add-new-h2">'. __( 'Add New', 'formidable' ) .'</a>';
+        $link .= '" class="add-new-h2 frm_animate_bg">'. __( 'Add New', 'formidable-pro' ) .'</a>';
 
         return $link;
     }
 
     public static function show_duplicate_link($entry) {
+		_deprecated_function( __METHOD__, '3.0' );
         echo self::duplicate_link($entry);
     }
 
-    public static function duplicate_link($entry) {
-        if ( current_user_can('frm_create_entries') ) {
-            $link = '<a href="?page=formidable-entries&frm_action=duplicate&form='. $entry->form_id .'&id='. $entry->id .'" class="button-secondary alignright">'. __( 'Duplicate', 'formidable' ) .'</a>';
-            return $link;
-        }
-    }
+	public static function duplicate_link( $entry ) {
+		if ( current_user_can('frm_create_entries') ) {
+			_deprecated_function( __METHOD__, '3.0' );
+			return '<a href="' . esc_url( '?page=formidable-entries&frm_action=duplicate&form=' . $entry->form_id . '&id=' . $entry->id ) . '" class="button-secondary">' .
+				esc_html__( 'Duplicate', 'formidable-pro' ) .
+				'</a>';
+		}
+	}
 
-    public static function edit_button() {
+	/**
+	 * @since 3.0
+	 * @param $atts array includes id & entry
+	 */
+	public static function add_actions_dropdown( $actions, $atts ) {
+		$entry = $atts['entry'];
+
+		if ( current_user_can( 'frm_delete_entries' ) ) {
+			if ( ! empty( $entry->post_id ) ) {
+				$actions['frm_delete_post'] = array(
+					'url'   => admin_url( 'admin.php?page=formidable-entries&frm_action=destroy&keep_post=1&id=' . $entry->id . '&form=' . $entry->form_id ),
+					'label' => __( 'Delete without Post' ),
+					'icon'  => 'frm_icon_font frm_delete_icon',
+					'data'  => array( 'frmverify' => __( 'Really delete?', 'formidable' ) ),
+				);
+			}
+		}
+
+		if ( current_user_can('frm_create_entries') ) {
+			$actions['frm_duplicate'] = array(
+				'url'   => admin_url( 'admin.php?page=formidable-entries&frm_action=duplicate&id=' . $entry->id . '&form=' . $entry->form_id ),
+				'label' => __( 'Duplicate', 'formidable-pro' ),
+				'icon'  => 'frm_icon_font frm_duplicate_icon',
+			);
+		}
+
+		return $actions;
+	}
+
+    public static function edit_button( $entry = array() ) {
         if ( ! current_user_can('frm_edit_entries') ) {
             return;
         }
 ?>
-	    <div id="publishing-action">
-			<a href="<?php echo esc_url( add_query_arg( 'frm_action', 'edit' ) ) ?>" class="button-primary"><?php _e( 'Edit', 'formidable' ) ?></a>
-        </div>
+		<div id="publishing-action">
+			<a href="<?php echo esc_url( add_query_arg( 'frm_action', 'edit' ) ) ?>" class="button-primary">
+				<?php _e( 'Edit', 'formidable-pro' ) ?>
+			</a>
+		</div>
 <?php
     }
 
     public static function resend_email_links($entry_id, $form_id, $args = array()) {
         $defaults = array(
-            'label' => __( 'Resend Email Notifications', 'formidable' ),
+            'label' => __( 'Resend Email Notifications', 'formidable-pro' ),
             'echo' => true,
         );
 
@@ -280,7 +314,12 @@ class FrmProEntriesHelper{
 
         if ( $footer ) {
             if ( apply_filters('frm_show_delete_all', current_user_can('frm_edit_entries'), $form_id) ) {
-            ?><div class="frm_uninstall alignleft actions"><a href="?page=formidable-entries&amp;frm_action=destroy_all<?php echo esc_attr( $form_id ? '&form=' . absint( $form_id ) : '' ); ?>" class="button" onclick="return confirm('<?php esc_attr_e( 'Are you sure you want to permanently delete ALL the entries in this form?', 'formidable' ) ?>')"><?php _e( 'Delete ALL Entries', 'formidable' ) ?></a></div>
+			?>
+			<div class="frm_uninstall alignleft actions">
+				<a href="?page=formidable-entries&amp;frm_action=destroy_all<?php echo esc_attr( $form_id ? '&form=' . absint( $form_id ) : '' ); ?>" class="button" data-frmverify="<?php esc_attr_e( 'Really permanently delete ALL entries in this form?', 'formidable-pro' ) ?>">
+					<?php _e( 'Delete ALL Entries', 'formidable-pro' ) ?>
+				</a>
+			</div>
 <?php
             }
             return;
@@ -306,7 +345,7 @@ class FrmProEntriesHelper{
 		?>
 		<div class="alignleft actions">
 			<a href="<?php echo esc_url( add_query_arg( $page_params, admin_url( 'admin-ajax.php' ) ) ) ?>" class="button">
-				<?php _e( 'Download CSV', 'formidable' ); ?>
+				<?php _e( 'Download CSV', 'formidable-pro' ); ?>
 			</a>
 		</div>
 		<?php
@@ -330,11 +369,6 @@ class FrmProEntriesHelper{
 
         return $var;
     }
-
-	public static function get_dfe_values( $field, $entry, &$field_value ) {
-		_deprecated_function( __FUNCTION__, '2.0.08', 'FrmProEntriesHelper::get_dynamic_list_values' );
-		FrmProEntriesHelper::get_dynamic_list_values( $field, $entry, $field_value );
-	}
 
 	/**
 	* Get the values for Dynamic List fields based on the conditional logic settings
@@ -494,7 +528,7 @@ class FrmProEntriesHelper{
 			return array();
 		}
 
-		$dynamic_field_query = array( 'field_id' => $dynamic_field_ids );
+		$dynamic_field_query = array();
 
 		$linked_form_ids = FrmDb::get_col( 'frm_fields', array( 'id' => $linked_field_ids), 'form_id' );
 		if ( $linked_form_ids ) {
@@ -506,6 +540,7 @@ class FrmProEntriesHelper{
 				} else {
 					$dynamic_field_query['meta_value'] = $linked_entry_ids;
 				}
+				$dynamic_field_query['field_id'] = $dynamic_field_ids;
 			}
 		}
 
@@ -699,17 +734,15 @@ class FrmProEntriesHelper{
 			}
 		}
 
-		$matching_posts = FrmDb::get_col( $wpdb->posts, $p_search, 'ID' );
 		$p_ids = array( $search, 'or' => 1 );
-		if ( $matching_posts ) {
-			$post_ids = FrmDb::get_col( $wpdb->prefix .'frm_items', array( 'post_id' => $matching_posts, 'form_id' => (int) $form_id) );
-			if ( $post_ids ) {
-				$p_ids['item_id'] = $post_ids;
-			}
-		}
+		self::search_form_posts( $form_id, $p_search, $p_ids );
 
 		if ( ! empty( $e_ids ) ) {
-			$p_ids['item_id'] = $e_ids;
+			if ( isset( $p_ids['item_id'] ) ) {
+				$p_ids['item_id'] = array_merge( (array) $e_ids, (array) $p_ids['item_id'] );
+			} else {
+				$p_ids['item_id'] = $e_ids;
+			}
 		}
 
 		$query = array( 'fi.form_id' => $form_id );
@@ -718,42 +751,23 @@ class FrmProEntriesHelper{
 		return FrmEntryMeta::getEntryIds( $query, '', '', true, $args );
     }
 
-	public static function generate_csv( $form, $entry_ids, $form_cols ) {
-		_deprecated_function( __FUNCTION__, '2.0.8', 'FrmCSVExportHelper::generate_csv');
-		FrmCSVExportHelper::generate_csv( compact( 'form', 'entry_ids', 'form_cols' ) );
-	}
+	private static function search_form_posts( $form_id, $p_search, &$p_ids ) {
+		global $wpdb;
 
-	public static function csv_headings() {
-		_deprecated_function( __FUNCTION__, '2.0.8' );
-	}
+		$post_ids = FrmDb::get_col( 'frm_items', array( 'form_id' => (int) $form_id ), 'post_id' );
+		if ( empty( $post_ids ) ) {
+			return;
+		}
 
-	public static function add_repeat_field_values_to_csv() {
-		_deprecated_function( __FUNCTION__, '2.0.8' );
-	}
+		$matching_posts = FrmDb::get_col( $wpdb->posts, $p_search, 'ID' );
+		$matching_posts = array_intersect( $matching_posts, $post_ids );
+		if ( empty( $matching_posts ) ) {
+			return;
+		}
 
-	public static function add_field_values_to_csv() {
-		_deprecated_function( __FUNCTION__, '2.0.8' );
-	}
-
-	public static function add_comments_to_csv() {
-		_deprecated_function( __FUNCTION__, '2.0.8' );
-	}
-
-	public static function add_entry_data_to_csv() {
-		_deprecated_function( __FUNCTION__, '2.0.8' );
-	}
-
-	public static function print_csv_row() {
-		_deprecated_function( __FUNCTION__, '2.0.8' );
-	}
-
-	public static function encode_value( $line ) {
-		_deprecated_function( __FUNCTION__, '2.0.8', 'FrmCSVExportHelper::encode_value');
-		return FrmCSVExportHelper::encode_value( $line );
-	}
-
-	public static function escape_csv( $value ) {
-		_deprecated_function( __FUNCTION__, '2.0.8', 'FrmCSVExportHelper::escape_csv');
-		return FrmCSVExportHelper::escape_csv( $value );
+		$post_entries = FrmDb::get_col( 'frm_items', array( 'post_id' => $matching_posts ) );
+		if ( $post_entries ) {
+			$p_ids['item_id'] = $post_entries;
+		}
 	}
 }

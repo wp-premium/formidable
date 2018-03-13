@@ -12,7 +12,7 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 
 		$sub_fields = self::get_sub_fields( $field );
 
-		include( FrmAppHelper::plugin_path() .'/pro/classes/views/combo-fields/input.php' );
+		include( FrmProAppHelper::plugin_path() .'/classes/views/combo-fields/input.php' );
 	}
 
 	public static function add_optional_class( $class, $field ) {
@@ -21,20 +21,9 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 	}
 
 	public static function show_in_form_builder( $field, $name = '', $null = null ) {
-		$defaults = self::empty_value_array();
-		self::fill_values( $field['default_value'], $defaults );
-
-		$field['value'] = $field['default_value'];
-		$sub_fields = self::get_sub_fields( $field );
-
-		parent::show_in_form_builder( $field, $name, $sub_fields );
-
-		$display = array(
-			'clear_on_focus' => true,
-			'default_blank' => true,
-		);
-
-		FrmFieldsHelper::clear_on_focus_html( $field, $display );
+		_deprecated_function( __METHOD__, '3.0', 'FrmFieldType::show_on_form_builder' );
+		$field_type = FrmFieldFactory::get_field_type( 'address', $field );
+		return $field_type->show_on_form_builder( $name );
 	}
 
 	public static function get_sub_fields( $field ) {
@@ -48,7 +37,7 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 				'atts' => array( 'x-autocompletetype' => 'address-line2', 'autocompletetype' => 'address-line2' ),
 			),
 			'city'  => array(
-				'type' => 'text', 'classes' => 'frm_first frm_third', 'label' => 1,
+				'type' => 'text', 'classes' => 'frm_third frm_first', 'label' => 1,
 				'atts' => array( 'x-autocompletetype' => 'city', 'autocompletetype' => 'city' ),
 			),
 			'state' => array(
@@ -60,6 +49,14 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 				 'atts' => array( 'x-autocompletetype' => 'postal-zip', 'autocompletetype' => 'postal-zip' ),
 			 ),
 		);
+
+		if ( 'europe' === $field['address_type'] ) {
+			$city_field = $fields['city'];
+			unset( $fields['state'], $fields['city'] );
+			$fields['city'] = $city_field;
+			$fields['city']['classes'] = 'frm_third';
+			$fields['zip']['classes'] .= ' frm_first';
+		}
 
 		if ( $field['address_type'] == 'us' ) {
 			$fields['state']['type'] = 'select';
@@ -75,41 +72,14 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 		return $fields;
 	}
 
-	public static function add_default_options( $options ) {
-		$options['address_type'] = 'international';
-
-		$default_labels = self::default_labels();
-		foreach ( $default_labels as $key => $label ) {
-			$options[ $key . '_desc' ] = $label;
-		}
-
-		return $options;
-	}
-
 	public static function form_builder_options( $field, $display, $values ) {
-		include( FrmAppHelper::plugin_path() .'/pro/classes/views/combo-fields/addresses/back-end-field-opts.php' );
+		include( FrmProAppHelper::plugin_path() .'/classes/views/combo-fields/addresses/back-end-field-opts.php' );
 	}
 
 	public static function display_value( $value ) {
-		if ( ! is_array( $value ) ) {
-			return $value;
-		}
-
-		$new_value = '';
-		if ( ! empty( $value['line1'] ) ) {
-			$defaults = self::empty_value_array();
-			self::fill_values( $value, $defaults );
-
-			$new_value = $value['line1'] . ' <br/>';
-			if ( ! empty( $value['line2'] ) ) {
-				$new_value .= $value['line2'] . ' <br/>';
-			}
-			$new_value .= $value['city'] . ', ' . $value['state'] . ' ' . $value['zip'];
-			if ( isset( $value['country'] ) && ! empty( $value['country']) ) {
-				$new_value .= ' <br/>' . $value['country'];
-			}
-		}
-		return $new_value;
+		_deprecated_function( __FUNCTION__, '3.0', 'FrmProFieldAddress->get_display_value' );
+		$field_obj = FrmFieldFactory::get_field_type( 'address' );
+		return $field_obj->get_display_value( $value );
 	}
 
 	public static function add_csv_columns( $headings, $atts ) {
@@ -136,9 +106,9 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 	private static function get_field_label( $field, $field_name ) {
 		$default_labels = self::default_labels();
 		$descriptions = array_keys( $default_labels );
-		$default_labels['line1'] = __( 'Line 1', 'formidable' );
-		$default_labels['line2'] = __( 'Line 2', 'formidable' );
-		$default_labels['country'] = __( 'Country', 'formidable' );
+		$default_labels['line1'] = __( 'Line 1', 'formidable-pro' );
+		$default_labels['line2'] = __( 'Line 2', 'formidable-pro' );
+		$default_labels['country'] = __( 'Country', 'formidable-pro' );
 
 		$label = isset( $default_labels[ $field_name ] ) ? $default_labels[ $field_name ] : '';
 		if ( in_array( $field_name, $descriptions ) ) {
@@ -161,10 +131,10 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 		$options = array(
 			'line1' => '',
 			'line2' => '',
-			'city'  => __( 'City', 'formidable' ),
-			'state' => __( 'State/Province', 'formidable' ),
-			'zip'   => __( 'Zip/Postal', 'formidable' ),
-			'country' => __( 'Country', 'formidable' ),
+			'city'  => __( 'City', 'formidable-pro' ),
+			'state' => __( 'State/Province', 'formidable-pro' ),
+			'zip'   => __( 'Zip/Postal', 'formidable-pro' ),
+			'country' => __( 'Country', 'formidable-pro' ),
 		);
 		return $options;
 	}

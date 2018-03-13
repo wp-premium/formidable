@@ -280,102 +280,9 @@ class FrmProXMLHelper{
     }
 
     private static function convert_field_values( $field, $field_id, &$metas, $saved_entries = array() ) {
-	    switch ( $field->type ) {
-            case 'user_id':
-                $metas[$field_id] = FrmAppHelper::get_user_id_param( trim($metas[$field_id]) );
-                break;
-            case 'file':
-                $metas[$field_id] = self::get_file_id($metas[$field_id]);
-                // If single file upload field, reset array
-				if ( ! FrmField::is_option_true( $field, 'multiple' ) ) {
-                    $metas[$field_id] = reset( $metas[$field_id] );
-                }
-                break;
-            case 'date':
-                $metas[$field_id] = self::get_date($metas[$field_id]);
-                break;
-			case 'time':
-				$metas[ $field_id ] = FrmProAppHelper::format_time( $metas[ $field_id ] );
-				break;
-            case 'data':
-				$metas[ $field_id ] = self::prepare_dynamic_field_value_from_xml( $metas[ $field_id ], $field, $saved_entries );
-                break;
-			case 'lookup':
-				if ( FrmField::get_option( $field, 'data_type' ) == 'checkbox' ) {
-					$metas[ $field_id ] = self::convert_imported_value_to_array( $metas[ $field_id ] );
-				}
-				break;
-            case 'select':
-            case 'checkbox':
-                $metas[$field_id] = self::get_multi_opts($metas[$field_id], $field);
-                break;
-			case 'divider':
-			case 'form':
-				$metas[ $field_id ] = self::get_new_child_ids( $metas[ $field_id ], $field, $saved_entries );
-				break;
-		    case 'address':
-		    	$metas[ $field_id ] = self::format_imported_address_field_values( $metas[ $field_id ] );
-				break;
-			case 'number':
-				if ( is_numeric( $metas[ $field_id ] ) ) {
-					$metas[ $field_id ] = (string) $metas[ $field_id ];
-				}
-			    break;
-	    }
+		$field_obj = FrmFieldFactory::get_field_object( $field );
+		$metas[ $field_id ] = $field_obj->get_import_value( $metas[ $field_id ], array( 'ids' => $saved_entries ) );
     }
-
-	/**
-	 * Convert comma-separated address values to an associative array
-	 *
-	 * @since 2.02.13
-	 *
-	 * @param string|array $value
-	 *
-	 * @return array
-	 */
-	private static function format_imported_address_field_values( $value ) {
-		if ( is_array( $value ) ) {
-			return $value;
-		}
-
-		$sep = apply_filters( 'frm_csv_sep', ', ' );
-		$value = explode( $sep, $value );
-
-		$count = count( $value );
-
-		if ( $count < 4 || $count > 6 ) {
-			return $value;
-		}
-
-		$new_value = FrmProAddressesController::empty_value_array();
-
-		$new_value['line1'] = $value[0];
-
-		$last_item = end( $value );
-
-		if ( $count == 6 || ( $count == 5 && is_numeric( $last_item ) ) ) {
-			$new_value['line2'] = $value[1];
-			$new_value['city']  = $value[2];
-			$new_value['state'] = $value[3];
-			$new_value['zip']   = $value[4];
-
-			if ( $count == 6 ) {
-				$new_value['country'] = $value[ 5 ];
-			}
-
-		} else {
-			$new_value['city']  = $value[1];
-			$new_value['state'] = $value[2];
-			$new_value['zip']   = $value[3];
-
-			if ( $count == 5 ) {
-				$new_value['country'] = $value[4];
-			}
-		}
-
-		return $new_value;
-	}
-
 
     /**
      * Convert timestamps to the database format
@@ -463,73 +370,23 @@ class FrmProXMLHelper{
 		}
 	}
 
-    public static function get_file_id($value) {
-        global $wpdb;
+	public static function get_file_id($value) {
+		_deprecated_function( __FUNCTION__, '3.0', 'FrmProFieldFile->get_file_id' );
+		$field_obj = FrmFieldFactory::get_field_type( 'file' );
+		return $field_obj->get_file_id( $value );
+	}
 
-        if ( ! is_array($value ) ) {
-            $value = explode(',', $value);
-        }
+	public static function get_date($value) {
+		_deprecated_function( __FUNCTION__, '3.0', 'FrmProFieldFile->get_file_id' );
+		$field_obj = FrmFieldFactory::get_field_type('file');
+		return $field_obj->get_import_value( $value );
+	}
 
-        foreach ( (array) $value as $pos => $m) {
-            $m = trim($m);
-            if (empty($m) ) {
-                continue;
-            }
-
-            if ( ! is_numeric($m) ) {
-                //get the ID from the URL if on this site
-                $m = FrmDb::get_col( $wpdb->posts, array( 'guid' => $m), 'ID' );
-            }
-
-            if ( ! is_numeric($m) ) {
-                unset($value[$pos]);
-            } else {
-                $value[$pos] = $m;
-            }
-
-            unset($pos);
-            unset($m);
-        }
-
-        return $value;
-    }
-
-    public static function get_date($value) {
-		if ( ! empty($value) ) {
-            $value = date('Y-m-d', strtotime($value));
-        }
-
-        return $value;
-    }
-
-    public static function get_multi_opts($value, $field) {
-
-        if ( ! $field || empty($value) || in_array($value, (array) $field->options ) ) {
-            return $value;
-        }
-
-        if ( $field->type != 'checkbox' && $field->type != 'select' ) {
-            return $value;
-        }
-
-		if ( $field->type == 'select' && ! FrmField::is_option_true( $field, 'multiple' ) ) {
-            return $value;
-        }
-
-        $checked = is_array($value) ? $value : maybe_unserialize($value);
-
-        if ( ! is_array($checked) ) {
-            $checked = explode(',', $checked);
-        }
-
-        if ( ! empty($checked) && count($checked) > 1 ) {
-            $value = array_map('trim', $checked);
-        }
-
-        unset($checked);
-
-        return $value;
-    }
+	public static function get_multi_opts( $value, $field ) {
+		_deprecated_function( __FUNCTION__, '3.0', 'FrmProFieldFile->get_import_value' );
+		$field_obj = FrmFieldFactory::get_field_object( $field );
+		return $field_obj->get_import_value( $value );
+	}
 
 	/**
 	 * @deprecated 2.03.08
@@ -541,34 +398,6 @@ class FrmProXMLHelper{
 	}
 
 	/**
-	 * Get the entry IDs for a value imported in a Dynamic field
-	 *
-	 * @since 2.03.08
-	 *
-	 * @param array|string|int $value
-	 * @param stdClass $field
-	 * @param array $ids
-	 *
-	 * @return array|string|int
-	 */
-	private static function prepare_dynamic_field_value_from_xml( $value, $field, $ids = array() ) {
-		if ( ! $field || FrmProField::is_list_field( $field ) ) {
-			return $value;
-		}
-
-		$value = self::convert_imported_value_to_array( $value );
-		self::switch_dynamic_field_imported_entry_ids( $field, $ids, $value );
-
-		if ( count( $value ) <= 1 ) {
-			$value = reset( $value );
-		} else {
-			$value = array_map( 'trim', $value );
-		}
-
-		return $value;
-	}
-
-	/**
 	 * Converted an imported XML value to an array
 	 *
 	 * @since 2.03.08
@@ -577,7 +406,7 @@ class FrmProXMLHelper{
 	 *
 	 * @return array|mixed|string
 	 */
-	private static function convert_imported_value_to_array( $imported_value ) {
+	public static function convert_imported_value_to_array( $imported_value ) {
 		if ( is_string( $imported_value ) && strpos( $imported_value, ',' ) !== false ) {
 			$imported_value = maybe_unserialize( $imported_value );
 
@@ -589,63 +418,6 @@ class FrmProXMLHelper{
 		}
 
 		return $imported_value;
-	}
-
-	/**
-	 * Switch the old entry IDs imported to new entry IDs for a Dynamic field
-	 *
-	 * @since 2.03.08
-	 *
-	 * @param stdClass $field
-	 * @param array $imported_values
-	 */
-	private static function switch_dynamic_field_imported_entry_ids( $field, $ids, &$imported_values ) {
-		if ( ! is_array( $imported_values ) ) {
-			return;
-		}
-
-		foreach ( $imported_values as $key => $imported_value ) {
-
-			// This entry was just imported, so we have the id
-			if ( is_numeric( $imported_value ) && isset( $ids[ $imported_value ] ) ) {
-				$imported_values[ $key ] = $ids[ $imported_value ];
-				continue;
-			}
-
-			// Look for the entry ID based on the imported value
-			// TODO: this may not be needed for XML imports. It appears to always be the entry ID that's exported
-			$where  = array( 'field_id' => $field->field_options['form_select'], 'meta_value' => $imported_value );
-			$new_id = FrmDb::get_var( 'frm_item_metas', $where, 'item_id' );
-
-			if ( $new_id && is_numeric( $new_id ) ) {
-				$imported_values[ $key ] = $new_id;
-			}
-		}
-	}
-
-	/**
-	* Get the new child IDs for a repeating field's or embedded form's meta_value
-	*
-	* @since 2.0.16
-	* @param array $meta_value
-	* @param object $field
-	* @param array $saved_entries
-	* @return array $meta_value
-	*/
-	private static function get_new_child_ids( $meta_value, $field, $saved_entries ) {
-		if ( $field->type == 'form' || FrmField::is_repeating_field( $field ) ) {
-
-			$new_meta_value = array();
-			foreach ( (array) $meta_value as $old_child_id ) {
-				if ( isset( $saved_entries[ $old_child_id ] ) ) {
-					$new_meta_value[] = $saved_entries[ $old_child_id ];
-				}
-			}
-
-			$meta_value = $new_meta_value;
-		}
-
-		return $meta_value;
 	}
 
 	/**

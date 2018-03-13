@@ -67,7 +67,8 @@ class FrmProDynamicFieldsController {
 			return array();
 		}
 
-		$linked_posts = isset( $selected_field->field_options['post_field'] ) && $selected_field->field_options['post_field'] && $selected_field->field_options['post_field'] != '';
+		$linked_is_post_field = FrmField::get_option( $selected_field, 'post_field' );
+		$linked_posts = $linked_is_post_field && $linked_is_post_field != '';
 
 		$post_ids = array();
 
@@ -125,11 +126,12 @@ class FrmProDynamicFieldsController {
 				continue;
 			}
 
-			if ( $selected_field->type == 'image' ) {
-				$options[ $meta['item_id'] ] = $meta['meta_value'];
-			} else {
-				$options[ $meta['item_id'] ] = FrmEntriesHelper::display_value( $meta['meta_value'], $selected_field, array( 'type' => $selected_field->type, 'show_icon' => true, 'show_filename' => false ) );
+			$new_value = FrmEntriesHelper::display_value( $meta['meta_value'], $selected_field, array( 'type' => $selected_field->type, 'show_icon' => true, 'show_filename' => false ) );
+			if ( $field->field_options['data_type'] == 'select' || FrmAppHelper::is_admin_page('formidable') ) {
+				$new_value = strip_tags( $new_value );
 			}
+
+			$options[ $meta['item_id'] ] = $new_value;
 
 			unset( $meta );
 		}

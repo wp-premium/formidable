@@ -58,7 +58,7 @@ class FrmProForm{
 
 				$create_file = new FrmCreateFile( array(
 					'folder_name' => $folder_name, 'file_name' => '.htaccess',
-					'error_message' => sprintf( __( 'Unable to write to %s to protect your uploads.', 'formidable' ), $folder_name . '/.htaccess' ),
+					'error_message' => sprintf( __( 'Unable to write to %s to protect your uploads.', 'formidable-pro' ), $folder_name . '/.htaccess' ),
 				) );
 				$create_file->create_file( $content );
 			}
@@ -119,7 +119,7 @@ class FrmProForm{
                 if ( !empty( $form->name ) ) {
                     $post_title = $form->name;
                 } else {
-                    $post_title = __( 'Single Post', 'formidable' );
+                    $post_title = __( 'Single Post', 'formidable-pro' );
                 }
 
                 //create new
@@ -127,7 +127,7 @@ class FrmProForm{
                     'post_status'   => 'publish',
                     'post_type'     => 'frm_display',
                     'post_title'    => $post_title,
-                    'post_excerpt'  => __( 'Used for the single post page', 'formidable' ),
+                    'post_excerpt'  => __( 'Used for the single post page', 'formidable-pro' ),
                     'post_content'  => $_POST['dyncontent'],
                 );
 
@@ -176,7 +176,7 @@ class FrmProForm{
 
         //create a new field
         $new_values = apply_filters('frm_before_field_created', FrmFieldsHelper::setup_new_vars('select', $form_id));
-        $new_values['name'] = __( 'Status', 'formidable' );
+        $new_values['name'] = __( 'Status', 'formidable-pro' );
         $new_values['field_options']['post_field'] = 'post_status';
 		$new_values['field_options']['separate_value'] = 1;
 		$new_values['options'] = FrmProFieldsHelper::get_initial_post_status_options();
@@ -273,7 +273,7 @@ class FrmProForm{
             $user_field = FrmField::get_all_types_in_form($form_id, 'user_id', 1);
             if ( ! $user_field ) {
                 $new_values = FrmFieldsHelper::setup_new_vars('user_id', $form_id);
-                $new_values['name'] = __( 'User ID', 'formidable' );
+                $new_values['name'] = __( 'User ID', 'formidable-pro' );
                 FrmField::create($new_values);
             }
         }

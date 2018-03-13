@@ -10,7 +10,7 @@ class FrmProComboFieldsController {
 		$field_name = 'item_meta[' . $field['id'] . ']';
 		$html_id = 'field_' . $field['field_key'];
 
-		include( FrmAppHelper::plugin_path() .'/pro/classes/views/combo-fields/input-form-builder.php' );
+		include( FrmProAppHelper::plugin_path() .'/classes/views/combo-fields/input-form-builder.php' );
 	}
 
 	public static function get_sub_fields( $field ) {
@@ -88,7 +88,7 @@ class FrmProComboFieldsController {
 	public static function include_inplace_sub_label( $atts ) {
 		$field = $atts['field'];
 		$option_name = $atts['option_name'];
-		include( FrmAppHelper::plugin_path() .'/pro/classes/views/combo-fields/inplace-sub-label.php' );
+		include( FrmProAppHelper::plugin_path() .'/classes/views/combo-fields/inplace-sub-label.php' );
 	}
 
 	public static function show_sub_label( $atts ) {
@@ -107,6 +107,7 @@ class FrmProComboFieldsController {
 	}
 
 	public static function add_default_options( $options ) {
+		_deprecated_function( __METHOD__, '3.0', 'FrmProField{type} Modals' );
 		return $options;
 	}
 

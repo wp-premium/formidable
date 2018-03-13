@@ -14,9 +14,9 @@ class FrmProSettings extends FrmSettings{
      */
 	function default_options() {
         return array(
-            'edit_msg'          => __( 'Your submission was successfully saved.', 'formidable' ),
-            'update_value'      => __( 'Update', 'formidable' ),
-            'already_submitted' => __( 'You have already submitted that form', 'formidable' ),
+            'edit_msg'          => __( 'Your submission was successfully saved.', 'formidable-pro' ),
+            'update_value'      => __( 'Update', 'formidable-pro' ),
+            'already_submitted' => __( 'You have already submitted that form', 'formidable-pro' ),
 			'date_format'       => 'm/d/Y',
 			'cal_date_format'   => $this->get_cal_date(),
         );
