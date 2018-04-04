@@ -3,7 +3,7 @@
 class FrmProEntriesListHelper extends FrmEntriesListHelper {
 
 	function get_bulk_actions() {
-        $actions = array( 'bulk_delete' => __( 'Delete'));
+		$actions = array( 'bulk_delete' => __( 'Delete' ) );
 
         if ( ! current_user_can('frm_delete_entries') ) {
             unset($actions['bulk_delete']);
@@ -55,13 +55,14 @@ class FrmProEntriesListHelper extends FrmEntriesListHelper {
 	<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ) ?>"><?php echo esc_attr( $text ); ?>:</label>
 	<input type="text" id="<?php echo esc_attr( $input_id ) ?>" name="s" value="<?php echo esc_attr( $search_str ); ?>" />
 	<?php
-	if ( isset( $field_list ) && ! empty( $field_list ) ) { ?>
+	if ( isset( $field_list ) && ! empty( $field_list ) ) {
+	?>
 	<select name="fid" class="hide-if-js">
 		<option value="">&mdash; <?php _e( 'All Fields', 'formidable-pro' ) ?> &mdash;</option>
 		<option value="created_at" <?php selected( $fid, 'created_at' ) ?>><?php _e( 'Entry creation date', 'formidable-pro' ) ?></option>
 		<option value="id" <?php selected( $fid, 'id' ) ?>><?php _e( 'Entry ID', 'formidable-pro' ) ?></option>
 		<?php foreach ( $field_list as $f ) { ?>
-		<option value="<?php echo ( $f->type == 'user_id' ) ? 'user_id' : $f->id ?>" <?php selected( $fid, $f->id ) ?>><?php echo FrmAppHelper::truncate( $f->name, 30 );  ?></option>
+		<option value="<?php echo ( $f->type == 'user_id' ) ? 'user_id' : $f->id; ?>" <?php selected( $fid, $f->id ); ?>><?php echo FrmAppHelper::truncate( $f->name, 30 ); ?></option>
 		<?php } ?>
 	</select>
 
@@ -72,17 +73,21 @@ class FrmProEntriesListHelper extends FrmEntriesListHelper {
 			<li><a href="#" id="fid-created_at"><?php _e( 'Entry creation date', 'formidable-pro' ) ?></a></li>
 			<li><a href="#" id="fid-id"><?php _e( 'Entry ID', 'formidable-pro' ) ?></a></li>
 			<?php
-			foreach ( $field_list as $f ) { ?>
+			foreach ( $field_list as $f ) {
+			?>
 			<li><a href="#" id="fid-<?php echo ( $f->type == 'user_id' ) ? 'user_id' : $f->id ?>"><?php echo FrmAppHelper::truncate( $f->name, 30 ); ?></a></li>
 			<?php
 				unset( $f );
-			} ?>
+			}
+			?>
 		</ul>
 	</div>
-	<?php submit_button( $text, 'button hide-if-js', false, false, array( 'id' => 'search-submit' ) );
+	<?php
+		submit_button( $text, 'button hide-if-js', false, false, array( 'id' => 'search-submit' ) );
 	} else {
 		submit_button( $text, 'button', false, false, array( 'id' => 'search-submit' ) );
-	} ?>
+	}
+	?>
 
 </div>
 <?php

@@ -20,6 +20,7 @@ if ( is_array( $field['options'] ) ) {
 		?> /><label for="<?php echo esc_attr( $html_id . '-' . $opt_key ) ?>" class="<?php echo esc_attr( $class ) ?>"></label>
 <?php
 	}
-} ?>
+}
+?>
 <div style="clear:both;"></div>
 </div>

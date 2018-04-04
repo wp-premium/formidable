@@ -1,6 +1,6 @@
 <?php
 
-class FrmProHooksController{
+class FrmProHooksController {
 
 	/**
 	 * @since 3.0
@@ -48,8 +48,9 @@ class FrmProHooksController{
 	public static function load_hooks() {
 		add_action( 'plugins_loaded', 'FrmProAppController::load_lang' );
         add_action( 'init', 'FrmProAppController::create_taxonomies', 0 );
-		add_action( 'wp_before_admin_bar_render', 'FrmProAppController::admin_bar_configure', 25 );
 		add_filter( 'frm_combined_js_files', 'FrmProAppController::combine_js_files' );
+		add_filter( 'frm_js_location', 'FrmProAppController::pro_js_location' );
+		add_action( 'wp_before_admin_bar_render', 'FrmProAppController::admin_bar_configure', 25 );
 		add_action( 'frm_before_get_form', 'FrmProAppController::register_scripts' );
 
 		add_filter( 'frm_db_needs_upgrade', 'FrmProDb::needs_upgrade' );
@@ -60,6 +61,7 @@ class FrmProHooksController{
 
         add_shortcode('frm_set_get', 'FrmProAppController::set_get');
         add_shortcode('frm-set-get', 'FrmProAppController::set_get');
+		add_shortcode( 'frm-condition', 'FrmProAppController::frm_condition_shortcode' );
 
         add_action('genesis_init', 'FrmProAppController::load_genesis');
 
@@ -319,7 +321,7 @@ class FrmProHooksController{
         // Settings Controller
         add_action('frm_style_general_settings', 'FrmProSettingsController::general_style_settings');
         add_action('frm_settings_form', 'FrmProSettingsController::more_settings', 1);
-        add_action('frm_update_settings',  'FrmProSettingsController::update');
+		add_action( 'frm_update_settings', 'FrmProSettingsController::update' );
         add_action('frm_store_settings', 'FrmProSettingsController::store');
 
 		// Styles Controller

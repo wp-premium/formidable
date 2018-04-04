@@ -12,7 +12,7 @@
                 <p><?php _e( 'Select a report to view.', 'formidable-pro' ); ?></p>
                 <input type="hidden" name="frm_action" value="reports" />
                 <input type="hidden" name="page" value="formidable" />
-                <?php FrmFormsHelper::forms_dropdown( 'form', '', array( 'blank' => false) ); ?><br/>
+				<?php FrmFormsHelper::forms_dropdown( 'form', '', array( 'blank' => false ) ); ?><br/>
                 </div>
                 <div id="nav-menu-footer">
 					<div class="major-publishing-actions">

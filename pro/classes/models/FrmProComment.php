@@ -6,8 +6,9 @@ class FrmProComment {
 
 		$post = get_post($comment_post_ID);
 
-		if ( empty($post->comment_status) )
+		if ( empty( $post->comment_status ) ) {
 			return;
+		}
 
 		// get_post_status() will get the parent status for attachments.
 		$status = get_post_status($post);
@@ -42,10 +43,10 @@ class FrmProComment {
 			$comment_author       = $display_name;
 			$comment_author_email = ''; //get email from field
 			$comment_author_url   = $current_user->user_url;
-		}else{
-			$comment_author       = ( isset($_POST['author']) )  ? trim(strip_tags($_POST['author'])) : '';
-			$comment_author_email = ( isset($_POST['email']) )   ? trim($_POST['email']) : '';
-			$comment_author_url   = ( isset($_POST['url']) )     ? trim($_POST['url']) : '';
+		} else {
+			$comment_author       = ( isset( $_POST['author'] ) ) ? trim( strip_tags( $_POST['author'] ) ) : '';
+			$comment_author_email = ( isset( $_POST['email'] ) ) ? trim( $_POST['email'] ) : '';
+			$comment_author_url   = ( isset( $_POST['url'] ) ) ? trim( $_POST['url'] ) : '';
 		}
 
 		$comment_type = '';

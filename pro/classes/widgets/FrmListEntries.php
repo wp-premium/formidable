@@ -36,7 +36,7 @@ class FrmListEntries extends WP_Widget {
 						//If ordering by a field
 
 						//Get all post IDs for this form
-                        $posts = FrmDb::get_results( $wpdb->prefix .'frm_items', array( 'form_id' => $display->frm_form_id, 'post_id >' => 1, 'is_draft' => 0), 'id, post_id' );
+						$posts = FrmDb::get_results( $wpdb->prefix . 'frm_items', array( 'form_id' => $display->frm_form_id, 'post_id >' => 1, 'is_draft' => 0 ), 'id, post_id' );
 			            $linked_posts = array();
 			           	foreach ( $posts as $post_meta ) {
 			            	$linked_posts[ $post_meta->post_id ] = $post_meta->id;
@@ -70,7 +70,7 @@ class FrmListEntries extends WP_Widget {
 							$where['em.field_id'] = $o_field->id;
 							FrmDb::get_where_clause_and_values( $where );
 
-							$query .= $wpdb->prefix . 'frm_item_metas em ON em.item_id=m.id ' . $where['where'] . ' ORDER BY CASE when em.meta_value IS NULL THEN 1 ELSE 0 END, em.meta_value' . ( $o_field->type == 'number' ? ' +0 ' : '' ) . ' '. $order;
+							$query .= $wpdb->prefix . 'frm_item_metas em ON em.item_id=m.id ' . $where['where'] . ' ORDER BY CASE when em.meta_value IS NULL THEN 1 ELSE 0 END, em.meta_value' . ( $o_field->type == 'number' ? ' +0 ' : '' ) . ' ' . $order;
 						}
 
 						//Get ordered values
@@ -90,7 +90,7 @@ class FrmListEntries extends WP_Widget {
 							$order_by = implode( ', ', $order_by_array );
 							unset( $order_by_array );
                         } else {
-                            $order_by .= 'it.created_at '. $order;
+							$order_by .= 'it.created_at ' . $order;
 						}
 						unset( $metas );
 					} else if ( ! empty( $order_field ) ) {
@@ -99,15 +99,15 @@ class FrmListEntries extends WP_Widget {
 					}
 
 					if ( ! empty( $order_by ) ) {
-                        $order_by = ' ORDER BY '. $order_by;
+						$order_by = ' ORDER BY ' . $order_by;
                     }
                 }
 
                 if ( isset($instance['cat_list']) && (int) $instance['cat_list'] == 1 && is_numeric($instance['cat_id']) ) {
-                    if ($cat_field = FrmField::getOne($instance['cat_id']))
-                        $categories = maybe_unserialize($cat_field->options);
+					if ( $cat_field = FrmField::getOne( $instance['cat_id'] ) ) {
+						$categories = maybe_unserialize( $cat_field->options );
+					}
                 }
-
         }
 
 		echo $args['before_widget'];
@@ -115,7 +115,7 @@ class FrmListEntries extends WP_Widget {
 			echo $args['before_title'] . $title . $args['after_title'];
 		}
 
-        echo '<ul id="frm_entry_list'. ( $display ? $display->frm_form_id : '' ) .'">'. "\n";
+		echo '<ul id="frm_entry_list' . ( $display ? $display->frm_form_id : '' ) . '">' . "\n";
 
 		//if Listing entries by category
         if ( isset($instance['cat_list']) && (int) $instance['cat_list'] == 1 && isset($categories) && is_array($categories) ) {
@@ -132,12 +132,16 @@ class FrmListEntries extends WP_Widget {
                 echo esc_html( $cat );
 
                 if ( isset($instance['cat_count']) && (int) $instance['cat_count'] == 1 ) {
-					echo ' ('. FrmProStatisticsController::stats_shortcode( array( 'id' => $instance['cat_id'], 'type' => 'count', 'value' => $cat ) ) .')';
+					echo ' (' . FrmProStatisticsController::stats_shortcode( array(
+						'id'    => $instance['cat_id'],
+						'type'  => 'count',
+						'value' => $cat,
+					) ) . ')';
                 }
 
                 if ( isset($instance['cat_name']) && (int) $instance['cat_name'] == 1 ) {
                     echo '</a>';
-                }else{
+				} else {
                     $entry_ids = FrmEntryMeta::getEntryIds( array('meta_value like' => $cat, 'fi.id' => $instance['cat_id'] ) );
                     $items = false;
 					if ( $entry_ids ) {
@@ -237,7 +241,8 @@ class FrmListEntries extends WP_Widget {
             <?php
             if ( isset($title_opts) && $title_opts ) {
                 foreach ( $title_opts as $title_opt ) {
-                    if ( $title_opt->type != 'checkbox' ) { ?>
+					if ( $title_opt->type !== 'checkbox' ) {
+                    ?>
                         <option value="<?php echo absint( $title_opt->id ) ?>" <?php selected( $instance['title_id'], $title_opt->id ) ?>><?php echo esc_html( $title_opt->name ) ?></option>
                         <?php
                     }

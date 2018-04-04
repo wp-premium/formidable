@@ -23,10 +23,10 @@
     <?php
         } else {
 
-    		include(FrmAppHelper::plugin_path() .'/classes/views/frm-entries/errors.php');
+			include( FrmAppHelper::plugin_path() . '/classes/views/frm-entries/errors.php' );
 
 			$form_action = 'create';
-			require(FrmAppHelper::plugin_path() .'/classes/views/frm-entries/form.php');
+			require( FrmAppHelper::plugin_path() . '/classes/views/frm-entries/form.php' );
 			?>
 
             <p>
@@ -34,7 +34,8 @@
                 <input class="button-primary" type="submit" value="<?php echo esc_attr($submit) ?>" <?php do_action('frm_submit_button_action', $form, $form_action); ?> />
                 <?php echo FrmProFormsHelper::get_draft_link($form); ?>
             </p>
-		<?php }
+		<?php
+		}
 		?>
 			</div>
             <?php include( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-entries/sidebar-new.php' ); ?>

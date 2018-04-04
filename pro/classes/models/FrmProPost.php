@@ -1,5 +1,5 @@
 <?php
-	
+
 class FrmProPost {
 	public static function save_post( $action, $entry, $form ) {
 		if ( $entry->post_id ) {
@@ -31,7 +31,7 @@ class FrmProPost {
 
 		$status = ( isset($post['post_status']) && ! empty($post['post_status']) ) ? true : false;
 
-		if ( ! $status && $action && in_array($action->post_content['post_status'], array( 'pending', 'publish')) ) {
+		if ( ! $status && $action && in_array( $action->post_content['post_status'], array( 'pending', 'publish' ) ) ) {
 			$post['post_status'] = $action->post_content['post_status'];
 		}
 
@@ -69,8 +69,8 @@ class FrmProPost {
 		}
 
 		foreach ( $post_fields as $post_field ) {
-			if ( isset($new_post[$post_field]) ) {
-				$post[$post_field] = $new_post[$post_field];
+			if ( isset( $new_post[ $post_field ] ) ) {
+				$post[ $post_field ] = $new_post[ $post_field ];
 			}
 			unset($post_field);
 		}
@@ -109,7 +109,7 @@ class FrmProPost {
 		}
 
 		// delete child entries
-		$child_entries = FrmDb::get_col( $wpdb->prefix .'frm_items', array( 'parent_item_id' => $entry_id ) );
+		$child_entries = FrmDb::get_col( $wpdb->prefix . 'frm_items', array( 'parent_item_id' => $entry_id ) );
 		foreach ( $child_entries as $child_entry ) {
 			FrmEntry::destroy( $child_entry );
 		}
@@ -134,7 +134,7 @@ class FrmProPost {
 		$temp_fields = FrmField::get_all_for_form($form->id);
 		$fields = array();
 		foreach ( $temp_fields as $f ) {
-			$fields[$f->id] = $f;
+			$fields[ $f->id ] = $f;
 			unset($f);
 		}
 		unset($temp_fields);
@@ -166,14 +166,14 @@ class FrmProPost {
 		$post_fields = self::get_post_fields( $new_post, 'post_fields' );
 
 		foreach ( $post_fields as $setting_name ) {
-			if ( ! is_numeric( $action->post_content[$setting_name] ) ) {
+			if ( ! is_numeric( $action->post_content[ $setting_name ] ) ) {
 				continue;
 			}
 
-			$new_post[$setting_name] = isset( $entry->metas[$action->post_content[$setting_name]]) ? $entry->metas[$action->post_content[$setting_name]] : '';
+			$new_post[ $setting_name ] = isset( $entry->metas[ $action->post_content[ $setting_name ] ] ) ? $entry->metas[ $action->post_content[ $setting_name ] ] : '';
 
 			if ( 'post_date' == $setting_name ) {
-				$new_post[$setting_name] = FrmProAppHelper::maybe_convert_to_db_date( $new_post[$setting_name], 'Y-m-d H:i:s' );
+				$new_post[ $setting_name ] = FrmProAppHelper::maybe_convert_to_db_date( $new_post[ $setting_name ], 'Y-m-d H:i:s' );
 			}
 
 			unset( $setting_name );
@@ -210,21 +210,21 @@ class FrmProPost {
 	private static function populate_custom_fields( $action, $entry, $fields, &$new_post ) {
 		// populate custom fields
 		foreach ( $action->post_content['post_custom_fields'] as $custom_field ) {
-			if ( empty($custom_field['field_id']) || empty($custom_field['meta_name']) || ! isset($fields[$custom_field['field_id']]) ) {
+			if ( empty( $custom_field['field_id'] ) || empty( $custom_field['meta_name'] ) || ! isset( $fields[ $custom_field['field_id'] ] ) ) {
 				continue;
 			}
 
-			$value = isset($entry->metas[$custom_field['field_id']]) ? $entry->metas[$custom_field['field_id']] : '';
+			$value = isset( $entry->metas[ $custom_field['field_id'] ] ) ? $entry->metas[ $custom_field['field_id'] ] : '';
 
-			if ( $fields[$custom_field['field_id']]->type == 'date' ) {
+			if ( $fields[ $custom_field['field_id'] ]->type == 'date' ) {
 				$value = FrmProAppHelper::maybe_convert_to_db_date($value);
 			}
 
-			if ( isset($new_post['post_custom'][$custom_field['meta_name']]) ) {
-				$new_post['post_custom'][$custom_field['meta_name']] = (array) $new_post['post_custom'][$custom_field['meta_name']];
-				$new_post['post_custom'][$custom_field['meta_name']][] = $value;
+			if ( isset( $new_post['post_custom'][ $custom_field['meta_name'] ] ) ) {
+				$new_post['post_custom'][ $custom_field['meta_name'] ] = (array) $new_post['post_custom'][ $custom_field['meta_name'] ];
+				$new_post['post_custom'][ $custom_field['meta_name'] ][] = $value;
 			} else {
-				$new_post['post_custom'][$custom_field['meta_name']] = $value;
+				$new_post['post_custom'][ $custom_field['meta_name'] ] = $value;
 			}
 
 			unset($value);
@@ -238,7 +238,7 @@ class FrmProPost {
 			}
 
 			$tax_type = ( isset($taxonomy['meta_name']) && ! empty($taxonomy['meta_name']) ) ? $taxonomy['meta_name'] : 'frm_tag';
-			$value = isset($entry->metas[$taxonomy['field_id']]) ? $entry->metas[$taxonomy['field_id']] : '';
+			$value = isset( $entry->metas[ $taxonomy['field_id'] ] ) ? $entry->metas[ $taxonomy['field_id'] ] : '';
 
 			if ( isset( $fields[ $taxonomy['field_id'] ] ) && $fields[ $taxonomy['field_id'] ]->type == 'tag' ) {
 				$value = trim($value);
@@ -255,12 +255,12 @@ class FrmProPost {
 							$term_id = wp_insert_term($v, $tax_type);
 						}
 
-						if ( $term_id && is_array($term_id) )  {
+						if ( $term_id && is_array( $term_id ) ) {
 							$term_id = $term_id['term_id'];
 						}
 
 						if ( is_numeric($term_id) ) {
-							$terms[$term_id] = $v;
+							$terms[ $term_id ] = $v;
 						}
 
 						unset($term_id, $v);
@@ -270,10 +270,10 @@ class FrmProPost {
 					unset($terms);
 				}
 
-				if ( isset($new_post['taxonomies'][$tax_type]) ) {
-					$new_post['taxonomies'][$tax_type] += (array) $value;
+				if ( isset( $new_post['taxonomies'][ $tax_type ] ) ) {
+					$new_post['taxonomies'][ $tax_type ] += (array) $value;
 				} else {
-					$new_post['taxonomies'][$tax_type] = (array) $value;
+					$new_post['taxonomies'][ $tax_type ] = (array) $value;
 				}
 			} else {
 				$value = (array) $value;
@@ -285,9 +285,9 @@ class FrmProPost {
 							continue;
 						}
 
-						$term = term_exists($val, $fields[$taxonomy['field_id']]->field_options['taxonomy']);
+						$term = term_exists( $val, $fields[ $taxonomy['field_id'] ]->field_options['taxonomy']);
 						if ( $term ) {
-							$value[$k] = is_array($term) ? $term['term_id'] : $term;
+							$value[ $k ] = is_array( $term ) ? $term['term_id'] : $term;
 						}
 
 						unset($k, $val, $term);
@@ -305,7 +305,7 @@ class FrmProPost {
 							continue;
 						}
 
-						$new_value[ $val ] = self::get_taxonomy_term_name_from_id( $val, $fields[$taxonomy['field_id']]->field_options['taxonomy'] );
+						$new_value[ $val ] = self::get_taxonomy_term_name_from_id( $val, $fields[ $taxonomy['field_id'] ]->field_options['taxonomy'] );
 					}
 
 					self::fill_taxonomies($new_post['taxonomies'], $tax_type, $new_value);
@@ -335,13 +335,13 @@ class FrmProPost {
 		return $value;
 	}
 
-	private static function fill_taxonomies(&$taxonomies, $tax_type, $new_value) {
-		if ( isset($taxonomies[$tax_type]) ) {
+	private static function fill_taxonomies( &$taxonomies, $tax_type, $new_value ) {
+		if ( isset( $taxonomies[ $tax_type ] ) ) {
 			foreach ( (array) $new_value as $new_key => $new_name ) {
-				$taxonomies[$tax_type][$new_key] = $new_name;
+				$taxonomies[ $tax_type ][ $new_key ] = $new_name;
 			}
 		} else {
-			$taxonomies[$tax_type] = $new_value;
+			$taxonomies[ $tax_type ] = $new_value;
 		}
 	}
 
@@ -350,7 +350,8 @@ class FrmProPost {
      */
     private static function post_value_overrides( &$post, $new_post, $editing, $form, $entry, &$dyn_content ) {
         //if empty post content and auto display, then save compiled post content
-        $display_id = ( $editing ) ? get_post_meta($post['ID'], 'frm_display_id', true) : ( isset($new_post['post_custom']['frm_display_id']) ? $new_post['post_custom']['frm_display_id'] : 0 );
+		$default_display = isset( $new_post['post_custom']['frm_display_id'] ) ? $new_post['post_custom']['frm_display_id'] : 0;
+		$display_id = ( $editing ) ? get_post_meta( $post['ID'], 'frm_display_id', true ) : $default_display;
 
         if ( ! isset($post['post_content']) && $display_id ) {
             $display = FrmProDisplay::getOne( $display_id, false, true);
@@ -365,7 +366,7 @@ class FrmProPost {
 			$post['post_date_gmt'] = get_gmt_from_date( $post['post_date'] );
 		}
     }
-	
+
     /**
      * Add taxonomies after save in case user doesn't have permissions
      */
@@ -456,16 +457,16 @@ class FrmProPost {
 	 * save post_id with the entry
 	 * If entry was updated, get updated entry object
 	 */
-	private static function save_post_id_to_entry($post_ID, &$entry, $editing) {
+	private static function save_post_id_to_entry( $post_ID, &$entry, $editing ) {
 		if ( $editing ) {
 			return;
 		}
 
 		global $wpdb;
-		$updated = $wpdb->update( $wpdb->prefix .'frm_items', array( 'post_id' => $post_ID), array( 'id' => $entry->id ) );
+		$updated = $wpdb->update( $wpdb->prefix . 'frm_items', array( 'post_id' => $post_ID ), array( 'id' => $entry->id ) );
 		if ( $updated ) {
 			wp_cache_delete( $entry->id, 'frm_entry' );
-			wp_cache_delete( $entry->id .'_nometa', 'frm_entry' );
+			wp_cache_delete( $entry->id . '_nometa', 'frm_entry' );
 			// Save new post ID for later use
 			$entry->post_id = $post_ID;
 		}
@@ -598,8 +599,8 @@ class FrmProPost {
 
 		// Set up hidden fields for read-only dropdown
 		if ( FrmField::is_read_only( $field ) ) {
-			$dropdown = str_replace( "name='" . $args['name'] . "'", "", $dropdown );
-			$dropdown = str_replace( "id='" . $args['id'] . "'", "", $dropdown );
+			$dropdown = str_replace( "name='" . $args['name'] . "'", '', $dropdown );
+			$dropdown = str_replace( "id='" . $args['id'] . "'", '', $dropdown );
 		}
 
 		self::select_saved_values_in_category_dropdown( $field, $dropdown );
@@ -618,7 +619,7 @@ class FrmProPost {
 		$dropdown = str_replace( " class='placeholder_class'", '', $dropdown );
 
 		// Remove id
-		$dropdown = str_replace( "id='" . $args['id'] . "'", "", $dropdown );
+		$dropdown = str_replace( "id='" . $args['id'] . "'", '', $dropdown );
 
 		self::select_saved_values_in_category_dropdown( $field, $dropdown );
 	}
@@ -632,7 +633,7 @@ class FrmProPost {
 	 */
 	private static function format_category_dropdown_for_logic( $args, &$dropdown ) {
 		// Remove placeholder id
-		$dropdown = str_replace( "id='" . $args['id'] . "'", "", $dropdown );
+		$dropdown = str_replace( "id='" . $args['id'] . "'", '', $dropdown );
 
 		// Remove placeholder class
 		$dropdown = str_replace( " class='placeholder_class'", '', $dropdown );

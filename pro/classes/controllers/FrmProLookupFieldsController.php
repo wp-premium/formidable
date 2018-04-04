@@ -1,13 +1,13 @@
 <?php
 
-class FrmProLookupFieldsController{
+class FrmProLookupFieldsController {
 
 	/**
 	 * Get the data types for Lookup fields
 	 *
 	 * @return array $data_types
 	 */
-	public static function get_lookup_field_data_types(){
+	public static function get_lookup_field_data_types() {
 		$data_types = array(
 			'select'    => __( 'Dropdown', 'formidable-pro' ),
 			'radio'     => __( 'Radio Buttons', 'formidable-pro' ),
@@ -22,7 +22,7 @@ class FrmProLookupFieldsController{
 	 * @deprecated 3.0
 	 * @return array $lookup_display_options
 	 */
-	public static function get_lookup_options_for_insert_fields_tab(){
+	public static function get_lookup_options_for_insert_fields_tab() {
 		_deprecated_function( __METHOD__, '3.0', 'FrmProLookupFieldsController::get_lookup_field_data_types' );
 		return self::get_lookup_field_data_types();
 	}
@@ -59,7 +59,6 @@ class FrmProLookupFieldsController{
 			if ( ! empty( $values['options'] ) ) {
 				$values['options'] = array();
 			}
-
 		}
 
 		return $values;
@@ -276,7 +275,7 @@ class FrmProLookupFieldsController{
 	 *
 	 * @since 2.01.0
 	 */
-	public static function ajax_get_options_for_get_values_field(){
+	public static function ajax_get_options_for_get_values_field() {
 		check_ajax_referer( 'frm_ajax', 'nonce' );
 
 		$form_id = FrmAppHelper::get_post_param( 'form_id', '', 'absint' );
@@ -325,8 +324,8 @@ class FrmProLookupFieldsController{
 			);
 
 			// Set up width string
-			if ( FrmField::is_option_true( $field, 'size' ) ) {
-				$width_string = ' style="width:'. $field['size'] . ( is_numeric( $field['size'] ) ? 'px' : '' ) . ';"';
+			if ( FrmField::is_option_true( $field, 'size' ) && ! FrmAppHelper::is_admin_page('formidable' ) ) {
+				$width_string = ' style="width:' . $field['size'] . ( is_numeric( $field['size'] ) ? 'px' : '' ) . ';"';
 			} else {
 				$width_string = '';
 			}
@@ -336,7 +335,7 @@ class FrmProLookupFieldsController{
 		}
 
 		// Generate field name and HTML id
-		$field_name = 'item_meta['. $field['id'] .']';
+		$field_name = 'item_meta[' . $field['id'] . ']';
 		if ( 'checkbox' == $field['data_type'] ) {
 			$field_name .= '[]';
 		}
@@ -524,13 +523,34 @@ class FrmProLookupFieldsController{
 			$args['limit'] = 500;
 		}
 
-		$options = FrmProEntryMeta::get_all_metas_for_field( $linked_field, $args );
+		$options = self::get_filtered_lookup_options( $linked_field, $args );
 
-		$options = self::flatten_and_unserialize_meta_values( $options );
-		self::get_unique_values( $options );
 		self::order_values( $values['lookup_option_order'], $options );
 
 		return $options;
+	}
+
+	/**
+	 * Formats meta values for a lookup field associated to an address field.
+	 *
+	 * @since 3.01
+	 * @param array  $metas
+	 * @param object $linked_field
+	 * @return array
+	 */
+	private static function format_address_metas_for_lookup_field( $metas, $linked_field ) {
+		if ( 'address' !== $linked_field->type ) {
+			return $metas;
+		}
+
+		$address_class = FrmFieldFactory::get_field_object( $linked_field );
+
+		$result = array();
+		foreach ( $metas as $value ) {
+			$result[] = $address_class->format_address_for_display( $value, array( 'line_sep' => ' ' ) );
+		}
+
+		return $result;
 	}
 
 	/**
@@ -677,7 +697,7 @@ class FrmProLookupFieldsController{
 					}
 				}
 			}
-			echo "__frmDepLookupFields=" . json_encode( $lookup_field_ids ) . ";";
+			echo '__frmDepLookupFields=' . json_encode( $lookup_field_ids ) . ';';
 		}
 	}
 
@@ -698,7 +718,7 @@ class FrmProLookupFieldsController{
 	 *
 	 * @since 2.01.0
 	 */
-	public static function ajax_get_dependent_lookup_field_options(){
+	public static function ajax_get_dependent_lookup_field_options() {
 		check_ajax_referer( 'frm_ajax', 'nonce' );
 		$field_id = FrmAppHelper::get_param( 'field_id', '', 'post', 'absint' );
 		$parent_args = array(
@@ -780,7 +800,7 @@ class FrmProLookupFieldsController{
 
 		$field_name = self::generate_field_name_for_radio_inputs( $child_field, $args );
 
-		$disabled = ( FrmField::is_read_only( $child_field ) && ! FrmAppHelper::is_admin() ) ?  ' disabled="disabled"' : '';
+		$disabled = ( FrmField::is_read_only( $child_field ) && ! FrmAppHelper::is_admin() ) ? ' disabled="disabled"' : '';
 
 		if ( 'checkbox' == $field['data_type'] ) {
 			$field_name .= '[]';
@@ -836,7 +856,7 @@ class FrmProLookupFieldsController{
 	 *
 	 * @since 2.01.0
 	 */
-	public static function ajax_get_text_field_lookup_value(){
+	public static function ajax_get_text_field_lookup_value() {
 		check_ajax_referer( 'frm_ajax', 'nonce' );
 		$parent_field_ids = FrmAppHelper::get_param( 'parent_fields', '', 'post', 'absint' );
 		$parent_vals = FrmAppHelper::get_param( 'parent_vals', '', 'post', 'wp_kses_post' );
@@ -999,13 +1019,27 @@ class FrmProLookupFieldsController{
 
 		$linked_field = FrmField::getOne( $child_field->field_options['get_values_field'] );
 
-		$meta_values = FrmProEntryMeta::get_all_metas_for_field( $linked_field, $args );
+		return self::get_filtered_lookup_options( $linked_field, $args );
+	}
 
-		$meta_values = self::flatten_and_unserialize_meta_values( $meta_values );
+	/**
+	 * @since 3.0.06
+	 *
+	 * @param object $field
+	 * @param array $args
+	 */
+	private static function get_filtered_lookup_options( $field, $args ) {
+		$options = FrmProEntryMeta::get_all_metas_for_field( $field, $args );
+		$options = self::format_address_metas_for_lookup_field( $options, $field );
+		$options = self::flatten_and_unserialize_meta_values( $options );
+		self::get_unique_values( $options );
 
-		self::get_unique_values( $meta_values );
+		/**
+		 * @since 3.0.06
+		 */
+		$options = apply_filters( 'frm_filtered_lookup_options', $options, compact( 'field', 'args' ) );
 
-		return $meta_values;
+		return $options;
 	}
 
 	/**

@@ -91,6 +91,10 @@ class FrmFieldsController {
         return $field;
     }
 
+	/**
+	 * @deprecated 3.0
+	 * @codeCoverageIgnore
+	 */
 	public static function edit_name( $field = 'name', $id = '' ) {
 		_deprecated_function( __FUNCTION__, '3.0' );
 
@@ -174,6 +178,9 @@ class FrmFieldsController {
 
 	/**
 	 * Load a single field in the form builder along with all needed variables
+	 *
+	 * @deprecated 3.0
+	 * @codeCoverageIgnore
 	 *
 	 * @param int $field_id
 	 * @param array $values
@@ -300,10 +307,18 @@ class FrmFieldsController {
 		wp_die();
     }
 
+	/**
+	 * @deprecated 2.3
+	 * @codeCoverageIgnore
+	 */
     public static function edit_option() {
 		_deprecated_function( __FUNCTION__, '2.3' );
     }
 
+	/**
+	 * @deprecated 2.3
+	 * @codeCoverageIgnore
+	 */
     public static function delete_option() {
 		_deprecated_function( __FUNCTION__, '2.3' );
     }

@@ -12,7 +12,7 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 
 		$sub_fields = self::get_sub_fields( $field );
 
-		include( FrmProAppHelper::plugin_path() .'/classes/views/combo-fields/input.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/combo-fields/input.php' );
 	}
 
 	public static function add_optional_class( $class, $field ) {
@@ -29,25 +29,51 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 	public static function get_sub_fields( $field ) {
 		$fields = array(
 			'line1' => array(
-				'type' => 'text', 'classes' => '', 'label' => 1,
-				'atts' => array( 'x-autocompletetype' => 'address-line1', 'autocompletetype' => 'address-line1' ),
-		 	),
+				'type'    => 'text',
+				'classes' => '',
+				'label'   => 1,
+				'atts'    => array(
+					'x-autocompletetype' => 'address-line1',
+					'autocompletetype'   => 'address-line1',
+				),
+			),
 			'line2' => array(
-				'type' => 'text', 'classes' => '', 'optional' => true, 'label' => 1,
-				'atts' => array( 'x-autocompletetype' => 'address-line2', 'autocompletetype' => 'address-line2' ),
+				'type' => 'text',
+				'classes' => '',
+				'optional' => true,
+				'label' => 1,
+				'atts' => array(
+					'x-autocompletetype' => 'address-line2',
+					'autocompletetype'   => 'address-line2',
+				),
 			),
 			'city'  => array(
-				'type' => 'text', 'classes' => 'frm_third frm_first', 'label' => 1,
-				'atts' => array( 'x-autocompletetype' => 'city', 'autocompletetype' => 'city' ),
+				'type'    => 'text',
+				'classes' => 'frm_third frm_first',
+				'label'   => 1,
+				'atts'    => array(
+					'x-autocompletetype' => 'city',
+					'autocompletetype'   => 'city',
+				),
 			),
 			'state' => array(
-				'type' => 'text', 'classes' => 'frm_third', 'label' => 1,
-				'atts' => array( 'x-autocompletetype' => 'state', 'autocompletetype' => 'state' ),
+				'type'    => 'text',
+				'classes' => 'frm_third',
+				'label'   => 1,
+				'atts'    => array(
+					'x-autocompletetype' => 'state',
+					'autocompletetype'   => 'state',
+				),
 			),
 			'zip'   => array(
-				'type' => 'text', 'classes' => 'frm_third', 'label' => 1,
-				 'atts' => array( 'x-autocompletetype' => 'postal-zip', 'autocompletetype' => 'postal-zip' ),
-			 ),
+				'type'    => 'text',
+				'classes' => 'frm_third',
+				'label'   => 1,
+				'atts'   => array(
+					'x-autocompletetype' => 'postal-zip',
+					'autocompletetype'   => 'postal-zip',
+				),
+			),
 		);
 
 		if ( 'europe' === $field['address_type'] ) {
@@ -63,9 +89,14 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 			$fields['state']['options'] = FrmFieldsHelper::get_us_states();
 		} else if ( $field['address_type'] != 'generic' ) {
 			$fields['country'] = array(
-				'type' => 'select', 'classes' => '', 'label' => 1,
+				'type'    => 'select',
+				'classes' => '',
+				'label'   => 1,
 				'options' => FrmFieldsHelper::get_countries(),
-				'atts' => array( 'x-autocompletetype' => 'country-name', 'autocompletetype' => 'country-name' ),
+				'atts'    => array(
+					'x-autocompletetype' => 'country-name',
+					'autocompletetype'   => 'country-name',
+				),
 			);
 		}
 
@@ -73,7 +104,7 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 	}
 
 	public static function form_builder_options( $field, $display, $values ) {
-		include( FrmProAppHelper::plugin_path() .'/classes/views/combo-fields/addresses/back-end-field-opts.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/combo-fields/addresses/back-end-field-opts.php' );
 	}
 
 	public static function display_value( $value ) {
@@ -89,7 +120,7 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 			foreach ( $values as $heading => $value ) {
 				$label = self::get_field_label( $atts['field'], $heading );
 
-				$headings[ $atts['field']->id .'_'. $heading ] = strip_tags( $label );
+				$headings[ $atts['field']->id . '_' . $heading ] = strip_tags( $label );
 			}
 		}
 		return $headings;

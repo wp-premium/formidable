@@ -343,14 +343,14 @@ class FrmProFieldTime extends FrmFieldType {
 	private function get_multiple_time_field_options( $values, &$options ) {
 		$all_times = $options;
 
-		$options['H'] = array('');
-		$options['m'] = array('');
+		$options['H'] = array( '' );
+		$options['m'] = array( '' );
 
 		$this->get_hours( $all_times, $options );
 		$this->get_minutes( $all_times, $options );
 
 		if ( $values['clock'] != 24 ) {
-			$options['A'] = array( 'AM', 'PM');
+			$options['A'] = array( 'AM', 'PM' );
 		}
 	}
 
@@ -374,7 +374,6 @@ class FrmProFieldTime extends FrmFieldType {
 				$hour = substr( $time, 0, $colon_position );
 				$options['H'][] = $hour;
 			}
-
 		}
 		unset( $time );
 
@@ -469,12 +468,12 @@ class FrmProFieldTime extends FrmFieldType {
 			$value = wp_parse_args( $value, $defaults );
 		} elseif ( is_string( $value ) && strpos( $value, ':' ) !== false ) {
 			$h = explode( ':', $value );
-			$m = explode( ' ', $h[ 1 ] );
+			$m = explode( ' ', $h[1] );
 
 			$value = array(
 				'H' => reset( $h ),
 				'm' => reset( $m ),
-				'A' => isset( $m[ 1 ] ) ? $m[ 1 ] : '',
+				'A' => isset( $m[1] ) ? $m[1] : '',
 			);
 		} else {
 			$value = $defaults;

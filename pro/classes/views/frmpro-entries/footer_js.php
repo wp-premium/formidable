@@ -12,12 +12,13 @@ if(typeof __FRMRULES == 'undefined'){__FRMRULES=frmrules;}
 else{__FRMRULES=jQuery.extend({},__FRMRULES,frmrules);}<?php
 }
 
-if ( isset( $frm_vars['lookup_fields'] ) && ! empty( $frm_vars['lookup_fields'] ) ) { ?>
+if ( isset( $frm_vars['lookup_fields'] ) && ! empty( $frm_vars['lookup_fields'] ) ) {
+?>
 	__FRMLOOKUP=<?php echo json_encode( $frm_vars['lookup_fields'] ) ?>;<?php
 }
 
 if ( isset($frm_vars['google_graphs']) && ! empty($frm_vars['google_graphs']) ) {
-    echo '__FRMTABLES='. json_encode($frm_vars['google_graphs']) .";\n";
+	echo '__FRMTABLES=' . json_encode( $frm_vars['google_graphs'] ) . ";\n";
 	echo 'frmProForm.loadGoogle();' . "\n";
 }
 

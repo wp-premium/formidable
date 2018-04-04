@@ -1,8 +1,8 @@
 <?php
 
-class FrmProFormActionsController{
+class FrmProFormActionsController {
 
-    public static function register_actions($actions) {
+	public static function register_actions( $actions ) {
         $actions['wppost'] = 'FrmProPostAction';
 
         include_once(FrmProAppHelper::plugin_path() . '/classes/views/frmpro-form-actions/post_action.php');
@@ -10,7 +10,7 @@ class FrmProFormActionsController{
         return $actions;
     }
 
-    public static function email_action_control($settings) {
+	public static function email_action_control( $settings ) {
 		$settings['event'] = array_unique(
 			array_merge( $settings['event'],
 			array( 'draft', 'create', 'update', 'delete', 'import' )
@@ -20,7 +20,7 @@ class FrmProFormActionsController{
 	    return $settings;
 	}
 
-    public static function form_action_settings($form_action, $atts){
+	public static function form_action_settings( $form_action, $atts ) {
         global $wpdb;
         extract($atts);
 
@@ -50,7 +50,7 @@ class FrmProFormActionsController{
         include(FrmProAppHelper::plugin_path() . '/classes/views/frmpro-form-actions/_form_action.php');
     }
 
-    public static function _logic_row(){
+	public static function _logic_row() {
 		FrmAppHelper::permission_check('frm_edit_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
@@ -67,7 +67,7 @@ class FrmProFormActionsController{
 			'meta_name' => $meta_name,
 			'condition' => array( 'hide_field_cond' => '==', 'hide_field' => '' ),
 			'key'       => $key,
-			'name'      => 'frm_' . $type .'_action[' . $key . '][post_content][conditions][' . $meta_name . ']',
+			'name'      => 'frm_' . $type . '_action[' . $key . '][post_content][conditions][' . $meta_name . ']',
 			'hidelast'  => '#frm_logic_rows_' . $key,
 			'showlast'  => '#logic_link_' . $key,
 		) );
@@ -122,7 +122,7 @@ class FrmProFormActionsController{
 		return count( $conditions ) > 2;
 	}
 
-    public static function fill_action_options($action, $type) {
+	public static function fill_action_options( $action, $type ) {
         if ( 'wppost' == $type ) {
 
             $default_values = array(
@@ -163,14 +163,14 @@ class FrmProFormActionsController{
 		FrmFormActionsController::trigger_actions( $event, $form_id, $entry_id );
 	}
 
-    public static function trigger_delete_actions($entry_id, $entry = false) {
+	public static function trigger_delete_actions( $entry_id, $entry = false ) {
 		if ( empty( $entry ) ) {
 			$entry = FrmEntry::getOne( $entry_id );
 		}
         FrmFormActionsController::trigger_actions('delete', $entry->form_id, $entry);
     }
 
-    public static function _postmeta_row(){
+	public static function _postmeta_row() {
 		FrmAppHelper::permission_check('frm_edit_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
@@ -221,7 +221,7 @@ class FrmProFormActionsController{
 		return $cf_keys;
 	}
 
-    public static function _posttax_row(){
+	public static function _posttax_row() {
 		FrmAppHelper::permission_check('frm_edit_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
@@ -249,7 +249,7 @@ class FrmProFormActionsController{
         $values = array();
 
         if ( isset($_POST['form_id']) ) {
-			$values['fields'] = FrmField::getAll( array( 'fi.form_id' => (int) $_POST['form_id'], 'fi.type' => array( 'checkbox', 'radio', 'select', 'tag', 'data') ), 'field_order');
+			$values['fields'] = FrmField::getAll( array( 'fi.form_id' => (int) $_POST['form_id'], 'fi.type' => array( 'checkbox', 'radio', 'select', 'tag', 'data' ) ), 'field_order' );
             $values['id'] = (int) $_POST['form_id'];
         }
 
@@ -258,7 +258,7 @@ class FrmProFormActionsController{
         wp_die();
     }
 
-    public static function _replace_posttax_options(){
+	public static function _replace_posttax_options() {
 		FrmAppHelper::permission_check('frm_edit_forms');
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
@@ -296,7 +296,8 @@ class FrmProFormActionsController{
 		foreach ( $children as $key => $cat ) {
 			$args['cat'] = $cat; ?>
 			<div class="frm_catlevel_1"><?php
-				self::display_taxonomy_checkbox_group( $args ); ?>
+				self::display_taxonomy_checkbox_group( $args );
+				?>
 			</div><?php
 		}
 	}
@@ -313,7 +314,7 @@ class FrmProFormActionsController{
 		}
 
 		if ( is_array($args['value']) ) {
-			$checked = ( in_array($args['cat']->cat_ID, $args['value'])) ? ' checked="checked" ' : '';
+			$checked = ( in_array($args['cat']->cat_ID, $args['value'] ) ) ? ' checked="checked" ' : '';
 		} else {
 			$checked = checked( $args['value'], $args['cat']->cat_ID, false );
 		}
@@ -321,7 +322,8 @@ class FrmProFormActionsController{
 		?>
 		<div class="frm_checkbox">
 			<label><input type="checkbox" name="<?php echo esc_attr( $args['field_name'] ) ?>" value="<?php
-			echo esc_attr( $args['cat']->cat_ID ) ?>"<?php
+			echo esc_attr( $args['cat']->cat_ID );
+			?>"<?php
 			echo $checked;
 			?> /><?php echo esc_html( $args['cat']->cat_name ) ?></label><?php
 
@@ -335,9 +337,11 @@ class FrmProFormActionsController{
 		if ( $children ) {
 			$args['level']++;
 			foreach ( $children as $key => $cat ) {
-				$args['cat'] = $cat; ?>
+				$args['cat'] = $cat;
+				?>
 		<div class="frm_catlevel_<?php echo esc_attr( $args['level'] ) ?>"><?php self::display_taxonomy_checkbox_group( $args ); ?></div>
-<?php       }
+<?php
+			}
 		}
 		echo '</div>';
 	}

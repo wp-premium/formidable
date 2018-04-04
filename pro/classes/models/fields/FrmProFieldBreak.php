@@ -33,7 +33,7 @@ class FrmProFieldBreak extends FrmFieldType {
 			'required'      => false,
 			'visibility'    => false,
 			'description'   => false,
-			'label_position'=> false,
+			'label_position' => false,
 			'css'           => false,
 			'options'       => true,
 		);

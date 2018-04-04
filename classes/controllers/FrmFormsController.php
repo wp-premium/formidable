@@ -37,6 +37,17 @@ class FrmFormsController {
         register_widget('FrmShowForm');
     }
 
+	/**
+	 * By default, Divi processes form shortcodes on the edit post page.
+	 * Now that won't do.
+	 *
+	 * @since 3.01
+	 */
+	public static function prevent_divi_conflict( $shortcodes ) {
+		$shortcodes[] = 'formidable';
+		return $shortcodes;
+	}
+
     public static function list_form() {
         FrmAppHelper::permission_check('frm_view_forms');
 
@@ -162,35 +173,6 @@ class FrmFormsController {
         $message = __( 'Settings Successfully Updated', 'formidable' );
 		return self::get_settings_vars( $id, array(), $message );
     }
-
-	public static function edit_key() {
-		_deprecated_function( __METHOD__, '3.0' );
-		$values = self::edit_in_place_value( 'form_key' );
-		echo wp_kses( stripslashes( FrmForm::get_key_by_id( $values['form_id'] ) ), array() );
-		wp_die();
-	}
-
-	public static function edit_description() {
-		_deprecated_function( __METHOD__, '3.0' );
-		$values = self::edit_in_place_value( 'description' );
-		echo wp_kses_post( FrmAppHelper::use_wpautop( stripslashes( $values['description'] ) ) );
-		wp_die();
-	}
-
-	private static function edit_in_place_value( $field ) {
-		_deprecated_function( __METHOD__, '3.0' );
-		check_ajax_referer( 'frm_ajax', 'nonce' );
-		FrmAppHelper::permission_check('frm_edit_forms', 'hide');
-
-		$form_id = FrmAppHelper::get_post_param( 'form_id', '', 'absint' );
-		$value = FrmAppHelper::get_post_param( 'update_value', '', 'wp_filter_post_kses' );
-
-		$values = array( $field => trim( $value ) );
-		FrmForm::update( $form_id, $values );
-		$values['form_id'] = $form_id;
-
-		return $values;
-	}
 
 	public static function update( $values = array() ) {
 		if ( empty( $values ) ) {
@@ -386,13 +368,6 @@ class FrmFormsController {
 		}
 
 		require( FrmAppHelper::plugin_path() . '/classes/views/frm-entries/direct.php' );
-	}
-
-	public static function register_pro_scripts() {
-		_deprecated_function( __FUNCTION__, '2.03', 'FrmProEntriesController::register_scripts' );
-		if ( FrmAppHelper::pro_is_installed() ) {
-			FrmProEntriesController::register_scripts();
-		}
 	}
 
     public static function untrash() {
@@ -964,6 +939,10 @@ class FrmFormsController {
         return $errors;
     }
 
+	/**
+	 * @deprecated 1.07.05
+	 * @codeCoverageIgnore
+	 */
     public static function add_default_templates( $path, $default = true, $template = true ) {
         _deprecated_function( __FUNCTION__, '1.07.05', 'FrmXMLController::add_default_templates()' );
 
@@ -1634,6 +1613,10 @@ class FrmFormsController {
 		return isset( $atts['minimize'] ) && ! empty( $atts['minimize'] );
 	}
 
+	/**
+	 * @deprecated 3.0
+	 * @codeCoverageIgnore
+	 */
 	public static function bulk_create_template( $ids ) {
 		_deprecated_function( __METHOD__, '3.0', 'FrmForm::duplicate( $id, true, true )' );
 		FrmAppHelper::permission_check( 'frm_edit_forms' );
@@ -1643,5 +1626,57 @@ class FrmFormsController {
 		}
 
 		return __( 'Form template was Successfully Created', 'formidable' );
+	}
+
+	/**
+	 * @deprecated 2.03
+	 * @codeCoverageIgnore
+	 */
+	public static function register_pro_scripts() {
+		_deprecated_function( __FUNCTION__, '2.03', 'FrmProEntriesController::register_scripts' );
+		if ( FrmAppHelper::pro_is_installed() ) {
+			FrmProEntriesController::register_scripts();
+		}
+	}
+
+	/**
+	 * @deprecated 3.0
+	 * @codeCoverageIgnore
+	 */
+	public static function edit_key() {
+		_deprecated_function( __METHOD__, '3.0' );
+		$values = self::edit_in_place_value( 'form_key' );
+		echo wp_kses( stripslashes( FrmForm::get_key_by_id( $values['form_id'] ) ), array() );
+		wp_die();
+	}
+
+	/**
+	 * @deprecated 3.0
+	 * @codeCoverageIgnore
+	 */
+	public static function edit_description() {
+		_deprecated_function( __METHOD__, '3.0' );
+		$values = self::edit_in_place_value( 'description' );
+		echo wp_kses_post( FrmAppHelper::use_wpautop( stripslashes( $values['description'] ) ) );
+		wp_die();
+	}
+
+	/**
+	 * @deprecated 3.0
+	 * @codeCoverageIgnore
+	 */
+	private static function edit_in_place_value( $field ) {
+		_deprecated_function( __METHOD__, '3.0' );
+		check_ajax_referer( 'frm_ajax', 'nonce' );
+		FrmAppHelper::permission_check('frm_edit_forms', 'hide');
+
+		$form_id = FrmAppHelper::get_post_param( 'form_id', '', 'absint' );
+		$value = FrmAppHelper::get_post_param( 'update_value', '', 'wp_filter_post_kses' );
+
+		$values = array( $field => trim( $value ) );
+		FrmForm::update( $form_id, $values );
+		$values['form_id'] = $form_id;
+
+		return $values;
 	}
 }

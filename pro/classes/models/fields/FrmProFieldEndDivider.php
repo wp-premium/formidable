@@ -34,7 +34,7 @@ class FrmProFieldEndDivider extends FrmFieldType {
 			'visibility'    => false,
 
 			'description'   => false,
-			'label_position'=> false,
+			'label_position' => false,
 
 			'label'         => false,
 			'logic'         => false,

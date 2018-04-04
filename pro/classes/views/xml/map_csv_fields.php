@@ -1,7 +1,7 @@
 <div class="wrap">
     <h2><?php _e( 'Import/Export', 'formidable-pro' ); ?></h2>
 
-    <?php include(FrmAppHelper::plugin_path() .'/classes/views/shared/errors.php'); ?>
+	<?php include( FrmAppHelper::plugin_path() . '/classes/views/shared/errors.php' ); ?>
     <div id="poststuff" class="metabox-holder">
     <div id="post-body">
     <div id="post-body-content">
@@ -20,9 +20,9 @@
         <table class="form-table">
             <thead>
             <tr class="form-field">
-                <th><b><?php _e( 'CSV header' ,'formidable' ) ?></b></th>
-                <th><b><?php _e( 'Sample data' ,'formidable' ) ?></b></th>
-                <th><b><?php _e( 'Corresponding Field' ,'formidable' ) ?></b></th>
+                <th><b><?php esc_html_e( 'CSV header', 'formidable' ); ?></b></th>
+                <th><b><?php esc_html_e( 'Sample data', 'formidable' ); ?></b></th>
+                <th><b><?php esc_html_e( 'Corresponding Field', 'formidable' ); ?></b></th>
             </tr>
             </thead>
             <?php foreach ( $headers as $i => $header ) { ?>
@@ -34,11 +34,12 @@
                 <td>
                     <select name="data_array[<?php echo esc_attr( $i ) ?>]" id="mapping_<?php echo esc_attr( $i ) ?>">
                         <option value=""> </option>
-                        <?php foreach ( $fields as $field ) {
+						<?php
+						foreach ( $fields as $field ) {
 							if ( FrmField::is_no_save_field( $field->type ) ) {
                                 continue;
                             }
-                            $selected = (strtolower(strip_tags($field->name)) == strtolower(htmlspecialchars($header)) );
+							$selected = ( strtolower( strip_tags( $field->name ) ) == strtolower( htmlspecialchars( $header ) ) );
                             $selected = apply_filters('frm_map_csv_field', $selected, $field, $header);
                         ?>
                             <option value="<?php echo esc_attr( $field->id ) ?>" <?php selected($selected, true) ?>><?php echo FrmAppHelper::truncate($field->name, 50) ?></option>

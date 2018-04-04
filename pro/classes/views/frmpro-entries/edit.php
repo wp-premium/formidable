@@ -12,10 +12,10 @@
 				'form'  => $form,
 			) );
 
-        	include(FrmAppHelper::plugin_path() .'/classes/views/frm-entries/errors.php');
+        	include( FrmAppHelper::plugin_path() . '/classes/views/frm-entries/errors.php' );
 
             $form_action = 'update';
-            require(FrmAppHelper::plugin_path() .'/classes/views/frm-entries/form.php');
+			require( FrmAppHelper::plugin_path() . '/classes/views/frm-entries/form.php' );
 		?>
 
         <p>

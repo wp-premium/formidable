@@ -100,7 +100,7 @@ class FrmProDynamicFieldsController {
 			}
 
 			if ( isset( $entry_ids ) && ! empty( $entry_ids ) ) {
-				$metas = FrmEntryMeta::getAll( array( 'it.item_id' => $entry_ids, 'field_id' => (int)$values['form_select'] ), ' ORDER BY meta_value', '' );
+				$metas = FrmEntryMeta::getAll( array( 'it.item_id' => $entry_ids, 'field_id' => (int) $values['form_select'] ), ' ORDER BY meta_value', '' );
 			}
 		} else {
 			$limit = '';
@@ -121,7 +121,7 @@ class FrmProDynamicFieldsController {
 
 		$options = array();
 		foreach ( $metas as $meta ) {
-			$meta = (array)$meta;
+			$meta = (array) $meta;
 			if ( $meta['meta_value'] == '' ) {
 				continue;
 			}
@@ -140,7 +140,7 @@ class FrmProDynamicFieldsController {
 		unset( $metas );
 
 		if ( self::include_blank_option( $options, $field ) ) {
-			$options = array( '' => '' ) + (array)$options;
+			$options = array( '' => '' ) + (array) $options;
 		}
 
 		return stripslashes_deep( $options );

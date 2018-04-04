@@ -38,12 +38,12 @@ class FrmProPostAction extends FrmFormAction {
         if ( $display_ids ) {
             $query_args = array(
                 'pm.meta_key' => 'frm_show_count', 'post_type' => 'frm_display',
-                'pm.meta_value' => array( 'dynamic', 'calendar', 'one'),
-                'p.post_status' => array( 'publish', 'private'),
+				'pm.meta_value' => array( 'dynamic', 'calendar', 'one' ),
+				'p.post_status' => array( 'publish', 'private' ),
                 'p.ID' => $display_ids,
             );
             $displays = FrmDb::get_results(
-                $wpdb->posts .' p LEFT JOIN '. $wpdb->postmeta .' pm ON (p.ID = pm.post_ID)', $query_args, 'p.ID, p.post_title', array( 'order_by' => 'p.post_title ASC')
+				$wpdb->posts . ' p LEFT JOIN ' . $wpdb->postmeta . ' pm ON (p.ID = pm.post_ID)', $query_args, 'p.ID, p.post_title', array( 'order_by' => 'p.post_title ASC' )
             );
 
             if ( isset($form_action->post_content['display_id']) ) {
@@ -73,7 +73,7 @@ class FrmProPostAction extends FrmFormAction {
 
         unset($display_ids);
 
-	    include(dirname(__FILE__) .'/post_options.php');
+		include( dirname(__FILE__) . '/post_options.php' );
 	}
 
 	function get_defaults() {
@@ -88,14 +88,14 @@ class FrmProPostAction extends FrmFormAction {
             'post_status'   => '',
             'post_custom_fields' => array(),
             'post_password' => '',
-            'event'         => array( 'create', 'update'),
+			'event'         => array( 'create', 'update' ),
         );
 	}
 
 	function get_switch_fields() {
-	    return array(
-            'post_category' => array( 'field_id'),
-            'post_custom_fields' => array( 'field_id'),
-        );
+		return array(
+			'post_category' => array( 'field_id' ),
+			'post_custom_fields' => array( 'field_id' ),
+		);
 	}
 }

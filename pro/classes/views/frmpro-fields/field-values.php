@@ -15,7 +15,7 @@ $selector_args = array();
 
 // Get field name
 if ( isset( $field_name ) ) {
-	$selector_args[ 'html_name' ] = $field_name;
+	$selector_args['html_name'] = $field_name;
 } else if ( isset( $current_field_id ) ) {
 	$selector_args['html_name'] = 'field_options[hide_opt_' . $current_field_id . '][]';
 } else {
@@ -24,9 +24,9 @@ if ( isset( $field_name ) ) {
 
 // Get value
 if ( isset( $val ) ) {
-	$selector_args['value' ] = $val;
+	$selector_args['value'] = $val;
 } else {
-	$selector_args['value'] = ( isset( $field ) && isset( $field['hide_opt'][$meta_name] ) ) ? $field['hide_opt'][$meta_name] : '';
+	$selector_args['value'] = ( isset( $field ) && isset( $field['hide_opt'][ $meta_name ] ) ) ? $field['hide_opt'][ $meta_name ] : '';
 }
 
 // Get source

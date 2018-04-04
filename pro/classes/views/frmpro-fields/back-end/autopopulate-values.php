@@ -7,7 +7,7 @@
 		</label>
 	</td>
 </tr>
-<tr class="frm_autopopulate_value_section_<?php echo absint( $field['id'] ) . esc_attr( $field['autopopulate_value'] ? '' : ' frm_hidden' )?>">
+<tr class="frm_autopopulate_value_section_<?php echo absint( $field['id'] ) . esc_attr( $field['autopopulate_value'] ? '' : ' frm_hidden' ); ?>">
 	<td>
 		<label><?php esc_html_e( 'Get value from', 'formidable-pro' ) ?></label>
 	</td>
@@ -15,7 +15,7 @@
 	require( FrmProAppHelper::plugin_path() . '/classes/views/lookup-fields/back-end/get-options-from.php' );
 	?></td>
 </tr>
-<tr class="frm_autopopulate_value_section_<?php echo absint( $field['id'] ) . esc_attr( $field['autopopulate_value'] ? '' : ' frm_hidden' )?>">
+<tr class="frm_autopopulate_value_section_<?php echo absint( $field['id'] ) . esc_attr( $field['autopopulate_value'] ? '' : ' frm_hidden' ); ?>">
 	<td><label><?php esc_html_e( 'Watch Lookup fields', 'formidable-pro' ) ?></label></td>
 	<td>
 	    <a href="javascript:void(0)" id="frm_add_watch_lookup_link_<?php echo absint( $field['id'] ) ?>" class="frm_add_watch_lookup_row frm_add_watch_lookup_link frm_hidden">
@@ -36,7 +36,7 @@
 		?></div>
 	</td>
 </tr>
-<tr class="frm_autopopulate_value_section_<?php echo absint( $field['id'] ) . esc_attr( $field['autopopulate_value'] ? '' : ' frm_hidden' )?>">
+<tr class="frm_autopopulate_value_section_<?php echo absint( $field['id'] ) . esc_attr( $field['autopopulate_value'] ? '' : ' frm_hidden' ); ?>">
 	<td><label><?php _e( 'Filter options', 'formidable-pro' ) ?></label></td>
 	<td>
 		<label for="get_most_recent_value_<?php echo absint( $field['id'] ) ?>">

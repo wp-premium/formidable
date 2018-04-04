@@ -17,7 +17,7 @@ class FrmProFieldDate extends FrmFieldType {
 			'autopopulate'  => true,
 			'size'          => true,
 			'unique'        => true,
-			'clear_on_focus'=> true,
+			'clear_on_focus' => true,
 			'invalid'       => true,
 			'read_only'     => true,
 		);
@@ -27,8 +27,8 @@ class FrmProFieldDate extends FrmFieldType {
 
 	protected function extra_field_opts() {
 		return array(
-			'start_year' => 2000,
-			'end_year'   => 2020,
+			'start_year' => '-10',
+			'end_year'   => '+10',
 			'locale'     => '',
 			'max'        => '10',
 		);
@@ -101,31 +101,31 @@ class FrmProFieldDate extends FrmFieldType {
 		$date = explode( '-', $value );
 
 		if ( count( $date ) != 3 || ! checkdate( (int) $date[1], (int) $date[2], (int) $date[0] ) ) {
-			$errors['field' . $args['id'] ] = FrmFieldsHelper::get_error_msg( $this->field, 'invalid' );
+			$errors[ 'field' . $args['id'] ] = FrmFieldsHelper::get_error_msg( $this->field, 'invalid' );
 		}
 
 		if ( ! $this->validate_year_is_within_range( $date[0] ) ) {
-			$errors['field' . $args['id'] ] = FrmFieldsHelper::get_error_msg( $this->field, 'invalid' );
+			$errors[ 'field' . $args['id'] ] = FrmFieldsHelper::get_error_msg( $this->field, 'invalid' );
 		}
-		
+
 		return $errors;
 	}
-	
+
 	private function validate_year_is_within_range( $year ) {
-		$year 	    = (int) $year;
+		$year       = (int) $year;
 		$start_year = $this->maybe_convert_relative_year_to_int('start_year');
 		$end_year   = $this->maybe_convert_relative_year_to_int('end_year');
-		
+
 		return ( ( ! $start_year || ( $start_year <= $year ) ) && ( ! $end_year || ( $year <= $end_year ) ) );
 	}
-	
+
 	private function maybe_convert_relative_year_to_int( $start_end ) {
 		$rel_year = FrmField::get_option( $this->field, $start_end );
-		
+
 		if ( is_string( $rel_year ) && strlen( $rel_year ) > 0 && ( '0' === $rel_year || '+' == $rel_year[0] || '-' == $rel_year[0] ) ) {
 			$rel_year = date( 'Y', strtotime( $rel_year . ' year' ) );
 		}
-		
+
 		return (int) $rel_year;
 	}
 

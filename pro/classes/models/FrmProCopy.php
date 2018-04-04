@@ -1,11 +1,11 @@
 <?php
 
-class FrmProCopy{
+class FrmProCopy {
 
     public static function table_name() {
         global $wpmuBaseTablePrefix, $wpdb;
         $prefix = $wpmuBaseTablePrefix ? $wpmuBaseTablePrefix : $wpdb->base_prefix;
-        return $prefix .'frmpro_copies';
+		return $prefix . 'frmpro_copies';
     }
 
 	public static function create( $values ) {
@@ -47,8 +47,8 @@ class FrmProCopy{
 	private static function prepare_values( $values, &$new_values ) {
 		global $blog_id;
 		$new_values['blog_id'] = $blog_id;
-		$new_values['form_id'] = isset( $values['form_id'] ) ? (int) $values['form_id']: null;
-		$new_values['type'] = isset( $values['type'] ) ? $values['type']: 'form'; //options here are: form, display
+		$new_values['form_id'] = isset( $values['form_id'] ) ? (int) $values['form_id'] : null;
+		$new_values['type'] = isset( $values['type'] ) ? $values['type'] : 'form'; //options here are: form, display
 		if ( $new_values['type'] == 'form' ) {
 			$form_copied = FrmForm::getOne( $new_values['form_id'] );
 			$new_values['copy_key'] = $form_copied->form_key;
@@ -65,7 +65,7 @@ class FrmProCopy{
 
         global $wpdb;
 
-        if ( ( $db_version != $old_db_version) || $force ) {
+		if ( ( $db_version != $old_db_version ) || $force ) {
             $force = true;
 
             require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -74,7 +74,7 @@ class FrmProCopy{
             $charset_collate = $frmdb->collation();
 
             /* Create/Upgrade Display Table */
-            $sql = 'CREATE TABLE '. self::table_name() .' (
+			$sql = 'CREATE TABLE ' . self::table_name() . ' (
                     id int(11) NOT NULL auto_increment,
                     type varchar(255) default NULL,
                     copy_key varchar(255) default NULL,
@@ -84,7 +84,7 @@ class FrmProCopy{
                     PRIMARY KEY id (id),
                     KEY form_id (form_id),
                     KEY blog_id (blog_id)
-            ) '. $charset_collate .';';
+			) ' . $charset_collate . ';';
 
             dbDelta($sql);
 

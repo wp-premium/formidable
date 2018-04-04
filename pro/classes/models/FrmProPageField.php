@@ -97,7 +97,7 @@ class FrmProPageField {
 		$current_page = 0;
 		$page_count = count( $args['page_array'] );
 
-		$classes = array( 'frm_page_bar', 'frm_rootline_' . $page_count, 'frm_' . $type, 'frm_' . $type .'_line' );
+		$classes = array( 'frm_page_bar', 'frm_rootline_' . $page_count, 'frm_' . $type, 'frm_' . $type . '_line' );
 		$classes[] = $hide_numbers ? 'frm_no_numbers' : '';
 		$classes[] = $hide_lines ? '' : 'frm_show_lines';
 		$output = '<div class="frm_rootline_group">';
@@ -114,7 +114,7 @@ class FrmProPageField {
 
 			$output .= '<input type="button" value="' . esc_attr( $page_number ) . '" ';
 			foreach ( $page as $key => $attr ) {
-				$output .= $key .'="' . esc_attr( $attr ) . '" ';
+				$output .= $key . '="' . esc_attr( $attr ) . '" ';
 			}
 			$output .= ' />';
 

@@ -425,7 +425,7 @@ $text_color = '#ffffff' . $important;
 	width: 2em;';
 	echo $thumb = 'border-radius: 20px;
 	border: 1px solid rgba(' . esc_html( FrmStylesHelper::hex2rgb( '#008ec2' ) ) . ',0.6);
-	color:'. esc_html( $text_color ) . ';
+	color:' . esc_html( $text_color ) . ';
 	background-color: ' . esc_html( $thumb_color ) . ';
 	cursor: pointer;';
 	?>
