@@ -10,7 +10,7 @@ foreach ( $values['fields'] as $fo_key => $fo ) {
     }
 
     if ( $fo['post_field'] == $post_key ) {
-        $values[$post_key] = $fo['id'];
+		$values[ $post_key ] = $fo['id'];
     }
     ?>
 	<option value="<?php echo esc_attr( $fo['id'] ) ?>" <?php selected( $form_action->post_content[ $post_key ], $fo['id'] ) ?>>

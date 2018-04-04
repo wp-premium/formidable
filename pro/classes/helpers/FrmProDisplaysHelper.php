@@ -1,6 +1,6 @@
 <?php
 
-class FrmProDisplaysHelper{
+class FrmProDisplaysHelper {
 
 	public static function setup_new_vars() {
         $values = array();
@@ -21,7 +21,7 @@ class FrmProDisplaysHelper{
         $values = (object) $post;
 
 		foreach ( array( 'form_id', 'entry_id', 'dyncontent', 'param', 'type', 'show_count' ) as $var ) {
-            $values->{'frm_'. $var} = get_post_meta($post->ID, 'frm_'. $var, true);
+			$values->{'frm_' . $var} = get_post_meta( $post->ID, 'frm_' . $var, true );
             if ( $check_post ) {
 				$sanitize = self::sanitize_option( $var );
 				$values->{'frm_' . $var} = FrmAppHelper::get_param( $var, $values->{'frm_' . $var}, 'post', $sanitize );
@@ -31,14 +31,14 @@ class FrmProDisplaysHelper{
 		$defaults = self::get_default_opts();
         $options = get_post_meta($post->ID, 'frm_options', true);
 		foreach ( $defaults as $var => $default ) {
-            if ( ! isset( $values->{'frm_'. $var} ) ) {
-				$values->{'frm_'. $var} = isset($options[$var]) ? $options[$var] : $default;
+			if ( ! isset( $values->{'frm_' . $var} ) ) {
+				$values->{'frm_' . $var} = isset( $options[ $var ] ) ? $options[ $var ] : $default;
                 if ( $check_post ) {
 					$sanitize = self::sanitize_option( $var );
 					$values->{'frm_' . $var} = FrmAppHelper::get_post_param( 'options[' . $var . ']', $values->{'frm_' . $var}, $sanitize );
                 }
-            } else if ( $var == 'param' && empty($values->{'frm_'. $var}) ) {
-                $values->{'frm_'. $var} = $default;
+			} elseif ( $var == 'param' && empty( $values->{'frm_' . $var} ) ) {
+				$values->{'frm_' . $var} = $default;
             }
         }
 
@@ -101,7 +101,7 @@ class FrmProDisplaysHelper{
         return $post;
     }
 
-    public static function get_shortcodes($content, $form_id) {
+	public static function get_shortcodes( $content, $form_id ) {
 		if ( empty( $form_id ) || strpos( $content, '[' ) === false ) {
 			// don't continue if there are no shortcodes to check
 			return array( array() );

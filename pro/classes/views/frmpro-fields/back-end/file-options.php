@@ -75,3 +75,40 @@
 		</label>
 	</td>
 </tr>
+
+<tr>
+	<td>
+		<label><?php esc_html_e( 'Auto Resize', 'formidable-pro' ) ?></label>
+		<span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php echo esc_attr__( 'When a large image is uploaded, resize it before you save it to your site.', 'formidable-pro' ); ?>" ></span>
+	</td>
+	<td>
+		<label>
+			<input type="checkbox" id="resize_<?php echo esc_attr( $field['id'] ) ?>" name="field_options[resize_<?php echo esc_attr( $field['id'] ) ?>]" value="1" onchange="frm_show_div('resize_file_<?php echo absint( $field['id'] ) ?>',this.checked,1,'.')" <?php checked( $field['resize'], 1 ); ?> />
+			<span class="howto"><?php esc_html_e( 'Resize files before upload', 'formidable-pro' ) ?></span>
+		</label>
+	</td>
+</tr>
+<tr class="resize_file_<?php echo esc_attr( $field['id'] ); ?> <?php echo esc_attr( $field['resize'] == 1 ? '' : 'frm_hidden' ); ?>">
+	<td>
+		<label><?php esc_html_e( 'New file size', 'formidable-pro' ); ?></label>
+	</td>
+	<td>
+		<label id="new_size_<?php echo esc_attr( $field['id'] ) ?>">
+			<span class="frm_screen_reader"><?php esc_html_e( 'The size the image should be resized to', 'formidable-pro' ); ?></span>
+			<input type="text" id="new_size_<?php echo esc_attr( $field['id'] ) ?>" name="field_options[new_size_<?php echo esc_attr( $field['id'] ) ?>]" value="<?php echo esc_attr( absint( $field['new_size'] ) ); ?>" size="5" />
+			<span class="howto"><?php esc_html_e( 'px', 'formidable-pro' ) ?></span>
+		</label>
+
+		<label id="resize_dir_<?php echo esc_attr( $field['id'] ) ?>">
+			<span class="frm_screen_reader"><?php esc_html_e( 'Resize the image by width or height', 'formidable-pro' ); ?></span>
+			<select name="field_options[resize_dir_<?php echo esc_attr( $field['id'] ) ?>]">
+				<option value="width" <?php selected( $field['resize_dir'], 'width' ) ?>>
+					<?php echo esc_html_e( 'wide', 'formidable-pro' ); ?>
+				</option>
+				<option value="height" <?php selected( $field['resize_dir'], 'height' ) ?>>
+					<?php echo esc_html_e( 'high', 'formidable-pro' ); ?>
+				</option>
+			</select>
+		</label>
+	</td>
+</tr>

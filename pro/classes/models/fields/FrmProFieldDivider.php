@@ -115,13 +115,13 @@ DEFAULT_HTML;
 		$html = str_replace( array( 'frm_none_container', 'frm_hidden_container', 'frm_top_container', 'frm_left_container', 'frm_right_container' ), '', $html );
 
 		if ( isset( $frm_vars['collapse_div'] ) && $frm_vars['collapse_div'] ) {
-			$html = "</div>\n". $html;
+			$html = "</div>\n" . $html;
 			$frm_vars['collapse_div'] = false;
 		}
 
 		if ( isset( $frm_vars['div'] ) && $frm_vars['div'] && $frm_vars['div'] != $this->field['id'] ) {
 			// close the div if it's from a different section
-			$html = "</div>\n". $html;
+			$html = "</div>\n" . $html;
 			$frm_vars['div'] = false;
 		}
 
@@ -138,7 +138,7 @@ DEFAULT_HTML;
 			$input = $this->front_field_input( compact( 'errors', 'form' ), array() );
 
 			if ( FrmField::is_option_true( $this->field, 'slide' ) ) {
-				$input = $collapse_div . $input .'</div>';
+				$input = $collapse_div . $input . '</div>';
 			}
 
 			$html = str_replace( '[collapse_this]', $input, $html );

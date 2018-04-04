@@ -34,7 +34,7 @@
         </select>
     </td>
 </tr>
-<tr id="frm_cookie_expiration" class="frm_short_tr <?php echo ($values['single_entry'] && $values['single_entry_type'] == 'cookie') ? '' : 'frm_hidden' ?>">
+<tr id="frm_cookie_expiration" class="frm_short_tr <?php echo ( $values['single_entry'] && $values['single_entry_type'] == 'cookie' ) ? '' : 'frm_hidden'; ?>">
     <td colspan="2">
         <p class="frm_indent_opt">
             <label><?php _e( 'Cookie Expiration', 'formidable-pro' ) ?></label>
@@ -98,7 +98,7 @@ if ( isset( $values['open_editable'] ) && empty( $values['open_editable'] ) ) {
             </select>
         </span>
         <span class="edit_action_redirect_box edit_action_box <?php echo esc_attr( $values['edit_action'] == 'redirect' ? '' : 'frm_hidden' ); ?>">
-            <input type="text" name="options[edit_url]" id="edit_url" value="<?php if (isset($values['edit_url'])) echo esc_attr($values['edit_url']); ?>" style="width:61%" placeholder="http://example.com" />
+			<input type="text" name="options[edit_url]" id="edit_url" value="<?php echo esc_attr( isset( $values['edit_url'] ) ? $values['edit_url'] : '' ); ?>" style="width:61%" placeholder="http://example.com" />
         </span>
 
 		<span class="edit_action_page_box edit_action_box <?php echo esc_attr( $values['edit_action'] == 'page' ? '' : 'frm_hidden' ); ?>">
@@ -126,20 +126,26 @@ if ( isset( $values['open_editable'] ) && empty( $values['open_editable'] ) ) {
 			</label>
 	    </td>
 	</tr>
-<?php } else {
-	?>
+<?php } else { ?>
 	<input type="hidden" value="0" name="options[protect_files]" />
 <?php } ?>
 
 <?php
 if ( is_multisite() ) {
-	if ( current_user_can( 'setup_network' ) ) { ?>
+	if ( current_user_can( 'setup_network' ) ) {
+	?>
         <tr><td colspan="2">
-        <label for="copy"><input type="checkbox" name="options[copy]" id="copy" value="1" <?php echo ($values['copy'])? ' checked="checked"' : ''; ?> /> <?php _e( 'Copy this form to other blogs when Formidable Forms is activated', 'formidable-pro' ) ?></label></td></tr>
+			<label for="copy">
+				<input type="checkbox" name="options[copy]" id="copy" value="1" <?php echo ( $values['copy'] ) ? ' checked="checked"' : ''; ?> />
+				<?php esc_html_e( 'Copy this form to other blogs when Formidable Forms is activated', 'formidable-pro' ); ?>
+			</label>
+		</td></tr>
 	<?php
-	} else if ( $values['copy'] ) { ?>
+	} elseif ( $values['copy'] ) {
+	?>
         <input type="hidden" name="options[copy]" id="copy" value="1" />
     <?php
     }
-} ?>
+}
+?>
 </table>

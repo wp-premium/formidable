@@ -63,7 +63,7 @@ class FrmProFieldAddress extends FrmFieldType {
 		$field_name = $this->html_name( $name );
 		$html_id = $this->html_id();
 
-		include( FrmProAppHelper::plugin_path() .'/classes/views/combo-fields/input-form-builder.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/combo-fields/input-form-builder.php' );
 	}
 
 	public function front_field_input( $args, $shortcode_atts ) {
@@ -208,9 +208,8 @@ class FrmProFieldAddress extends FrmFieldType {
 			$new_value['zip']   = $value[4];
 
 			if ( $count == 6 ) {
-				$new_value['country'] = $value[ 5 ];
+				$new_value['country'] = $value[5];
 			}
-
 		} else {
 			$new_value['city']  = $value[1];
 			$new_value['state'] = $value[2];

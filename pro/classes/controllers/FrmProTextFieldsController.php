@@ -1,6 +1,6 @@
 <?php
 
-class FrmProTextFieldsController{
+class FrmProTextFieldsController {
 
 	/**
 	 * Display the Pro field options for a Text field in the form builder

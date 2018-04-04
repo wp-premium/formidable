@@ -1,6 +1,6 @@
 <?php
 
-class FrmProPhoneFieldsController{
+class FrmProPhoneFieldsController {
 
 	/**
 	 * Show the Pro options for a phone field on the form builder page

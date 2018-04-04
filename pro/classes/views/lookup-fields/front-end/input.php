@@ -18,15 +18,17 @@ if ( 'select' == $field['data_type'] ) {
 <?php
 		foreach ( $field['options'] as $opt ) {
 			$opt_value = ( $opt == $field['lookup_placeholder_text'] ) ? '' : $opt;
-			$selected = ( in_array( $opt_value, $saved_value_array ) ) ? ' selected="selected"' : ''; ?>
-<option value="<?php echo esc_attr( $opt_value ) ?>"<?php echo $selected ?>><?php echo ($opt == '') ? ' ' : esc_html( $opt ); ?></option>
+			$selected = ( in_array( $opt_value, $saved_value_array ) ) ? ' selected="selected"' : '';
+			?>
+<option value="<?php echo esc_attr( $opt_value ); ?>"<?php echo $selected; ?>><?php
+	echo ( $opt == '' ) ? ' ' : esc_html( $opt );
+?></option>
 <?php
 		}
 ?>
 </select>
 <?php
     }
-
 } else if ( 'radio' == $field['data_type'] ) {
 	 // Radio Button Lookup Field
 

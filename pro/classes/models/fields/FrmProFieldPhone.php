@@ -4,7 +4,7 @@
  * @since 3.0
  */
 class FrmProFieldPhone extends FrmFieldPhone {
-	
+
 	protected function field_settings_for_type() {
 		$settings = parent::field_settings_for_type();
 

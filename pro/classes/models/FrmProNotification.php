@@ -1,7 +1,7 @@
 <?php
-class FrmProNotification{
+class FrmProNotification {
 
-    public static function add_attachments($attachments, $form, $args) {
+	public static function add_attachments( $attachments, $form, $args ) {
         $defaults = array(
             'entry'     => false,
             'email_key' => '',
@@ -63,14 +63,14 @@ class FrmProNotification{
 		$file = get_post_meta( $file_id, '_wp_attached_file', true);
 		if ( $file ) {
 			$uploads = wp_upload_dir();
-			$attachments[] = $uploads['basedir'] . '/'. $file;
+			$attachments[] = $uploads['basedir'] . '/' . $file;
 		}
 	}
 
 	/**
 	 * @deprecated 2.03.04
 	 */
-    public static function entry_created($entry_id, $form_id) {
+	public static function entry_created( $entry_id, $form_id ) {
 	    $new_function = 'FrmFormActionsController::trigger_actions("create", ' . $form_id . ', ' . $entry_id . ', "email")';
 	    _deprecated_function( __FUNCTION__, '2.03.04', $new_function );
 	    FrmFormActionsController::trigger_actions( 'create', $form_id, $entry_id, 'email' );

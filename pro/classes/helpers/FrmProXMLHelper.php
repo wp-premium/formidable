@@ -1,8 +1,8 @@
 <?php
 
-class FrmProXMLHelper{
+class FrmProXMLHelper {
 
-    public static function import_xml_entries($entries, $imported) {
+	public static function import_xml_entries( $entries, $imported ) {
         global $frm_duplicate_ids;
 
         $saved_entries = array();
@@ -16,10 +16,10 @@ class FrmProXMLHelper{
 	            'id'            => (int) $item->id,
 		        'item_key'      => (string) $item->item_key,
 		        'name'          => (string) $item->name,
-		        'description'   => FrmAppHelper::maybe_json_decode((string) $item->description),
+				'description'   => FrmAppHelper::maybe_json_decode( (string) $item->description ),
 		        'ip'            => (string) $item->ip,
-		        'form_id'       => ( isset($imported['forms'][ (int) $item->form_id] ) ? $imported['forms'][ (int) $item->form_id] : (int) $item->form_id),
-		        'post_id'       => ( isset($imported['posts'][ (int) $item->post_id] ) ? $imported['posts'][ (int) $item->post_id] : (int) $item->post_id),
+				'form_id'       => ( isset( $imported['forms'][ (int) $item->form_id ] ) ? $imported['forms'][ (int) $item->form_id ] : (int) $item->form_id ),
+				'post_id'       => ( isset( $imported['posts'][ (int) $item->post_id ] ) ? $imported['posts'][ (int) $item->post_id ] : (int) $item->post_id ),
 		        'user_id'       => FrmAppHelper::get_user_id_param( (string) $item->user_id ),
 		        'parent_item_id' => (int) $item->parent_item_id,
 		        'is_draft'      => (int) $item->is_draft,
@@ -31,23 +31,23 @@ class FrmProXMLHelper{
 	        $metas = array();
     		foreach ( $item->item_meta as $meta ) {
     		    $field_id = (int) $meta->field_id;
-    		    if ( is_array($frm_duplicate_ids) && isset($frm_duplicate_ids[$field_id] ) ) {
-    		        $field_id = $frm_duplicate_ids[$field_id];
-    		    }
+				if ( is_array( $frm_duplicate_ids ) && isset( $frm_duplicate_ids[ $field_id ] ) ) {
+					$field_id = $frm_duplicate_ids[ $field_id ];
+				}
     		    $field = FrmField::getOne($field_id);
 
     		    if ( ! $field ) {
     		        continue;
     		    }
 
-                $metas[$field_id] = FrmAppHelper::maybe_json_decode((string) $meta->meta_value);
+				$metas[ $field_id ] = FrmAppHelper::maybe_json_decode( (string) $meta->meta_value );
 
-                $metas[$field_id] = apply_filters('frm_import_val', $metas[$field_id], $field);
+				$metas[ $field_id ] = apply_filters( 'frm_import_val', $metas[ $field_id ], $field );
 
-                self::convert_field_values($field, $field_id, $metas, $saved_entries);
-                if ( $field->type == 'user_id' && $metas[$field_id] && is_numeric($metas[$field_id]) ) {
-                    $entry['frm_user_id'] = $metas[$field_id];
-                }
+				self::convert_field_values( $field, $field_id, $metas, $saved_entries );
+				if ( $field->type == 'user_id' && $metas[ $field_id ] && is_numeric( $metas[ $field_id ] ) ) {
+					$entry['frm_user_id'] = $metas[ $field_id ];
+				}
 
                 unset($field, $meta);
     		}
@@ -63,9 +63,9 @@ class FrmProXMLHelper{
             if ( $editing ) {
 				FrmEntry::update_entry_from_xml( $entry['id'], $entry );
                 $imported['updated']['items']++;
-                $saved_entries[$entry['id']] = $entry['id'];
+				$saved_entries[ $entry['id'] ] = $entry['id'];
             } else if ( $e = FrmEntry::create_entry_from_xml($entry) ) {
-                $saved_entries[$entry['id']] = $e;
+				$saved_entries[ $entry['id'] ] = $e;
                 $imported['imported']['items']++;
             }
 
@@ -187,7 +187,7 @@ class FrmProXMLHelper{
 
                 unset($_POST, $values);
 
-                if ( ($row - $start_row) >= $max ) {
+                if ( ( $row - $start_row ) >= $max ) {
                     fclose($f);
                     return $row;
                 }
@@ -207,57 +207,57 @@ class FrmProXMLHelper{
 		return $unmapped_fields;
 	}
 
-    private static function csv_to_entry_value($key, $field_id, $data, &$values) {
-        $data[$key] = isset($data[$key]) ? $data[$key] : '';
+	private static function csv_to_entry_value( $key, $field_id, $data, &$values ) {
+		$data[ $key ] = isset( $data[ $key ] ) ? $data[ $key ] : '';
 
         if ( is_numeric($field_id) ) {
             self::set_values_for_fields($key, $field_id, $data, $values);
         } else if ( is_array($field_id) ) {
             self::set_values_for_data_fields($key, $field_id, $data, $values);
         } else {
-            $values[$field_id] = $data[$key];
+			$values[ $field_id ] = $data[ $key ];
         }
     }
 
     /**
      * Called by self::csv_to_entry_value
      */
-    private static function set_values_for_fields($key, $field_id, $data, &$values) {
+	private static function set_values_for_fields( $key, $field_id, $data, &$values ) {
         global $importing_fields;
 
         if ( ! $importing_fields ) {
             $importing_fields = array();
         }
 
-        if ( isset($importing_fields[$field_id]) ) {
-            $field = $importing_fields[$field_id];
-        } else {
-            $field = FrmField::getOne($field_id);
-            $importing_fields[$field_id] = $field;
-        }
+		if ( isset( $importing_fields[ $field_id ] ) ) {
+			$field = $importing_fields[ $field_id ];
+		} else {
+			$field = FrmField::getOne( $field_id );
+			$importing_fields[ $field_id ] = $field;
+		}
 
-        $values['item_meta'][$field_id] = apply_filters('frm_import_val', $data[$key], $field);
+		$values['item_meta'][ $field_id ] = apply_filters( 'frm_import_val', $data[ $key ], $field );
 
         self::convert_field_values($field, $field_id, $values['item_meta']);
         if ( $field->type == 'user_id' ) {
-            $_POST['frm_user_id'] = $values['frm_user_id'] = $values['item_meta'][$field_id];
+			$_POST['frm_user_id'] = $values['frm_user_id'] = $values['item_meta'][ $field_id ];
         }
 
-        if ( isset($_POST['item_meta'][$field_id]) && ( $field->type == 'checkbox' || ( $field->type == 'data' && $field->field_options['data_type'] != 'checkbox') ) ) {
-            if ( empty($values['item_meta'][$field_id]) ) {
-                $values['item_meta'][$field_id] = $_POST['item_meta'][$field_id];
-            } else if ( ! empty($_POST['item_meta'][$field_id]) ) {
-                $values['item_meta'][$field_id] = array_merge( (array) $_POST['item_meta'][$field_id], (array) $values['item_meta'][$field_id] );
-            }
-        }
+		if ( isset( $_POST['item_meta'][ $field_id ] ) && ( $field->type == 'checkbox' || ( $field->type == 'data' && $field->field_options['data_type'] != 'checkbox' ) ) ) {
+			if ( empty( $values['item_meta'][ $field_id ] ) ) {
+				$values['item_meta'][ $field_id ] = $_POST['item_meta'][ $field_id ];
+			} else if ( ! empty( $_POST['item_meta'][ $field_id ] ) ) {
+				$values['item_meta'][ $field_id ] = array_merge( (array) $_POST['item_meta'][ $field_id ], (array) $values['item_meta'][ $field_id ] );
+			}
+		}
 
-        $_POST['item_meta'][$field_id] = $values['item_meta'][$field_id];
+		$_POST['item_meta'][ $field_id ] = $values['item_meta'][ $field_id ];
     }
 
     /**
      * Called by self::csv_to_entry_value
      */
-    private static function set_values_for_data_fields($key, $field_id, $data, &$values) {
+	private static function set_values_for_data_fields( $key, $field_id, $data, &$values ) {
         $field_type = isset($field_id['type']) ? $field_id['type'] : false;
 
         if ( $field_type != 'data' ) {
@@ -268,14 +268,14 @@ class FrmProXMLHelper{
         $field_id = $field_id['field_id'];
 
         if ( $linked ) {
-            $entry_id = FrmDb::get_var( 'frm_item_metas', array( 'meta_value' => $data[$key], 'field_id' => $linked), 'item_id' );
+			$entry_id = FrmDb::get_var( 'frm_item_metas', array( 'meta_value' => $data[ $key ], 'field_id' => $linked ), 'item_id' );
         } else {
             //get entry id of entry with item_key == $data[$key]
-            $entry_id = FrmDb::get_var( 'frm_items', array( 'item_key' => $data[$key]) );
+			$entry_id = FrmDb::get_var( 'frm_items', array( 'item_key' => $data[ $key ] ) );
         }
 
         if ( $entry_id ) {
-            $values['item_meta'][$field_id] = $entry_id;
+			$values['item_meta'][ $field_id ] = $entry_id;
         }
     }
 
@@ -291,25 +291,25 @@ class FrmProXMLHelper{
         $offset = get_option('gmt_offset') * 60 * 60;
 
         $frmpro_settings = new FrmProSettings();
-        foreach ( array( 'created_at', 'updated_at') as $stamp ) {
-            if ( ! isset($values[$stamp]) ) {
+		foreach ( array( 'created_at', 'updated_at' ) as $stamp ) {
+            if ( ! isset( $values[ $stamp ] ) ) {
                 continue;
             }
 
             // adjust the date format if it starts with the day
-            if ( ! preg_match('/^\d{4}-\d{2}-\d{2}/', trim($values[$stamp])) && substr($frmpro_settings->date_format, 0, 1) == 'd' ) {
+			if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}/', trim( $values[ $stamp ] ) ) && substr( $frmpro_settings->date_format, 0, 1 ) == 'd' ) {
                 $reg_ex = str_replace(
-                    array( '/', '.', '-', 'd', 'j', 'm', 'y', 'Y'),
-                    array( '\/', '\.', '\-', '\d{2}', '\d', '\d{2}', '\d{2}', '\d{4}'),
+					array( '/', '.', '-', 'd', 'j', 'm', 'y', 'Y' ),
+					array( '\/', '\.', '\-', '\d{2}', '\d', '\d{2}', '\d{2}', '\d{4}' ),
                     $frmpro_settings->date_format
                 );
 
-                if ( preg_match('/^'. $reg_ex .'/', trim($values[$stamp])) ) {
-                    $values[$stamp] = FrmProAppHelper::convert_date($values[$stamp], $frmpro_settings->date_format, 'Y-m-d H:i:s');
-                }
-            }
+				if ( preg_match( '/^' . $reg_ex . '/', trim( $values[ $stamp ] ) ) ) {
+					$values[ $stamp ] = FrmProAppHelper::convert_date( $values[ $stamp ], $frmpro_settings->date_format, 'Y-m-d H:i:s' );
+				}
+			}
 
-            $values[$stamp] = date('Y-m-d H:i:s', (strtotime($values[$stamp]) - $offset));
+			$values[ $stamp ] = date( 'Y-m-d H:i:s', ( strtotime( $values[ $stamp ] ) - $offset ) );
 
             unset($stamp);
         }
@@ -321,7 +321,7 @@ class FrmProXMLHelper{
     private static function convert_db_cols( &$values ) {
         if ( ! isset($values['item_key']) || empty($values['item_key']) ) {
             global $wpdb;
-            $values['item_key'] = FrmAppHelper::get_unique_key('', $wpdb->prefix .'frm_items', 'item_key');
+			$values['item_key'] = FrmAppHelper::get_unique_key( '', $wpdb->prefix . 'frm_items', 'item_key' );
         }
 
         if ( isset($values['user_id']) ) {
@@ -370,13 +370,13 @@ class FrmProXMLHelper{
 		}
 	}
 
-	public static function get_file_id($value) {
+	public static function get_file_id( $value ) {
 		_deprecated_function( __FUNCTION__, '3.0', 'FrmProFieldFile->get_file_id' );
 		$field_obj = FrmFieldFactory::get_field_type( 'file' );
 		return $field_obj->get_file_id( $value );
 	}
 
-	public static function get_date($value) {
+	public static function get_date( $value ) {
 		_deprecated_function( __FUNCTION__, '3.0', 'FrmProFieldFile->get_file_id' );
 		$field_obj = FrmFieldFactory::get_field_type('file');
 		return $field_obj->get_import_value( $value );

@@ -5,7 +5,7 @@
 			printf(
 				__( 'Edit your style below, or %1$screate a new style%2$s or %3$sduplicate the current style%4$s.', 'formidable-pro' ),
 				'<a href="?page=formidable-styles&frm_action=new_style">', '</a>',
-				'<a href="?page=formidable-styles&frm_action=duplicate&style_id=' . absint( $style->ID ) . '">','</a>'
+				'<a href="?page=formidable-styles&frm_action=duplicate&style_id=' . absint( $style->ID ) . '">', '</a>'
 			);
 		} else { ?>
 			<form method="get">
@@ -33,11 +33,13 @@
 					printf(
 						__( 'or %1$screate a new style%2$s or %3$sduplicate the current style%4$s.', 'formidable-pro' ),
 						'<a href="?page=formidable-styles&frm_action=new_style">', '</a>',
-						'<a href="?page=formidable-styles&frm_action=duplicate&style_id=' . absint( $style->ID ) . '">','</a>'
+						'<a href="?page=formidable-styles&frm_action=duplicate&style_id=' . absint( $style->ID ) . '">', '</a>'
 					);
-				} ?>
+				}
+				?>
 			</span>
 <?php
-		} ?>
+		}
+		?>
 	</span>
 </div><!-- /manage-menus -->

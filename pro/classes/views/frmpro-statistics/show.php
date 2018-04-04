@@ -34,7 +34,7 @@
         }
 
         foreach ( $fields as $field ) {
-            if ( ! isset($data[$field->id]) ) {
+			if ( ! isset( $data[ $field->id ] ) ) {
                 continue;
             }
 
@@ -86,7 +86,7 @@
             <div class="clear"></div>
             </div>
         <?php
-            $class = ($class == 'odd') ? 'even' : 'odd';
+			$class = ( $class == 'odd' ) ? 'even' : 'odd';
             unset($field);
         }
 

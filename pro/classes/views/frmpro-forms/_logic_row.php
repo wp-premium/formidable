@@ -1,5 +1,9 @@
 <div id="<?php echo esc_attr( $id ) ?>" class="frm_logic_row frm_logic_row_<?php echo esc_attr( $key ) ?>">
-<select name="<?php echo esc_attr( $names['hide_field'] ) ?>" <?php if ( ! empty( $onchange ) ) { ?>onchange="<?php echo $onchange ?>"<?php } ?>>
+<select name="<?php echo esc_attr( $names['hide_field'] ) ?>" <?php
+	if ( ! empty( $onchange ) ) {
+		?>onchange="<?php echo $onchange ?>"<?php
+	}
+	?>>
     <option value=""><?php _e( '&mdash; Select &mdash;' ) ?></option>
     <?php
     foreach ( $form_fields as $ff ) {
@@ -11,11 +15,13 @@
             continue;
         }
 
-        $selected = ( isset($condition['hide_field']) && $ff->id == $condition['hide_field'] ) ? ' selected="selected"' : ''; ?>
+		$selected = ( isset( $condition['hide_field'] ) && $ff->id == $condition['hide_field'] ) ? ' selected="selected"' : '';
+		?>
 	<option value="<?php echo esc_attr( $ff->id ) ?>"<?php echo $selected ?>><?php echo FrmAppHelper::truncate($ff->name, 25); ?></option>
     <?php
         unset($ff);
-        } ?>
+		}
+		?>
 </select>
 <?php _e( 'is', 'formidable-pro' ); ?>
 

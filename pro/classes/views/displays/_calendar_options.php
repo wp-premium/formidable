@@ -4,9 +4,10 @@
     <option value="created_at" <?php selected($post->frm_date_field_id, 'created_at') ?>><?php _e( 'Entry creation date', 'formidable-pro' ) ?></option>
     <option value="updated_at" <?php selected($post->frm_date_field_id, 'updated_at') ?>><?php _e( 'Entry update date', 'formidable-pro' ) ?></option>
     <?php
-    if ( is_numeric($post->frm_form_id) && !empty($post->frm_form_id) ) {
+	if ( is_numeric( $post->frm_form_id ) && ! empty( $post->frm_form_id ) ) {
 		FrmProFieldsHelper::get_field_options( $post->frm_form_id, $post->frm_date_field_id, '', array( 'date' ) );
-    } ?>
+	}
+	?>
 </select>
 <br/>
 
@@ -18,7 +19,8 @@
     <?php
 	if ( is_numeric( $post->frm_form_id ) && ! empty( $post->frm_form_id ) ) {
 		FrmProFieldsHelper::get_field_options( $post->frm_form_id, $post->frm_edate_field_id, '', array( 'date', 'number', 'select', 'radio', 'scale', 'star' ) );
-    } ?>
+	}
+	?>
 </select>
 <br/>
 
@@ -26,9 +28,10 @@
 <select id="repeat_event_field_id" name="options[repeat_event_field_id]">
     <option value=""><?php _e( 'No repeating events', 'formidable-pro' ) ?></option>
     <?php
-    if ( is_numeric($post->frm_form_id) && !empty($post->frm_form_id) ) {
+	if ( is_numeric( $post->frm_form_id ) && ! empty( $post->frm_form_id ) ) {
 		FrmProFieldsHelper::get_field_options( $post->frm_form_id, $post->frm_repeat_event_field_id, '', array( 'radio', 'select' ) );
-    } ?>
+	}
+	?>
 </select>
 <br/>
 
@@ -38,5 +41,6 @@
     <?php
 	if ( is_numeric( $post->frm_form_id ) && ! empty( $post->frm_form_id ) ) {
 		FrmProFieldsHelper::get_field_options( $post->frm_form_id, $post->frm_repeat_edate_field_id, '', array( 'date' ) );
-	} ?>
+	}
+	?>
 </select>

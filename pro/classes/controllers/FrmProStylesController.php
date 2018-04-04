@@ -1,6 +1,6 @@
 <?php
 
-class FrmProStylesController extends FrmStylesController{
+class FrmProStylesController extends FrmStylesController {
 
     public static function load_pro_hooks() {
         if ( FrmAppHelper::is_admin_page('formidable-styles') ) {
@@ -67,7 +67,7 @@ class FrmProStylesController extends FrmStylesController{
 		include( self::view_folder() . '/_style_switcher.php' );
 	}
 
-    public static function maybe_new_style($style) {
+	public static function maybe_new_style( $style ) {
 		$action = FrmAppHelper::get_param( 'frm_action', '', 'get', 'sanitize_title' );
     	if ( 'new_style' == $action ) {
             $style = self::new_style('style');
@@ -77,7 +77,7 @@ class FrmProStylesController extends FrmStylesController{
         return $style;
     }
 
-    public static function new_style($return = '') {
+	public static function new_style( $return = '' ) {
         $frm_style = new FrmStyle();
         $style = $frm_style->get_new();
 
@@ -119,7 +119,7 @@ class FrmProStylesController extends FrmStylesController{
         self::edit('default', $message);
     }
 
-    public static function pro_route($action) {
+	public static function pro_route( $action ) {
         switch ( $action ) {
             case 'new_style':
             case 'duplicate':

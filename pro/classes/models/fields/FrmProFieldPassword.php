@@ -16,7 +16,7 @@ class FrmProFieldPassword extends FrmFieldType {
 		$settings = array(
 			'size'          => true,
 			'unique'        => true,
-			'clear_on_focus'=> true,
+			'clear_on_focus' => true,
 			'invalid'       => true,
 			'read_only'     => true,
 			'conf_field'    => true,

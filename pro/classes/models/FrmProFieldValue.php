@@ -42,8 +42,7 @@ class FrmProFieldValue extends FrmFieldValue {
 					$this->saved_value[ $child_entry_id ] = $current_field_value->get_saved_value();
 				}
 			}
-
-		} else if ( isset( $this->field->field_options['post_field'] ) && $this->field->field_options['post_field'] ){
+		} elseif ( isset( $this->field->field_options['post_field'] ) && $this->field->field_options['post_field'] ) {
 
 			$this->saved_value = $this->get_post_value( $entry );
 			$this->clean_saved_value();

@@ -166,6 +166,9 @@ function frmProFormJS(){
 			dictCancelUploadConfirmation: uploadFields[i].cancelConfirm,
 			dictRemoveFile: uploadFields[i].remove,
 			dictMaxFilesExceeded: uploadFields[i].maxFilesExceeded,
+			resizeMethod: 'contain',
+			resizeWidth: uploadFields[i].resizeWidth,
+			resizeHeight: uploadFields[i].resizeHeight,
 			fallback: function() {
 				// Force ajax submit to turn off
 				jQuery(this.element).closest('form').removeClass('frm_ajax_submit');

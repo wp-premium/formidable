@@ -1,6 +1,6 @@
 <?php
 
-class FrmProAppHelper{
+class FrmProAppHelper {
 
     public static function plugin_folder() {
         return basename( self::plugin_path() );
@@ -110,7 +110,7 @@ class FrmProAppHelper{
      * @since 2.0
      * @return string|array
      */
-    public static function get_current_user_value($value, $return_array = false) {
+	public static function get_current_user_value( $value, $return_array = false ) {
         global $current_user;
         $new_value = isset($current_user->{$value}) ? $current_user->{$value} : '';
         if ( is_array($new_value) && ! $return_array ) {
@@ -138,7 +138,7 @@ class FrmProAppHelper{
      * @since 2.0
      * @return string
      */
-    public static function get_current_post_value($value) {
+	public static function get_current_post_value( $value ) {
         global $post;
         if ( ! $post ) {
             return;
@@ -227,8 +227,8 @@ class FrmProAppHelper{
 	}
 
 	private static function convert_date_fallback( $date_str, $from_format, $to_format ) {
-		$base_struc     = preg_split( "/[\/|.| |-]/", $from_format );
-		$date_str_parts = preg_split( "/[\/|.| |-]/", $date_str );
+		$base_struc     = preg_split( '/[\/|.| |-]/', $from_format );
+		$date_str_parts = preg_split( '/[\/|.| |-]/', $date_str );
 		$date_elements = array();
 
 		$p_keys = array_keys( $base_struc );
@@ -280,7 +280,7 @@ class FrmProAppHelper{
         $taxonomies = get_object_taxonomies($post_type);
         if ( ! $taxonomies ) {
             return false;
-        }else{
+		} else {
             $field = (array) $field;
             if ( ! isset($field['taxonomy']) ) {
                 $field['field_options'] = maybe_unserialize($field['field_options']);
@@ -289,7 +289,7 @@ class FrmProAppHelper{
 
             if ( isset($field['taxonomy']) && in_array($field['taxonomy'], $taxonomies) ) {
                 return $field['taxonomy'];
-            } else if($post_type == 'post' ) {
+			} elseif ( $post_type == 'post' ) {
                 return 'category';
             } else {
                 return reset($taxonomies);
@@ -303,8 +303,8 @@ class FrmProAppHelper{
         $ordered = array();
 		foreach ( $order_array as $key ) {
 			if ( array_key_exists( $key, $array ) ) {
-                $ordered[$key] = $array[$key];
-                unset($array[$key]);
+				$ordered[ $key ] = $array[ $key ];
+				unset( $array[ $key ] );
             }
         }
         return $ordered + $array;
@@ -374,7 +374,7 @@ class FrmProAppHelper{
             }
         }
 
-        $args['temp_where_is'] = str_replace( array( '!', 'not '), '', $args['where_is']);
+		$args['temp_where_is'] = str_replace( array( '!', 'not ' ), '', $args['where_is'] );
 
         //get values that aren't blank and then remove them from entry list
         if ( $args['where_val'] == '' && $args['temp_where_is'] == '=' ) {
@@ -407,7 +407,7 @@ class FrmProAppHelper{
 
 		if ( $args['where_val'] == 'NOW' ) {
 			$args['where_val'] = self::get_date( $date_format );
-		} elseif ( ! self::option_is_like( $args['where_is'] )  ) {
+		} elseif ( ! self::option_is_like( $args['where_is'] ) ) {
 			$args['where_val'] = date( $date_format, strtotime( $args['where_val'] ) );
 		}
 	}
@@ -453,7 +453,7 @@ class FrmProAppHelper{
 			$linked_id = FrmDb::get_col( 'frm_items', array(
 				'form_id' => $linked_field->form_id,
 				'item_key ' . FrmDb::append_where_is( $args['temp_where_is'] ) => $args['where_val'],
-				) );
+			) );
 		}
 
 		if ( ! $linked_id ) {
@@ -526,14 +526,14 @@ class FrmProAppHelper{
             return;
         }
 
-        if ( ! isset($where_field->field_options['post_field']) || ! in_array($where_field->field_options['post_field'], array( 'post_category', 'post_custom', 'post_status', 'post_content', 'post_excerpt', 'post_title', 'post_name', 'post_date')) ) {
+		if ( ! isset( $where_field->field_options['post_field'] ) || ! in_array( $where_field->field_options['post_field'], array( 'post_category', 'post_custom', 'post_status', 'post_content', 'post_excerpt', 'post_title', 'post_name', 'post_date' ) ) ) {
             // this is not a post field
             return;
         }
 
         $post_ids = array();
         foreach ( $args['form_posts'] as $form_post ) {
-            $post_ids[$form_post->post_id] = $form_post->id;
+			$post_ids[ $form_post->post_id ] = $form_post->id;
             if ( ! in_array($form_post->id, $new_ids) ) {
                 $new_ids[] = $form_post->id;
             }
@@ -549,13 +549,13 @@ class FrmProAppHelper{
         if ( $where_field->field_options['post_field'] == 'post_category' ) {
             //check categories
 
-			$args['temp_where_is'] = FrmDb::append_where_is( str_replace( array( '!', 'not '), '', $args['where_is'] ) );
+			$args['temp_where_is'] = FrmDb::append_where_is( str_replace( array( '!', 'not ' ), '', $args['where_is'] ) );
 
 			$t_where = array(
 				'or' => 1,
-				't.term_id '. $args['temp_where_is'] => $args['where_val'],
-				't.slug '. $args['temp_where_is'] => $args['where_val'],
-				't.name '. $args['temp_where_is'] => $args['where_val'],
+				't.term_id ' . $args['temp_where_is'] => $args['where_val'],
+				't.slug ' . $args['temp_where_is'] => $args['where_val'],
+				't.name ' . $args['temp_where_is'] => $args['where_val'],
 			);
             unset($args['temp_where_is']);
 
@@ -563,14 +563,14 @@ class FrmProAppHelper{
 			$query[] = $t_where;
 
 			$add_posts = FrmDb::get_col(
-				$wpdb->terms .' AS t INNER JOIN '. $wpdb->term_taxonomy .' AS tt ON tt.term_id = t.term_id INNER JOIN '. $wpdb->term_relationships .' AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id',
+				$wpdb->terms . ' AS t INNER JOIN ' . $wpdb->term_taxonomy . ' AS tt ON tt.term_id = t.term_id INNER JOIN ' . $wpdb->term_relationships . ' AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id',
 				$query,
 				'tr.object_id',
 				$filter_args
 			);
             $add_posts = array_intersect($add_posts, array_keys($post_ids));
 
-            if ( in_array($args['where_is'], array( '!=', 'not LIKE') ) ) {
+			if ( in_array( $args['where_is'], array( '!=', 'not LIKE' ) ) ) {
                 $remove_posts = $add_posts;
                 $add_posts = false;
             } else if ( empty($add_posts) ) {
@@ -603,19 +603,19 @@ class FrmProAppHelper{
         if ( $add_posts && ! empty($add_posts) ) {
             $new_ids = array();
             foreach ( $add_posts as $add_post ) {
-                if ( ! in_array($post_ids[$add_post], $new_ids) ) {
-                    $new_ids[] = $post_ids[$add_post];
-                }
+				if ( ! in_array( $post_ids[ $add_post ], $new_ids ) ) {
+					$new_ids[] = $post_ids[ $add_post ];
+				}
             }
         }
 
         if ( isset($remove_posts) ) {
             if ( ! empty($remove_posts) ) {
                 foreach ( $remove_posts as $remove_post ) {
-                    $key = array_search($post_ids[$remove_post], $new_ids);
-                    if ( $key && $new_ids[$key] == $post_ids[$remove_post] ) {
-                        unset($new_ids[$key]);
-                    }
+					$key = array_search( $post_ids[ $remove_post ], $new_ids );
+					if ( $key && $new_ids[ $key ] == $post_ids[ $remove_post ] ) {
+						unset( $new_ids[ $key ] );
+					}
 
                     unset($key);
                 }
@@ -640,9 +640,9 @@ class FrmProAppHelper{
     }
 
 	public static function get_rand( $length ) {
-        $all_g = "ABCDEFGHIJKLMNOPQRSTWXZ";
-        $pass = "";
-        for($i=0;$i<$length;$i++) {
+        $all_g = 'ABCDEFGHIJKLMNOPQRSTWXZ';
+        $pass = '';
+		for ( $i = 0; $i < $length; $i++ ) {
             $pass .= $all_g[ rand(0, strlen($all_g) - 1) ];
         }
         return $pass;

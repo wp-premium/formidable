@@ -1,5 +1,5 @@
 <?php
-class FrmProSettings extends FrmSettings{
+class FrmProSettings extends FrmSettings {
     public $option_name = 'frmpro_options';
 
     // options
@@ -50,7 +50,7 @@ class FrmProSettings extends FrmSettings{
 
 	function store() {
         // Save the posted value in the database
-        update_option( $this->option_name, $this);
+		update_option( $this->option_name, $this, 'no' );
 
         delete_transient($this->option_name);
         set_transient($this->option_name, $this);

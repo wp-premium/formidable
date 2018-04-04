@@ -17,8 +17,6 @@ class FrmProFieldCreditCard extends FrmFieldType {
 	 */
 	protected $has_for_label = false;
 
-	protected $is_tall = true;
-
 	protected function field_settings_for_type() {
 		$settings = array(
 			'clear_on_focus' => true,
@@ -63,7 +61,7 @@ class FrmProFieldCreditCard extends FrmFieldType {
 		$field_name = $this->html_name( $name );
 		$html_id = $this->html_id();
 
-		include( FrmProAppHelper::plugin_path() .'/classes/views/combo-fields/input-form-builder.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/combo-fields/input-form-builder.php' );
 	}
 
 	public function front_field_input( $args, $shortcode_atts ) {
@@ -165,16 +163,16 @@ class FrmProFieldCreditCard extends FrmFieldType {
 		switch ( $firstnumber ) {
 			case 3:
 				$is_valid = preg_match( '/^3\d{3}[ \-]?\d{6}[ \-]?\d{5}$/', $card_number );
-			break;
+				break;
 			case 4:
 				$is_valid = preg_match( '/^4\d{3}[ \-]?\d{4}[ \-]?\d{4}[ \-]?\d{4}$/', $card_number );
-			break;
+				break;
 			case 5:
 				$is_valid = preg_match( '/^5\d{3}[ \-]?\d{4}[ \-]?\d{4}[ \-]?\d{4}$/', $card_number );
-			break;
+				break;
 			case 6:
 				$is_valid = preg_match( '/^6011[ \-]?\d{4}[ \-]?\d{4}[ \-]?\d{4}$/', $card_number );
-			break;
+				break;
 			default:
 				$is_valid = false;
 		}

@@ -212,8 +212,8 @@ class FrmProEntryShortcodeFormatter extends FrmEntryShortcodeFormatter {
 	protected function get_dynamic_list_field_value_shortcode( $field ) {
 		if ( ! empty( $field->field_options['hide_field'] ) && ! empty( $field->field_options['form_select'] ) ) {
 
-			$trigger_field_id = reset( $field->field_options[ 'hide_field' ] );
-			$value = $trigger_field_id . ' show=' . $field->field_options[ 'form_select' ];
+			$trigger_field_id = reset( $field->field_options['hide_field'] );
+			$value = $trigger_field_id . ' show=' . $field->field_options['form_select'];
 
 		} else {
 			$value = $field->id;

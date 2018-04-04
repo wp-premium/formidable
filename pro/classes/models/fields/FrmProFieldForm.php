@@ -30,7 +30,7 @@ DEFAULT_HTML;
 			'required'      => false,
 			'visibility'    => false,
 			'description'   => false,
-			'label_position'=> false,
+			'label_position' => false,
 		);
 
 		FrmProFieldsHelper::fill_default_field_display( $settings );

@@ -3,7 +3,7 @@
 /**
  * @since 3.0
  */
-class FrmProInstallPlugin{
+class FrmProInstallPlugin {
 
 	protected $plugin_file; // format: folder/filename.php
 	protected $plugin_slug;

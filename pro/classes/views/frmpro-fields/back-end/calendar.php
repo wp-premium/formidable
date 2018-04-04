@@ -2,8 +2,10 @@
 	<td><label><?php esc_html_e( 'Calendar Localization', 'formidable-pro' ) ?></label></td>
 	<td>
 		<select name="field_options[locale_<?php echo absint( $field['id'] ) ?>]">
-			<?php foreach ( $locales as $locale_key => $locale ) {
-				$selected = (isset($field['locale']) && $field['locale'] == $locale_key)? ' selected="selected"':''; ?>
+			<?php
+			foreach ( $locales as $locale_key => $locale ) {
+				$selected = ( isset( $field['locale'] ) && $field['locale'] == $locale_key ) ? ' selected="selected"' : '';
+				?>
 				<option value="<?php echo esc_attr( $locale_key ) ?>"<?php echo $selected; ?>><?php echo esc_html( $locale ) ?></option>
 			<?php } ?>
 		</select>

@@ -1,5 +1,5 @@
 <?php
-foreach ( $field[ 'options' ] as $opt_key => $opt_value ) {
+foreach ( $field['options'] as $opt_key => $opt_value ) {
 	$checked = ( in_array( $opt_value, $saved_value_array ) ) ? ' checked="checked"' : '';
 	?>
 	<div class="<?php echo esc_attr( apply_filters( 'frm_radio_class', 'frm_radio', $field, $opt_value ) ) ?>">

@@ -8,7 +8,8 @@
 		<div id="frm_calc_opts<?php echo esc_attr( $field['id'] ) ?>" <?php
 			if ( ! $field['use_calc'] ) {
 				echo 'class="frm_hidden"';
-			} ?>>
+			}
+			?>>
 			<label for="calc_type_<?php echo esc_attr( $field['id'] ) ?>">
 				<input type="checkbox" value="text" name="field_options[calc_type_<?php echo esc_attr( $field['id'] ) ?>]" id="calc_type_<?php echo esc_attr( $field['id'] ) ?>" <?php checked( $field['calc_type'], 'text' ) ?> onchange="frm_show_div('frm_num_calc_<?php echo absint( $field['id'] ) ?>',this.checked,false,'#')" />
 				<?php esc_html_e( 'This calculation is copying text', 'formidable-pro' ) ?>

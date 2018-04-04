@@ -1,6 +1,6 @@
 <?php
 
-class FrmProFormsHelper{
+class FrmProFormsHelper {
 
 	public static function setup_new_vars( $values ) {
 
@@ -12,11 +12,12 @@ class FrmProFormsHelper{
 
 	public static function setup_edit_vars( $values ) {
         $record = FrmForm::getOne($values['id']);
-        foreach ( array( 'logged_in' => $record->logged_in, 'editable' => $record->editable) as $var => $default)
+		foreach ( array( 'logged_in' => $record->logged_in, 'editable' => $record->editable ) as $var => $default ) {
 			$values[ $var ] = FrmAppHelper::get_param( $var, $default, 'get', 'sanitize_text_field' );
+		}
 
 		foreach ( self::get_default_opts() as $opt => $default ) {
-            if ( ! isset($values[$opt]) ) {
+			if ( ! isset( $values[ $opt ] ) ) {
 				$values[ $opt ] = ( $_POST && isset( $_POST['options'][ $opt ] ) ) ? sanitize_text_field( $_POST['options'][ $opt ] ) : $default;
             }
 
@@ -27,7 +28,7 @@ class FrmProFormsHelper{
     }
 
 	public static function load_chosen_js( $frm_vars ) {
-		if ( isset( $frm_vars['chosen_loaded' ] ) && $frm_vars['chosen_loaded'] ) {
+		if ( isset( $frm_vars['chosen_loaded'] ) && $frm_vars['chosen_loaded'] ) {
 			$original_js = 'allow_single_deselect:true';
 			$chosen_js = apply_filters( 'frm_chosen_js', $original_js );
 			if ( $original_js != $chosen_js ) {
@@ -59,7 +60,7 @@ class FrmProFormsHelper{
 		}
 
 		// Check dependent Dynamic fields
-		if ( isset( $frm_vars['dep_dynamic_fields'] )  && ! empty( $frm_vars['dep_dynamic_fields'] ) ) {
+		if ( isset( $frm_vars['dep_dynamic_fields'] ) && ! empty( $frm_vars['dep_dynamic_fields'] ) ) {
 			echo '__frmDepDynamicFields=' . json_encode( $frm_vars['dep_dynamic_fields'] ) . ';';
 		}
 	}
@@ -128,9 +129,9 @@ class FrmProFormsHelper{
 
             if ( strpos($date_field_id, '^') === 0 ) {
                 // this is a repeating field
-                $trigger_id = 'input[id^="'. str_replace('^', '', esc_attr( $date_field_id ) ) .'"]';
+				$trigger_id = 'input[id^="' . str_replace( '^', '', esc_attr( $date_field_id ) ) . '"]';
             } else {
-                $trigger_id = '#'. esc_attr( $date_field_id );
+				$trigger_id = '#' . esc_attr( $date_field_id );
             }
 
 			$custom_options = self::get_custom_date_js( $date_field_id, $options );
@@ -182,7 +183,7 @@ echo $custom_options;
 			echo 'else{__frmDatepicker=jQuery.extend(__frmDatepicker,frmDates);}';
 		}
 
-		FrmProTimeFieldsController::load_timepicker_js( $datepicker ) ;
+		FrmProTimeFieldsController::load_timepicker_js( $datepicker );
     }
 
 	private static function get_custom_date_js( $date_field_id, $options ) {
@@ -202,7 +203,7 @@ echo $custom_options;
 		FrmProTimeFieldsController::load_timepicker_js( $datepicker );
 	}
 
-    public static function load_calc_js($frm_vars) {
+	public static function load_calc_js( $frm_vars ) {
         if ( ! isset($frm_vars['calc_fields']) || empty($frm_vars['calc_fields']) ) {
             return;
         }
@@ -211,7 +212,7 @@ echo $custom_options;
             'fields'    => array(),
             'calc'      => array(),
             'fieldKeys' => array(),
-			'fieldsWithCalc'	=> array(),
+			'fieldsWithCalc' => array(),
         );
 
         $triggers = array();
@@ -227,17 +228,17 @@ echo $custom_options;
 
             foreach ( $matches[0] as $match_key => $val ) {
                 $val = trim(trim($val, '['), ']');
-                $calc_fields[$val] = FrmField::getOne($val);
-                if ( ! $calc_fields[$val] ) {
-                    unset($calc_fields[$val]);
-                    continue;
-                }
+				$calc_fields[ $val ] = FrmField::getOne( $val );
+				if ( ! $calc_fields[ $val ] ) {
+					unset( $calc_fields[ $val ] );
+					continue;
+				}
 
-				$field_keys[$calc_fields[$val]->id] = self::get_field_call_for_calc( $calc_fields[ $val ], $field['parent_form_id'] );
+				$field_keys[ $calc_fields[ $val ]->id ] = self::get_field_call_for_calc( $calc_fields[ $val ], $field['parent_form_id'] );
 
 				$calc_rules['fieldKeys'] = $calc_rules['fieldKeys'] + $field_keys;
 
-                $calc = str_replace($matches[0][$match_key], '['. $calc_fields[$val]->id .']', $calc);
+				$calc = str_replace( $matches[0][ $match_key ], '[' . $calc_fields[ $val ]->id . ']', $calc );
 
 				// Prevent invalid decrement error for -- in calcs
 				if ( $field['calc_type'] != 'text' ) {
@@ -260,16 +261,16 @@ echo $custom_options;
 			$calc_rules['calc'][ $result ]['fields'] = array();
 
             foreach ( $calc_fields as $calc_field ) {
-                $calc_rules['calc'][$result]['fields'][] = $calc_field->id;
-                if ( isset($calc_rules['fields'][$calc_field->id]) ) {
-                    $calc_rules['fields'][$calc_field->id]['total'][] = $result;
-                } else {
-                    $calc_rules['fields'][$calc_field->id] = array(
-                        'total' => array($result),
-                        'type'  => ( $calc_field->type == 'lookup' ) ? $calc_field->field_options['data_type'] : $calc_field->type,
-                        'key'   => $field_keys[$calc_field->id],
-                    );
-                }
+                $calc_rules['calc'][ $result ]['fields'][] = $calc_field->id;
+				if ( isset( $calc_rules['fields'][ $calc_field->id ] ) ) {
+					$calc_rules['fields'][ $calc_field->id ]['total'][] = $result;
+				} else {
+					$calc_rules['fields'][ $calc_field->id ] = array(
+						'total' => array( $result ),
+						'type'  => ( $calc_field->type == 'lookup' ) ? $calc_field->field_options['data_type'] : $calc_field->type,
+						'key'   => $field_keys[ $calc_field->id ],
+					);
+				}
 
                 if ( $calc_field->type == 'date' ) {
                     if ( ! isset($frmpro_settings) ) {
@@ -296,11 +297,11 @@ echo $custom_options;
 		$field = $atts['field'];
 
 		$rule = array(
-			'calc'			=> isset( $atts['calc'] ) ? $atts['calc'] : $field['calc'],
-			'calc_dec'		=> $field['calc_dec'],
-			'calc_type'		=> $field['calc_type'],
-			'form_id'		=> $atts['form_id'],
-			'field_id'		=> isset( $atts['field_id'] ) ? $atts['field_id'] : $field['id'],
+			'calc'          => isset( $atts['calc'] ) ? $atts['calc'] : $field['calc'],
+			'calc_dec'      => $field['calc_dec'],
+			'calc_type'     => $field['calc_type'],
+			'form_id'       => $atts['form_id'],
+			'field_id'      => isset( $atts['field_id'] ) ? $atts['field_id'] : $field['id'],
 			'in_section'    => isset( $field['in_section'] ) ? $field['in_section'] : '0',
 			'in_embed_form' => isset( $field['in_embed_form'] ) ? $field['in_embed_form'] : '0',
 		);
@@ -325,22 +326,22 @@ echo $custom_options;
 	 * @return string $field_call
 	 */
 	private static function get_field_call_for_calc( $calc_field, $parent_form_id ) {
-		$html_field_id = '="field_'. $calc_field->field_key;
+		$html_field_id = '="field_' . $calc_field->field_key;
 
 		// If field is inside of repeating section/embedded form or it is a radio, scale, or checkbox field
 		$in_child_form = $parent_form_id != $calc_field->form_id;
 		if ( self::has_variable_html_id( $calc_field ) || $in_child_form ) {
-			$html_field_id = '^'. $html_field_id .'-';
+			$html_field_id = '^' . $html_field_id . '-';
 		} else if ( $calc_field->type == 'select' ) {
 			$is_multiselect = FrmField::get_option( $calc_field, 'multiselect' );
 			if ( $is_multiselect ) {
-				$html_field_id = '^'. $html_field_id;
+				$html_field_id = '^' . $html_field_id;
 			}
 		} elseif ( $calc_field->type == 'time' && ! FrmField::is_option_true( $calc_field, 'single_time' ) ) {
-			$html_field_id = '^'. $html_field_id . '_';
+			$html_field_id = '^' . $html_field_id . '_';
 		}
 
-		$field_call = '[id'. $html_field_id .'"]';
+		$field_call = '[id' . $html_field_id . '"]';
 
 		return $field_call;
 	}
@@ -648,9 +649,9 @@ echo $custom_options;
         }
 
         $html = FrmProFormsController::replace_shortcodes($html, $form);
-        if ( strpos( $html, '[if '. $button_type .']') !== false ) {
-            $html = preg_replace('/(\[if\s+'. $button_type .'\])(.*?)(\[\/if\s+'. $button_type .'\])/mis', '', $html);
-        }
+		if ( strpos( $html, '[if ' . $button_type . ']') !== false ) {
+			$html = preg_replace( '/(\[if\s+' . $button_type . '\])(.*?)(\[\/if\s+' . $button_type . '\])/mis', '', $html );
+		}
         return $html;
     }
 
@@ -690,11 +691,11 @@ echo $custom_options;
 		return self::get_draft_button( $form, '', FrmFormsHelper::get_draft_link() );
     }
 
-    public static function is_show_data_field($field) {
+	public static function is_show_data_field( $field ) {
         return $field['type'] == 'data' && ( $field['data_type'] == '' || $field['data_type'] == 'data' );
     }
 
-    public static function has_field($type, $form_id, $single = true) {
+	public static function has_field( $type, $form_id, $single = true ) {
         if ( $single ) {
             $included = FrmDb::get_var( 'frm_fields', array( 'form_id' => $form_id, 'type' => $type ) );
             if ( $included ) {
@@ -711,7 +712,7 @@ echo $custom_options;
      * @since 2.0
      * @return array of repeatable section fields
      */
-    public static function has_repeat_field($form_id, $single = true) {
+	public static function has_repeat_field( $form_id, $single = true ) {
         $fields = self::has_field('divider', $form_id, $single);
         if ( ! $fields ) {
             return $fields;
@@ -736,7 +737,7 @@ echo $custom_options;
 		return ( isset( $form->options[ $atts['setting_name'] ] ) && $form->options[ $atts['setting_name'] ] == $atts['expected_setting'] );
 	}
 
-    public static function &post_type($form) {
+	public static function &post_type( $form ) {
         if ( is_numeric($form) ) {
             $form_id = $form;
         } else {
@@ -773,7 +774,7 @@ echo $custom_options;
 		return $form;
 	}
 
-	public static function get_sub_form($field_name, $field, $args = array()) {
+	public static function get_sub_form( $field_name, $field, $args = array() ) {
 		_deprecated_function( __FUNCTION__, '2.02.06', 'FrmProNestedFormsController::display_front_end_nested_form' );
 		FrmProNestedFormsController::display_front_end_nested_form( $field, $field_name, $args );
 	}

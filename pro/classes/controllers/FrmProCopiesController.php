@@ -1,6 +1,6 @@
 <?php
 
-class FrmProCopiesController{
+class FrmProCopiesController {
 
 	public static function install() {
 		if ( is_multisite() ) {
@@ -41,16 +41,23 @@ class FrmProCopiesController{
 	}
 
 	public static function save_copied_display( $id, $values ) {
-        global $wpdb, $blog_id;
+		global $wpdb, $blog_id;
 
 		self::maybe_install_import();
 
-        $wpdb->delete(FrmProCopy::table_name(), array( 'form_id' => $id, 'type' => 'display', 'blog_id' => $blog_id));
+		$wpdb->delete( FrmProCopy::table_name(), array(
+			'form_id' => $id,
+			'type'    => 'display',
+			'blog_id' => $blog_id,
+		) );
 
-        if ( isset($values['options']['copy']) && $values['options']['copy'] ) {
-            FrmProCopy::create( array( 'form_id' => $id, 'type' => 'display'));
-        }
-    }
+		if ( isset( $values['options']['copy'] ) && $values['options']['copy'] ) {
+			FrmProCopy::create( array(
+				'form_id' => $id,
+				'type'    => 'display',
+			) );
+		}
+	}
 
 	public static function save_copied_form( $id, $values ) {
 		global $blog_id, $wpdb;

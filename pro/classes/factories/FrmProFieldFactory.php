@@ -88,7 +88,7 @@ class FrmProFieldFactory {
 			);
 
 			$class = isset( $type_classes[ $field_type ] ) ? $type_classes[ $field_type ] : '';
-		} elseif ( strpos( $class, 'FrmField' ) === 0  ) {
+		} elseif ( strpos( $class, 'FrmField' ) === 0 ) {
 			$new_class = str_replace( 'FrmField', 'FrmProField', $class );
 			if ( class_exists( $new_class ) ) {
 				$class = $new_class;
