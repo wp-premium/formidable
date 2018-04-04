@@ -15,7 +15,7 @@
             <p><label for="calendar"><input type="radio" value="calendar" id="calendar" <?php checked($post->frm_show_count, 'calendar') ?> name="show_count" /> <?php _e( 'Calendar &mdash; insert entries into a calendar', 'formidable-pro' ); ?>.</label></p>
             </fieldset>
 
-            <div id="date_select_container" class="frm_indent_opt <?php echo ($post->frm_show_count == 'calendar') ? '' : 'frm_hidden'; ?>">
+            <div id="date_select_container" class="frm_indent_opt <?php echo ( $post->frm_show_count == 'calendar' ) ? '' : 'frm_hidden'; ?>">
                 <?php include(FrmProAppHelper::plugin_path() . '/classes/views/displays/_calendar_options.php'); ?>
             </div>
         </td>

@@ -23,7 +23,7 @@ class FrmProFieldData extends FrmFieldType {
 
 	protected function field_settings_for_type() {
 		$settings = array();
-		
+
 		if ( $this->field && isset( $this->field->field_options['data_type'] ) ) {
 			$settings['default_value'] = true;
 			$settings['read_only'] = true;
@@ -35,10 +35,9 @@ class FrmProFieldData extends FrmFieldType {
 					$settings['default_blank'] = false;
 					$settings['read_only'] = false;
 					$settings['unique'] = false;
-				break;
+					break;
 				case 'select':
 					$settings['size'] = true;
-				break;
 			}
 		}
 

@@ -164,7 +164,7 @@ class FrmProStatisticsController {
 		}
 
 		if ( isset( $atts['user_id'] ) ) {
-			$atts[ 'user_id' ] = FrmAppHelper::get_user_id_param( $atts[ 'user_id' ] );
+			$atts['user_id'] = FrmAppHelper::get_user_id_param( $atts['user_id'] );
 		}
 
 		if ( isset( $atts['entry'] ) ) {
@@ -460,14 +460,14 @@ class FrmProStatisticsController {
 	private static function check_field_filters( &$atts ) {
 		if ( ! empty( $atts['filters'] ) ) {
 
-			if ( ! isset( $atts[ 'entry_ids' ] ) ) {
-				$atts[ 'entry_ids' ] = array();
+			if ( ! isset( $atts['entry_ids'] ) ) {
+				$atts['entry_ids'] = array();
 				$after_where = false;
 			} else {
 				$after_where = true;
 			}
 
-			foreach ( $atts[ 'filters' ] as $orig_f => $val ) {
+			foreach ( $atts['filters'] as $orig_f => $val ) {
 				// Replace HTML entities with less than/greater than symbols
 				$val = str_replace( array( '&gt;', '&lt;' ), array( '>', '<' ), $val );
 
@@ -497,11 +497,11 @@ class FrmProStatisticsController {
 
 				// If we have a previous value saved that needs to be parsed back together (due to WordPress pullling it apart)
 				if ( isset( $next_val ) ) {
-					if ( substr( FrmAppHelper::replace_quotes( $val ), -1 ) == $next_val[ 'char' ] ) {
-						$val = $next_val[ 'val' ] . ' ' . $val;
+					if ( substr( FrmAppHelper::replace_quotes( $val ), -1 ) == $next_val['char'] ) {
+						$val = $next_val['val'] . ' ' . $val;
 						unset( $next_val );
 					} else {
-						$next_val[ 'val' ] .= ' ' . $val;
+						$next_val['val'] .= ' ' . $val;
 						continue;
 					}
 				}
@@ -692,7 +692,7 @@ class FrmProStatisticsController {
 	 * @param array $filter_args
 	 */
 	private static function convert_filter_field_key_to_id( &$filter_args ) {
-		if ( ! is_numeric( $filter_args['field'] ) && ! in_array( $filter_args['field'], array ( 'created_at', 'updated_at' ) ) ) {
+		if ( ! is_numeric( $filter_args['field'] ) && ! in_array( $filter_args['field'], array( 'created_at', 'updated_at' ) ) ) {
 			$filter_args['field'] = FrmField::get_id_by_key( $filter_args['field'] );
 		}
 	}
@@ -707,7 +707,7 @@ class FrmProStatisticsController {
 		$filter_args['value'] = FrmAppHelper::replace_quotes( $filter_args['value'] );
 
 		if ( in_array( $filter_args['field'], array( 'created_at', 'updated_at' ) ) ) {
-			$filter_args['value'] = str_replace( array( '"', "'" ), "", $filter_args['value'] );
+			$filter_args['value'] = str_replace( array( '"', "'" ), '', $filter_args['value'] );
 			$filter_args['value'] = date( 'Y-m-d H:i:s', strtotime( $filter_args['value'] ) );
 			$filter_args['value'] = get_gmt_from_date( $filter_args['value'] );
 		} else {
@@ -737,8 +737,8 @@ class FrmProStatisticsController {
 
 			$str = explode( $filter_args['operator'], $filter_args['value'] );
 
-			$filter_args['field'] = $str[ 0 ];
-			$filter_args['value'] = $str[ 1 ];
+			$filter_args['field'] = $str[0];
+			$filter_args['value'] = $str[1];
 
 		} else if ( $lpos !== false || $gpos !== false ) {
 			// Greater than or less than
@@ -746,18 +746,18 @@ class FrmProStatisticsController {
 			$str = explode( $filter_args['operator'], $filter_args['value'] );
 
 			if ( count( $str ) == 2 ) {
-				$filter_args['field'] = $str[ 0 ];
-				$filter_args['value'] = $str[ 1 ];
+				$filter_args['field'] = $str[0];
+				$filter_args['value'] = $str[1];
 			} else if ( count( $str ) == 3 ) {
 				//3 parts assumes a structure like '-1 month'<255<'1 month'
 				$pass_args = $filter_args;
 				$pass_args['orig_f'] = 0;
-				$pass_args['val'] = str_replace( $str[ 0 ] . $filter_args['operator'], '', $filter_args['value'] );
+				$pass_args['val'] = str_replace( $str[0] . $filter_args['operator'], '', $filter_args['value'] );
 
 				$filter_args['entry_ids'] = self::get_field_matches( $pass_args );
 				$filter_args['after_where'] = true;
-				$filter_args['field'] = $str[ 1 ];
-				$filter_args['value'] = $str[ 0 ];
+				$filter_args['field'] = $str[1];
+				$filter_args['value'] = $str[0];
 				$filter_args['operator'] = ( $filter_args['operator'] == '<' ) ? '>' : '<';
 			}
 
@@ -765,14 +765,13 @@ class FrmProStatisticsController {
 				$filter_args['operator'] .= '=';
 				$filter_args['value'] = substr( $filter_args['value'], 1 );
 			}
-
 		} else if ( $dash_pos !== false && strpos( $filter_args['value'], '=' ) !== false ) {
 			// Field key contains dash
 			// If field key contains a dash, then it won't be put in as $f automatically (WordPress quirk maybe?)
 
 			$str = explode( '=', $filter_args['value'] );
-			$filter_args['field'] = $str[ 0 ];
-			$filter_args['value'] = $str[ 1 ];
+			$filter_args['field'] = $str[0];
+			$filter_args['value'] = $str[1];
 		}
 	}
 

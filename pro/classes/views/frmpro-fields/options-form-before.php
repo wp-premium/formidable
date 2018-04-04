@@ -27,7 +27,8 @@ if ( 'data' != $field['type'] || ! $form_list ) {
     <?php
     if ( is_object($selected_field) ) {
         include(FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/field-selection.php');
-    } else if ( $selected_field == 'taxonomy') { ?>
+	} elseif ( $selected_field == 'taxonomy' ) {
+    ?>
         <span class="howto"><?php _e( 'Select a taxonomy on the Form Actions tab of the Form Settings page', 'formidable-pro' ); ?></span>
 		<input type="hidden" name="field_options[form_select_<?php echo absint( $current_field_id ) ?>]" value="taxonomy" />
     <?php

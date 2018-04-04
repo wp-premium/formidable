@@ -35,7 +35,7 @@
             <?php
 			foreach ( $post->frm_order_by as $order_key => $order_by_field ) {
 				if ( isset( $post->frm_order[ $order_key ] ) && isset( $post->frm_order_by[ $order_key ] ) ) {
-                	FrmProDisplaysController::add_order_row($order_key, $post->frm_form_id, $order_by_field, $post->frm_order[$order_key]);
+                	FrmProDisplaysController::add_order_row( $order_key, $post->frm_form_id, $order_by_field, $post->frm_order[ $order_key ] );
 				}
 			}
             ?>
@@ -77,7 +77,7 @@
 <?php } ?>
 
 <table class="form-table frm-no-margin">
-    <tr class="hide_dyncontent <?php echo in_array($post->frm_show_count, array( 'dynamic', 'calendar')) ? '' : 'frm_hidden'; ?>">
+    <tr class="hide_dyncontent <?php echo in_array( $post->frm_show_count, array( 'dynamic', 'calendar' ) ) ? '' : 'frm_hidden'; ?>">
         <td><?php _e( 'Detail Page Slug', 'formidable-pro' ); ?> <span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php printf(__( 'Example: If parameter name is \'contact\', the url would be like %1$s/selected-page?contact=2. If this entry is linked to a post, the post permalink will be used instead.', 'formidable-pro' ), FrmAppHelper::site_url()) ?>" ></span></td>
         <td>
                 <input type="text" id="param" name="param" value="<?php echo esc_attr($post->frm_param) ?>">
@@ -93,7 +93,8 @@
 
     <?php
 	if ( is_multisite() ) {
-		if ( current_user_can( 'setup_network' ) ) { ?>
+		if ( current_user_can( 'setup_network' ) ) {
+		?>
         <tr class="form-field">
             <td><?php _e( 'Copy', 'formidable-pro' ); ?></td>
             <td>
@@ -103,7 +104,9 @@
         </tr>
 		<?php } else if ( $post->frm_copy ) { ?>
         <input type="hidden" id="copy" name="options[copy]" value="1" />
-        <?php }
-    } ?>
+		<?php
+        }
+	}
+	?>
 
 </table>

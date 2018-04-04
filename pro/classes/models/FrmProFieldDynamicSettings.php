@@ -47,5 +47,4 @@ class FrmProFieldDynamicSettings extends FrmProFieldSettings {
 	public function get_linked_field_id() {
 		return $this->linked_field_id;
 	}
-
 }

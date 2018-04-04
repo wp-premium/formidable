@@ -10,7 +10,7 @@ class FrmProComboFieldsController {
 		$field_name = 'item_meta[' . $field['id'] . ']';
 		$html_id = 'field_' . $field['field_key'];
 
-		include( FrmProAppHelper::plugin_path() .'/classes/views/combo-fields/input-form-builder.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/combo-fields/input-form-builder.php' );
 	}
 
 	public static function get_sub_fields( $field ) {
@@ -54,7 +54,7 @@ class FrmProComboFieldsController {
 
 		if ( isset( $atts['field']['default_value'][ $atts['key'] ] ) ) {
 			$atts['field']['default_value'] = $atts['field']['default_value'][ $atts['key'] ];
-		} else{
+		} else {
 			$atts['field']['default_value'] = '';
 		}
 
@@ -68,7 +68,7 @@ class FrmProComboFieldsController {
 
 		if ( isset( $atts['sub_field']['atts'] ) ) {
 			foreach ( $atts['sub_field']['atts'] as $att_name => $att_value ) {
-				echo ' '. esc_attr( $att_name ) . '="'. esc_attr( $att_value ) .'"';
+				echo ' ' . esc_attr( $att_name ) . '="' . esc_attr( $att_value ) . '"';
 			}
 		}
 	}
@@ -77,7 +77,7 @@ class FrmProComboFieldsController {
 		$is_form_builder = FrmAppHelper::is_admin_page('formidable' );
 		$ajax_action = FrmAppHelper::get_param( 'action', '', 'get', 'sanitize_text_field' );
 		$is_new_field = FrmAppHelper::doing_ajax() && ( $ajax_action == 'frm_insert_field' || $ajax_action == 'frm_load_field' );
-		
+
 		if ( $is_form_builder || $is_new_field ) {
 			self::include_inplace_sub_label( $atts );
 		} else {
@@ -88,7 +88,7 @@ class FrmProComboFieldsController {
 	public static function include_inplace_sub_label( $atts ) {
 		$field = $atts['field'];
 		$option_name = $atts['option_name'];
-		include( FrmProAppHelper::plugin_path() .'/classes/views/combo-fields/inplace-sub-label.php' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/combo-fields/inplace-sub-label.php' );
 	}
 
 	public static function show_sub_label( $atts ) {

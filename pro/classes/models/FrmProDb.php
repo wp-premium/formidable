@@ -1,13 +1,13 @@
 <?php
 
-class FrmProDb{
+class FrmProDb {
 
-	public static $db_version = 60;
+	public static $db_version = 64;
 
 	/**
 	 * @since 3.0.02
 	 */
-	public static $plug_version = '3.0.06';
+	public static $plug_version = '3.01';
 
 	/**
 	 * @since 2.3
@@ -49,7 +49,7 @@ class FrmProDb{
 		}
 
 		if ( $old_db_version && is_numeric( $old_db_version ) ) {
-			$migrations = array( 16, 17, 25, 27, 28, 29, 30, 31, 32, 34, 36, 37, 39, 43, 44, 50 );
+			$migrations = array( 16, 17, 25, 27, 28, 29, 30, 31, 32, 34, 36, 37, 39, 43, 44, 50, 62 );
 			foreach ( $migrations as $migration ) {
 				if ( $db_version >= $migration && $old_db_version < $migration ) {
 					call_user_func( array( __CLASS__, 'migrate_to_' . $migration ) );
@@ -70,13 +70,13 @@ class FrmProDb{
     }
 
 	public static function uninstall() {
-        if ( !current_user_can('administrator') ) {
+		if ( ! current_user_can( 'administrator' ) ) {
             $frm_settings = FrmAppHelper::get_settings();
             wp_die($frm_settings->admin_permission);
         }
 
         global $wpdb;
-        $wpdb->query( 'DROP TABLE IF EXISTS '. $wpdb->prefix .'frm_display' );
+		$wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'frm_display' );
         delete_option('frmpro_options');
         delete_option('frmpro_db_version');
 
@@ -100,6 +100,28 @@ class FrmProDb{
 	 */
 	public static function before_free_version_db_upgrade() {
 		FrmProContent::add_rewrite_endpoint();
+	}
+
+	/**
+	 * Switch end year from 2020 to +10
+	 * @since 3.01
+	 */
+	public static function migrate_to_62() {
+		// Get all date fields
+		$fields = FrmDb::get_results( 'frm_fields', array( 'type' => 'date' ), 'id, field_options, form_id' );
+
+		foreach ( $fields as $field ) {
+			$field_options = maybe_unserialize( $field->field_options );
+			if ( isset( $field_options['end_year'] ) && $field_options['end_year'] == '2020' ) {
+				$field_options['end_year'] = '+10';
+				$options = array(
+					'form_id'       => $field->form_id,
+					'field_options' => $field_options,
+				);
+
+				FrmField::update( $field->id, $options );
+			}
+		}
 	}
 
 	/**
@@ -129,7 +151,7 @@ class FrmProDb{
 				return;
 			}
 
-			update_option( 'frm_attempt_copy', true );
+			update_option( 'frm_attempt_copy', true, 'no' );
 
 			if ( $plugin_helper->is_installed() ) {
 				$plugin_helper->activate_plugin();
@@ -326,7 +348,7 @@ class FrmProDb{
 	 *
 	 * @since 2.01.0
 	 */
-	private static function migrate_to_34(){
+	private static function migrate_to_34() {
 		$dividers = FrmDb::get_col( 'frm_fields', array( 'type' => 'divider' ), 'id' );
 
 		if ( ! $dividers ) {
@@ -403,22 +425,22 @@ class FrmProDb{
 	 * @param array $view_options
 	 */
 	private static function add_entry_id_is_equal_to_get_param_filter( &$view_options ) {
-		if ( ! isset( $view_options[ 'where' ] ) ) {
-			$view_options[ 'where' ] = array();
+		if ( ! isset( $view_options['where'] ) ) {
+			$view_options['where'] = array();
 		}
 
-		if ( ! isset( $view_options[ 'where_is' ] ) ) {
-			$view_options[ 'where_is' ] = array();
+		if ( ! isset( $view_options['where_is'] ) ) {
+			$view_options['where_is'] = array();
 		}
 
-		if ( ! isset( $view_options[ 'where_val' ] ) ) {
-			$view_options[ 'where_val' ] = array();
+		if ( ! isset( $view_options['where_val'] ) ) {
+			$view_options['where_val'] = array();
 		}
 
-		if ( ! in_array( 'id', $view_options[ 'where' ] ) ) {
-			$view_options[ 'where' ][] = 'id';
-			$view_options[ 'where_is' ][] = '=';
-			$view_options[ 'where_val' ][] = '[get param=entry old_filter=1]';
+		if ( ! in_array( 'id', $view_options['where'] ) ) {
+			$view_options['where'][] = 'id';
+			$view_options['where_is'][] = '=';
+			$view_options['where_val'][] = '[get param=entry old_filter=1]';
 		}
 	}
 
@@ -472,12 +494,12 @@ class FrmProDb{
 	/**
 	* Remove form_select from all non-repeating sections
 	*/
-	private static function migrate_to_30(){
+	private static function migrate_to_30() {
 		// Get all section fields
 		$dividers = FrmField::getAll( array( 'fi.type' => 'divider' ) );
 
 		// Remove form_select for non-repeating sections
-		foreach( $dividers as $d ) {
+		foreach ( $dividers as $d ) {
 			if ( FrmField::is_repeating_field( $d ) ) {
 				continue;
 			}
@@ -492,12 +514,12 @@ class FrmProDb{
 	/**
 	* Switch repeating section forms to published and give them names
 	*/
-	private static function migrate_to_29(){
+	private static function migrate_to_29() {
 		// Get all section fields
 		$dividers = FrmField::getAll( array( 'fi.type' => 'divider' ) );
 
 		// Update the form name and status for repeating sections
-		foreach( $dividers as $d ) {
+		foreach ( $dividers as $d ) {
 			if ( ! FrmField::is_repeating_field( $d ) ) {
 				continue;
 			}
@@ -515,12 +537,12 @@ class FrmProDb{
 	*/
 	private static function migrate_to_28() {
 		global $wpdb;
-		$query = $wpdb->prepare( "SELECT fi.id, fi.form_id, form.parent_form_id FROM " . $wpdb->prefix . "frm_fields fi INNER JOIN " . $wpdb->prefix . "frm_forms form ON fi.form_id = form.id WHERE fi.type = %s AND parent_form_id > %d", 'end_divider', 0 );
+		$query = $wpdb->prepare( 'SELECT fi.id, fi.form_id, form.parent_form_id FROM ' . $wpdb->prefix . 'frm_fields fi INNER JOIN ' . $wpdb->prefix . 'frm_forms form ON fi.form_id = form.id WHERE fi.type = %s AND parent_form_id > %d', 'end_divider', 0 );
 		$end_dividers = $wpdb->get_results( $query );
 
 		foreach ( $end_dividers as $e ) {
 			// Update the form_id column for the end_divider field
-		    $wpdb->update( $wpdb->prefix .'frm_fields', array( 'form_id' => $e->parent_form_id ), array( 'id' => $e->id ) );
+			$wpdb->update( $wpdb->prefix . 'frm_fields', array( 'form_id' => $e->parent_form_id ), array( 'id' => $e->id ) );
 
 			// Clear the cache
 			wp_cache_delete( $e->id, 'frm_field' );
@@ -568,7 +590,7 @@ class FrmProDb{
 
         foreach ( $default_styles as $setting => $default ) {
             if ( isset($frmpro_settings->{$setting}) ) {
-                $new_post['post_content'][$setting] = $frmpro_settings->{$setting};
+				$new_post['post_content'][ $setting ] = $frmpro_settings->{$setting};
             }
         }
 
@@ -594,18 +616,18 @@ class FrmProDb{
         foreach ( $form as $f ) {
             if ( isset($f->options['single_entry']) && $f->options['single_entry'] && is_numeric($f->options['single_entry_type']) ) {
                 $f->options['single_entry'] = 0;
-                $wpdb->update( $wpdb->prefix .'frm_forms', array( 'options' => serialize($f->options)), array( 'id' => $f->id ) );
+				$wpdb->update( $wpdb->prefix . 'frm_forms', array( 'options' => serialize( $f->options ) ), array( 'id' => $f->id ) );
                 $field_ids[] = $f->options['single_entry_type'];
             }
             unset($f);
         }
 
         if ( ! empty($field_ids) ) {
-            $fields = FrmDb::get_results( 'frm_fields', array( 'id' => $field_ids), 'id, field_options' );
+			$fields = FrmDb::get_results( 'frm_fields', array( 'id' => $field_ids ), 'id, field_options' );
             foreach ( $fields as $f ) {
                 $opts = maybe_unserialize($f->field_options);
                 $opts['unique'] = 1;
-                $wpdb->update( $wpdb->prefix .'frm_fields', array( 'field_options' => serialize($opts)), array( 'id' => $f->id ) );
+				$wpdb->update( $wpdb->prefix . 'frm_fields', array( 'field_options' => serialize( $opts ) ), array( 'id' => $f->id ) );
                 unset($f);
             }
         }
@@ -643,36 +665,36 @@ class FrmProDb{
                 $d->show_count = 'none';
             }
 
-            foreach ( array(
+			foreach ( array(
                 'dyncontent', 'param', 'form_id', 'post_id', 'entry_id',
                 'param', 'type', 'show_count', 'insert_loc'
-                ) as $f ) {
-                update_post_meta($post_ID, 'frm_'. $f, $d->{$f});
+			) as $f ) {
+				update_post_meta( $post_ID, 'frm_' . $f, $d->{$f} );
                 unset($f);
             }
 
             $d->options = maybe_unserialize($d->options);
             update_post_meta($post_ID, 'frm_options', $d->options);
 
-            if ( isset($d->options['insert_loc']) && $d->options['insert_loc'] != 'none' && is_numeric($d->options['post_id']) && ! isset($display_posts[$d->options['post_id']]) ) {
-                $display_posts[$d->options['post_id']] = $post_ID;
-            }
+			if ( isset( $d->options['insert_loc'] ) && $d->options['insert_loc'] != 'none' && is_numeric( $d->options['post_id'] ) && ! isset( $display_posts[ $d->options['post_id'] ] ) ) {
+				$display_posts[ $d->options['post_id'] ] = $post_ID;
+			}
 
             unset($d, $post_ID);
         }
         unset($dis);
 
         //get all post_ids from frm_entries
-        $entry_posts = FrmDb::get_results( $wpdb->prefix .'frm_items', array( 'post_id >' => 1), 'id, post_id, form_id' );
+		$entry_posts = FrmDb::get_results( $wpdb->prefix . 'frm_items', array( 'post_id >' => 1 ), 'id, post_id, form_id' );
         $form_display = array();
         foreach ( $entry_posts as $ep ) {
-            if ( isset($form_display[$ep->form_id]) ) {
-                $display_posts[$ep->post_id] = $form_display[$ep->form_id];
-            } else {
-                $d = FrmProDisplay::get_auto_custom_display( array( 'post_id' => $ep->post_id, 'form_id' => $ep->form_id, 'entry_id' => $ep->id));
-                $display_posts[$ep->post_id] = $form_display[$ep->form_id] = ($d ? $d->ID : 0);
-                unset($d);
-            }
+			if ( isset( $form_display[ $ep->form_id ] ) ) {
+				$display_posts[ $ep->post_id ] = $form_display[ $ep->form_id ];
+			} else {
+				$d = FrmProDisplay::get_auto_custom_display( array( 'post_id' => $ep->post_id, 'form_id' => $ep->form_id, 'entry_id' => $ep->id ) );
+				$display_posts[ $ep->post_id ] = $form_display[ $ep->form_id ] = ( $d ? $d->ID : 0 );
+				unset( $d );
+			}
 
             unset($ep);
         }

@@ -7,13 +7,13 @@
         $cf_keys[] = $custom_data['meta_name'];
     }
 
-    if ( ! isset($cf_keys) || empty($cf_keys) ) { ?>
+	if ( ! isset( $cf_keys ) || empty( $cf_keys ) ) {
+	?>
 	<input type="text" value="<?php echo esc_attr( $echo ? $custom_data['meta_name'] : '' ) ?>" name="<?php echo esc_attr( $action_control->get_field_name( 'post_custom_fields' ) ) ?>[<?php echo esc_attr( $sanitized_name ) ?>][meta_name]" class="frm_enternew" />
-    <?php }else{ ?>
+    <?php } else { ?>
     <select name="<?php echo esc_attr( $action_control->get_field_name( 'post_custom_fields' ) ) ?>[<?php echo esc_attr( $sanitized_name ) ?>][meta_name]" class="frm_cancelnew">
         <option value=""><?php _e( '&mdash; Select &mdash;' ); ?></option>
-        <?php
-        foreach ( $cf_keys as $cf_key ) { ?>
+		<?php foreach ( $cf_keys as $cf_key ) { ?>
     	<option value="<?php echo esc_attr($cf_key) ?>"><?php echo esc_html($cf_key) ?></option>
     	<?php
     		unset($cf_key);
@@ -44,13 +44,15 @@
 
 		foreach ( $values['fields'] as $fo ) {
             $fo = (array) $fo;
-			if ( ! FrmField::is_no_save_field( $fo['type'] ) ) { ?>
+			if ( ! FrmField::is_no_save_field( $fo['type'] ) ) {
+			?>
 		<option value="<?php echo esc_attr( $fo['id'] ) ?>" <?php selected( $custom_data['field_id'], $fo['id'] ) ?>><?php echo FrmAppHelper::truncate( $fo['name'], 50 ) ?></option>
         <?php
             }
             unset($fo);
         }
-        } ?>
+		}
+		?>
     </select>
     </td>
     <td>
@@ -61,4 +63,4 @@
     </td>
 </tr>
 <?php
-unset($sanitized_name);
+unset( $sanitized_name );

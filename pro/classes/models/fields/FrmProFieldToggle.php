@@ -46,7 +46,7 @@ class FrmProFieldToggle extends FrmFieldType {
 			$input_html = $this->get_field_input_html_hook( $this->field );
 			$this->add_aria_description( $args, $input_html );
 		}
-		
+
 		$checked_values = $this->get_field_column('value');
 
 		$show_labels = FrmField::get_option( $this->field, 'show_label' );

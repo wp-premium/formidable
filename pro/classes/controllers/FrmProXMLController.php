@@ -1,13 +1,13 @@
 <?php
 
-class FrmProXMLController{
+class FrmProXMLController {
 
-    public static function import_default_templates($files) {
+	public static function import_default_templates( $files ) {
         $files[] = FrmProAppHelper::plugin_path() . '/classes/views/xml/default-templates.xml';
         return $files;
     }
 
-    public static function route($continue, $action) {
+	public static function route( $continue, $action ) {
         if ( $action == 'import_csv' ) {
             self::import_csv();
             $continue = false;
@@ -15,7 +15,7 @@ class FrmProXMLController{
         return $continue;
     }
 
-    public static function importing_xml($imported, $xml) {
+	public static function importing_xml( $imported, $xml ) {
         if ( ! isset($xml->view) && ! isset($xml->item) ) {
             return $imported;
         }
@@ -36,18 +36,18 @@ class FrmProXMLController{
         return $imported;
     }
 
-    public static function csv_instructions_1(){
+	public static function csv_instructions_1() {
         return __( 'Upload your Formidable XML or CSV file to import forms, entries, and views into this site. Note: If your imported form/entry/view key and creation date match an item on your site, that item will be updated. You cannot undo this action.', 'formidable-pro' );
     }
 
-    public static function csv_instructions_2(){
+	public static function csv_instructions_2() {
         return __( 'Choose a Formidable XML or any CSV file', 'formidable-pro' );
     }
 
 	/**
 	 * @param array|object $forms
 	 */
-    public static function csv_opts($forms) {
+	public static function csv_opts( $forms ) {
 		$csv_del = FrmAppHelper::get_param( 'csv_del', ',', 'get', 'sanitize_text_field' );
 		$form_id = FrmAppHelper::get_param( 'form_id', '', 'get', 'absint' );
 		$csv_files = FrmAppHelper::get_param( 'csv_files', '', 'get', 'absint' );
@@ -60,14 +60,14 @@ class FrmProXMLController{
         include(FrmProAppHelper::plugin_path() . '/classes/views/xml/csv_opts.php');
     }
 
-    public static function xml_export_types($types) {
+	public static function xml_export_types( $types ) {
         $types['posts'] = __( 'Views', 'formidable-pro' );
         $types['styles'] = __( 'Styles', 'formidable-pro' );
 
         return $types;
     }
 
-    public static function export_formats($formats) {
+	public static function export_formats( $formats ) {
 		$formats['csv'] = array( 'name' => 'CSV', 'support' => 'items', 'count' => 'single' );
 		$formats['xml']['support'] = 'forms|items|posts|styles';
 
@@ -149,11 +149,11 @@ class FrmProXMLController{
     public static function map_csv_fields() {
         $name = 'frm_import_file';
 
-        if ( ! isset($_FILES) || ! isset($_FILES[$name]) || empty($_FILES[$name]['name']) || (int) $_FILES[$name]['size'] < 1) {
+		if ( ! isset( $_FILES ) || ! isset( $_FILES[ $name ] ) || empty( $_FILES[ $name ]['name'] ) || (int) $_FILES[ $name ]['size'] < 1 ) {
             return;
         }
 
-        $file = $_FILES[$name]['tmp_name'];
+		$file = $_FILES[ $name ]['tmp_name'];
 
         // check if file was uploaded
         if ( ! is_uploaded_file($file) ) {
@@ -161,7 +161,7 @@ class FrmProXMLController{
         }
 
         if ( empty($_POST['form_id']) ) {
-            $errors = array(__( 'All Fields are required', 'formidable-pro' ));
+			$errors = array( __( 'All Fields are required', 'formidable-pro' ) );
             FrmXMLController::form($errors);
             return;
         }
@@ -173,7 +173,7 @@ class FrmProXMLController{
         }
 
         if ( empty($filename) ) {
-            $errors = array(__( 'That CSV was not uploaded. Are CSV files allowed on your site?', 'formidable-pro' ));
+			$errors = array( __( 'That CSV was not uploaded. Are CSV files allowed on your site?', 'formidable-pro' ) );
             FrmXMLController::form($errors);
             return;
         }
@@ -199,7 +199,7 @@ class FrmProXMLController{
             }
             fclose($f);
         } else {
-            $errors = array(__( 'CSV cannot be opened.', 'formidable-pro' ));
+			$errors = array( __( 'CSV cannot be opened.', 'formidable-pro' ) );
             FrmXMLController::form($errors);
             return;
         }
@@ -221,19 +221,19 @@ class FrmProXMLController{
 
         $opts = get_option('frm_import_options');
 
-        $left = ( $opts && isset($opts[$media_id]) ) ? ( (int) $row - (int) $opts[$media_id]['imported'] - 1 ) : ( $row - 1 );
-        if ( $row < 300 && ( ! isset($opts[$media_id]) || $opts[$media_id]['imported'] < 300 ) ) {
-            // if the total number of rows is less than 250
-            $import_count = ceil($left/2);
-        }
+		$left = ( $opts && isset( $opts[ $media_id ] ) ) ? ( (int) $row - (int) $opts[ $media_id ]['imported'] - 1 ) : ( $row - 1 );
+		if ( $row < 300 && ( ! isset( $opts[ $media_id ] ) || $opts[ $media_id ]['imported'] < 300 ) ) {
+			// if the total number of rows is less than 250
+			$import_count = ceil( $left / 2 );
+		}
 
         if ( $import_count > $left ) {
             $import_count = $left;
         }
 
 		$mapping = FrmAppHelper::get_param( 'data_array', '', 'get', 'sanitize_text_field' );
-        $url_vars = "&csv_del=". urlencode($csv_del) ."&form_id={$form_id}&frm_import_file={$media_id}&row={$row}&max={$import_count}";
-		$url_vars .= "&csv_files=" . $csv_files;
+        $url_vars = '&csv_del=' . urlencode( $csv_del ) . "&form_id={$form_id}&frm_import_file={$media_id}&row={$row}&max={$import_count}";
+		$url_vars .= '&csv_files=' . $csv_files;
 
         foreach ( $mapping as $mkey => $map ) {
             $url_vars .= "&data_array[$mkey]=$map";
@@ -254,23 +254,23 @@ class FrmProXMLController{
         $vars = $_POST;
         $file_id = $vars['frm_import_file'];
         $current_path = get_attached_file($file_id);
-        $start_row = isset($opts[$file_id]) ? $opts[$file_id]['imported'] : 1;
+		$start_row = isset( $opts[ $file_id ] ) ? $opts[ $file_id ]['imported'] : 1;
 
-        $imported = FrmProXMLHelper::import_csv($current_path, $vars['form_id'], $vars['data_array'], 0, $start_row+1, $vars['csv_del'], $vars['max']);
+		$imported = FrmProXMLHelper::import_csv( $current_path, $vars['form_id'], $vars['data_array'], 0, $start_row + 1, $vars['csv_del'], $vars['max'] );
 
-        $opts[$file_id] = array( 'row' => $vars['row'], 'imported' => $imported);
+		$opts[ $file_id ] = array( 'row' => $vars['row'], 'imported' => $imported );
         $remaining = ( (int) $vars['row'] - (int) $imported );
 		echo (int) $remaining;
 
         // check if the import is complete
         if ( ! $remaining ) {
-            unset($opts[$file_id]);
+			unset( $opts[ $file_id ] );
 
             // since we are finished with this csv, delete it
             wp_delete_attachment($file_id, true);
         }
 
-        update_option('frm_import_options', $opts);
+        update_option( 'frm_import_options', $opts, 'no' );
 
         wp_die();
     }

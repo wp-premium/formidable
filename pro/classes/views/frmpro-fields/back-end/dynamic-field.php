@@ -1,8 +1,10 @@
 <tr><td><label><?php _e( 'Display as', 'formidable-pro' ) ?></label></td>
 	<td>
 		<select name="field_options[data_type_<?php echo absint( $field['id'] ) ?>]" class="frm_toggle_mult_sel">
-			<?php foreach ( $frm_field_selection['data']['types'] as $type_key => $type_name ) {
-				$selected = (isset($field['data_type']) && $field['data_type'] == $type_key) ? ' selected="selected"':''; ?>
+			<?php
+			foreach ( $frm_field_selection['data']['types'] as $type_key => $type_name ) {
+				$selected = ( isset( $field['data_type'] ) && $field['data_type'] == $type_key ) ? ' selected="selected"' : '';
+				?>
 				<option value="<?php echo esc_attr( $type_key ) ?>"<?php echo $selected; ?>>
 					<?php echo esc_html( $type_name ) ?>
 				</option>

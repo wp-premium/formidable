@@ -1,12 +1,12 @@
 <?php
-class FrmProEntry{
+class FrmProEntry {
 
 	public static function validate( $params, $fields, $form, $title, $description ) {
         global $frm_vars;
 
         $frm_settings = FrmAppHelper::get_settings();
 
-		$has_another_page = ( $_POST && isset( $_POST['frm_page_order_' . $form->id ] ) );
+		$has_another_page = ( $_POST && isset( $_POST[ 'frm_page_order_' . $form->id ] ) );
 		$switching_pages = ( $has_another_page || FrmProFormsHelper::going_to_prev( $form->id ) );
 		$entry_id = FrmFormsController::just_created_entry( $form->id );
 		$args = compact( 'fields', 'form', 'title', 'description', 'entry_id' );
@@ -24,14 +24,14 @@ class FrmProEntry{
 				$submit = isset( $form->options['submit_value'] ) ? $form->options['submit_value'] : $frm_settings->submit_value;
 				$values = $fields ? FrmEntriesHelper::setup_new_vars( $fields, $form ) : array();
 
-				require( FrmAppHelper::plugin_path() .'/classes/views/frm-entries/new.php' );
+				require( FrmAppHelper::plugin_path() . '/classes/views/frm-entries/new.php' );
 				add_filter('frm_continue_to_create', '__return_false');
 			}
 		} else if ( $entry_id && $form->editable && isset( $form->options['single_entry'] ) && $form->options['single_entry'] && $form->options['single_entry_type'] == 'user' && ! FrmProFormsHelper::saving_draft() ) {
 			$show_form = ( isset( $form->options['show_form'] ) ) ? $form->options['show_form'] : true;
 
 			if ( $show_form ) {
-				$saved_message = isset( $form->options[ 'success_msg' ] ) ? $form->options[ 'success_msg' ] : $frm_settings->success_msg;
+				$saved_message = isset( $form->options['success_msg'] ) ? $form->options['success_msg'] : $frm_settings->success_msg;
 				$saved_message = apply_filters( 'frm_content', $saved_message, $form, ( $entry_id ? $entry_id : false ) );
 				$message = wpautop( do_shortcode( $entry_id ? $saved_message : $frm_settings->failed_msg ) );
 				$message = '<div class="frm_message" id="message">' . $message . '</div>';
@@ -71,8 +71,8 @@ class FrmProEntry{
 		add_filter( 'frm_continue_to_create', '__return_false' );
 	}
 
-    public static function save_sub_entries($values, $action = 'create') {
-        $form_id = isset($values['form_id']) ? (int) $values['form_id']: 0;
+	public static function save_sub_entries( $values, $action = 'create' ) {
+		$form_id = isset( $values['form_id'] ) ? (int) $values['form_id'] : 0;
         if ( ! $form_id || ! isset($values['item_meta']) ) {
             return $values;
         }
@@ -96,7 +96,7 @@ class FrmProEntry{
                 // don't continue if we don't know which form to insert the sub entries into
 
 	            self::delete_all_sub_entries( $action, $values, $field->id );
-	            unset( $values['item_meta'][$field->id] );
+				unset( $values['item_meta'][ $field->id ] );
 
                 continue;
             }
@@ -106,12 +106,12 @@ class FrmProEntry{
                 continue;
             }
 
-            $field_values = $values['item_meta'][$field->id];
+			$field_values = $values['item_meta'][ $field->id ];
 
             $sub_form_id = $field->field_options['form_select'];
 
             if ( $action != 'create' ) {
-	            $old_ids = self::get_existing_sub_entries( $values[ 'id' ], $field->id );
+				$old_ids = self::get_existing_sub_entries( $values['id'], $field->id );
             } else {
                 $old_ids = array();
             }
@@ -152,7 +152,7 @@ class FrmProEntry{
                 unset($k, $v, $entry_values, $sub_id);
             }
 
-            $values['item_meta'][$field->id] = $sub_ids; // array of sub entry ids
+			$values['item_meta'][ $field->id ] = $sub_ids; // array of sub entry ids
 
             $old_ids = array_diff($old_ids, $sub_ids);
 	        self::delete_sub_entries( $old_ids );
@@ -174,7 +174,7 @@ class FrmProEntry{
 	 */
     private static function delete_all_sub_entries( $action, $values, $field_id ) {
 	    if ( $action != 'create' ) {
-		    $old_ids = self::get_existing_sub_entries( $values[ 'id' ], $field_id );
+			$old_ids = self::get_existing_sub_entries( $values['id'], $field_id );
 		    self::delete_sub_entries( $old_ids );
 	    }
     }
@@ -233,12 +233,12 @@ class FrmProEntry{
 
         $sub_ids = array();
         foreach ( $form_fields as $field ) {
-            if ( ! isset($entry->metas[$field->id]) ) {
+			if ( ! isset( $entry->metas[ $field->id ] ) ) {
                 continue;
             }
 
             $field_ids = array();
-            $ids = maybe_unserialize($entry->metas[$field->id]);
+			$ids = maybe_unserialize( $entry->metas[ $field->id ] );
             if ( ! empty($ids) ) {
                 // duplicate all entries for this field
                 foreach ( (array) $ids as $sub_id ) {
@@ -268,7 +268,7 @@ class FrmProEntry{
      * After the sub entry and parent entry are created, we can update the parent id field
      * @since 2.0
      */
-    public static function update_parent_id($entry_id, $form_id) {
+	public static function update_parent_id( $entry_id, $form_id ) {
         $form_fields = FrmProFormsHelper::has_field('form', $form_id, false);
         $section_fields = FrmProFormsHelper::has_repeat_field($form_id, false);
 
@@ -285,11 +285,11 @@ class FrmProEntry{
 
         $sub_ids = array();
         foreach ( $form_fields as $field ) {
-            if ( ! isset($entry->metas[$field->id]) ) {
+			if ( ! isset( $entry->metas[ $field->id ] ) ) {
                 continue;
             }
 
-            $ids = maybe_unserialize($entry->metas[$field->id]);
+			$ids = maybe_unserialize( $entry->metas[ $field->id ] );
             if ( ! empty($ids) ) {
                 $sub_ids = array_merge($ids, $sub_ids);
             }
@@ -307,7 +307,7 @@ class FrmProEntry{
         }
     }
 
-    public static function get_sub_entries($entry_id, $meta = false) {
+	public static function get_sub_entries( $entry_id, $meta = false ) {
 		$entries = FrmEntry::getAll( array( 'parent_item_id' => $entry_id ), '', '', $meta, false );
         return $entries;
     }
@@ -343,18 +343,18 @@ class FrmProEntry{
                 if ( $location == 'back' ) {
                     // Check if "other" item was selected. If not, remove other text string from saved array
                     foreach ( $o_val as $opt_key => $saved_val ) {
-                        if ( $saved_val && !empty( $values['item_meta'][$f_id][$opt_key] ) ) {
-                            $values['item_meta'][$f_id][$opt_key] = $saved_val;
-                        }
+						if ( $saved_val && ! empty( $values['item_meta'][ $f_id ][ $opt_key ] ) ) {
+							$values['item_meta'][ $f_id ][ $opt_key ] = $saved_val;
+						}
                         unset( $opt_key, $saved_val);
                     }
-                } else if ( isset($values['item_meta'][$f_id]) ) {
-                    $values['item_meta'][$f_id] = array_merge( (array)$values['item_meta'][$f_id], $o_val );
+				} elseif ( isset( $values['item_meta'][ $f_id ] ) ) {
+					$values['item_meta'][ $f_id ] = array_merge( (array) $values['item_meta'][ $f_id ], $o_val );
                 }
 
             //For radio buttons and regular dropdowns
             } else if ( $o_val ) {
-                if ( $location == 'back' && isset( $values['item_meta'][$f_id] ) && !empty( $values['item_meta'][$f_id] ) ) {
+				if ( $location == 'back' && isset( $values['item_meta'][ $f_id ] ) && ! empty( $values['item_meta'][ $f_id ] ) ) {
                     $field = FrmField::getOne( $f_id );
 
                     if ( $field ) {
@@ -362,13 +362,13 @@ class FrmProEntry{
                         $other_key = array_filter( array_keys( $field->options ), 'is_string' );
                         $other_key = reset( $other_key );
 
-                        // Check if the Other option is selected. If so, set the value in text field.
-                        if ( $values['item_meta'][$f_id] == $field->options[$other_key] ) {
-                            $values['item_meta'][$f_id] = $o_val;
-                        }
+						// Check if the Other option is selected. If so, set the value in text field.
+						if ( $values['item_meta'][ $f_id ] == $field->options[ $other_key ] ) {
+							$values['item_meta'][ $f_id ] = $o_val;
+						}
                     }
                 } else {
-                    $values['item_meta'][$f_id] = $o_val;
+					$values['item_meta'][ $f_id ] = $o_val;
                 }
             }
             unset( $f_id, $o_val );
@@ -401,7 +401,7 @@ class FrmProEntry{
 		// Check for posted confirmation field values and delete them
 		foreach ( $values['item_meta'] as $key => $val ) {
 			if ( strpos( $key, 'conf_' ) !== false ) {
-				unset( $values['item_meta'][$key] );
+				unset( $values['item_meta'][ $key ] );
 			}
 		}
 
@@ -435,16 +435,18 @@ class FrmProEntry{
         global $wpdb;
 
 		$defaults = array(
-			'order_by_array' => array(), 'order_array' => array(),
-			'limit' 	=> '', 'posts' => array(),
-			'display'   => false,
+			'order_by_array' => array(),
+			'order_array' => array(),
+			'limit'   => '',
+			'posts'   => array(),
+			'display' => false,
 		);
 
 		$args = wp_parse_args($args, $defaults);
         $args['time_field'] = false;
 
         $query = array(
-        	'select'    => 'SELECT it.id FROM '. $wpdb->prefix .'frm_items it',
+			'select'    => 'SELECT it.id FROM ' . $wpdb->prefix . 'frm_items it',
             'where'     => $where,
             'order'     => 'ORDER BY it.created_at ASC',
         );
@@ -478,8 +480,8 @@ class FrmProEntry{
 		if ( reset($args['order_by_array']) == 'created_at' || reset($args['order_by_array']) == 'updated_at' ) {
 			foreach ( $args['order_by_array'] as $o_key => $order_by_field ) {
 				if ( is_numeric($order_by_field) ) {
-					unset($args['order_by_array'][$o_key]);
-					unset($args['order_array'][$o_key]);
+					unset( $args['order_by_array'][ $o_key ] );
+					unset( $args['order_array'][ $o_key ] );
 				}
 			}
             $numeric_order_array = array();
@@ -503,17 +505,17 @@ class FrmProEntry{
 	    //If ordering by at least one field (not just created_at, updated_at, or entry ID)
 		$order_fields = array();
 		foreach ( $args['order_by_array'] as $o_key => $order_by_field ) {
-			if ( is_numeric($order_by_field) ) {
-				$order_fields[$o_key] = FrmField::getOne($order_by_field);
+			if ( is_numeric( $order_by_field ) ) {
+				$order_fields[ $o_key ] = FrmField::getOne( $order_by_field );
 			} else {
-				$order_fields[$o_key] = $order_by_field;
+				$order_fields[ $o_key ] = $order_by_field;
 			}
 		}
 
 		//Get all post IDs for this form
         $linked_posts = array();
        	foreach ( $args['posts'] as $post_meta ) {
-        	$linked_posts[$post_meta->post_id] = $post_meta->id;
+        	$linked_posts[ $post_meta->post_id ] = $post_meta->id;
         }
 
         $first_order = true;
@@ -538,20 +540,20 @@ class FrmProEntry{
 
             //if field is custom field
 			if ( $o_field->field_options['post_field'] == 'post_custom' ) {
-                $query['select'] .= $wpdb->prepare(' LEFT JOIN '. $wpdb->postmeta .' pm'. $o_key .' ON pm'. $o_key .'.post_id=it.post_id AND pm'. $o_key .'.meta_key = %s ', $o_field->field_options['custom_field']);
+				$query['select'] .= $wpdb->prepare( ' LEFT JOIN ' . $wpdb->postmeta . ' pm' . $o_key . ' ON pm' . $o_key . '.post_id=it.post_id AND pm' . $o_key . '.meta_key = %s ', $o_field->field_options['custom_field'] );
 				$query['order'] .= 'CASE when pm' . $o_key . '.meta_value IS NULL THEN 1 ELSE 0 END, pm' . $o_key . '.meta_value ';
 				$query['order'] .= FrmProAppHelper::maybe_query_as_number( $o_field->type );
 				$query['order'] .= $order . ', ';
             } else if ( $o_field->field_options['post_field'] != 'post_category' ) {
                 //if field is a non-category post field
                 $query['select'] .= $first_order ? ' INNER ' : ' LEFT ';
-				$query['select'] .= 'JOIN '. sanitize_title( $wpdb->posts ) .' p'. $o_key .' ON p'. $o_key .'.ID=it.post_id ';
+				$query['select'] .= 'JOIN ' . sanitize_title( $wpdb->posts ) . ' p' . $o_key . ' ON p' . $o_key . '.ID=it.post_id ';
 
 				$query['order'] .= 'CASE p' . $o_key . '.' . sanitize_title( $o_field->field_options['post_field'] ) . " WHEN '' THEN 1 ELSE 0 END, p$o_key." . sanitize_title( $o_field->field_options['post_field'] ) . ' ' . $order . ', ';
             }
-        } else if ( is_numeric($args['order_by_array'][$o_key]) ) {
+		} elseif ( is_numeric( $args['order_by_array'][ $o_key ] ) ) {
             //if ordering by a normal, non-post field
-            $query['select'] .= $wpdb->prepare(' LEFT JOIN '. $wpdb->prefix .'frm_item_metas em'. $o_key .' ON em'. $o_key .'.item_id=it.id AND em'. $o_key .'.field_id=%d ', $o_field->id);
+			$query['select'] .= $wpdb->prepare( ' LEFT JOIN ' . $wpdb->prefix . 'frm_item_metas em' . $o_key . ' ON em' . $o_key . '.item_id=it.id AND em' . $o_key . '.field_id=%d ', $o_field->id );
 			$query['order'] .= 'CASE when em' . $o_key . '.meta_value IS NULL THEN 1 ELSE 0 END, em' . $o_key . '.meta_value ';
 			$query['order'] .= FrmProAppHelper::maybe_query_as_number( $o_field->type );
 			$query['order'] .= $order . ', ';

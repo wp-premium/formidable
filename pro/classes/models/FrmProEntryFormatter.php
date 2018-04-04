@@ -294,7 +294,6 @@ class FrmProEntryFormatter extends FrmEntryFormatter {
 				$child_values = reset( $child_values );
 				$this->push_field_values_to_array( $child_values, $output );
 			}
-
 		} else {
 			parent::push_single_field_to_array( $field_value, $output );
 		}

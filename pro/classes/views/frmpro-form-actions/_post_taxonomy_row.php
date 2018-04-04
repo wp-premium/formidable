@@ -11,10 +11,12 @@ $selected_type = '';
            <option value=""><?php _e( '&mdash; Select a Taxonomy &mdash;', 'formidable-pro' ) ?></option>
 		<?php foreach ( $taxonomies as $taxonomy ) { ?>
            <option value="<?php echo esc_attr( $taxonomy ) ?>" <?php selected( $field_vars['meta_name'], $taxonomy ) ?>>
-			   <?php echo esc_html( str_replace( array( '_','-' ), ' ', ucfirst($taxonomy ) ) ) ?>
+			   <?php echo esc_html( str_replace( array( '_', '-' ), ' ', ucfirst( $taxonomy ) ) ); ?>
 		   </option>
-       <?php    unset($taxonomy);
-            } ?>
+		<?php
+			unset( $taxonomy );
+		}
+		?>
        </select>
     <?php } ?>
 
@@ -32,7 +34,7 @@ $selected_type = '';
                 $fo = (array) $fo;
             }
 
-			if ( in_array($fo['type'], array( 'checkbox', 'radio', 'select', 'tag')) || ( $fo['type'] == 'data' && isset($fo['form_select']) && $fo['form_select'] == 'taxonomy' ) ) {
+			if ( in_array( $fo['type'], array( 'checkbox', 'radio', 'select', 'tag' ) ) || ( $fo['type'] == 'data' && isset( $fo['form_select'] ) && $fo['form_select'] == 'taxonomy' ) ) {
 				?>
 				<option value="<?php echo esc_attr( $fo['id'] ) ?>" <?php selected( $field_vars['field_id'], $fo['id'] ) ?>>
 					<?php echo FrmAppHelper::truncate($fo['name'], 50) ?>
@@ -70,17 +72,20 @@ $selected_type = '';
 				<span class="howto frm_no_float"><?php _e( 'Check All', 'formidable-pro' ) ?></span>
 			</label>
 
-            <?php // Get the selected category/taxonomy depth, and then show the correct number of checkboxes
-            $depth = FrmProFieldsHelper::get_category_depth( $field_vars['meta_name'] );?>
-            <?php for ( $i=1; $i<=$depth; $i++ ) { ?>
+            <?php
+			// Get the selected category/taxonomy depth, and then show the correct number of checkboxes
+            $depth = FrmProFieldsHelper::get_category_depth( $field_vars['meta_name'] );
+			?>
+            <?php for ( $i = 1; $i <= $depth; $i++ ) { ?>
 				<label for="check_lev<?php echo esc_attr( $i . '_' . $tax_meta ) ?>" class="check_lev<?php echo absint( $i ) ?>_label">
-					<input type="checkbox" id="check_lev<?php echo absint( $i ) ?>_<?php echo esc_attr( $tax_meta ) ?>" class="frm_check_all" value="0" name="<?php echo esc_attr( $action_control->get_field_name( 'exclude_cat_'. $tax_meta ) ) ?>[]" onclick="frmCheckAllLevel(this.checked,'<?php echo esc_js( $action_control->get_field_name('post_category') ) ?>[<?php echo esc_attr( $tax_meta ) ?>][exclude_cat]',<?php echo absint( $i ) ?>)" />
+					<input type="checkbox" id="check_lev<?php echo absint( $i ); ?>_<?php echo esc_attr( $tax_meta ); ?>" class="frm_check_all" value="0" name="<?php echo esc_attr( $action_control->get_field_name( 'exclude_cat_' . $tax_meta ) ); ?>[]" onclick="frmCheckAllLevel(this.checked,'<?php echo esc_js( $action_control->get_field_name('post_category') ); ?>[<?php echo esc_attr( $tax_meta ); ?>][exclude_cat]',<?php echo absint( $i ); ?>)" />
 					<span class="howto frm_no_float"><?php printf(__( 'Check All Level %d', 'formidable-pro' ), $i); ?></span>
 				</label>
             <?php } ?>
             </div>
             <?php
-			if ( ! empty( $selected_type ) && $selected_type != 'data' ) { ?>
+			if ( ! empty( $selected_type ) && $selected_type != 'data' ) {
+			?>
             <p class="howto check_lev1_label frm_hidden"><?php _e( 'NOTE: if the parent is excluded, child categories will be automatically excluded.', 'formidable-pro' ) ?></p>
             <?php
             }
@@ -88,7 +93,7 @@ $selected_type = '';
 			FrmProFormActionsController::display_taxonomy_checkboxes_for_post_action( array(
                 'form_id' => $values['id'],
 				'taxonomy' => $field_vars['meta_name'],
-				'field_name' =>  $action_control->get_field_name( 'post_category' ) . '[' . $tax_meta . '][exclude_cat][]',
+				'field_name' => $action_control->get_field_name( 'post_category' ) . '[' . $tax_meta . '][exclude_cat][]',
 				'value' => ( isset( $field_vars['exclude_cat'] ) ? $field_vars['exclude_cat'] : 0 ),
 			) );
            ?>

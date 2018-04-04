@@ -1,5 +1,5 @@
 <?php
-class FrmProDisplay{
+class FrmProDisplay {
 
     public static function duplicate( $id, $copy_keys = false, $blog_id = false ) {
         global $wpdb;
@@ -29,7 +29,7 @@ class FrmProDisplay{
 				continue;
 			}
 
-            $meta['options'][$k] = $values->{'frm_'. $k};
+			$meta['options'][ $k ] = $values->{'frm_' . $k};
             unset($k, $v);
         }
         $meta['options']['copy'] = false;
@@ -38,13 +38,13 @@ class FrmProDisplay{
             $old_form = FrmForm::getOne($values->frm_form_id, $blog_id);
             $new_form = FrmForm::getOne($old_form->form_key);
             $meta['form_id'] = $new_form->id;
-        }else{
+		} else {
             $meta['form_id'] = $values->form_id;
         }
 
         $post_ID = wp_insert_post( $new_values );
 
-        $new_values = array_merge((array) $new_values, $meta);
+		$new_values = array_merge( (array) $new_values, $meta );
 
         self::update($post_ID, $new_values);
 
@@ -58,7 +58,7 @@ class FrmProDisplay{
 		$fields = array( 'dyncontent', 'type', 'show_count', 'form_id', 'entry_id' );
 		foreach ( $fields as $field ) {
             if ( isset( $values[ $field ] ) ) {
-				$new_values[ 'frm_'. $field ] = $values[ $field ];
+				$new_values[ 'frm_' . $field ] = $values[ $field ];
 			}
         }
 
@@ -153,7 +153,7 @@ class FrmProDisplay{
 			'orderby'       => $order_by,
 			'order'         => $order,
 			'post_type'     => 'frm_display',
-			'post_status'	=> array('publish','private'),
+			'post_status'   => array( 'publish', 'private' ),
 		);
 		$query = array_merge( (array) $where, $query );
 
@@ -182,7 +182,7 @@ class FrmProDisplay{
 
             if ( ! $args['post_id'] && ! $args['entry_id'] ) {
                 //does form have posts?
-                $args['entry_id'] = FrmDb::get_var( 'frm_items', array( 'form_id' => $args['form_id']), 'post_id' );
+				$args['entry_id'] = FrmDb::get_var( 'frm_items', array( 'form_id' => $args['form_id'] ), 'post_id' );
             }
         }
 
@@ -196,16 +196,18 @@ class FrmProDisplay{
             return false;
         }
 
-        $query = array(
-            'pm.meta_key' => 'frm_show_count', 'post_type' => 'frm_display',
-            'pm.meta_value' => array( 'dynamic', 'calendar', 'one'), 'p.post_status' => 'publish',
-        );
+		$query = array(
+			'pm.meta_key'   => 'frm_show_count',
+			'post_type'     => 'frm_display',
+			'pm.meta_value' => array( 'dynamic', 'calendar', 'one' ),
+			'p.post_status' => 'publish',
+		);
 
         if ( isset($display_ids) ) {
             $query['p.ID'] = $display_ids;
         }
 
-        $display = FrmDb::get_row( $wpdb->posts .' p LEFT JOIN '. $wpdb->postmeta .' pm ON (p.ID = pm.post_ID)', $query, 'p.*', array( 'order_by' => 'p.ID ASC') );
+		$display = FrmDb::get_row( $wpdb->posts . ' p LEFT JOIN ' . $wpdb->postmeta . ' pm ON (p.ID = pm.post_ID)', $query, 'p.*', array( 'order_by' => 'p.ID ASC' ) );
 
         return $display;
     }
@@ -225,12 +227,15 @@ class FrmProDisplay{
         }
 
         $display = FrmDb::get_row(
-            $wpdb->posts .' p LEFT JOIN '. $wpdb->postmeta .' pm ON (p.ID = pm.post_ID)',
-            array(
-                'pm.meta_key' => 'frm_show_count', 'post_type' => 'frm_display', 'p.ID' => $display_ids,
-                'pm.meta_value' => array( 'dynamic', 'calendar', 'one'), 'p.post_status' => 'publish',
-            ),
-            'p.*', array( 'order_by' => 'p.ID ASC')
+			$wpdb->posts . ' p LEFT JOIN ' . $wpdb->postmeta . ' pm ON (p.ID = pm.post_ID)',
+			array(
+				'pm.meta_key' => 'frm_show_count',
+				'post_type' => 'frm_display',
+				'p.ID' => $display_ids,
+				'pm.meta_value' => array( 'dynamic', 'calendar', 'one' ),
+				'p.post_status' => 'publish',
+			),
+            'p.*', array( 'order_by' => 'p.ID ASC' )
         );
 
         return $display;
@@ -277,9 +282,8 @@ class FrmProDisplay{
 	 * @param $key
 	 * @return int
 	 */
-	public static function get_id_by_key( $key ){
+	public static function get_id_by_key( $key ) {
         $id = FrmDb::get_var( 'posts', array( 'post_name' => sanitize_title( $key ) ) );
         return $id;
 	}
-
 }

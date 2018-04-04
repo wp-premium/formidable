@@ -8,7 +8,9 @@ if ( 'select' == $field['data_type'] ) {
 	foreach ( $field['options'] as $opt ) {
 		$opt_value = ( $opt == $field['lookup_placeholder_text'] ) ? '' : $opt;
 		$selected = ( in_array( $opt_value, $saved_value_array ) ) ? ' selected="selected"' : '';
-?><option value="<?php echo esc_attr( $opt_value ) ?>"<?php echo $selected ?>><?php echo ($opt == '') ? ' ' : esc_html( $opt ); ?></option>
+?><option value="<?php echo esc_attr( $opt_value ); ?>"<?php echo $selected; ?>><?php
+	echo ( $opt == '' ) ? ' ' : esc_html( $opt );
+?></option>
 <?php
 	}
 ?>
@@ -29,20 +31,21 @@ if ( 'select' == $field['data_type'] ) {
 		?><span><?php _e( 'Options will populate dynamically in form', 'formidable-pro' ); ?></span><?php
 	} else {
 		?>
-		<ul id="frm_field_<?php echo esc_attr( $field[ 'id' ] ) ?>_opts"
-			class="frm_sortable_field_opts frm_clear<?php echo ( count( $field[ 'options' ] ) > 10 ) ? ' frm_field_opts_list' : ''; ?>"><?php
-		foreach ( $field[ 'options' ] as $opt_key => $opt_value ) {
+		<ul id="frm_field_<?php echo esc_attr( $field['id'] ); ?>_opts"
+			class="frm_sortable_field_opts frm_clear<?php echo ( count( $field['options'] ) > 10 ) ? ' frm_field_opts_list' : ''; ?>"><?php
+		foreach ( $field['options'] as $opt_key => $opt_value ) {
 			$checked = ( in_array( $opt_value, $saved_value_array ) ) ? ' checked="checked"' : '';
 
 			?>
 			<li class="frm_single_option">
 			<input type="<?php echo esc_attr( $field['data_type'] ); ?>" name="<?php echo esc_attr( $field_name ) ?>"
 				   value="<?php echo esc_attr( $opt_value ) ?>"<?php echo $checked ?>/>
-			<label class="frm_ipe_field_option field_<?php echo esc_attr( $field[ 'id' ] ) ?>_option"
+			<label class="frm_ipe_field_option field_<?php echo esc_attr( $field['id'] ) ?>_option"
 				   id="<?php echo esc_attr( $html_id . '-' . $opt_key ) ?>"><?php echo esc_attr( $opt_value ) ?></label>
 			</li><?php
 		}
-		unset( $opt_key, $checked, $opt_value ); ?>
+		unset( $opt_key, $checked, $opt_value );
+		?>
 		</ul><?php
 	}
 } else if ( 'text' == $field['data_type'] ) {

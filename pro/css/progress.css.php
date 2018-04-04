@@ -153,6 +153,7 @@ ul.frm_page_bar li{
 .frm_forms .frm_rootline input {
 	width: <?php echo esc_html( $defaults['progress_size'] . $important ) ?>;
 	height: <?php echo esc_html( $defaults['progress_size'] . $important ) ?>;
+	min-height:auto;
 	border-radius: <?php echo esc_html( $defaults['progress_size'] . $important ) ?>;
 	padding:0<?php echo esc_html( $important ) ?>;
 }

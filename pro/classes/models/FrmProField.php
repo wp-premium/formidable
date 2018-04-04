@@ -9,7 +9,7 @@ class FrmProField {
 
 		self::switch_in_section_field_option( $field_data );
 
-		switch( $field_data['type'] ) {
+		switch ( $field_data['type'] ) {
             case 'select':
                 $width = FrmStylesController::get_style_val('auto_width', $field_data['form_id']);
                 $field_data['field_options']['size'] = $width;
@@ -30,7 +30,7 @@ class FrmProField {
 	 * @since 2.0.24
 	 * @param array $field_data
 	 */
-	private static function switch_in_section_field_option( &$field_data ){
+	private static function switch_in_section_field_option( &$field_data ) {
 		if ( in_array( $field_data['type'], array( 'divider', 'end_divider', 'form' ) ) ) {
 			return;
 		}
@@ -58,9 +58,9 @@ class FrmProField {
 
 		foreach ( $field_options['hide_field'] as $i => $f ) {
 			if ( empty( $f ) ) {
-                unset( $field_options['hide_field'][$i], $field_options['hide_field_cond'][$i] );
+				unset( $field_options['hide_field'][ $i ], $field_options['hide_field_cond'][ $i ] );
                 if ( isset($field_options['hide_opt']) && is_array($field_options['hide_opt']) ) {
-                    unset($field_options['hide_opt'][$i]);
+					unset( $field_options['hide_opt'][ $i ] );
                 }
             }
             unset($i, $f);
@@ -96,21 +96,21 @@ class FrmProField {
         }
 
         // switch out fields from calculation or default values
-        $switch_string = array( 'default_value', 'calc');
+		$switch_string = array( 'default_value', 'calc' );
         foreach ( $switch_string as $opt ) {
-            if ( ( ! isset($values['field_options'][$opt]) || empty($values['field_options'][$opt]) ) &&
-                ( ! isset($values[$opt]) || empty($values[$opt]) ) ) {
+			if ( ( ! isset( $values['field_options'][ $opt ] ) || empty( $values['field_options'][ $opt ] ) ) &&
+				( ! isset( $values[ $opt ] ) || empty( $values[ $opt ] ) ) ) {
                 continue;
             }
 
-            $this_val = isset($values[$opt]) ? $values[$opt] : $values['field_options'][$opt];
+			$this_val = isset( $values[ $opt ] ) ? $values[ $opt ] : $values['field_options'][ $opt ];
             if ( is_array($this_val) ) {
                 continue;
             }
 
             $ids = implode( '|', array_keys($frm_duplicate_ids) );
 
-            preg_match_all( "/\[(". $ids .")\]/s", $this_val, $matches, PREG_PATTERN_ORDER);
+			preg_match_all( '/\[(' . $ids . ')\]/s', $this_val, $matches, PREG_PATTERN_ORDER );
             unset($ids);
 
             if ( ! isset($matches[1]) ) {
@@ -119,12 +119,12 @@ class FrmProField {
             }
 
             foreach ( $matches[1] as $val ) {
-                $new_val = str_replace('['. $val .']', '['. $frm_duplicate_ids[$val] .']', $this_val);
-                if ( isset($values[$opt]) ) {
-                    $this_val = $values[$opt] = $new_val;
-                } else {
-                    $this_val = $values['field_options'][$opt] = $new_val;
-                }
+				$new_val = str_replace( '[' . $val . ']', '[' . $frm_duplicate_ids[ $val ] . ']', $this_val );
+				if ( isset( $values[ $opt ] ) ) {
+					$this_val = $values[ $opt ] = $new_val;
+				} else {
+					$this_val = $values['field_options'][ $opt ] = $new_val;
+				}
                 unset($new_val, $val);
             }
 
@@ -132,15 +132,15 @@ class FrmProField {
         }
 
         // switch out field ids in conditional logic
-        if ( isset($values['field_options']['hide_field']) && !empty($values['field_options']['hide_field']) ) {
+		if ( isset( $values['field_options']['hide_field'] ) && ! empty( $values['field_options']['hide_field'] ) ) {
             $values['field_options']['hide_field_cond'] = maybe_unserialize($values['field_options']['hide_field_cond']);
             $values['field_options']['hide_opt'] = maybe_unserialize($values['field_options']['hide_opt']);
             $values['field_options']['hide_field'] = maybe_unserialize($values['field_options']['hide_field']);
 
             foreach ( $values['field_options']['hide_field'] as $k => $f ) {
-                if ( isset($frm_duplicate_ids[$f]) ) {
-                    $values['field_options']['hide_field'][$k] = $frm_duplicate_ids[$f];
-                }
+				if ( isset( $frm_duplicate_ids[ $f ] ) ) {
+					$values['field_options']['hide_field'][ $k ] = $frm_duplicate_ids[ $f ];
+				}
                 unset($k, $f);
             }
         }
@@ -161,7 +161,7 @@ class FrmProField {
 	 * @param array $frm_duplicate_ids
 	 * @param array $values
 	 */
-	private static function switch_out_form_select( $frm_duplicate_ids, &$values ){
+	private static function switch_out_form_select( $frm_duplicate_ids, &$values ) {
 		if ( 'data' == $values['type'] && FrmField::is_option_true_in_array( $values['field_options'], 'form_select' ) ) {
 			self::maybe_switch_field_id_in_setting( $frm_duplicate_ids, 'form_select', $values['field_options'] );
 		}
@@ -178,7 +178,7 @@ class FrmProField {
 		if ( isset( $values['field_options']['in_section'] ) ) {
 			self::maybe_switch_field_id_in_setting( $frm_duplicate_ids, 'in_section', $values['field_options'] );
 		} else {
-			$values[ 'field_options' ][ 'in_section' ] = 0;
+			$values['field_options']['in_section'] = 0;
 		}
 	}
 
@@ -238,7 +238,7 @@ class FrmProField {
         //TODO: before delete do something with entries with data field meta_value = field_id
     }
 
-    public static function delete_repeat_field($field) {
+	public static function delete_repeat_field( $field ) {
         if ( ! FrmField::is_repeating_field($field) ) {
             return;
         }
@@ -331,7 +331,7 @@ class FrmProField {
 	* @param string $where_is
 	* @return int $linked_id
 	*/
-	public static function get_dynamic_field_entry_id( $linked_field_id, $where_val, $where_is ){
+	public static function get_dynamic_field_entry_id( $linked_field_id, $where_val, $where_is ) {
 		$query = array(
 			'field_id' => $linked_field_id,
 			'meta_value' . FrmDb::append_where_is( $where_is ) => $where_val,

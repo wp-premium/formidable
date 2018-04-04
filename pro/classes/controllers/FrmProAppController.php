@@ -1,6 +1,6 @@
 <?php
 
-class FrmProAppController{
+class FrmProAppController {
 
     public static function load_lang() {
         load_plugin_textdomain( 'formidable-pro', false, FrmProAppHelper::plugin_folder() . '/languages/' );
@@ -27,6 +27,15 @@ class FrmProAppController{
         ) );
     }
 
+	/**
+	 * Set the location for the combo js
+	 * @since 3.01
+	 */
+	public static function pro_js_location( $location ) {
+		$location['new_file_path'] = FrmProAppHelper::plugin_path() . '/js';
+		return $location;
+	}
+
 	public static function combine_js_files( $files ) {
 		$pro_js = self::get_pro_js_files('.min');
 		foreach ( $pro_js as $js ) {
@@ -36,13 +45,24 @@ class FrmProAppController{
 		return $files;
 	}
 
+	/**
+	 * @since 3.01
+	 */
+	public static function has_combo_js_file() {
+		return is_readable( FrmProAppHelper::plugin_path() . '/js/frm.min.js' );
+	}
+
 	public static function register_scripts() {
 		$suffix = FrmAppHelper::js_suffix();
+		$pro_js = self::get_pro_js_files();
+
 		if ( empty( $suffix ) || ! FrmFormsController::has_combo_js_file() ) {
-			$pro_js = self::get_pro_js_files();
 			foreach ( $pro_js as $js_key => $js ) {
 				wp_register_script( $js_key, FrmProAppHelper::plugin_url() . $js['file'], $js['requires'], $js['version'], true );
 			}
+		} else {
+			wp_deregister_script( 'formidable' );
+			wp_register_script( 'formidable', FrmProAppHelper::plugin_url() . '/js/frm.min.js', array( 'jquery' ), $pro_js['formidablepro']['version'], true );
 		}
 	}
 
@@ -157,7 +177,7 @@ class FrmProAppController{
 		$form_id = absint( $atts['form_id'] );
 
 		$nav[] = array(
-			'link'    => admin_url( 'edit.php?post_type=frm_display&form='. $form_id .'&show_nav=1' ),
+			'link'    => admin_url( 'edit.php?post_type=frm_display&form=' . $form_id . '&show_nav=1' ),
 			'label'   => __( 'Views', 'formidable-pro' ),
 			'current' => array(),
 			'page'    => 'frm_display',
@@ -180,11 +200,11 @@ class FrmProAppController{
 		return $nav;
 	}
 
-    public static function drop_tables( $tables ) {
-        global $wpdb;
-        $tables[] = $wpdb->prefix .'frm_display';
-        return $tables;
-    }
+	public static function drop_tables( $tables ) {
+		global $wpdb;
+		$tables[] = $wpdb->prefix . 'frm_display';
+		return $tables;
+	}
 
 	public static function set_get( $atts ) {
 		if ( empty( $atts ) ) {
@@ -192,7 +212,7 @@ class FrmProAppController{
 		}
 
 		foreach ( $atts as $att => $val ) {
-            $_GET[$att] = $val;
+			$_GET[ $att ] = $val;
             unset($att, $val);
         }
     }
@@ -202,4 +222,64 @@ class FrmProAppController{
         FrmProAppHelper::load_genesis();
     }
 
+	/**
+	 * Returns an array of attribute names and associated methods for processing conditions
+	 *
+	 * @return array
+	 */
+	private static function get_methods_for_frm_condition_shortcode() {
+		$methods = array(
+			'stats'       => array( 'FrmProStatisticsController', 'stats_shortcode' ),
+			'field-value' => array( 'FrmProEntriesController', 'get_field_value_shortcode' ),
+			'param'       => array( 'FrmFieldsHelper', 'process_get_shortcode' ),
+		);
+		return apply_filters( 'frm_condition_methods', $methods );
+	}
+
+	/**
+	 * Retrieves the value of the left side of the conditional in the frm-condition shortcode
+	 *
+	 * @param $atts
+	 *
+	 * @return array|bool|mixed|null|object|string
+	 */
+	private static function get_value_for_frm_condition_shortcode( $atts ) {
+		$value  = '';
+		$source = $atts['source'] ? $atts['source'] : 'stats';
+		unset( $atts['source'] );
+
+		$methods = self::get_methods_for_frm_condition_shortcode();
+
+		if ( isset( $methods[ $source ] ) ) {
+			$value = call_user_func( $methods[ $source ], $atts );
+		} else {
+			global $shortcode_tags;
+			if ( isset( $shortcode_tags[ $source ] ) && is_callable( $shortcode_tags[ $source ] ) ) {
+				$value = call_user_func( $shortcode_tags[ $source ], $atts, $atts['content'], $source );
+			}
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Conditional shortcode, used with stats, field values, and params or any other shortcode.
+	 *
+	 * @since 3.01
+	 * @param $atts
+	 * @param string $content
+	 *
+	 * @return string
+	 */
+	public static function frm_condition_shortcode( $atts, $content = '' ) {
+		$atts['content'] = $content;
+		$value       = self::get_value_for_frm_condition_shortcode( $atts );
+		$new_content = FrmProContent::conditional_replace_with_value( $value, $atts, '', 'custom' );
+
+		if ( $new_content === '' ) {
+			return '';
+		} else {
+			return $content;
+		}
+	}
 }

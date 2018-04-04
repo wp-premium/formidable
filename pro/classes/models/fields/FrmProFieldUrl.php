@@ -4,7 +4,7 @@
  * @since 3.0
  */
 class FrmProFieldUrl extends FrmFieldUrl {
-	
+
 	protected function field_settings_for_type() {
 		$settings = parent::field_settings_for_type();
 

@@ -33,9 +33,10 @@ foreach ( $entries as $entry ) {
 		<parent_item_id><?php echo absint( $entry->parent_item_id ) ?></parent_item_id>
 
 <?php
-        $metas = FrmDb::get_results( $wpdb->prefix .'frm_item_metas', array( 'item_id' => $entry->id), 'meta_value, field_id' );
+		$metas = FrmDb::get_results( $wpdb->prefix . 'frm_item_metas', array( 'item_id' => $entry->id ), 'meta_value, field_id' );
 
-		foreach ( $metas as $meta ) { ?>
+		foreach ( $metas as $meta ) {
+		?>
 		<item_meta>
 			<field_id><?php echo absint( $meta->field_id ) ?></field_id>
 		    <meta_value><?php
@@ -48,15 +49,15 @@ foreach ( $entries as $entry ) {
 		        unset($meta);
 		    ?></meta_value>
 		</item_meta>
-<?php   } ?>
+<?php } ?>
 	</item>
 <?php
     unset($metas);
 
     if ( ! empty( $entry->post_id ) ) {
         $old_ids = $item_ids;
-        $item_ids = array($entry->post_id);
-        include(FrmAppHelper::plugin_path() .'/classes/views/xml/posts_xml.php');
+		$item_ids = array( $entry->post_id );
+		include( FrmAppHelper::plugin_path() . '/classes/views/xml/posts_xml.php' );
         $item_ids = $old_ids;
     }
 

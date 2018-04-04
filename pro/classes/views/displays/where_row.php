@@ -11,7 +11,8 @@
         <?php
         if ( is_numeric($form_id) ) {
 			FrmProFieldsHelper::get_field_options( $form_id, $where_field, 'not', array( 'break', 'end_divider', 'divider', 'file', 'captcha', 'form' ), array( 'inc_sub' => 'include' ) );
-        } ?>
+		}
+		?>
         <option value="ip" <?php selected($where_field, 'ip') ?>><?php _e( 'IP', 'formidable-pro' ) ?></option>
     </select>
     <?php _e( 'is', 'formidable-pro' ) ?>

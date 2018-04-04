@@ -92,7 +92,7 @@ class FrmProCreditCardsController extends FrmProComboFieldsController {
 					$label = $atts['field']->name;
 				}
 
-				$headings[ $atts['field']->id .'_'. $heading ] = strip_tags( $label );
+				$headings[ $atts['field']->id . '_' . $heading ] = strip_tags( $label );
 			}
 		}
 

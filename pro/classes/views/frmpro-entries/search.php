@@ -2,7 +2,7 @@
 ?><div class="<?php echo esc_attr( $atts['style'] ) ?>"><?php
 }
 ?><form action="<?php echo esc_url( $action_link ) ?>" id="frm_search_form" method="get" class="searchform"><?php
-    if ( preg_match("/[?]/", $action_link) ) {
+	if ( preg_match( '/[?]/', $action_link ) ) {
 ?><input type="hidden" name="p" value="<?php echo esc_attr( $atts['post_id'] ) ?>" /><?php
     }
     if ( ! empty( $atts['views'] ) ) {

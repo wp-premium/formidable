@@ -1,7 +1,7 @@
 <?php
 // Contains all the functions necessary to provide an update mechanism for FormidableForms!
 
-class FrmUpdatesController{
+class FrmUpdatesController {
 
     // Where all the vitals are defined for this plugin
     var $plugin_nicename        = 'formidable';
@@ -21,13 +21,13 @@ class FrmUpdatesController{
     var $pro_error_message_str;
     var $license        = '';
 
-    function __construct(){
+	function __construct() {
 		_deprecated_function( __FUNCTION__, '2.3' );
 
         $this->pro_error_message_str = __( 'Your Formidable Pro License was Invalid', 'formidable-pro' );
 
         // Retrieve Pro Credentials
-        if (is_multisite() && get_site_option($this->pro_wpmu_store)){
+		if ( is_multisite() && get_site_option( $this->pro_wpmu_store ) ) {
             $creds = get_site_option($this->pro_cred_store);
             $this->pro_wpmu = true;
         } else {
@@ -66,13 +66,13 @@ class FrmUpdatesController{
         return false;
     }
 
-    function pro_is_installed_and_authorized(){
+	function pro_is_installed_and_authorized() {
         return $this->pro_is_authorized();
     }
 
-    function get_pro_cred_form_vals(){
+	function get_pro_cred_form_vals() {
 		$license = isset( $_POST['proplug-license'] ) ? sanitize_title( $_POST['proplug-license'] ) : $this->license;
-        $wpmu = (isset($_POST['proplug-wpmu'])) ? true : $this->pro_wpmu;
+		$wpmu = ( isset( $_POST['proplug-wpmu'] ) ) ? true : $this->pro_wpmu;
 
         return compact('license', 'wpmu');
     }
@@ -91,28 +91,27 @@ class FrmUpdatesController{
         $domain = home_url();
         $args = compact('domain');
 
-        $act = $this->send_mothership_request($this->plugin_nicename .'/activate/'. $license, $args);
+		$act = $this->send_mothership_request( $this->plugin_nicename . '/activate/' . $license, $args );
 
-        if($save){
+		if ( $save ) {
             $auth = false;
             if ( is_array($act) ) {
 
                 $auth = is_array($act) ? true : false;
-                $wpmu = (isset($_POST) && isset($_POST['proplug-wpmu'])) ? true : $this->pro_wpmu;
+				$wpmu = ( isset( $_POST ) && isset( $_POST['proplug-wpmu'] ) ) ? true : $this->pro_wpmu;
 
                 //save response
                 if ( is_multisite() ) {
                     update_site_option($this->pro_wpmu_store, $wpmu);
                 }
 
-                if ($wpmu){
+				if ( $wpmu ) {
                     update_site_option($this->pro_cred_store, compact('license', 'wpmu'));
                     update_site_option($this->pro_auth_store, $auth);
-                }else{
+				} else {
                     update_option($this->pro_cred_store, compact('license', 'wpmu'));
                     update_option($this->pro_auth_store, $auth);
-                }
-
+				}
             }
 
             return array( 'auth' => $auth, 'response' => $act);
@@ -192,10 +191,10 @@ class FrmUpdatesController{
         global $frm_vars;
         if ( ! isset($frm_vars['plugins_checked']) ) {
             $frm_vars['plugins_checked'] = array();
-        } else if ( isset($frm_vars['plugins_checked'][$plugin->plugin_name]) ) {
-            if ( $frm_vars['plugins_checked'][$plugin->plugin_name] != 'latest' ) {
-                $transient->response[$plugin->plugin_name] = $frm_vars['plugins_checked'][$plugin->plugin_name];
-            }
+		} elseif ( isset( $frm_vars['plugins_checked'][ $plugin->plugin_name ] ) ) {
+			if ( $frm_vars['plugins_checked'][ $plugin->plugin_name ] != 'latest' ) {
+				$transient->response[ $plugin->plugin_name ] = $frm_vars['plugins_checked'][ $plugin->plugin_name ];
+			}
             return $transient;
         }
 
@@ -206,7 +205,7 @@ class FrmUpdatesController{
 
         if ( $version_info && isset($version_info['version']) && ( $force || version_compare($version_info['version'], $installed_version, '>') ) ) {
 			if ( $plugin->plugin_nicename != 'formidable' && isset( $transient->response[ $plugin->plugin_name ] ) && $transient->response[ $plugin->plugin_name ]->new_version == $version_info['version'] ) {
-                $frm_vars['plugins_checked'][$plugin->plugin_name] = $transient->response[$plugin->plugin_name];
+				$frm_vars['plugins_checked'][ $plugin->plugin_name ] = $transient->response[ $plugin->plugin_name ];
 				return $transient;
             }
 
@@ -237,14 +236,14 @@ class FrmUpdatesController{
 				unset( $transient->response[ $plugin->plugin_name ] );
 
                 // check again in 1 hour if there was an error to prevent timeout loops
-                set_site_transient( $plugin->pro_last_checked_store, 'latest', 60*60 );
+				set_site_transient( $plugin->pro_last_checked_store, 'latest', 60 * 60 );
             }
         }
 
         return $transient;
     }
 
-    function get_version($force = false, $plugin = false) {
+	function get_version( $force = false, $plugin = false ) {
         global $frm_vars;
         if ( $plugin && $plugin->plugin_nicename != $this->plugin_nicename ) {
             //don't check for update if pro is not installed
@@ -281,7 +280,7 @@ class FrmUpdatesController{
                 $domain = home_url();
                 $args = compact('domain');
 
-                $version_info = $this->send_mothership_request($plugin->plugin_nicename .'/info/'. $this->license, $args);
+				$version_info = $this->send_mothership_request( $plugin->plugin_nicename . '/info/' . $this->license, $args );
                 if ( ! is_array($version_info) ) {
                     $errors = true;
                 }
@@ -289,7 +288,7 @@ class FrmUpdatesController{
 
             if ( ! isset($version_info) || $errors ) {
                 // query for the current version
-                $version_info = $this->send_mothership_request($plugin->plugin_nicename .'/latest');
+				$version_info = $this->send_mothership_request( $plugin->plugin_nicename . '/latest' );
                 $errors = ! is_array($version_info) ? true : false;
             }
 
@@ -320,20 +319,21 @@ class FrmUpdatesController{
             'body'      => $args,
             'timeout'   => $this->timeout,
             'sslverify' => false,
-            'user-agent' => 'Formidable/'. FrmAppHelper::plugin_version() .'; '. get_bloginfo( 'url' )
+			'user-agent' => 'Formidable/' . FrmAppHelper::plugin_version() . '; ' . get_bloginfo( 'url' ),
         );
 
         $resp = wp_remote_post($uri, $arg_array);
         $body = wp_remote_retrieve_body( $resp );
 
-        if(is_wp_error($resp)){
-            $message = sprintf(__( 'You had an error communicating with the Formidable Forms API. %1$sClick here%2$s for more information.', 'formidable-pro' ), '<a href="https://formidableforms.com/knowledgebase/why-cant-i-activate-formidable-pro/" target="_blank">', '</a>');
-            if(is_wp_error($resp))
-                $message .= ' '. $resp->get_error_message();
+        if ( is_wp_error( $resp ) ) {
+			$message = sprintf( __( 'You had an error communicating with the Formidable Forms API. %1$sClick here%2$s for more information.', 'formidable-pro' ), '<a href="https://formidableforms.com/knowledgebase/why-cant-i-activate-formidable-pro/" target="_blank">', '</a>' );
+			if ( is_wp_error( $resp ) ) {
+				$message .= ' ' . $resp->get_error_message();
+			}
             return $message;
-        }else if($body == 'error' || is_wp_error($body)){
+		} elseif ( $body == 'error' || is_wp_error( $body ) ) {
             return __( 'You had an HTTP error connecting to the Formidable Forms API', 'formidable-pro' );
-        }else{
+		} else {
             $json_res = json_decode($body, true);
             if ( null !== $json_res ) {
                 if ( is_array($json_res) && isset($json_res['error']) ) {
@@ -341,15 +341,15 @@ class FrmUpdatesController{
                 } else {
                     return $json_res;
                 }
-            }else if(isset($resp['response']) && isset($resp['response']['code'])){
-                return sprintf(__( 'There was a %1$s error: %2$s', 'formidable-pro' ), $resp['response']['code'], $resp['response']['message'] .' '. $resp['body']);
+			} elseif ( isset( $resp['response'] ) && isset( $resp['response']['code'] ) ) {
+				return sprintf( __( 'There was a %1$s error: %2$s', 'formidable-pro' ), $resp['response']['code'], $resp['response']['message'] . ' ' . $resp['body'] );
             }
         }
 
         return __( 'Your License Key was invalid', 'formidable-pro' );
     }
 
-    function no_permission_msg(){
+	function no_permission_msg() {
         return __( 'A Formidable Forms update is available, but your license is invalid.', 'formidable-pro' );
     }
 }

@@ -7,7 +7,8 @@
         <?php
         if ( is_numeric($form_id) ) {
             FrmProFieldsHelper::get_field_options($form_id, $order_by);
-        } ?>
+		}
+		?>
     </select>
 
     <select id="order" name="options[order][<?php echo esc_attr( $order_key ); ?>]">

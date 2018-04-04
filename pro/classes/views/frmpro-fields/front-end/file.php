@@ -18,7 +18,6 @@ if ( FrmField::is_read_only( $field ) ) {
 <div class="frm_file_icon"><?php echo FrmProFieldsHelper::get_file_icon( $media_id ); ?></div>
 <?php
 	}
-
 } else {
     FrmProFileField::setup_dropzone( $field, compact( 'field_name', 'html_id', 'file_name' ) );
 

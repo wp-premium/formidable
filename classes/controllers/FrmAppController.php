@@ -358,9 +358,12 @@ class FrmAppController {
         load_plugin_textdomain( 'formidable', false, FrmAppHelper::plugin_folder() . '/languages/' );
     }
 
-    /**
-     * Filter shortcodes in text widgets
-     */
+	/**
+	 * Filter shortcodes in text widgets
+	 *
+	 * @deprecated 2.5.4
+	 * @codeCoverageIgnore
+	 */
 	public static function widget_text_filter( $content ) {
 		_deprecated_function( __METHOD__, '2.5.4' );
 		$regex = '/\[\s*(formidable|display-frm-data|frm-stats|frm-graph|frm-entry-links|formresults|frm-search)\s+.*\]/';
@@ -369,6 +372,9 @@ class FrmAppController {
 
 	/**
 	 * Deprecated in favor of wpmu_upgrade_site
+	 *
+	 * @deprecated 2.3
+	 * @codeCoverageIgnore
 	 */
 	public static function front_head() {
 		_deprecated_function( __FUNCTION__, '2.3' );
@@ -430,8 +436,8 @@ class FrmAppController {
 	public static function api_install() {
 		if ( self::needs_update() ) {
 			$running = get_option( 'frm_install_running' );
-			if ( false === $running ) {
-				update_option( 'frm_install_running', true );
+			if ( false === $running || $running < strtotime( '-5 minutes' ) ) {
+				update_option( 'frm_install_running', time(), 'no' );
 				self::install();
 				delete_option( 'frm_install_running' );
 			}
@@ -450,6 +456,10 @@ class FrmAppController {
 		wp_die();
 	}
 
+	/**
+	 * @deprecated 3.0.04
+	 * @codeCoverageIgnore
+	 */
     public static function activation_install() {
 		_deprecated_function( __METHOD__, '3.0.04', 'FrmAppController::install' );
         FrmDb::delete_cache_and_transient( 'frm_plugin_version' );
@@ -485,7 +495,12 @@ class FrmAppController {
         return $tables;
     }
 
-    // Routes for wordpress pages -- we're just replacing content here folks.
+	/**
+	 * Routes for wordpress pages -- we're just replacing content
+	 *
+	 * @deprecated 3.0
+	 * @codeCoverageIgnore
+	 */
 	public static function page_route( $content ) {
 		_deprecated_function( __METHOD__, '3.0' );
 		global $post;
@@ -523,6 +538,10 @@ class FrmAppController {
 		return $text;
 	}
 
+	/**
+	 * @deprecated 1.07.05
+	 * @codeCoverageIgnore
+	 */
     public static function get_form_shortcode( $atts ) {
         _deprecated_function( __FUNCTION__, '1.07.05', 'FrmFormsController::get_form_shortcode()' );
         return FrmFormsController::get_form_shortcode( $atts );

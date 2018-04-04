@@ -257,7 +257,7 @@ class FrmProNestedFormsController {
 	 */
 	public static function format_saved_values_for_hidden_nested_forms( &$field ) {
 		$is_hidden_nested_form_field_with_saved_value = ( self::is_hidden_nested_form_field( $field ) &&
-			! isset( $field['value']['form'] ) && ! empty ( $field['value'] ) );
+			! isset( $field['value']['form'] ) && ! empty( $field['value'] ) );
 
 		if ( ! $is_hidden_nested_form_field_with_saved_value || ! is_numeric( $field['form_select'] ) ) {
 			return;
@@ -349,7 +349,6 @@ class FrmProNestedFormsController {
 			} else {
 				self::insert_hidden_sub_field_inputs( $field, $field_name . '[' . $key . ']', $value, $key );
 			}
-
 		}
 	}
 
@@ -419,7 +418,7 @@ class FrmProNestedFormsController {
 			?><input type="hidden" name="<?php echo esc_attr( $name ) ?>" id="<?php echo esc_attr( $id ) ?>" value="<?php echo esc_attr( $value ) ?>" />
 			<?php
 		} else {
-			?><input type="hidden" name="<?php echo esc_attr( $name ) ?>" value="<?php echo esc_attr( $value )?>" class="<?php echo esc_attr( $class )?>" />
+			?><input type="hidden" name="<?php echo esc_attr( $name ); ?>" value="<?php echo esc_attr( $value ); ?>" class="<?php echo esc_attr( $class ); ?>" />
 			<?php
 		}
 	}
@@ -440,21 +439,21 @@ class FrmProNestedFormsController {
 		$parts = explode( '][', $field_name . '[' );
 
 		if ( count( $parts ) > 2 ) {
-			if ( $parts[ 2 ] === 'other' ) {
+			if ( $parts[2] === 'other' ) {
 				$html_id = self::get_html_id_for_hidden_other_fields( $parts, $opt_key, $html_id );
 			} else {
-				$field_id = absint( $parts[ 2 ] );
+				$field_id = absint( $parts[2] );
 
 				if ( $field_id === 0 ) {
 					$html_id = '';
 				} else {
 					$field_key = FrmField::get_key_by_id( $field_id );
 					if ( $field_key ) {
-						$html_id = 'field_' . $field_key . '-' . $parts[ 1 ];
+						$html_id = 'field_' . $field_key . '-' . $parts[1];
 
 						// allow for a multi-dimensional array for the ids
-						if ( isset( $parts[ 3 ] ) && $parts[ 3 ] != '' ) {
-							$html_id .= '-' . $parts[ 3 ];
+						if ( isset( $parts[3] ) && $parts[3] != '' ) {
+							$html_id .= '-' . $parts[3];
 						}
 					}
 				}
@@ -477,11 +476,11 @@ class FrmProNestedFormsController {
 	 * @return string
 	 */
 	private static function get_html_id_for_hidden_other_fields( $parts, $opt_key, $html_id ) {
-		$field_id  = absint( $parts[ 3 ] );
+		$field_id  = absint( $parts[3] );
 		$field_key = FrmField::get_key_by_id( $field_id );
 
 		if ( $field_key ) {
-			$html_id = 'field_' . $field_key . '-' . $parts[ 1 ];
+			$html_id = 'field_' . $field_key . '-' . $parts[1];
 
 			// If checkbox field or multi-select dropdown
 			if ( $opt_key && FrmFieldsHelper::is_other_opt( $opt_key ) ) {
@@ -694,7 +693,7 @@ class FrmProNestedFormsController {
 			$class = ( isset( $classes[ $count ] ) ) ? $classes[ $count ] : '';
 		} else {
 			if ( 2 == $count ) {
-				$class = array( 10, 2);
+				$class = array( 10, 2 );
 			} elseif ( $count < 13 ) {
 				$field_width = floor( 12 / ( $count ) );
 				$submit_width = 12 - ( $field_width * ( $count - 1 ) );

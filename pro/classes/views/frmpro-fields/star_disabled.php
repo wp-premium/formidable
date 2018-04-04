@@ -11,6 +11,7 @@ for ( $i = 1; $i <= $max; $i++ ) {
 	}
 
 	?><i class="<?php echo esc_attr( $class ) ?>"></i><?php
-} ?>
+}
+?>
 </div>
 <div class="frm_clear"></div>

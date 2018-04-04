@@ -12,7 +12,7 @@
             <p><?php _e( 'Select a form for your new entry.', 'formidable-pro' ); ?></p>
             <input type="hidden" name="frm_action" value="new" />
             <input type="hidden" name="page" value="formidable-entries" />
-            <?php FrmFormsHelper::forms_dropdown('form', '', array( 'blank' => false)); ?><br/>
+			<?php FrmFormsHelper::forms_dropdown( 'form', '', array( 'blank' => false ) ); ?><br/>
             </div>
             <div id="nav-menu-footer">
 				<div class="major-publishing-actions">

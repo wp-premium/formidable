@@ -18,5 +18,6 @@ if ( is_array($field['options']) ) {
 <?php
 
 }
-} ?>
+}
+?>
 <div style="clear:both;"></div>

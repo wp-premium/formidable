@@ -52,8 +52,8 @@ class FrmProFieldSettings {
 	 * @since 2.03.05
 	 */
 	private function set_post_field() {
-		if ( isset( $this->field_options[ 'post_field' ] ) && $this->field_options[ 'post_field' ] ) {
-			$this->post_field = $this->field_options[ 'post_field' ];
+		if ( isset( $this->field_options['post_field'] ) && $this->field_options['post_field'] ) {
+			$this->post_field = $this->field_options['post_field'];
 		}
 	}
 
@@ -71,7 +71,7 @@ class FrmProFieldSettings {
 	 * @since 2.03.05
 	 */
 	private function set_has_separate_values() {
-		if ( isset( $this->field_options[ 'separate_value' ] ) && $this->field_options[ 'separate_value' ] ) {
+		if ( isset( $this->field_options['separate_value'] ) && $this->field_options['separate_value'] ) {
 			$this->has_separate_values = true;
 		}
 	}

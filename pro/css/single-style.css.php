@@ -43,10 +43,12 @@
 	color:<?php echo esc_html( $settings['text_color'] . $important ) ?>;
 }
 
+<?php if ( $settings['field_height'] != 'auto' && $settings['field_height'] != '' ) { ?>
 .<?php echo esc_html( $settings['style_class'] ) ?> .chosen-container-single .chosen-single{
-	height:<?php echo esc_html( ( $settings['field_height'] == 'auto' || $settings['field_height'] == '' ) ? '25px' : $settings['field_height'] ) ?>;
-	line-height:1.3<?php echo esc_html( $important ) ?>;
+	height:<?php echo esc_html( $settings['field_height'] ) ?>;
+	line-height:<?php echo esc_html( $settings['field_height'] . $important ) ?>;
 }
+<?php } ?>
 
 .<?php echo esc_html( $settings['style_class'] ) ?> .chosen-container-single .chosen-single div{
 	top:<?php echo esc_html( $top_margin . $pad_unit . $important ) ?>;
@@ -190,7 +192,7 @@ $text_color = $settings['progress_active_color'] . $important;
 .<?php echo esc_html( $settings['style_class'] ) ?> input[type=range]::-webkit-slider-thumb {
 	<?php
 	echo $thumb = 'border: 1px solid rgba(' . esc_html( FrmStylesHelper::hex2rgb( $thumb_color ) ) . ',0.6);
-	color:'. esc_html( $text_color ) . ';
+	color:' . esc_html( $text_color ) . ';
 	background-color: ' . esc_html( $thumb_color ) . ';';
 	?>
 }
