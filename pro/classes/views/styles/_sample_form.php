@@ -48,6 +48,30 @@
     <h3 class="frm_pos_top frm_section_spacing"> </h3>
 </div>
 
+<div class="frm_form_field form-field frm_first frm_third <?php echo esc_attr( $pos_class ) ?>">
+	<label for="field_toggle" class="frm_primary_label">
+		<?php esc_html_e( 'Toggle', 'formidable-pro' ); ?>
+	</label>
+	<div>
+		<span class="frm_off_label frm_switch_opt">No</span>
+		<label class="frm_switch">
+			<input type="checkbox" id="field_toggle" value="Yes" />
+			<span class="frm_slider"></span>
+		</label>
+		<span class="frm_on_label frm_switch_opt">Yes</span>
+	</div>
+</div>
+
+<div class="frm_form_field form-field frm_two_thirds <?php echo esc_attr( $pos_class ) ?>">
+	<label for="field_slider" class="frm_primary_label">
+		<?php esc_html_e( 'Slider', 'formidable-pro' ); ?>
+	</label>
+	<div class="frm_range_container">
+		<input type="range" id="field_slider" value="150" min="100" max="200" step="1" />
+		<span class="frm_range_value">150</span>
+	</div>
+</div>
+
 <div class="frm_rootline_group">
 	<ul class="frm_page_bar frm_progress_line frm_show_lines">
 		<li class="frm_rootline_single">

@@ -370,18 +370,27 @@ class FrmProXMLHelper {
 		}
 	}
 
+	/**
+	 * @deprecated 3.0
+	 */
 	public static function get_file_id( $value ) {
 		_deprecated_function( __FUNCTION__, '3.0', 'FrmProFieldFile->get_file_id' );
 		$field_obj = FrmFieldFactory::get_field_type( 'file' );
 		return $field_obj->get_file_id( $value );
 	}
 
+	/**
+	 * @deprecated 3.0
+	 */
 	public static function get_date( $value ) {
 		_deprecated_function( __FUNCTION__, '3.0', 'FrmProFieldFile->get_file_id' );
 		$field_obj = FrmFieldFactory::get_field_type('file');
 		return $field_obj->get_import_value( $value );
 	}
 
+	/**
+	 * @deprecated 3.0
+	 */
 	public static function get_multi_opts( $value, $field ) {
 		_deprecated_function( __FUNCTION__, '3.0', 'FrmProFieldFile->get_import_value' );
 		$field_obj = FrmFieldFactory::get_field_object( $field );
@@ -392,9 +401,9 @@ class FrmProXMLHelper {
 	 * @deprecated 2.03.08
 	 */
 	public static function get_dfe_id( $value, $field, $ids = array() ) {
-		_deprecated_function( __FUNCTION__, '2.03.08', 'custom code' );
-
-		return self::prepare_dynamic_field_value_from_xml( $value, $field, $ids );
+		_deprecated_function( __FUNCTION__, '2.03.08' );
+		$field_obj = FrmFieldFactory::get_field_object( $field );
+		return $field_obj->get_import_value( $value, compact( 'ids' ) );
 	}
 
 	/**

@@ -2244,6 +2244,36 @@ class FrmProDisplaysController {
 	}
 
 	/**
+	 * Add the pagination after the view content
+	 *
+	 * @since 3.01.01
+	 */
+	public static function include_pagination( $content, $view, $show, $args ) {
+		$show_pagination = isset( $args['pagination'] ) && ! empty( $args['pagination'] ) && $show === 'all';
+		if ( $show_pagination ) {
+			if ( isset( $args['prepend'] ) && $args['prepend'] ) {
+				$content = $args['pagination'] . $content;
+			} else {
+				$content .= $args['pagination'];
+			}
+		}
+
+		return $content;
+	}
+
+	/**
+	 * Add the pagination before the view content
+	 * Called by custom code:
+	 * add_filter( 'frm_before_display_content', 'FrmProDisplaysController::prepend_pagination', 10, 4 );
+	 *
+	 * @since 3.01.01
+	 */
+	public static function prepend_pagination( $content, $view, $show, $args ) {
+		$args['prepend'] = true;
+		return self::include_pagination( $content, $view, $show, $args );
+	}
+
+	/**
 	 * Get the pagination HTML for a paginated View
 	 *
 	 * @since 2.0.23
@@ -2476,8 +2506,6 @@ class FrmProDisplaysController {
 		if ( 'calendar' == $view->frm_show_count ) {
 			$calendar_footer = self::calendar_footer( '', $view );
 			$after_content = $calendar_footer . $after_content;
-		} else if ( $args['pagination'] ) {
-			$after_content .= $args['pagination'];
 		}
 
 		$after_content = apply_filters( 'frm_after_display_content', $after_content, $view, 'all', $args );

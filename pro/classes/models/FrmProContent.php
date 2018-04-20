@@ -144,6 +144,7 @@ class FrmProContent {
 			}
 
 			self::trigger_shortcode_atts( $atts, $display, $args, $replace_with );
+			$replace_with = str_replace( '[', '&#91;', $replace_with ); // prevent shortcode processing in values
 			$content = str_replace( $shortcodes[0][ $short_key ], $replace_with, $content );
 		}
 	}

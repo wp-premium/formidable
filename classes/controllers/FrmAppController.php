@@ -177,7 +177,7 @@ class FrmAppController {
 <div class="update-nag frm-update-to-pro">
 	<?php echo FrmAppHelper::kses( $tip['tip'] ); ?>
 	<span><?php echo FrmAppHelper::kses( $tip['call'] ); ?></span>
-	<a href="<?php echo esc_url( FrmAppHelper::make_affiliate_url('https://formidableforms.com?banner=1&tip=' . absint( $tip['num'] ) ) ); ?>" class="button">Upgrade to Pro</a>
+	<a href="<?php echo esc_url( FrmAppHelper::make_affiliate_url( 'https://formidableforms.com?banner=1&tip=' . absint( $tip['num'] ) ) ); ?>" class="button">Upgrade to Pro</a>
 </div>
 <?php
 		}
@@ -291,7 +291,7 @@ class FrmAppController {
 		$version = FrmAppHelper::plugin_version();
 		FrmAppHelper::load_admin_wide_js( false );
 
-		wp_register_script( 'formidable_admin', FrmAppHelper::plugin_url() . '/js/formidable_admin.js', array(
+		$dependecies = array(
 			'formidable_admin_global',
 			'formidable',
 			'jquery',
@@ -300,7 +300,13 @@ class FrmAppController {
 			'jquery-ui-sortable',
 			'bootstrap_tooltip',
 			'bootstrap-multiselect',
-		), $version, true );
+		);
+
+		if ( FrmAppHelper::is_admin_page( 'formidable-styles' ) ) {
+			$dependecies[] = 'wp-color-picker';
+		}
+
+		wp_register_script( 'formidable_admin', FrmAppHelper::plugin_url() . '/js/formidable_admin.js', $dependecies, $version, true );
 		wp_register_style( 'formidable-admin', FrmAppHelper::plugin_url() . '/css/frm_admin.css', array(), $version );
         wp_register_script( 'bootstrap_tooltip', FrmAppHelper::plugin_url() . '/js/bootstrap.min.js', array( 'jquery' ), '3.3.4' );
 		wp_register_style( 'formidable-grids', FrmAppHelper::plugin_url() . '/css/frm_grids.css', array(), $version );
@@ -467,13 +473,13 @@ class FrmAppController {
         self::install();
     }
 
-    public static function install( $old_db_version = false ) {
+    public static function install() {
         $frmdb = new FrmMigrate();
-        $frmdb->upgrade( $old_db_version );
+        $frmdb->upgrade();
     }
 
     public static function uninstall() {
-		FrmAppHelper::permission_check('administrator');
+		FrmAppHelper::permission_check( 'administrator' );
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
 		$frmdb = new FrmMigrate();
@@ -513,7 +519,7 @@ class FrmAppController {
 	}
 
     public static function deauthorize() {
-		FrmAppHelper::permission_check('frm_change_settings');
+		FrmAppHelper::permission_check( 'frm_change_settings' );
         check_ajax_referer( 'frm_ajax', 'nonce' );
 
         delete_option( 'frmpro-credentials' );

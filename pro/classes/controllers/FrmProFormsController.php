@@ -393,6 +393,10 @@ class FrmProFormsController {
 		}
 
 		self::maybe_add_hide_class( $form );
+
+		if ( current_user_can( 'activate_plugins' ) && current_user_can( 'frm_edit_forms' ) ) {
+			echo ' frm-admin-viewing ';
+		}
 	}
 
 	private static function maybe_add_hide_class( $form ) {

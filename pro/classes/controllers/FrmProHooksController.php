@@ -87,6 +87,7 @@ class FrmProHooksController {
         add_action('deleted_post', 'FrmProEntriesController::delete_entry');
         add_action('trashed_post', 'FrmProEntriesController::trashed_post');
         add_action('untrashed_post', 'FrmProEntriesController::trashed_post');
+		add_filter( 'frm_show_entry_defaults', 'FrmProEntriesController::show_entry_defaults' );
 
 		add_filter( 'frmpro_fields_replace_shortcodes', 'FrmProEntriesController::filter_shortcode_value', 10, 4 );
 		add_filter( 'frm_display_value_custom', 'FrmProEntriesController::filter_display_value', 1, 3 );
@@ -179,6 +180,8 @@ class FrmProHooksController {
 
 		// Styles Controller
 		add_action( 'frm_include_front_css', 'FrmProStylesController::include_front_css' );
+		add_filter( 'frm_default_style_settings', 'FrmProStylesController::add_defaults' );
+		add_filter( 'frm_override_default_styles', 'FrmProStylesController::override_defaults' );
 
 		// Graphs Controller
 		add_shortcode('frm-graph', 'FrmProGraphsController::graph_shortcode');
@@ -465,6 +468,7 @@ class FrmProHooksController {
 
     public static function load_view_hooks() {
 		add_filter( 'frm_display_entry_content', 'FrmProContent::replace_shortcodes', 10, 7 );
+		add_filter( 'frm_after_display_content', 'FrmProDisplaysController::include_pagination', 9, 4 );
 
 		// address
 		add_filter( 'frm_keep_address_value_array', '__return_true' );

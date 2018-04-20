@@ -61,7 +61,7 @@ class FrmEntriesListHelper extends FrmListHelper {
 
 		$limit = FrmDb::esc_limit( $start . ',' . $per_page );
 		$this->items = FrmEntry::getAll( $s_query, $order, $limit, true, $join_form_in_query );
-        $total_items = FrmEntry::getRecordCount($s_query);
+		$total_items = FrmEntry::getRecordCount( $s_query );
 
 		$this->set_pagination_args( array(
 			'total_items' => $total_items,
@@ -74,7 +74,7 @@ class FrmEntriesListHelper extends FrmListHelper {
 			'param' => 's',
 			'sanitize' => 'sanitize_text_field',
 		) );
-	    if ( ! empty($s) ) {
+		if ( ! empty( $s ) ) {
 			esc_html_e( 'No Entries Found', 'formidable' );
             return;
         }
@@ -83,7 +83,7 @@ class FrmEntriesListHelper extends FrmListHelper {
 		$form = $this->params['form'];
 
         if ( $form_id ) {
-            $form = FrmForm::getOne($form_id);
+			$form = FrmForm::getOne( $form_id );
         }
         $colspan = $this->get_column_count();
 
@@ -158,7 +158,7 @@ class FrmEntriesListHelper extends FrmListHelper {
             }
 
 			$attributes = 'class="' . esc_attr( $class ) . '"';
-			unset($class);
+			unset( $class );
 			$attributes .= ' data-colname="' . $column_display_name . '"';
 
 			$form_id = $this->params['form'] ? $this->params['form'] : 0;
@@ -183,7 +183,7 @@ class FrmEntriesListHelper extends FrmListHelper {
 			    }
 			    $r .= '</td>';
 			}
-			unset($val);
+			unset( $val );
 		}
 		$r .= '</tr>';
 
@@ -240,12 +240,12 @@ class FrmEntriesListHelper extends FrmListHelper {
     private function get_actions( &$actions, $item, $view_link ) {
 		$actions['view'] = '<a href="' . esc_url( $view_link ) . '">' . __( 'View', 'formidable' ) . '</a>';
 
-        if ( current_user_can('frm_delete_entries') ) {
+		if ( current_user_can( 'frm_delete_entries' ) ) {
 			$delete_link = '?page=formidable-entries&frm_action=destroy&id=' . $item->id . '&form=' . $this->params['form'];
 			$actions['delete'] = '<a href="' . esc_url( wp_nonce_url( $delete_link ) ) . '" class="submitdelete" data-frmverify="' . esc_attr__( 'Are you sure?', 'formidable' ) . '">' . __( 'Delete' ) . '</a>';
 	    }
 
-        $actions = apply_filters('frm_row_actions', $actions, $item);
+		$actions = apply_filters( 'frm_row_actions', $actions, $item );
     }
 
 	private function get_column_value( $item, &$val ) {

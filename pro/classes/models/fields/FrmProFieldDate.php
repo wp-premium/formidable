@@ -41,6 +41,16 @@ class FrmProFieldDate extends FrmFieldType {
 		$atts = wp_parse_args( $atts, $defaults );
 	}
 
+	/**
+	 * @since 3.01.01
+	 */
+	public function show_options( $field, $display, $values ) {
+		$locales = FrmAppHelper::locales( 'date' );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/back-end/calendar.php' );
+
+		parent::show_options( $field, $display, $values );
+	}
+
 	public function prepare_front_field( $values, $atts ) {
 		$values['value'] = FrmProAppHelper::maybe_convert_from_db_date( $values['value'] );
 		return $values;
@@ -149,6 +159,10 @@ class FrmProFieldDate extends FrmFieldType {
 		} else {
 			if ( ! is_array( $value ) && strpos( $value, ',' ) ) {
 				$value = explode( ',', $value );
+			}
+
+			if ( isset( $atts['date_format'] ) && ! empty( $atts['date_format'] ) ) {
+				$atts['format'] = $atts['date_format'];
 			}
 
 			$value = FrmProFieldsHelper::format_values_in_array( $value, $atts['format'], array( 'self', 'get_date' ) );

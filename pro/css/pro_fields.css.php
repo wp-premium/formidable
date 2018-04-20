@@ -280,12 +280,12 @@ table.frmcal-calendar .frmcal_date{
 }
 
 table.frmcal-calendar .frmcal-today .frmcal_date{
-    background-color:#<?php echo esc_html( $defaults['bg_color_active'] ) ?>;
+    background-color:<?php echo esc_html( $defaults['bg_color_active'] ) ?>;
     padding:0 5px;
     text-align:right;
-    -moz-box-shadow:0 2px 5px #<?php echo esc_html( $defaults['border_color_active'] ) ?>;
-    -webkit-box-shadow:0 2px 5px #<?php echo esc_html( $defaults['border_color_active'] ) ?>;
-    box-shadow:0 2px 5px #<?php echo esc_html( $defaults['border_color_active'] ) ?>;
+    -moz-box-shadow:0 2px 5px <?php echo esc_html( $defaults['border_color_active'] ) ?>;
+    -webkit-box-shadow:0 2px 5px <?php echo esc_html( $defaults['border_color_active'] ) ?>;
+    box-shadow:0 2px 5px <?php echo esc_html( $defaults['border_color_active'] ) ?>;
 }
 
 .frmcal_day_name,
@@ -380,7 +380,7 @@ $text_color = '#ffffff' . $important;
 	background:transparent !important;
 	display: block;
 	width: 100%;
-	margin: 7px 0 10px;
+	margin: 7px 0 15px;
 	font-size:14px;
 }
 

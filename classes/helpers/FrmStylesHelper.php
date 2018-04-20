@@ -29,7 +29,7 @@ class FrmStylesHelper {
             'swanky-purse'  => 'Swanky Purse',
         );
 
-        $themes = apply_filters('frm_jquery_themes', $themes);
+		$themes = apply_filters( 'frm_jquery_themes', $themes );
         return $themes;
     }
 
@@ -40,12 +40,12 @@ class FrmStylesHelper {
 
         if ( ! $theme_css || $theme_css == '' || $theme_css == 'ui-lightness' ) {
             $css_file = FrmAppHelper::plugin_url() . '/css/ui-lightness/jquery-ui.css';
-        } else if ( preg_match('/^http.?:\/\/.*\..*$/', $theme_css) ) {
+		} elseif ( preg_match( '/^http.?:\/\/.*\..*$/', $theme_css ) ) {
             $css_file = $theme_css;
         } else {
             $uploads = self::get_upload_base();
 			$file_path = '/formidable/css/' . $theme_css . '/jquery-ui.css';
-            if ( file_exists($uploads['basedir'] . $file_path) ) {
+			if ( file_exists( $uploads['basedir'] . $file_path ) ) {
                 $css_file = $uploads['baseurl'] . $file_path;
             } else {
 				$css_file = FrmAppHelper::jquery_ui_base_url() . '/themes/' . $theme_css . '/jquery-ui.min.css';
@@ -59,7 +59,7 @@ class FrmStylesHelper {
 		$form = self::get_form_for_page();
 		$theme_css = FrmStylesController::get_style_val( 'theme_css', $form );
         if ( $theme_css != -1 ) {
-            wp_enqueue_style('jquery-theme', self::jquery_css_url($theme_css), array(), FrmAppHelper::plugin_version());
+			wp_enqueue_style( 'jquery-theme', self::jquery_css_url( $theme_css ), array(), FrmAppHelper::plugin_version() );
         }
     }
 
@@ -77,21 +77,21 @@ class FrmStylesHelper {
 		return $form_id;
 	}
 
-    public static function get_upload_base() {
-        $uploads = wp_upload_dir();
-        if ( is_ssl() && ! preg_match('/^https:\/\/.*\..*$/', $uploads['baseurl']) ) {
-            $uploads['baseurl'] = str_replace('http://', 'https://', $uploads['baseurl']);
-        }
+	public static function get_upload_base() {
+		$uploads = wp_upload_dir();
+		if ( is_ssl() && ! preg_match( '/^https:\/\/.*\..*$/', $uploads['baseurl'] ) ) {
+			$uploads['baseurl'] = str_replace( 'http://', 'https://', $uploads['baseurl'] );
+		}
 
-        return $uploads;
-    }
+		return $uploads;
+	}
 
 	public static function style_menu( $active = '' ) {
 ?>
         <h2 class="nav-tab-wrapper">
 			<a href="<?php echo esc_url( admin_url( 'admin.php?page=formidable-styles' ) ) ?>" class="nav-tab <?php echo ( '' == $active ) ? 'nav-tab-active' : '' ?>"><?php esc_html_e( 'Edit Styles', 'formidable' ) ?></a>
 			<a href="<?php echo esc_url( admin_url( 'admin.php?page=formidable-styles&frm_action=manage' ) ) ?>" class="nav-tab <?php echo ( 'manage' == $active ) ? 'nav-tab-active' : '' ?>"><?php esc_html_e( 'Manage Form Styles', 'formidable' ) ?></a>
-			<a href="<?php echo esc_url( admin_url('admin.php?page=formidable-styles&frm_action=custom_css' ) ) ?>" class="nav-tab <?php echo ( 'custom_css' == $active ) ? 'nav-tab-active' : '' ?>"><?php esc_html_e( 'Custom CSS', 'formidable' ) ?></a>
+			<a href="<?php echo esc_url( admin_url( 'admin.php?page=formidable-styles&frm_action=custom_css' ) ); ?>" class="nav-tab <?php echo ( 'custom_css' == $active ) ? 'nav-tab-active' : ''; ?>"><?php esc_html_e( 'Custom CSS', 'formidable' ); ?></a>
         </h2>
 <?php
     }
@@ -223,7 +223,7 @@ class FrmStylesHelper {
 
         $name = ( 'arrow' == $type ) ? 'collapse_icon' : 'repeat_icon';
 ?>
-    	<select name="<?php echo esc_attr( $frm_style->get_field_name($name) ) ?>" id="frm_<?php echo esc_attr( $name ) ?>" class="frm_icon_font frm_multiselect hide-if-js">
+    	<select name="<?php echo esc_attr( $frm_style->get_field_name( $name ) ); ?>" id="frm_<?php echo esc_attr( $name ); ?>" class="frm_icon_font frm_multiselect hide-if-js">
             <?php foreach ( $icons as $key => $icon ) { ?>
 			<option value="<?php echo esc_attr( $key ) ?>" <?php selected( $style->post_content[ $name ], $key ) ?>>
 				<?php echo '&#xe' . $icon['+'] . '; &#xe' . $icon['-'] . ';'; ?>
@@ -299,14 +299,14 @@ class FrmStylesHelper {
 	 */
 	public static function get_settings_for_output( $style ) {
 		if ( self::previewing_style() ) {
-			if ( isset( $_GET['frm_style_setting'] ) ) {
-				$settings = $_GET['frm_style_setting']['post_content'];
+			if ( isset( $_POST['frm_style_setting'] ) ) {
+				$settings = $_POST['frm_style_setting']['post_content'];
 			} else {
-				$settings = $_GET;
+				$settings = $_POST;
 			}
 			FrmAppHelper::sanitize_value( 'sanitize_text_field', $settings );
 
-			$style_name = FrmAppHelper::simple_get( 'style_name', 'sanitize_title' );
+			$style_name = FrmAppHelper::get_post_param( 'style_name', '', 'sanitize_title' );
 			$settings['style_class'] = '';
 			if ( ! empty( $style_name ) ) {
 				$settings['style_class'] = $style_name . '.';
@@ -335,9 +335,12 @@ class FrmStylesHelper {
 	/**
 	 * @since 2.3
 	 */
-	private static function prepare_color_output( &$settings ) {
+	public static function prepare_color_output( &$settings, $allow_transparent = true ) {
 		$colors = self::allow_color_override();
 		foreach ( $colors as $css => $opts ) {
+			if ( $css === 'transparent' && ! $allow_transparent ) {
+				$css = '';
+			}
 			foreach ( $opts as $opt ) {
 				self::get_color_output( $css, $settings[ $opt ] );
 			}
@@ -348,9 +351,14 @@ class FrmStylesHelper {
 	 * @since 2.3
 	 */
 	private static function allow_color_override() {
+		$frm_style = new FrmStyle();
+		$colors = $frm_style->get_color_settings();
+
+		$transparent = array( 'fieldset_color', 'fieldset_bg_color', 'bg_color', 'section_bg_color', 'error_bg', 'success_bg_color', 'progress_bg_color', 'progress_active_bg_color' );
+
 		return array(
-			'transparent' => array( 'fieldset_color', 'fieldset_bg_color', 'bg_color', 'section_bg_color', 'error_bg', 'success_bg_color', 'progress_bg_color', 'progress_active_bg_color' ),
-			'' => array( 'title_color', 'section_color', 'submit_text_color', 'label_color', 'check_label_color', 'form_desc_color', 'description_color', 'text_color', 'text_color_disabled', 'border_color', 'submit_bg_color', 'submit_border_color', 'error_text', 'progress_border_color', 'progress_color', 'progress_active_color', 'submit_hover_bg_color', 'submit_hover_border_color', 'submit_hover_color', 'submit_active_color', 'submit_active_border_color', 'submit_active_bg_color' ),
+			'transparent' => $transparent,
+			''            => array_diff( $colors, $transparent ),
 		);
 	}
 
@@ -358,7 +366,12 @@ class FrmStylesHelper {
 	 * @since 2.3
 	 */
 	private static function get_color_output( $default, &$color ) {
-		$color = ( trim( $color ) == '' ) ? $default : '#' . $color;
+		$color = trim( $color );
+		if ( empty( $color ) ) {
+			$color = $default;
+		} elseif ( strpos( $color, '#' ) === false ) {
+			$color = '#' . $color;
+		}
 	}
 
 	/**
@@ -380,10 +393,11 @@ class FrmStylesHelper {
 	}
 
 	/**
+	 * Where is 'flat' being used?
 	 * @since 2.3
 	 */
 	public static function previewing_style() {
-		return isset( $_GET['frm_style_setting'] ) || isset( $_GET['flat'] );
+		return isset( $_POST['frm_style_setting'] ) || isset( $_POST['flat'] ) || isset( $_GET['flat'] );
 	}
 
 	/**

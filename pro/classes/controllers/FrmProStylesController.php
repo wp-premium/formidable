@@ -10,26 +10,42 @@ class FrmProStylesController extends FrmStylesController {
     }
 
 	public static function add_style_boxes( $boxes ) {
-		$boxes['section-fields'] = __( 'Section Fields', 'formidable-pro' );
-		$boxes['date-fields']   = __( 'Date Fields', 'formidable-pro' );
-		$boxes['progress-bars'] = __( 'Progress Bars &amp; Rootline', 'formidable-pro' );
+		$add_boxes = array(
+			'section-fields' => __( 'Section Fields', 'formidable-pro' ),
+			'date-fields'    => __( 'Date Fields', 'formidable-pro' ),
+			'toggle-fields'  => __( 'Toggle Fields', 'formidable-pro' ),
+			'slider-fields'  => __( 'Slider Fields', 'formidable-pro' ),
+			'progress-bars'  => __( 'Progress Bars &amp; Rootline', 'formidable-pro' ),
+		);
+		$boxes = array_merge( $boxes, $add_boxes );
 
-		add_filter( 'frm_style_settings_progress-bars', 'FrmProStylesController::progress_settings_file' );
-		add_filter( 'frm_style_settings_date-fields', 'FrmProStylesController::date_settings_file' );
-		add_filter( 'frm_style_settings_section-fields', 'FrmProStylesController::section_fields_file' );
+		foreach ( $add_boxes as $label => $name ) {
+			add_filter( 'frm_style_settings_' . $label, 'FrmProStylesController::style_box_file' );
+		}
 
 		return $boxes;
 	}
 
+	/**
+	 * @since 3.01.01
+	 */
+	public static function style_box_file( $f ) {
+		$path = explode( '/views/styles/', $f );
+		return self::view_folder() . '/' . $path[1];
+	}
+
 	public static function section_fields_file() {
+		_deprecated_function( __METHOD__, '3.01.01', 'FrmProStylesController::style_box_file' );
 		return self::view_folder() . '/_section-fields.php';
 	}
 
 	public static function date_settings_file() {
+		_deprecated_function( __METHOD__, '3.01.01', 'FrmProStylesController::style_box_file' );
 		return self::view_folder() . '/_date-fields.php';
 	}
 
 	public static function progress_settings_file() {
+		_deprecated_function( __METHOD__, '3.01.01', 'FrmProStylesController::style_box_file' );
 		return self::view_folder() . '/_progress-bars.php';
 	}
 
@@ -137,6 +153,39 @@ class FrmProStylesController extends FrmStylesController {
 		include( FrmProAppHelper::plugin_path() . '/css/chosen.css.php' );
 		include( FrmProAppHelper::plugin_path() . '/css/dropzone.css' );
 		include( FrmProAppHelper::plugin_path() . '/css/progress.css.php' );
+	}
+
+	/**
+	 * @since 3.01.01
+	 */
+	public static function add_defaults( $settings ) {
+		self::set_toggle_slider_colors( $settings );
+
+		return $settings;
+	}
+
+	/**
+	 * @since 3.01.01
+	 */
+	public static function override_defaults( $settings ) {
+		if ( ! isset( $settings['toggle_on_color'] ) && isset( $settings['progress_active_bg_color'] ) ) {
+			self::set_toggle_slider_colors( $settings );
+		}
+
+		return $settings;
+	}
+
+	/**
+	 * @since 3.01.01
+	 */
+	private static function set_toggle_slider_colors( &$settings ) {
+		$settings['toggle_font_size'] = $settings['font_size'];
+		$settings['toggle_on_color']  = $settings['progress_active_bg_color'];
+		$settings['toggle_off_color'] = $settings['border_color'];
+
+		$settings['slider_font_size'] = $settings['field_font_size'];
+		$settings['slider_color']     = $settings['progress_active_bg_color'];
+		$settings['slider_bar_color'] = $settings['border_color'];
 	}
 
 	/**
