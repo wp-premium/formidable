@@ -1371,8 +1371,10 @@ function frmProFormJS(){
 				setCheckboxOrRadioDefaultValue( input.name, defaultValue );
 
 			} else if ( input.name.indexOf( '[]' ) > -1 ) {
-				// TODO: fix this for checkboxes, address, and multi-select fields
 				setHiddenCheckboxDefaultValue( input.name, defaultValue );
+
+			} else if ( input.name.indexOf( '][' ) > -1 ) {
+				setHiddenCheckboxDefaultValue( input.name.replace( /\[\d*\]$/i, '' ), defaultValue );
 
 			} else {
 				if ( defaultValue.constructor === Object ) {
@@ -1425,7 +1427,7 @@ function frmProFormJS(){
 	// Set the default value for hidden checkbox or multi-select dropdown fields
 	function setHiddenCheckboxDefaultValue( inputName, defaultValue ){
 		// Get all the hidden inputs with the same name
-		var hiddenInputs = document.getElementsByName( inputName );
+		var hiddenInputs = jQuery( 'input[name^="' + inputName + '"]' ).get();
 
 		if ( jQuery.isArray(defaultValue) ) {
 			for ( var i = 0, l = defaultValue.length; i < l; i++ ) {
@@ -2728,6 +2730,23 @@ function frmProFormJS(){
 		return hidden;
 	}
 
+	function maybeShowCalculationsErrorAlert( err, field_key, thisFullCalc ) {
+
+		var alertMessage = '';
+
+		if ( ( !jQuery( 'form' ).hasClass( 'frm-admin-viewing' ) ) ) {
+			return;
+		}
+
+		alertMessage += frm_js.calc_error + ' ' + field_key + ':\n\n';
+		alertMessage += thisFullCalc + '\n\n';
+
+		if ( err.message ) {
+			alertMessage += err.message + '\n\n';
+		}
+		alert( alertMessage );
+	}
+
 	function doSingleCalculation( all_calcs, field_key, vals, triggerField ) {
 		var thisCalc = all_calcs.calc[ field_key ];
 		var thisFullCalc = thisCalc.calc;
@@ -2768,7 +2787,13 @@ function frmProFormJS(){
 
 			thisFullCalc = trimNumericCalculation( thisFullCalc );
 
-			total = parseFloat(eval(thisFullCalc));
+			try {
+				total = parseFloat( eval( thisFullCalc ) );
+			}
+
+			catch ( err ) {
+				maybeShowCalculationsErrorAlert( err, field_key, thisFullCalc );
+			}
 
 			if ( typeof total === 'undefined' || isNaN(total) ) {
 				total = 0;
@@ -2776,7 +2801,7 @@ function frmProFormJS(){
 
 			// Set decimal points
 			if ( isNumeric( dec ) ) {
-				total = total.toFixed(dec);
+				total = total.toFixed( dec );
 			}
 		}
 

@@ -64,6 +64,7 @@ class FrmProAppController {
 			wp_deregister_script( 'formidable' );
 			wp_register_script( 'formidable', FrmProAppHelper::plugin_url() . '/js/frm.min.js', array( 'jquery' ), $pro_js['formidablepro']['version'], true );
 		}
+		FrmAppHelper::localize_script( 'front' );
 	}
 
 	public static function get_pro_js_files( $suffix = '' ) {
@@ -206,16 +207,21 @@ class FrmProAppController {
 		return $tables;
 	}
 
-	public static function set_get( $atts ) {
+	public static function set_get( $atts, $content = '' ) {
 		if ( empty( $atts ) ) {
 			return;
 		}
 
+		if ( isset( $atts['param'] ) && $content !== '' ) {
+			$atts[ $atts['param'] ] = do_shortcode( $content );
+			unset( $atts['param'] );
+		}
+
 		foreach ( $atts as $att => $val ) {
 			$_GET[ $att ] = $val;
-            unset($att, $val);
-        }
-    }
+			unset( $att, $val );
+		}
+	}
 
 	public static function load_genesis() {
         //trigger Genesis hooks for integration
@@ -233,7 +239,26 @@ class FrmProAppController {
 			'field-value' => array( 'FrmProEntriesController', 'get_field_value_shortcode' ),
 			'param'       => array( 'FrmFieldsHelper', 'process_get_shortcode' ),
 		);
+
 		return apply_filters( 'frm_condition_methods', $methods );
+	}
+
+	/**
+	 * Returns an array of atts with any conditions removed
+	 *
+	 * @return array
+	 */
+	private static function remove_conditions_from_atts( $atts ) {
+		$conditions = FrmProContent::get_conditions();
+
+		foreach ( $conditions as $condition ) {
+			if ( isset( $atts[ $condition ] ) ) {
+				unset( $atts[ $condition ] );
+			}
+		}
+		unset( $condition );
+
+		return $atts;
 	}
 
 	/**
@@ -248,14 +273,16 @@ class FrmProAppController {
 		$source = $atts['source'] ? $atts['source'] : 'stats';
 		unset( $atts['source'] );
 
-		$methods = self::get_methods_for_frm_condition_shortcode();
+		$methods         = self::get_methods_for_frm_condition_shortcode();
+		$processing_atts = self::remove_conditions_from_atts( $atts );
 
 		if ( isset( $methods[ $source ] ) ) {
-			$value = call_user_func( $methods[ $source ], $atts );
+			$value = call_user_func( $methods[ $source ], $processing_atts );
 		} else {
 			global $shortcode_tags;
 			if ( isset( $shortcode_tags[ $source ] ) && is_callable( $shortcode_tags[ $source ] ) ) {
-				$value = call_user_func( $shortcode_tags[ $source ], $atts, $atts['content'], $source );
+				$content = isset( $atts['content'] ) ? $atts['content'] : '';
+				$value   = call_user_func( $shortcode_tags[ $source ], $processing_atts, $content, $source );
 			}
 		}
 
@@ -266,19 +293,21 @@ class FrmProAppController {
 	 * Conditional shortcode, used with stats, field values, and params or any other shortcode.
 	 *
 	 * @since 3.01
+	 *
 	 * @param $atts
 	 * @param string $content
 	 *
 	 * @return string
 	 */
 	public static function frm_condition_shortcode( $atts, $content = '' ) {
-		$atts['content'] = $content;
 		$value       = self::get_value_for_frm_condition_shortcode( $atts );
 		$new_content = FrmProContent::conditional_replace_with_value( $value, $atts, '', 'custom' );
 
 		if ( $new_content === '' ) {
 			return '';
 		} else {
+			$content = do_shortcode( $content );
+
 			return $content;
 		}
 	}

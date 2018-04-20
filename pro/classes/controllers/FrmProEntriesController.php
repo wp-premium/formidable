@@ -1019,6 +1019,16 @@ class FrmProEntriesController {
 		}
     }
 
+	/**
+	 * Allow extra parameters in the frm-show-entry shortcode
+	 *
+	 * @since 3.01.01
+	 */
+	public static function show_entry_defaults( $atts ) {
+		$atts['date_format'] = '';
+		return $atts;
+	}
+
     public static function create_entry_from_post_box( $post_type, $post = false ) {
         if ( ! $post || ! isset($post->ID) || $post_type == 'attachment' || $post_type == 'link' ) {
             return;
@@ -2734,6 +2744,9 @@ class FrmProEntriesController {
 					FrmProFormsController::footer_js();
 					$response['content'] .= ob_get_contents();
 					ob_end_clean();
+
+					// Mark the end of added footer content
+					$response['content'] .= '<span class="frm_end_ajax_' . $form->id . '"></span>';
 				}
 			}
 		} else {

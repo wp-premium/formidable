@@ -21,7 +21,7 @@
 	    <a href="javascript:void(0)" id="frm_add_watch_lookup_link_<?php echo absint( $field['id'] ) ?>" class="frm_add_watch_lookup_row frm_add_watch_lookup_link frm_hidden">
 			<?php _e( 'Watch Lookup fields', 'formidable-pro' ) ?>
 		</a>
-		<div id="frm_watch_lookup_block_<?php echo absint( $field['id'] ) ?>"><?php
+		<div id="frm_watch_lookup_block_<?php echo absint( $field['id'] ) ?>" class="frm_add_remove"><?php
 			if ( empty( $field['watch_lookup'] ) ) {
 				$field_id = $field['id'];
 				$row_key = 0;

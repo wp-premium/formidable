@@ -148,9 +148,10 @@ class FrmProFieldData extends FrmFieldType {
 	}
 
 	private function get_single_data_value( $linked_id, $atts ) {
+		$atts['includes_list_data'] = true;
 		$value = FrmProFieldsHelper::get_data_value( $linked_id, $this->field, $atts );
 
-		if ( $linked_id === $value ) {
+		if ( $linked_id === $value && ! FrmProField::is_list_field( $this->field ) ) {
 			$value = false;
 		} elseif ( is_array( $value ) ) {
 			$value = implode( $atts['sep'], $value );

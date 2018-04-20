@@ -331,8 +331,6 @@
     border:1px solid #aaa;
     border-bottom-right-radius:0;
     border-bottom-left-radius:0;
-	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(20%, #eee), color-stop(80%, #fff));
-	background-image: linear-gradient(#eee 20%, #fff 80%);
     box-shadow:0 1px 0 #fff inset;
 }
 

@@ -40,6 +40,36 @@ class FrmProFieldFile extends FrmFieldType {
 		);
 	}
 
+	/**
+	 * @since 3.01.01
+	 */
+	public function show_options( $field, $display, $values ) {
+		$mimes = $this->get_mime_options( $field );
+		include( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/back-end/file-options.php' );
+
+		parent::show_options( $field, $display, $values );
+	}
+
+	/**
+	 * @since 3.01.01
+	 */
+	private function get_mime_options( $field ) {
+		$mimes = get_allowed_mime_types();
+		$selected_mimes = $field['ftypes'];
+
+		$ordered = array();
+		foreach ( (array) $selected_mimes as $mime ) {
+			$key = array_search( $mime, $mimes );
+			if ( $key !== false ) {
+				$ordered[ $key ] = $mimes[ $key ];
+				unset( $mimes[ $key ] );
+			}
+		}
+
+		$mimes = $ordered + $mimes;
+		return $mimes;
+	}
+
 	public function validate( $args ) {
 		return FrmProFileField::no_js_validate( array(), $this->field, $args['value'], $args );
 	}
