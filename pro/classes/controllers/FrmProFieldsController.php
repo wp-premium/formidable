@@ -312,12 +312,6 @@ class FrmProFieldsController {
 			$frm_field_selection = FrmField::pro_field_selection();
         }
 
-        if ( $field['type'] == 'date' ) {
-            $locales = FrmAppHelper::locales('date');
-        } else if ( $field['type'] == 'file' ) {
-            $mimes = self::get_mime_options( $field );
-        }
-
 		$data_type = FrmField::get_option( $display['field_data'], 'data_type' );
 		if ( $display['type'] == 'radio' || $display['type'] == 'checkbox' || ( $display['type'] == 'data' && in_array( $data_type, array( 'radio', 'checkbox' ) ) ) ) {
 			include( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/back-end/alignment.php' );
@@ -331,9 +325,7 @@ class FrmProFieldsController {
 			'data'        => 'dynamic-field',
 			'divider'     => 'repeat-options',
 			'end_divider' => 'repeat-buttons',
-			'date'        => 'calendar',
 			'time'        => 'clock-settings',
-			'file'        => 'file-options',
 			'scale'       => 'scale-options',
 			'star'        => 'star-options',
 			'form'        => 'insert-form',
@@ -408,23 +400,6 @@ class FrmProFieldsController {
 	 */
 	public static function show_dynamic_values_options( $field, $display ) {
 		include( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-fields/back-end/dynamic-values.php' );
-	}
-
-	private static function get_mime_options( $field ) {
-        $mimes = get_allowed_mime_types();
-		$selected_mimes = $field['ftypes'];
-
-		$ordered = array();
-		foreach ( (array) $selected_mimes as $mime ) {
-			$key = array_search( $mime, $mimes );
-			if ( $key !== false ) {
-				$ordered[ $key ] = $mimes[ $key ];
-				unset( $mimes[ $key ] );
-			}
-		}
-
-		$mimes = $ordered + $mimes;
-		return $mimes;
 	}
 
 	public static function get_field_selection() {

@@ -2290,9 +2290,10 @@ class FrmProFieldsHelper {
         }
 
 		$linked_field_id = self::get_linked_field_id( $atts, $field );
+		$is_list_field = FrmProField::is_list_field( $field ) && ! is_numeric( $value );
 
 		// If value is an entry ID and the Dynamic field is not mapped to a taxonomy
-        if ( ctype_digit( $value ) && ( ! isset( $field->field_options['form_select'] ) || $field->field_options['form_select'] != 'taxonomy' ) && $linked_field_id ) {
+		if ( ctype_digit( $value ) && ( ! isset( $field->field_options['form_select'] ) || $field->field_options['form_select'] !== 'taxonomy' ) && $linked_field_id && ! $is_list_field ) {
 
 			$linked_field = FrmField::getOne( $linked_field_id );
 
@@ -2349,9 +2350,14 @@ class FrmProFieldsHelper {
 
 		// If linked field
 		} else if ( $linked_field ) {
+			$original_value = $value;
 		    $value = FrmEntryMeta::get_entry_meta_by_field( $value, $linked_field->id );
 
 			if ( $value === null ) {
+				if ( isset( $atts['field'] ) && isset( $atts['includes_list_data'] ) && FrmProField::is_list_field( $atts['field'] ) ) {
+					// if the dynamic field value was saved, return it
+					$value = $original_value;
+				}
 				return;
 			}
 
@@ -2825,11 +2831,7 @@ class FrmProFieldsHelper {
 	 * @param string $logic_value
 	 */
 	private static function get_logic_value_for_dynamic_field( $field, $key, $observed_value, &$logic_value ) {
-		if ( $field->type != 'data' || $field->field_options['data_type'] == 'data' ) {
-			return;
-		}
-
-		if ( ! self::is_dynamic_field( $field->field_options['hide_field'][ $key ] ) ) {
+		if ( $field->type != 'data' || ! self::is_dynamic_field( $field->field_options['hide_field'][ $key ] ) ) {
 			return;
 		}
 

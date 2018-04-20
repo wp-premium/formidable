@@ -82,7 +82,7 @@ abstract class FrmFieldType {
 	 */
 	protected function set_type( $type ) {
 		if ( empty( $this->type ) ) {
-			$this->type = $this->get_field_column('type');
+			$this->type = $this->get_field_column( 'type' );
 			if ( empty( $this->type ) && ! empty( $type ) ) {
 				$this->type = $type;
 			}
@@ -207,16 +207,16 @@ DEFAULT_HTML;
 	}
 
 	protected function builder_text_field( $name = '' ) {
-		return '<input type="text" name="' . esc_attr( $this->html_name( $name ) ) . '" id="' . esc_attr( $this->html_id() ) . '" value="' . esc_attr( $this->get_field_column('default_value') ) . '" class="dyn_default_value" />';
+		return '<input type="text" name="' . esc_attr( $this->html_name( $name ) ) . '" id="' . esc_attr( $this->html_id() ) . '" value="' . esc_attr( $this->get_field_column( 'default_value' ) ) . '" class="dyn_default_value" />';
 	}
 
 	protected function html_name( $name = '' ) {
 		$prefix = empty( $name ) ? 'item_meta' : $name;
-		return $prefix . '[' . $this->get_field_column('id') . ']';
+		return $prefix . '[' . $this->get_field_column( 'id' ) . ']';
 	}
 
 	protected function html_id( $plus = '' ) {
-		return apply_filters( 'frm_field_get_html_id', 'field_' . $this->get_field_column('field_key') . $plus, $this->field );
+		return apply_filters( 'frm_field_get_html_id', 'field_' . $this->get_field_column( 'field_key' ) . $plus, $this->field );
     }
 
 	public function display_field_settings() {
@@ -274,6 +274,13 @@ DEFAULT_HTML;
 		return $classes;
 	}
 
+	/**
+	 * @since 3.01.01
+	 */
+	public function show_options( $field, $display, $values ) {
+		do_action( 'frm_' . $field['type'] . '_field_options_form', $field, $display, $values );
+	}
+
 	/** New field **/
 
 	public function get_new_field_defaults() {
@@ -307,7 +314,7 @@ DEFAULT_HTML;
 	}
 
 	protected function default_invalid_msg() {
-		$field_name = $this->get_field_column('name');
+		$field_name = $this->get_field_column( 'name' );
 		if ( $field_name == '' ) {
 			$invalid = __( 'This field is invalid', 'formidable' );
 		} else {
@@ -581,7 +588,7 @@ DEFAULT_HTML;
 	 * @since 3.0
 	 */
 	protected function get_select_box( $values ) {
-		$options = $this->get_field_column('options');
+		$options = $this->get_field_column( 'options' );
 		$selected = $values['field_value'];
 
 		if ( isset( $values['combo_name'] ) ) {
@@ -640,8 +647,8 @@ DEFAULT_HTML;
 
 	protected function fill_display_field_values( $args = array() ) {
 		$defaults = array(
-			'field_name'    => 'item_meta[' . $this->get_field_column('id') . ']',
-			'field_id'      => $this->get_field_column('id'),
+			'field_name'    => 'item_meta[' . $this->get_field_column( 'id' ) . ']',
+			'field_id'      => $this->get_field_column( 'id' ),
 			'field_plus_id' => '',
 			'section_id'    => '',
 		);
@@ -669,7 +676,7 @@ DEFAULT_HTML;
 	 * @since 3.0
 	 */
 	protected function add_aria_description( $args, &$input_html ) {
-		if ( $this->get_field_column('description') != '' ) {
+		if ( $this->get_field_column( 'description' ) != '' ) {
 			$desc_id = 'frm_desc_' . esc_attr( $args['html_id'] );
 			$input_html .= ' aria-describedby="' . esc_attr( $desc_id ) . '"';
 		}
@@ -686,7 +693,7 @@ DEFAULT_HTML;
 	public function is_not_unique( $value, $entry_id ) {
 		$exists = false;
 		if ( FrmAppHelper::pro_is_installed() ) {
-			$exists = FrmProEntryMetaHelper::value_exists( $this->get_field_column('id'), $value, $entry_id );
+			$exists = FrmProEntryMetaHelper::value_exists( $this->get_field_column( 'id' ), $value, $entry_id );
 		}
 		return $exists;
 	}
