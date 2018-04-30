@@ -169,6 +169,7 @@ function frmProFormJS(){
 			resizeMethod: 'contain',
 			resizeWidth: uploadFields[i].resizeWidth,
 			resizeHeight: uploadFields[i].resizeHeight,
+			timeout: uploadFields[i].timeout,
 			fallback: function() {
 				// Force ajax submit to turn off
 				jQuery(this.element).closest('form').removeClass('frm_ajax_submit');
@@ -895,7 +896,9 @@ function frmProFormJS(){
 			'==': function(c,d){ return c === d; },
 			'!=': function(c,d){ return c !== d; },
 			'<': function(c,d){ return c > d; },
+			'<=': function(c,d){ return c >= d;},
 			'>': function(c,d){ return c < d; },
+			'>=': function(c,d){ return c <= d;},
 			'LIKE': function(c,d){
 				if(!d){
 					/* If no value, then assume no match */
@@ -1366,15 +1369,16 @@ function frmProFormJS(){
 		var defaultValue = $input.data('frmval');
 
 		if ( typeof defaultValue !== 'undefined' ) {
+			var numericKey = new RegExp( /\[\d*\]$/i );
 
 			if ( input.type == 'checkbox' || input.type == 'radio' ) {
 				setCheckboxOrRadioDefaultValue( input.name, defaultValue );
 
-			} else if ( input.name.indexOf( '[]' ) > -1 ) {
+			} else if ( input.type == 'hidden' && input.name.indexOf( '[]' ) > -1 ) {
 				setHiddenCheckboxDefaultValue( input.name, defaultValue );
 
-			} else if ( input.name.indexOf( '][' ) > -1 ) {
-				setHiddenCheckboxDefaultValue( input.name.replace( /\[\d*\]$/i, '' ), defaultValue );
+			} else if ( input.type == 'hidden' && input.name.indexOf( '][' ) > -1 && numericKey.test( input.name ) ) {
+				setHiddenCheckboxDefaultValue( input.name.replace( numericKey, '' ), defaultValue );
 
 			} else {
 				if ( defaultValue.constructor === Object ) {
@@ -1437,7 +1441,7 @@ function frmProFormJS(){
 					// TODO: accommodate for when there are multiple default values but the user has removed some
 				}
 			}
-		} else if ( hiddenInputs[0] !== null ) {
+		} else if ( hiddenInputs[0] !== null && typeof hiddenInputs[0] !== 'undefined' ) {
 			hiddenInputs[0].value = defaultValue;
 		}
 	}
@@ -3867,7 +3871,7 @@ function frmProFormJS(){
 	}
 
 	function loadSliders() {
-		jQuery( document ).on( 'input', 'input[data-frmrange]', function() {
+		jQuery( document ).on( 'input change', 'input[data-frmrange]', function() {
 			var range = jQuery( this );
 			range.next( '.frm_range_value' ).html( range.val() );
 		} );
