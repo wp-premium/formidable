@@ -48,6 +48,7 @@ class FrmProFileField {
 				'maxFilesExceeded' => sprintf( __( 'You have uploaded too many files. You may only include %d file(s).', 'formidable-pro' ), $max ),
 				'resizeHeight'     => null,
 				'resizeWidth'      => null,
+				'timeout'          => self::get_timeout(),
 			);
 
 			if ( $field['resize'] && ! empty( $field['new_size'] ) ) {
@@ -69,6 +70,24 @@ class FrmProFileField {
 
 			self::add_mock_files( $field['value'], $frm_vars['dropzone_loaded'][ $the_id ]['mockFiles'] );
 		}
+	}
+
+	/**
+	 * Increase the default timeout from 30 based on server limits
+	 *
+	 * @since 3.01.02
+	 */
+	private static function get_timeout() {
+		$timeout = absint( ini_get( 'max_execution_time' ) );
+		if ( $timeout <= 1 ) {
+			// allow for -1 or 0 for unlimited
+			$timeout = 5000 * 1000;
+		} elseif ( $timeout > 30 ) {
+			$timeout = $timeout * 1000;
+		} else {
+			$timeout = 30000;
+		}
+		return $timeout;
 	}
 
 	private static function add_mock_files( $media_ids, &$mock_files ) {
@@ -323,7 +342,7 @@ class FrmProFileField {
 
 		$upload_max = wp_max_upload_size() / 1000000;
 
-		return min( $upload_max, $mb_limit );
+		return round( min( $upload_max, $mb_limit ), 3 );
 	}
 
 	/**
