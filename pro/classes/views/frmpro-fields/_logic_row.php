@@ -32,7 +32,9 @@ $field['hide_field_cond'][ $meta_name ] = htmlspecialchars_decode( $field['hide_
     <option value="==" <?php selected( $field['hide_field_cond'][ $meta_name ], '==' ) ?>><?php _e( 'equal to', 'formidable-pro' ) ?></option>
     <option value="!=" <?php selected( $field['hide_field_cond'][ $meta_name ], '!=' ) ?>><?php _e( 'NOT equal to', 'formidable-pro' ) ?> &nbsp;</option>
     <option value=">" <?php selected( $field['hide_field_cond'][ $meta_name ], '>' ) ?>><?php _e( 'greater than', 'formidable-pro' ) ?></option>
+    <option value=">=" <?php selected( $field['hide_field_cond'][ $meta_name ], '>=' ) ?>><?php _e( 'greater than or equal to', 'formidable-pro' ) ?></option>
     <option value="<" <?php selected( $field['hide_field_cond'][ $meta_name ], '<' ) ?>><?php _e( 'less than', 'formidable-pro' ) ?></option>
+    <option value="<=" <?php selected( $field['hide_field_cond'][ $meta_name ], '<=' ) ?>><?php _e( 'less than or equal to', 'formidable-pro' ) ?></option>
     <option value="LIKE" <?php selected( $field['hide_field_cond'][ $meta_name ], 'LIKE' ) ?>><?php _e( 'like', 'formidable-pro' ) ?></option>
     <option value="not LIKE" <?php selected( $field['hide_field_cond'][ $meta_name ], 'not LIKE' ) ?>><?php _e( 'not like', 'formidable-pro' ) ?> &nbsp;</option>
 </select>
