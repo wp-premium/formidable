@@ -133,6 +133,22 @@ class FrmProFieldTime extends FrmFieldType {
 		echo $hidden . $html;
 	}
 
+	/**
+	 * Add extra classes on front-end input
+	 *
+	 * @since 3.01.04
+	 */
+	protected function get_input_class() {
+		$class = '';
+		$is_separate = $this->get_field_column( 'options' );
+		$combo_name = FrmField::get_option( $this->field, 'combo_name' );
+		if ( isset( $is_separate['H'] ) || ! empty( $combo_name ) ) {
+			$class = 'auto_width frm_time_select';
+		}
+
+		return $class;
+	}
+
 	protected function show_readonly_hidden() {
 		return true;
 	}

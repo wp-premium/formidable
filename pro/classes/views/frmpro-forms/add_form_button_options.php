@@ -24,9 +24,20 @@
     </td>
     <td>
         <select name="options[submit_align]">
-			<option value=""><?php _e( 'Default', 'formidable-pro' ) ?></option>
-			<option value="center" <?php selected( $values['submit_align'], 'center' ) ?>><?php _e( 'Center', 'formidable-pro' ) ?></option>
-			<option value="inline" <?php selected( $values['submit_align'], 'inline' ) ?>><?php _e( 'Inline', 'formidable-pro' ) ?></option>
+            <option value=""><?php _e( 'Default', 'formidable-pro' ) ?></option>
+            <option value="center" <?php selected( $values['submit_align'], 'center' ) ?>><?php _e( 'Center', 'formidable-pro' ) ?></option>
+            <option value="inline" <?php selected( $values['submit_align'], 'inline' ) ?>><?php _e( 'Inline', 'formidable-pro' ) ?></option>
         </select>
     </td>
 </tr>
+
+<?php if ( version_compare( FrmAppHelper::plugin_version(), '3.01.04', '>=' ) ) { ?>
+<tr>
+    <td>
+        <label><?php esc_html_e( 'Submit Button Logic', 'formidable-pro' ); ?></label>
+	</td>
+	<td>
+		<?php include( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-forms/_submit_conditional.php' ); ?>
+	</td>
+</tr>
+<?php } ?>

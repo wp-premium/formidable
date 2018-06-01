@@ -1,0 +1,89 @@
+# Translation of Formidable Forms in Chinese (Taiwan)
+# This file is distributed under the same license as the Formidable Forms package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2018-05-23 19:24:52+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: GlotPress/2.3.1\n"
+"Language: zh_TW\n"
+"Project-Id-Version: Formidable Forms\n"
+
+#: classes/models/FrmProFileField.php:42 classes/models/FrmProFileField.php:319
+#: classes/models/FrmProFileField.php:330
+msgid "That file is too big. It must be less than %sMB."
+msgstr "這個檔案太大了。必須小於 %s MB。"
+
+#: classes/models/FrmProFileField.php:47
+#: classes/views/frmpro-fields/front-end/file.php:54
+msgid "Remove file"
+msgstr "移除檔案"
+
+#: classes/models/FrmProFileField.php:48 classes/models/FrmProFileField.php:360
+msgid "You have uploaded too many files. You may only include %d file(s)."
+msgstr "您上傳太多檔案。目前只允許 %d 個檔案。"
+
+#: classes/models/FrmProFileField.php:431
+msgid "Sorry, this file type is not permitted."
+msgstr "很抱歉，系統不接受這種檔案類型。"
+
+#: classes/views/frmpro-fields/back-end/field-file.php:4
+#: classes/views/frmpro-fields/front-end/file.php:66
+msgid "Drop a file here or click to upload"
+msgstr "點此上傳檔案"
+
+#: classes/views/frmpro-fields/back-end/field-file.php:6
+#: classes/views/frmpro-fields/front-end/file.php:69
+msgid "Maximum upload size: %sMB"
+msgstr "檔案上傳限制：%s MB"
+
+#: classes/models/FrmProFileField.php:39
+msgid "Drop files here to upload"
+msgstr "拖曳檔案到這裡上傳"
+
+#: classes/models/FrmProFileField.php:40
+msgid "Your browser does not support drag and drop file uploads."
+msgstr "您的瀏覽器不支援拖曳檔案上傳。"
+
+#: classes/models/FrmProFileField.php:45
+msgid "Cancel upload"
+msgstr "取消上傳"
+
+#: classes/models/FrmProFileField.php:46
+msgid "Are you sure you want to cancel this upload?"
+msgstr "您確定要取消這個上傳？"
+
+#: classes/models/FrmProFileField.php:521
+msgid "File upload failed"
+msgstr "檔案上傳失敗"
+
+#: classes/views/displays/where_row.php:16
+msgid "IP"
+msgstr " 位址"
+
+#: classes/views/xml/map_csv_fields.php:51
+msgid "Timestamp"
+msgstr "提交時間"
+
+#: classes/models/FrmProFileField.php:428
+msgid "is invalid"
+msgstr "無效"
+
+#: classes/controllers/FrmProFormsController.php:299
+#: classes/controllers/FrmProFormsController.php:539
+#: classes/models/FrmProForm.php:276
+msgid "User ID"
+msgstr "使用者 ID"
+
+#: classes/controllers/FrmProDisplaysController.php:139
+#: classes/controllers/FrmProDisplaysController.php:285
+#: classes/views/displays/mb_dyncontent.php:23
+msgid "Content"
+msgstr "內容"
+
+#: classes/controllers/FrmProFormsController.php:294
+#: classes/controllers/FrmProFormsController.php:544
+msgid "Email"
+msgstr "郵箱"

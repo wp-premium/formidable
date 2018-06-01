@@ -15,7 +15,7 @@ if ( FrmField::is_read_only( $field ) ) {
 	foreach ( (array) $media_ids as $media_id ) {
 ?>
 <input type="hidden" value="<?php echo esc_attr( $media_id ) ?>" name="<?php echo esc_attr( $input_name ); ?>" />
-<div class="frm_file_icon"><?php echo FrmProFieldsHelper::get_file_icon( $media_id ); ?></div>
+<div class="frm_show_file_icon"><?php echo FrmProFieldsHelper::get_file_icon( $media_id ); ?></div>
 <?php
 	}
 } else {

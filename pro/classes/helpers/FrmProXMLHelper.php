@@ -345,21 +345,49 @@ class FrmProXMLHelper {
      * Save the entry after checking if it should be created or updated
      */
 	private static function save_or_edit_entry( $values, $unmapped_fields ) {
-        $editing = false;
-        if ( isset($values['id']) && $values['item_key'] ) {
+		$editing = self::get_entry_to_edit( $values, $unmapped_fields );
+		if ( $editing ) {
+			FrmEntry::update( $editing, $values );
+		} else {
+			FrmEntry::create( $values );
+		}
+	}
+
+	/**
+	 * Editing CSV entries on import based on id or key
+	 * @since 3.01.03
+	 */
+	private static function get_entry_to_edit( $values, $unmapped_fields ) {
+		$entry_id = 0;
+		$query = array();
+
+		if ( isset( $values['id'] ) ) {
+			$query['id'] = $values['id'];
+		} elseif ( isset( $values['item_key'] ) && $values['item_key'] ) {
+			$query['item_key'] = $values['item_key'];
+		}
+
+		if ( ! empty( $query ) ) {
 			//check for updating by entry ID
-			$editing = FrmDb::get_var( 'frm_items', array( 'form_id' => $values['form_id'], 'id' => $values['id'] ) );
-			if ( $editing ) {
+			$entry_id = FrmDb::get_var( 'frm_items', array(
+				'form_id' => $values['form_id'],
+				$query,
+			) );
+
+			if ( $entry_id ) {
 				//self::merge_old_entry( $unmapped_fields, $values );
 			}
-        }
+		}
 
-        if ( $editing ) {
-            FrmEntry::update($values['id'], $values);
-        } else {
-            FrmEntry::create($values);
-        }
-    }
+		/**
+		 * When importing entries via CSV set the id of the entry that should be edited
+		 *
+		 * @since 3.01.03
+		 * @param int $entry_id - The ID of the entry to edit. 0 means a new entry will be created.
+		 * @param array $values - The mapped values for this entry
+		 */
+		return apply_filters( 'frm_editing_entry_by_csv', absint( $entry_id ), $values );
+	}
 
 	private static function merge_old_entry( $unmapped_fields, &$values ) {
 		if ( $unmapped_fields ) {

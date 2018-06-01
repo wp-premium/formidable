@@ -272,6 +272,8 @@ class FrmProFormsController {
 
         $post_types = FrmProAppHelper::get_custom_post_types();
 
+        $submit_conditions = $values['submit_conditions'];
+
         require(FrmProAppHelper::plugin_path() . '/classes/views/frmpro-forms/add_form_button_options.php');
     }
 
@@ -549,6 +551,71 @@ class FrmProFormsController {
         $options = array_merge($options, $user_fields);
         return $options;
     }
+
+
+	/**
+	 * Add submit conditions to $frm_vars for inclusion in Conditional Logic processing
+	 * @param $atts
+	 * @param $form
+	 */
+	public static function add_submit_conditions_to_frm_vars( $form ) {
+		if ( ! isset( $form->options['submit_conditions'] ) ||
+             ! isset( $form->options['submit_conditions']['hide_field'] ) ||
+             empty( $form->options['submit_conditions']['hide_field'] ) ) {
+			return;
+		}
+
+		$submit_field = array(
+			'id'              => 'submit_' . $form->id,
+			'key'             => 'submit_' . $form->id,
+			'type'            => 'submit',
+			'form_id'         => $form->id,
+			'parent_form_id'  => $form->id,
+			'form_select'     => '',
+			'hide_field'      => $form->options['submit_conditions']['hide_field'],
+			'hide_field_cond' => $form->options['submit_conditions']['hide_field_cond'],
+			'hide_opt'        => $form->options['submit_conditions']['hide_opt'],
+			'show_hide'       => $form->options['submit_conditions']['show_hide'],
+			'any_all'         => $form->options['submit_conditions']['any_all'],
+		);
+
+		FrmProFieldsHelper::setup_conditional_fields( $submit_field );
+	}
+
+	/**
+	 * Adds a row to Conditional Logic for the submit button
+	 */
+	public static function _submit_logic_row() {
+		FrmAppHelper::permission_check( 'frm_edit_forms' );
+		check_ajax_referer( 'frm_ajax', 'nonce' );
+
+		$meta_name         = FrmAppHelper::get_post_param( 'meta_name', '', 'absint' );
+		$hide_field        = '';
+		$form_id           = FrmAppHelper::get_param( 'form_id', '', 'get', 'absint' );
+		$form_fields       = FrmField::get_all_for_form( $form_id );
+		if ( ! $form_fields ) {
+			wp_die();
+		}
+
+		$condition = array(
+			'hide_field'      => '',
+			'hide_field_cond' => '==',
+		);
+
+		$form              = FrmForm::getOne( $form_id );
+		$submit_conditions = FrmForm::get_option( array(
+			'form'    => $form,
+			'option'  => 'submit_conditions',
+			'default' => $condition,
+		) );
+
+		$form_fields       = FrmField::get_all_for_form( $form_id );
+		$exclude_fields    = array_merge( FrmField::no_save_fields(), array( 'file', 'rte', 'date' ) );
+
+		include( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-forms/_submit_logic_row.php' );
+
+		wp_die();
+	}
 
 	public static function include_logic_row( $atts ) {
         $defaults = array(

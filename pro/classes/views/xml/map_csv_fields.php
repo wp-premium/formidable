@@ -64,7 +64,7 @@
         <p class="submit">
             <input type="submit" value="<?php esc_attr_e( 'Import', 'formidable-pro' ) ?>" class="button-primary" />
         </p>
-        <p class="howto"><?php _e( 'Note: If you select a field for the Entry ID, the matching entry with that ID will be updated.', 'formidable-pro' ) ?></p>
+        <p class="howto"><?php esc_html_e( 'Note: If you select a field for the Entry ID or Entry Key, the matching entry with that ID or key will be updated.', 'formidable-pro' ) ?></p>
     </form>
 
     </div>
