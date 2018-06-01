@@ -270,8 +270,11 @@ class FrmProAppController {
 	 */
 	private static function get_value_for_frm_condition_shortcode( $atts ) {
 		$value  = '';
-		$source = $atts['source'] ? $atts['source'] : 'stats';
-		unset( $atts['source'] );
+		$source = 'stats';
+		if ( isset( $atts['source'] ) ) {
+			$source = $atts['source'] ? $atts['source'] : $source;
+			unset( $atts['source'] );
+		}
 
 		$methods         = self::get_methods_for_frm_condition_shortcode();
 		$processing_atts = self::remove_conditions_from_atts( $atts );

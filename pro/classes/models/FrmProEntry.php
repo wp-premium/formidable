@@ -173,7 +173,7 @@ class FrmProEntry {
 	 * @param string|int $field_id
 	 */
     private static function delete_all_sub_entries( $action, $values, $field_id ) {
-	    if ( $action != 'create' ) {
+	    if ( $action != 'create' && isset( $values['id'] ) ) {
 			$old_ids = self::get_existing_sub_entries( $values['id'], $field_id );
 		    self::delete_sub_entries( $old_ids );
 	    }

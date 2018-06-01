@@ -99,6 +99,7 @@ class FrmProHooksController {
 		// File field
 		add_filter( 'frm_validate_entry', 'FrmProFileField::upload_files_no_js', 10, 1 );
 		add_action( 'frm_before_destroy_entry', 'FrmProFileField::delete_files_with_entry', 10, 2 );
+		add_action( 'frm_after_duplicate_entry', 'FrmProFileField::duplicate_files_with_entry', 10, 3 );
 
         // Entry and Meta Helpers
         add_filter('frm_show_new_entry_page', 'FrmProEntriesHelper::allow_form_edit', 10, 2);
@@ -157,6 +158,7 @@ class FrmProHooksController {
 		}
 		add_action( 'wp_head', 'FrmProFormsController::head' );
         add_action('formidable_shortcode_atts', 'FrmProFormsController::formidable_shortcode_atts', 10, 2);
+		add_action( 'frm_pre_get_form', 'FrmProFormsController::add_submit_conditions_to_frm_vars', 10 );
         add_filter('frm_replace_content_shortcodes', 'FrmProFormsController::replace_content_shortcodes', 10, 3);
         add_filter('frm_conditional_shortcodes', 'FrmProFormsController::conditional_options');
         add_filter('frm_user_shortcodes', 'FrmProFormsController::user_options');
@@ -416,10 +418,13 @@ class FrmProHooksController {
 		add_action('wp_ajax_frm_get_lookup_text_value', 'FrmProLookupFieldsController::ajax_get_text_field_lookup_value');
 
         // Form Actions Controller
-        add_action('wp_ajax_frm_add_form_logic_row', 'FrmProFormActionsController::_logic_row');
+		add_action('wp_ajax_frm_add_form_logic_row', 'FrmProFormActionsController::_logic_row');
         add_action('wp_ajax_frm_add_postmeta_row', 'FrmProFormActionsController::_postmeta_row');
         add_action('wp_ajax_frm_add_posttax_row', 'FrmProFormActionsController::_posttax_row');
         add_action('wp_ajax_frm_replace_posttax_options', 'FrmProFormActionsController::_replace_posttax_options');
+
+		//Form general settings controller
+		add_action('wp_ajax_frm_add_submit_logic_row', 'FrmProFormsController::_submit_logic_row');
 
 		// Nested forms controller
 		add_action('wp_ajax_frm_add_form_row', 'FrmProNestedFormsController::ajax_add_repeat_row');

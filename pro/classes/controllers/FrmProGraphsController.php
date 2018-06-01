@@ -607,7 +607,7 @@ class FrmProGraphsController {
 			$title = '';
 		}
 
-		return $title;
+		return html_entity_decode( $title );
 	}
 
 	/**

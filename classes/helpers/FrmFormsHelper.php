@@ -46,7 +46,7 @@ class FrmFormsHelper {
 		self::add_html_attr( $args['class'], 'class', $add_html );
 
         ?>
-		<select name="<?php echo esc_attr( $field_name ); ?>" id="<?php echo esc_attr( $args['field_id'] ) ?>" <?php echo implode( ' ', $add_html ); ?>>
+		<select name="<?php echo esc_attr( $field_name ); ?>" id="<?php echo esc_attr( $args['field_id'] ) ?>" <?php echo wp_strip_all_tags( implode( ' ', $add_html ) ); // WPCS: XSS ok. ?>>
 		<?php if ( $args['blank'] ) { ?>
 			<option value=""><?php echo ( $args['blank'] == 1 ) ? ' ' : '- ' . esc_attr( $args['blank'] ) . ' -'; ?></option>
 		<?php } ?>
@@ -336,7 +336,7 @@ BEFORE_HTML;
 	public static function get_custom_submit( $html, $form, $submit, $form_action, $values ) {
 		$button = self::replace_shortcodes( $html, $form, $submit, $form_action, $values );
 		if ( ! strpos( $button, '[button_action]' ) ) {
-			echo $button;
+			echo $button; // WPCS: XSS ok.
 			return;
 		}
 
@@ -353,9 +353,9 @@ BEFORE_HTML;
 			}
 		}
 
-		echo $button_parts[0];
+		echo $button_parts[0]; // WPCS: XSS ok.
 		do_action( 'frm_submit_button_action', $form, $form_action );
-		echo $button_parts[1];
+		echo $button_parts[1]; // WPCS: XSS ok.
 	}
 
     /**
@@ -561,6 +561,10 @@ BEFORE_HTML;
 	 * @return bool
 	 */
 	private static function form_has_top_labels( $form ) {
+		if ( ! isset( $form['fields'] ) ) {
+			return false;
+		}
+
 		$fields = $form['fields'];
 		if ( count( $fields ) <= 0 ) {
 			return false;

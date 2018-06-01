@@ -60,6 +60,19 @@ class FrmProFieldDate extends FrmFieldType {
 		return 'text';
 	}
 
+	/**
+	 * Add extra classes on front-end input
+	 *
+	 * @since 3.01.04
+	 */
+	protected function get_input_class() {
+		$class = '';
+		if ( ! FrmField::is_read_only( $this->field ) ) {
+			$class = 'frm_date';
+		}
+		return $class;
+	}
+
 	protected function load_field_scripts( $args ) {
 		if ( ! FrmField::is_read_only( $this->field ) ) {
 			global $frm_vars;

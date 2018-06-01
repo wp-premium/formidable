@@ -511,11 +511,23 @@ function frmProFormJS(){
 				// If trigger field is not repeating/embedded, get all repeating/embedded field divs
 				childFieldDivs = getAllRepeatingFieldDivIds(depFieldArgs);
 			}
+		} else if ( depFieldArgs.fieldType === 'submit' ) {
+			childFieldDivs.push( getSubmitButtonContainerID( depFieldArgs ) );
 		} else {
 			childFieldDivs.push( 'frm_field_' + depFieldArgs.fieldId + '_container' );
 		}
 
 		return childFieldDivs;
+	}
+
+	/**
+	 * Return selector for submit button for use in Conditional Logic.
+	 *
+	 * @param depFieldArgs
+	 * @returns {string}
+	 */
+	function getSubmitButtonContainerID ( depFieldArgs ){
+		return 'frm_form_' + depFieldArgs.formId + '_container .frm_final_submit';
 	}
 
 	/**
@@ -995,7 +1007,14 @@ function frmProFormJS(){
 	function routeToHideOrShowField( depFieldArgs, logicOutcomes ) {
 		var action = getHideOrShowAction( depFieldArgs, logicOutcomes );
 
-		var onCurrentPage = isFieldDivOnPage( depFieldArgs.containerId );
+		var onCurrentPage;
+
+		if ( depFieldArgs.fieldType === 'submit' ) {
+			onCurrentPage = isSubmitButtonOnPage( depFieldArgs );
+		}
+		else {
+			onCurrentPage = isFieldDivOnPage( depFieldArgs.containerId );
+		}
 
 		if ( action == 'show' ) {
 			if ( depFieldArgs.fieldType == 'data' && depFieldArgs.hasOwnProperty('dataLogic') ) {
@@ -1013,6 +1032,18 @@ function frmProFormJS(){
 		var fieldDiv = document.getElementById( containerId );
 
 		return fieldDiv !== null;
+	}
+
+	/**
+	 * Checks if specified submit button is on the current page.
+	 *
+	 * @param depFieldArgs
+	 * @returns {boolean}
+	 */
+	function isSubmitButtonOnPage (depFieldArgs){
+		var submitButton = document.querySelector( '#' + depFieldArgs.containerId );
+
+		return submitButton != null;
 	}
 
 	/**
@@ -1063,6 +1094,13 @@ function frmProFormJS(){
 		}
 
 		removeFromHideFields(depFieldArgs.containerId, depFieldArgs.formId);
+
+		if ( depFieldArgs.fieldType === 'submit' ) {
+			if ( onCurrentPage ) {
+				showOrEnableSubmitButton( depFieldArgs );
+			}
+			return;
+		}
 		if ( onCurrentPage ) {
 			// Set value, then show field
 			setValuesInsideFieldOnPage(depFieldArgs.containerId, depFieldArgs);
@@ -1070,6 +1108,28 @@ function frmProFormJS(){
 		} else {
 			setValuesInsideFieldAcrossPage( depFieldArgs );
 		}
+	}
+
+	/**
+	 * Show or enable submit button, as appropriate based on submit Conditional Logic.
+	 *
+	 * @param depFieldArgs
+	 */
+	function showOrEnableSubmitButton( depFieldArgs ) {
+		if ( depFieldArgs.hideDisable && depFieldArgs.hideDisable == 'disable' ) {
+			enableButton( '#' + depFieldArgs.containerId );
+		} else {
+			showFieldContainer( depFieldArgs.containerId );
+		}
+	}
+
+	/**
+	 * Enable button with given selector.
+	 *
+	 * @param buttonSelector
+	 */
+	function enableButton( buttonSelector ) {
+		jQuery( buttonSelector ).prop( 'disabled', false );
 	}
 
 	/**
@@ -1198,6 +1258,13 @@ function frmProFormJS(){
 
 		addToHideFields( depFieldArgs.containerId, depFieldArgs.formId );
 
+		if ( depFieldArgs.fieldType === 'submit' ) {
+			if ( onCurrentPage ) {
+				hideOrDisableSubmitButton( depFieldArgs );
+			}
+			return;
+		}
+
 		if ( onCurrentPage ) {
 			hideFieldContainer( depFieldArgs.containerId );
 			clearInputsInFieldOnPage( depFieldArgs.containerId );
@@ -1206,8 +1273,49 @@ function frmProFormJS(){
 		}
 	}
 
+	/**
+	 * Hide or disable given submit button as appropriate, based on submit Conditional Logic
+	 *
+	 * @param depFieldArgs
+	 */
+	function hideOrDisableSubmitButton( depFieldArgs ) {
+		if ( depFieldArgs.containerId == undefined ) {
+			depFieldArgs.containerId = getSubmitButtonContainerID( depFieldArgs );
+		}
+
+		if ( depFieldArgs.hideDisable && depFieldArgs.hideDisable == 'disable' ) {
+			disableButton( '#' + depFieldArgs.containerId );
+		} else {
+			hideFieldContainer( depFieldArgs.containerId );
+		}
+	}
+
+	/**
+	 * Hide submit button with specified container ID that was previously hidden.
+	 *
+	 * @param submitContainerID
+	 */
+	function hidePreviouslyHiddenSubmitButton ( submitContainerID ){
+		var form_id = submitContainerID.replace( 'frm_form_', '' );
+		form_id = form_id.replace( '_container .frm_final_submit', '' );
+
+		var depFieldArgs = getRulesForSingleField( 'submit_' + form_id );
+		if ( depFieldArgs ) {
+			hideOrDisableSubmitButton( depFieldArgs );
+		}
+	}
+
 	function hideFieldContainer( containerId ) {
 		jQuery( '#' + containerId ).hide();
+	}
+
+	/**
+	 * Disable button with specified selector
+	 *
+	 * @param buttonSelector
+	 */
+	function disableButton( buttonSelector ) {
+		jQuery( buttonSelector ).prop( 'disabled', true );
 	}
 
 	function clearInputsInFieldOnPage( containerId ) {
@@ -4091,6 +4199,16 @@ function frmProFormJS(){
 			var len = hiddenFields.length;
 			for ( var i = 0, l = len; i < l; i++ ) {
 				var container = document.getElementById( hiddenFields[ i ] );
+
+				//check for submit button
+				if ( container == null ) {
+					container = document.querySelector( '#' + hiddenFields[ i ] );
+					if ( container != null && hiddenFields[ i ].indexOf( 'frm_final_submit' ) > -1 ) {
+						hidePreviouslyHiddenSubmitButton( hiddenFields[ i ] );
+						continue;
+					}
+				}
+
 				if ( container !== null ) {
 					container.style.display = 'none';
 				}

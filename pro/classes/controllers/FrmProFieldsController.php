@@ -168,18 +168,7 @@ class FrmProFieldsController {
 				$add_html .= ' data-placeholder=" "';
 			}
 
-			if ( $field['type'] == 'number' || $field['type'] == 'range' ) {
-				if ( ! is_numeric($field['minnum']) ) {
-					$field['minnum'] = 0;
-				}
-				if ( ! is_numeric($field['maxnum']) ) {
-					$field['maxnum'] = 9999999;
-				}
-				if ( ! is_numeric( $field['step'] ) && $field['step'] != 'any' ) {
-					$field['step'] = 1;
-				}
-				$add_html .= ' min="' . esc_attr( $field['minnum'] ) . '" max="' . esc_attr( $field['maxnum'] ) . '" step="' . esc_attr( $field['step'] ) . '"';
-			} elseif ( in_array( $field['type'], array( 'url', 'email' ) ) ) {
+			if ( in_array( $field['type'], array( 'url', 'email' ) ) ) {
 				if ( ( ! isset($frm_vars['novalidate']) || ! $frm_vars['novalidate'] ) && ( $field['type'] != 'email' || ( isset($field['value']) && $field['default_value'] == $field['value'] ) ) ) {
 					// add novalidate for drafts
 					$frm_vars['novalidate'] = true;
@@ -204,19 +193,6 @@ class FrmProFieldsController {
 	}
 
 	public static function add_field_class( $class, $field ) {
-		if ( $field['type'] == 'date' && ! FrmField::is_read_only( $field ) ) {
-            $class .= ' frm_date';
-		} else if ( $field['type'] == 'file' && FrmField::is_option_true( $field, 'multiple' ) ) {
-            $class .= ' frm_multiple_file';
-        } elseif ( $field['type'] == 'time' && ( isset( $field['options']['H'] ) || isset( $field['combo_name'] ) ) ) {
-        	$class .= ' auto_width frm_time_select';
-        }
-
-		// Hide the "No files selected" text if files are selected
-		if ( $field['type'] == 'file' && ! FrmField::is_option_empty( $field, 'value' ) ) {
-			$class .= ' frm_transparent';
-		}
-
 		if ( ! FrmAppHelper::is_admin() && FrmField::is_option_true( $field, 'autocom' ) &&
 		( $field['type'] == 'select' || ( $field['type'] == 'data' && isset( $field['data_type'] ) && $field['data_type'] == 'select' ) ) &&
 		! empty( $field['options'] ) && ! FrmField::is_read_only( $field ) ) {

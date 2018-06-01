@@ -33,6 +33,7 @@ class FrmFieldsController {
 			}
 			$field->field_options = json_decode( json_encode( $field->field_options ), true );
 			$field->options = json_decode( json_encode( $field->options ), true );
+			$field->default_value = json_decode( json_encode( $field->default_value ), true );
 
 			ob_start();
 			self::load_single_field( $field, $values );
@@ -71,11 +72,6 @@ class FrmFieldsController {
      * @return array|bool
      */
 	public static function include_new_field( $field_type, $form_id ) {
-		$values = array();
-		if ( FrmAppHelper::pro_is_installed() ) {
-			$values['post_type'] = FrmProFormsHelper::post_type( $form_id );
-		}
-
 		$field_values = FrmFieldsHelper::setup_new_vars( $field_type, $form_id );
         $field_values = apply_filters( 'frm_before_field_created', $field_values );
 
@@ -86,6 +82,17 @@ class FrmFieldsController {
         }
 
 		$field = self::get_field_array_from_id( $field_id );
+
+		$values = array();
+		if ( FrmAppHelper::pro_is_installed() ) {
+			$values['post_type'] = FrmProFormsHelper::post_type( $form_id );
+
+			$parent_form_id = FrmDb::get_var( 'frm_forms', array( 'id' => $form_id ), 'parent_form_id' );
+			if ( $parent_form_id ) {
+				$field['parent_form_id'] = $parent_form_id;
+			}
+		}
+
 		self::load_single_field( $field, $values, $form_id );
 
         return $field;
@@ -121,7 +128,7 @@ class FrmFieldsController {
 
 		do_action( 'frm_after_update_field_' . $field, compact( 'id', 'value' ) );
 
-		echo stripslashes( wp_kses_post( $value ) );
+		echo stripslashes( wp_kses_post( $value ) ); // WPCS: XSS ok.
         wp_die();
     }
 
@@ -505,7 +512,7 @@ class FrmFieldsController {
 		$add_html = ' ' . implode( ' ', $add_html ) . '  ';
 
         if ( $echo ) {
-            echo $add_html;
+            echo $add_html; // WPCS: XSS ok.
         }
 
         return $add_html;

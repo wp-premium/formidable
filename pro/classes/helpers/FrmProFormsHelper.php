@@ -391,23 +391,45 @@ echo $custom_options;
     }
 
 	public static function get_default_opts() {
-        $frmpro_settings = new FrmProSettings();
+		$frmpro_settings = new FrmProSettings();
 
-        return array(
-            'edit_value' => $frmpro_settings->update_value, 'edit_msg' => $frmpro_settings->edit_msg,
-            'edit_action' => 'message', 'edit_url' => '', 'edit_page_id' => 0,
-            'logged_in' => 0, 'logged_in_role' => '', 'editable' => 0, 'save_draft' => 0,
-            'draft_msg' => __( 'Your draft has been saved.', 'formidable-pro' ),
-            'editable_role' => '', 'open_editable_role' => '-1',
-            'copy' => 0, 'single_entry' => 0, 'single_entry_type' => 'user',
-            'success_page_id' => '', 'success_url' => '', 'ajax_submit' => 0,
-            'cookie_expiration' => 8000, 'prev_value' => __( 'Previous', 'formidable-pro' ),
-			'submit_align' => '',
-			'protect_files' => 0, 'rootline' => '',
-			'rootline_titles_on' => 0, 'rootline_titles' => array(),
-			'rootline_lines_off' => 0, 'rootline_numbers_off' => 0,
-        );
-    }
+		return array(
+			'edit_value'           => $frmpro_settings->update_value,
+			'edit_msg'             => $frmpro_settings->edit_msg,
+			'edit_action'          => 'message',
+			'edit_url'             => '',
+			'edit_page_id'         => 0,
+			'logged_in'            => 0,
+			'logged_in_role'       => '',
+			'editable'             => 0,
+			'save_draft'           => 0,
+			'draft_msg'            => __( 'Your draft has been saved.', 'formidable-pro' ),
+			'editable_role'        => '',
+			'open_editable_role'   => '-1',
+			'copy'                 => 0,
+			'single_entry'         => 0,
+			'single_entry_type'    => 'user',
+			'success_page_id'      => '',
+			'success_url'          => '',
+			'ajax_submit'          => 0,
+			'cookie_expiration'    => 8000,
+			'prev_value'           => __( 'Previous', 'formidable-pro' ),
+			'submit_align'         => '',
+			'submit_conditions'    => array(
+				'show_hide'        => 'show',
+				'any_all'          => 'all',
+				'hide_field'       => array(),
+				'hide_opt'         => array(),
+				'hide_cond'        => array(),
+			),
+			'protect_files'        => 0,
+			'rootline'             => '',
+			'rootline_titles_on'   => 0,
+			'rootline_titles'      => array(),
+			'rootline_lines_off'   => 0,
+			'rootline_numbers_off' => 0,
+		);
+	}
 
 	public static function get_taxonomy_count( $taxonomy, $post_categories, $tax_count = 0 ) {
 		if ( isset( $post_categories[ $taxonomy . $tax_count ] ) ) {

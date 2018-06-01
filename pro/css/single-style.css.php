@@ -43,16 +43,23 @@
 	color:<?php echo esc_html( $settings['text_color'] . $important ) ?>;
 }
 
-<?php if ( $settings['field_height'] != 'auto' && $settings['field_height'] != '' ) { ?>
 .<?php echo esc_html( $settings['style_class'] ) ?> .chosen-container-single .chosen-single{
-	height:<?php echo esc_html( $settings['field_height'] ) ?>;
+	padding-top:0 <?php esc_html( $important ); ?>;
+<?php if ( $settings['field_height'] != 'auto' && $settings['field_height'] != '' ) { ?>
+	height:<?php echo esc_html( $settings['field_height'] . $important ); ?>;
 	line-height:<?php echo esc_html( $settings['field_height'] . $important ) ?>;
-}
 <?php } ?>
+}
+
+<?php if ( is_numeric( $top_margin ) && $pad_unit === 'px' ) { ?>
+.<?php echo esc_html( $settings['style_class'] ) ?> .chosen-container-single .chosen-single abbr{
+    top:<?php echo esc_attr( 6 + (int) $top_margin ); ?>px <?php esc_html( $important ); ?>;
+}
 
 .<?php echo esc_html( $settings['style_class'] ) ?> .chosen-container-single .chosen-single div{
 	top:<?php echo esc_html( $top_margin . $pad_unit . $important ) ?>;
 }
+<?php } ?>
 
 .<?php echo esc_html( $settings['style_class'] ) ?> .chosen-container-single .chosen-search input[type="text"]{
 	height:<?php echo esc_html( ( $settings['field_height'] == 'auto' || $settings['field_height'] == '' ) ? 'auto' : $settings['field_height'] ) ?>;

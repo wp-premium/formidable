@@ -2791,8 +2791,8 @@ class FrmProEntriesController {
 		$id = FrmAppHelper::get_param( 'id', '', 'post', 'absint' );
 		$entry_id = FrmAppHelper::get_param('entry_id', 0, 'post', 'absint' );
 		$post_id = FrmAppHelper::get_param( 'post_id', 0, 'post', 'sanitize_title' );
-		$fields = FrmAppHelper::get_param( 'fields', array(), 'post', 'sanitize_title' );
-		$exclude_fields = FrmAppHelper::get_param( 'exclude_fields', array(), 'post', 'sanitize_title' );
+		$fields = FrmAppHelper::get_param( 'fields', array(), 'post', 'sanitize_text_field' );
+		$exclude_fields = FrmAppHelper::get_param( 'exclude_fields', array(), 'post', 'sanitize_text_field' );
 
 		global $frm_vars;
 		$frm_vars['footer_loaded'] = $frm_vars['inplace_edit'] = true;
