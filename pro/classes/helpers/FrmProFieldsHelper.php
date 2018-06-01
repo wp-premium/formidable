@@ -1023,6 +1023,10 @@ class FrmProFieldsHelper {
 	 * @return array
 	 */
 	private static function initialize_logic_rules_for_field_array( $field, $form_id ) {
+	    if ( $field['type'] === 'submit' ) {
+	        return self::initialize_logic_rules_for_submit( $field, $form_id );
+	    }
+
         $original_type = self::get_original_field_type( $field );
 
 		$logic_rules = array(
@@ -1042,6 +1046,46 @@ class FrmProFieldsHelper {
         );
 
         return $logic_rules;
+	}
+
+	/**
+	 * Initialize the logic rules for the submit button
+	 *
+	 * @param array $submit_field
+	 * @param int $form_id
+	 * @return array
+	 */
+	private static function initialize_logic_rules_for_submit( $submit_field, $form_id ) {
+		$show_hide = 'show';
+		if ( isset( $submit_field['show_hide'] ) && ( ( $submit_field['show_hide'] == 'hide' ||
+		$submit_field['show_hide'] == 'disable' ) ) ) {
+			$show_hide = 'hide';
+		}
+
+		$hide_disable = 'hide';
+		if ( isset( $submit_field['show_hide'] ) && ( ( $submit_field['show_hide'] == 'enable' ||
+		$submit_field['show_hide'] == 'disable' ) ) ) {
+			$hide_disable = 'disable';
+		}
+
+		$logic_rules = array(
+			'fieldId'        => 'submit_' . $form_id,
+			'fieldKey'       => 'submit_' . $form_id,
+			'fieldType'      => 'submit',
+			'inputType'      => 'submit',
+			'isMultiSelect'  => false,
+			'formId'         => $form_id,
+			'inSection'      => false,
+			'inEmbedForm'    => false,
+			'isRepeating'    => false,
+			'dependents'     => array(),
+			'showHide'       => $show_hide,
+			'hideDisable'    => $hide_disable,
+			'anyAll'         => isset( $submit_field['any_all'] ) ? $submit_field['any_all'] : 'any',
+			'conditions'     => array(),
+		);
+
+		return $logic_rules;
 	}
 
 	/**

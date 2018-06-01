@@ -370,6 +370,25 @@ class FrmProFieldFile extends FrmFieldType {
 		return $input_html;
 	}
 
+	/**
+	 * Add extra classes on front-end input
+	 *
+	 * @since 3.01.04
+	 */
+	protected function get_input_class() {
+		$class = '';
+		if ( FrmField::is_option_true( $this->field, 'multiple' ) ) {
+			$class = 'frm_multiple_file';
+		}
+
+		// Hide the "No files selected" text if files are selected
+		if ( ! FrmField::is_option_empty( $this->field, 'value' ) ) {
+			$class .= ' frm_transparent';
+		}
+
+		return $class;
+	}
+
 	protected function prepare_import_value( $value, $atts ) {
 		$value = $this->get_file_id( $value );
 		// If single file upload field, reset array

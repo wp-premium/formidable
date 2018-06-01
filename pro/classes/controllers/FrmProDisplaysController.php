@@ -2624,7 +2624,7 @@ class FrmProDisplaysController {
 	private static function get_no_entries_message( $view, $atts ) {
 		$empty_msg = '';
 
-		if ( isset( $view->frm_empty_msg ) && ! empty( $view->frm_empty_msg ) ) {
+		if ( isset( $view->frm_empty_msg ) && '' !== trim( $view->frm_empty_msg ) ) {
 			$empty_msg = '<div class="frm_no_entries">' . FrmProFieldsHelper::get_default_value( $view->frm_empty_msg, false ) . '</div>';
 		}
 

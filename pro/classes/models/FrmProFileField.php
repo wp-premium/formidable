@@ -529,8 +529,9 @@ class FrmProFileField {
     /**
      * Let WordPress process the uploads
      * @param int $field_id
+     * @param bool $sideload
      */
-	public static function upload_file( $field_id ) {
+	public static function upload_file( $field_id, $sideload = false ) {
 		require_once( ABSPATH . 'wp-admin/includes/file.php' );
 		require_once( ABSPATH . 'wp-admin/includes/image.php' );
 		require_once( ABSPATH . 'wp-admin/includes/media.php' );
@@ -538,7 +539,7 @@ class FrmProFileField {
 		$response = array( 'media_ids' => array(), 'errors' => array() );
 		add_filter( 'upload_dir', array( 'FrmProFileField', 'upload_dir' ) );
 
-		if ( is_array( $_FILES[ $field_id ]['name'] ) ) {
+		if ( ! $sideload && is_array( $_FILES[ $field_id ]['name'] ) ) {
 			foreach ( $_FILES[ $field_id ]['name'] as $k => $n ) {
 				if ( empty( $n ) ) {
 					continue;
@@ -558,7 +559,7 @@ class FrmProFileField {
 				self::handle_upload( $f_id, $response );
 			}
 		} else {
-			self::handle_upload( $field_id, $response );
+			self::handle_upload( $field_id, $response, $sideload );
 		}
 
 		remove_filter( 'upload_dir', array( 'FrmProFileField', 'upload_dir' ) );
@@ -568,9 +569,9 @@ class FrmProFileField {
 		return $response;
 	}
 
-	private static function handle_upload( $field_id, &$response ) {
+	private static function handle_upload( $field_id, &$response, $sideload = false ) {
 		add_filter( 'wp_insert_attachment_data', 'FrmProFileField::change_attachment_slug' );
-		$media_id = media_handle_upload( $field_id, 0 );
+		$media_id = $sideload ? media_handle_sideload( $field_id, 0 ) : media_handle_upload( $field_id, 0 );
 		remove_filter( 'wp_insert_attachment_data', 'FrmProFileField::change_attachment_slug' );
 
 		if ( is_numeric( $media_id ) ) {
@@ -649,11 +650,15 @@ class FrmProFileField {
 		}
 	}
 
-    /**
+	/**
 	 * Upload files into "formidable" subdirectory
 	 */
 	public static function upload_dir( $uploads ) {
 		$form_id = FrmAppHelper::get_post_param( 'form_id', 0, 'absint' );
+		if ( ! $form_id ) {
+			$form_id = FrmAppHelper::simple_get( 'form', 'absint', 0 );
+		}
+
 		$relative_path = self::get_upload_dir_for_form( $form_id );
 
 		if ( ! empty( $relative_path ) ) {
@@ -822,6 +827,75 @@ class FrmProFileField {
 	}
 
 	/**
+	 * @since 3.01.03
+	 */
+	public static function duplicate_files_with_entry( $entry_id, $form_id, $args ) {
+		$old_entry_id  = ! empty( $args['old_id'] ) ? $args['old_id'] : 0;
+		$upload_fields = FrmField::getAll( array( 'fi.type' => 'file', 'fi.form_id' => $form_id ) );
+
+		if ( ! $old_entry_id || ! $upload_fields ) {
+			return;
+		}
+
+		foreach ( $upload_fields as $field ) {
+			$attachments = maybe_unserialize( self::get_previous_file_ids( $field, $old_entry_id ) );
+			if ( empty( $attachments ) ) {
+				continue;
+			}
+
+			$new_media_ids = array();
+
+			foreach ( (array) $attachments as $attachment_id ) {
+				$orig_path = get_attached_file( $attachment_id );
+
+				if ( ! file_exists( $orig_path ) ) {
+					continue;
+				}
+
+				// Copy path to a temp location because wp_handle_sideload() deletes the original.
+				$tmp_path = wp_tempnam();
+				if ( ! $tmp_path ) {
+					continue;
+				}
+
+				$read_file = new FrmCreateFile( array(
+				    'new_file_path' => dirname( $orig_path ),
+				    'file_name' => basename( $orig_path ),
+				) );
+				$file_contents = $read_file->get_file_contents();
+
+				if ( ! $file_contents || false === file_put_contents( $tmp_path, $file_contents ) ) { // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_file_put_contents,
+					@unlink( $tmp_path );
+					continue;
+				}
+
+				$file_arr = array(
+					'name'     => basename( $orig_path ),
+					'size'     => @filesize( $tmp_path ),
+					'tmp_name' => $tmp_path,
+					'error'    => 0
+				);
+				$response = self::upload_file( $file_arr, true );
+
+				foreach ( (array) $response as $r ) {
+					if ( is_numeric( $r ) ) {
+						$new_media_ids[] = $r;
+					}
+				}
+			}
+
+			if ( 1 === count( $new_media_ids ) ) {
+				$new_meta = reset( $new_media_ids );
+			} else {
+				$new_meta = $new_media_ids;
+			}
+
+			FrmEntryMeta::update_entry_meta( $entry_id, $field->id, null, $new_meta );
+		}
+	}
+
+
+	/**
 	 * @deprecated 2.03.08
 	 */
 	public static function validate( $errors, $field, $values, $args ) {
@@ -830,3 +904,4 @@ class FrmProFileField {
 		return self::no_js_validate( $errors, $field, $values, $args );
 	}
 }
+

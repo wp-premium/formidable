@@ -133,7 +133,7 @@ class FrmListHelper {
 
 	public function display_rows() {
 		foreach ( $this->items as $item ) {
-			echo "\n\t", $this->single_row( $item );
+			echo "\n\t", $this->single_row( $item ); // WPCS: XSS ok.
 		}
 	}
 
@@ -228,7 +228,7 @@ class FrmListHelper {
 	 * @access public
 	 */
 	public function no_items() {
-		_e( 'No items found.' );
+		esc_html_e( 'No items found.' );
 	}
 
 	/**
@@ -304,9 +304,9 @@ class FrmListHelper {
 
 		echo "<ul class='subsubsub'>\n";
 		foreach ( $views as $class => $view ) {
-			$views[ $class ] = "\t<li class='$class'>$view";
+			$views[ $class ] = "\t" . '<li class="' . esc_attr( $class ) . '">' . $view;
 		}
-		echo implode( " |</li>\n", $views ) . "</li>\n";
+		echo implode( " |</li>\n", $views ) . "</li>\n"; // WPCS: XSS ok.
 		echo '</ul>';
 	}
 
@@ -367,7 +367,7 @@ class FrmListHelper {
 		foreach ( $this->_actions as $name => $title ) {
 			$class = 'edit' == $name ? ' class="hide-if-no-js"' : '';
 
-			echo "\t<option value='" . esc_attr( $name ) . "'$class>$title</option>\n";
+			echo "\t<option value='" . esc_attr( $name ) . "'$class>" . esc_html( $title ) . "</option>\n"; // WPCS: XSS ok.
 		}
 
 		echo "</select>\n";
@@ -460,10 +460,10 @@ class FrmListHelper {
 				}
 
 				printf(
-					"<a href='%s' class='%s' id='view-switch-$mode'><span class='screen-reader-text'>%s</span></a>\n",
+					'<a href="%s" class="%s" id="view-switch-' . esc_attr( $mode ) . '"><span class="screen-reader-text">%s</span></a>' . "\n",
 					esc_url( add_query_arg( 'mode', $mode ) ),
-					implode( ' ', $classes ),
-					$title
+					esc_attr( implode( ' ', $classes ) ),
+					esc_html( $title )
 				);
 			}
 		?>
@@ -597,7 +597,7 @@ class FrmListHelper {
 		if ( ! empty( $infinite_scroll ) ) {
 			$pagination_links_class = ' hide-if-js';
 		}
-		$output .= "\n<span class='$pagination_links_class'>" . join( "\n", $page_links ) . '</span>';
+		$output .= "\n" . '<span class="' . esc_attr( $pagination_links_class ) . '">' . join( "\n", $page_links ) . '</span>';
 
 		if ( $total_pages ) {
 			$page_class = $total_pages < 2 ? ' one-page' : '';
@@ -606,7 +606,7 @@ class FrmListHelper {
 		}
 		$this->_pagination = "<div class='tablenav-pages" . esc_attr( $page_class ) . "'>$output</div>";
 
-		echo $this->_pagination;
+		echo $this->_pagination; // WPCS: XSS ok.
 	}
 
 	private function disabled_pages( $total_pages ) {
@@ -887,7 +887,7 @@ class FrmListHelper {
 					$class[] = $desc_first ? 'asc' : 'desc';
 				}
 
-				$column_display_name = '<a href="' . esc_url( add_query_arg( compact( 'orderby', 'order' ), $current_url ) ) . '"><span>' . $column_display_name . '</span><span class="sorting-indicator"></span></a>';
+				$column_display_name = '<a href="' . esc_url( add_query_arg( compact( 'orderby', 'order' ), $current_url ) ) . '"><span>' . esc_html( $column_display_name ) . '</span><span class="sorting-indicator"></span></a>';
 			}
 
 			$tag = ( 'cb' === $column_key ) ? 'td' : 'th';
@@ -895,10 +895,10 @@ class FrmListHelper {
 			$id = $with_id ? "id='" . esc_attr( $column_key ) . "'" : '';
 
 			if ( ! empty( $class ) ) {
-				$class = "class='" . join( ' ', $class ) . "'";
+				$class = "class='" . esc_attr( join( ' ', $class ) ) . "'";
 			}
 
-			echo "<$tag $scope $id $class>$column_display_name</$tag>";
+			echo "<$tag $scope $id $class>$column_display_name</$tag>"; // WPCS: XSS ok.
 		}
 	}
 
@@ -920,7 +920,7 @@ class FrmListHelper {
 	</tr>
 	</thead>
 
-	<tbody id="the-list"<?php echo ( $singular ? " data-wp-lists='list:" . esc_attr( $singular ) . "'" : '' ); ?>>
+	<tbody id="the-list"<?php echo ( $singular ? " data-wp-lists='list:" . esc_attr( $singular ) . "'" : '' ); // WPCS: XSS ok. ?>>
 		<?php $this->display_rows_or_placeholder(); ?>
 	</tbody>
 
@@ -1037,14 +1037,14 @@ class FrmListHelper {
 
 			// Comments column uses HTML in the display name with screen reader text.
 			// Instead of using esc_attr(), we strip tags to get closer to a user-friendly string.
-			$data = 'data-colname="' . wp_strip_all_tags( $column_display_name ) . '"';
+			$data = 'data-colname="' . esc_attr( $column_display_name ) . '"';
 
-			$attributes = "class='$classes' $data";
+			$attributes = 'class="' . esc_attr( $classes ) . '" ' . $data;
 
 			if ( 'cb' == $column_name ) {
 				echo '<th scope="row" class="check-column"></th>';
 			} elseif ( method_exists( $this, '_column_' . $column_name ) ) {
-				echo call_user_func(
+				echo call_user_func( // WPCS: XSS ok.
 					array( $this, '_column_' . $column_name ),
 					$item,
 					$classes,
@@ -1052,13 +1052,13 @@ class FrmListHelper {
 					$primary
 				);
 			} elseif ( method_exists( $this, 'column_' . $column_name ) ) {
-				echo "<td $attributes>";
-				echo call_user_func( array( $this, 'column_' . $column_name ), $item );
-				echo $this->handle_row_actions( $item, $column_name, $primary );
+				echo "<td $attributes>"; // WPCS: XSS ok.
+				echo call_user_func( array( $this, 'column_' . $column_name ), $item ); // WPCS: XSS ok.
+				echo $this->handle_row_actions( $item, $column_name, $primary ); // WPCS: XSS ok.
 				echo '</td>';
 			} else {
-				echo "<td $attributes>";
-				echo $this->handle_row_actions( $item, $column_name, $primary );
+				echo "<td $attributes>"; // WPCS: XSS ok.
+				echo $this->handle_row_actions( $item, $column_name, $primary ); // WPCS: XSS ok.
 				echo '</td>';
 			}
 		}
@@ -1076,7 +1076,7 @@ class FrmListHelper {
 	 * @return string The row actions output. In this case, an empty string.
 	 */
 	protected function handle_row_actions( $item, $column_name, $primary ) {
-		return $column_name == $primary ? '<button type="button" class="toggle-row"><span class="screen-reader-text">' . __( 'Show more details' ) . '</span></button>' : '';
+		return $column_name == $primary ? '<button type="button" class="toggle-row"><span class="screen-reader-text">' . esc_html__( 'Show more details' ) . '</span></button>' : '';
  	}
 
 	/**

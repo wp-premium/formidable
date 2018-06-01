@@ -1,0 +1,145 @@
+# Translation of Formidable Forms in Chinese (China)
+# This file is distributed under the same license as the Formidable Forms package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2018-05-23 19:25:14+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: GlotPress/2.3.1\n"
+"Language: zh_CN\n"
+"Project-Id-Version: Formidable Forms\n"
+
+#: classes/models/FrmProFileField.php:42 classes/models/FrmProFileField.php:319
+#: classes/models/FrmProFileField.php:330
+msgid "That file is too big. It must be less than %sMB."
+msgstr "这个档案太大了。必须小于 %s MB。"
+
+#: classes/models/FrmProFileField.php:47
+#: classes/views/frmpro-fields/front-end/file.php:54
+msgid "Remove file"
+msgstr "移除档案"
+
+#: classes/models/FrmProFileField.php:48 classes/models/FrmProFileField.php:360
+msgid "You have uploaded too many files. You may only include %d file(s)."
+msgstr "您上传太多档案。目前只允许 %d 个档案。"
+
+#: classes/models/FrmProFileField.php:431
+msgid "Sorry, this file type is not permitted."
+msgstr "很抱歉，系统不接受这种档案类型。"
+
+#: classes/views/frmpro-fields/back-end/field-file.php:4
+#: classes/views/frmpro-fields/front-end/file.php:66
+msgid "Drop a file here or click to upload"
+msgstr "点此上传档案"
+
+#: classes/views/frmpro-fields/back-end/field-file.php:6
+#: classes/views/frmpro-fields/front-end/file.php:69
+msgid "Maximum upload size: %sMB"
+msgstr "档案上传限制：%s MB"
+
+#: classes/models/FrmProFileField.php:39
+msgid "Drop files here to upload"
+msgstr "拖曳档案到这裡上传"
+
+#: classes/models/FrmProFileField.php:40
+msgid "Your browser does not support drag and drop file uploads."
+msgstr "您的浏览器不支援拖曳档案上传。"
+
+#: classes/models/FrmProFileField.php:45
+msgid "Cancel upload"
+msgstr "取消上传"
+
+#: classes/models/FrmProFileField.php:46
+msgid "Are you sure you want to cancel this upload?"
+msgstr "您确定要取消这个上传？"
+
+#: classes/models/FrmProFileField.php:521
+msgid "File upload failed"
+msgstr "档案上传失败"
+
+#: classes/views/displays/where_row.php:16
+msgid "IP"
+msgstr "IP地址"
+
+#: classes/controllers/FrmProFormsController.php:660
+#: classes/views/frmpro-forms/add_form_button_options.php:27
+msgid "Default"
+msgstr "默认"
+
+#: classes/models/fields/FrmProFieldEndDivider.php:50
+#: classes/views/styles/_sample_form.php:29
+msgid "Remove"
+msgstr "移除"
+
+#: classes/views/xml/map_csv_fields.php:51
+msgid "Timestamp"
+msgstr "时间戳"
+
+#: classes/views/xml/map_csv_fields.php:65
+msgid "Import"
+msgstr "导入"
+
+#: classes/views/frmpro-form-actions/post_options.php:123
+#: classes/views/frmpro-form-actions/post_options.php:135
+#: classes/views/styles/_date-fields.php:15
+#: classes/views/frmpro-fields/back-end/confirmation.php:5
+msgid "None"
+msgstr "无"
+
+#: classes/models/FrmProFileField.php:428
+msgid "is invalid"
+msgstr "无效"
+
+#: classes/widgets/FrmListEntries.php:212
+msgid "Title"
+msgstr "标题"
+
+#: classes/views/styles/_section-fields.php:37
+msgid "Padding"
+msgstr "填充"
+
+#: classes/controllers/FrmProFormsController.php:741
+msgid "Height"
+msgstr "高度"
+
+#: classes/controllers/FrmProFormsController.php:742
+msgid "Width"
+msgstr "宽度"
+
+#: classes/views/styles/_section-fields.php:32
+msgid "Size"
+msgstr "尺寸"
+
+#: classes/views/styles/_section-fields.php:64
+msgid "Style"
+msgstr "样式"
+
+#: classes/controllers/FrmProFormsController.php:299
+#: classes/controllers/FrmProFormsController.php:539
+#: classes/models/FrmProForm.php:276
+msgid "User ID"
+msgstr "用户 ID"
+
+#: classes/controllers/FrmProDisplaysController.php:139
+#: classes/controllers/FrmProDisplaysController.php:285
+#: classes/views/displays/mb_dyncontent.php:23
+msgid "Content"
+msgstr "正文"
+
+#: classes/controllers/FrmProEntriesController.php:2268
+#: classes/controllers/FrmProEntriesController.php:2773
+#: classes/models/FrmProSettings.php:18
+msgid "Update"
+msgstr "更新"
+
+#: classes/controllers/FrmProEntriesController.php:1660
+#: classes/controllers/FrmProEntriesController.php:1904
+msgid "Delete"
+msgstr "删除"
+
+#: classes/controllers/FrmProFormsController.php:294
+#: classes/controllers/FrmProFormsController.php:544
+msgid "Email"
+msgstr "邮箱地址"
