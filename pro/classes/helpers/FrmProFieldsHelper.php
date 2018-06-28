@@ -1053,6 +1053,7 @@ class FrmProFieldsHelper {
 	 *
 	 * @param array $submit_field
 	 * @param int $form_id
+	 *
 	 * @return array
 	 */
 	private static function initialize_logic_rules_for_submit( $submit_field, $form_id ) {
@@ -1068,6 +1069,8 @@ class FrmProFieldsHelper {
 			$hide_disable = 'disable';
 		}
 
+		$form_key = FrmForm::get_key_by_id( $form_id );
+
 		$logic_rules = array(
 			'fieldId'        => 'submit_' . $form_id,
 			'fieldKey'       => 'submit_' . $form_id,
@@ -1075,6 +1078,7 @@ class FrmProFieldsHelper {
 			'inputType'      => 'submit',
 			'isMultiSelect'  => false,
 			'formId'         => $form_id,
+			'formKey'        => $form_key,
 			'inSection'      => false,
 			'inEmbedForm'    => false,
 			'isRepeating'    => false,
@@ -1164,6 +1168,10 @@ class FrmProFieldsHelper {
 	 * @param array $logic_rules
 	 */
 	private static function add_condition_to_logic_rules( $field, $i, &$logic_rules ) {
+		if ( ! isset( $field['hide_opt'][ $i ] ) ) {
+			return;
+		}
+
 		$value = self::get_default_value( $field['hide_opt'][ $i ], $field, false );
 		$logic_rules['conditions'][] = array(
 			'fieldId'  => $field['hide_field'][ $i ],

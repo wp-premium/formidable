@@ -47,7 +47,7 @@ class FrmProFieldTime extends FrmFieldType {
 
 	protected function fill_default_atts( &$atts ) {
 		$defaults = array(
-			'format' => FrmProAppHelper::get_time_format_for_field( $this->field ),
+			'format' => $this->get_time_format_for_field(),
 		);
 
 		$atts = wp_parse_args( $atts, $defaults );
@@ -103,6 +103,7 @@ class FrmProFieldTime extends FrmFieldType {
 		$this->set_field_column( 'options', $field['options'] );
 
 		$hidden = $this->maybe_include_hidden_values( $values );
+		$this->maybe_format_time( $values['field_value'] );
 
 		if ( isset( $field['options']['H'] ) ) {
 			$this->time_string_to_array( $values['field_value'] );
@@ -131,6 +132,20 @@ class FrmProFieldTime extends FrmFieldType {
 		}
 
 		echo $hidden . $html;
+	}
+
+	/**
+	 * If the value was in a hidden field on a previous page,
+	 * it may still be in the database format
+	 *
+	 * @since 3.02.01
+	 */
+	private function maybe_format_time( &$time ) {
+		if ( ! is_array( $time ) && ! strpos( $time, ' ' ) ) {
+			$time = $this->get_display_value( $time, array(
+				'format' => $this->get_time_format_for_field(),
+			) );
+		}
 	}
 
 	/**
@@ -347,7 +362,7 @@ class FrmProFieldTime extends FrmFieldType {
 		$time = strtotime( $values['start_time_str'] );
 		$end_time = strtotime( $values['end_time_str'] );
 		$format = ( $values['clock'] == 24 ) ? 'H:i' : 'g:i A';
-		$values['step'] = $values['step'] * 60; //switch minutes to seconds
+		$values['step'] = max( $values['step'] * 60, 60 ); //switch minutes to seconds
 
 		$options[] = '';
 		while ( $time <= $end_time ) {
@@ -504,5 +519,23 @@ class FrmProFieldTime extends FrmFieldType {
 
 	protected function prepare_import_value( $value, $atts ) {
 		return FrmProAppHelper::format_time( $value );
+	}
+
+	/**
+	 * @since 3.02.01
+	 */
+	public function get_time_format_for_field( $field = array() ) {
+		if ( empty( $field ) ) {
+			$field = $this->field;
+		}
+		$time_format = FrmField::get_option( $field, 'clock', 12 );
+		return $this->get_time_format_for_setting( $time_format );
+	}
+
+	/**
+	 * @since 3.02.01
+	 */
+	public function get_time_format_for_setting( $time_format ) {
+		return ( $time_format == 12 ) ? 'g:i A' : 'H:i';
 	}
 }

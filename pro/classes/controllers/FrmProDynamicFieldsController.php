@@ -105,7 +105,7 @@ class FrmProDynamicFieldsController {
 		} else {
 			$limit = '';
 			if ( FrmAppHelper::is_admin_page( 'formidable' ) ) {
-				$limit = 500;
+				$limit = 200;
 			}
 
 			$metas = FrmDb::get_results( 'frm_item_metas', array( 'field_id' => $values['form_select'] ), 'item_id, meta_value', array( 'order_by' => 'meta_value', 'limit' => $limit ) );

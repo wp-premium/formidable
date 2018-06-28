@@ -1298,7 +1298,30 @@ class FrmProEntriesController {
 		return $atts;
 	}
 
-    public static function filter_display_value( $value, $field, $atts = array() ) {
+	public static function filter_display_value( $value, $field, $atts = array() ) {
+		self::set_display_atts( $field, $atts );
+
+		if ( $atts['type'] == 'data' ) {
+			self::get_dynamic_value_for_display( $field, $atts, $value );
+		} else {
+			$atts['return_array'] = true;
+			$value = FrmFieldsHelper::get_unfiltered_display_value( compact( 'value', 'field', 'atts' ) );
+
+			$value = self::get_option_label_for_saved_value( $value, $field, $atts );
+			if ( is_array( $value ) ) {
+				$sep   = isset( $atts['sep'] ) ? $atts['sep'] : ', ';
+				$value = implode( $sep, $value );
+			}
+		}
+
+		if ( ! $atts['keepjs'] ) {
+			$value = FrmAppHelper::recursive_function_map( $value, 'wp_kses_post' );
+		}
+
+		return $value;
+	}
+
+	private static function set_display_atts( $field, &$atts ) {
 		$defaults = array( 'html' => 0, 'type' => $field->type, 'keepjs' => 0 );
 		$atts = array_merge( $defaults, $atts );
 
@@ -1315,64 +1338,53 @@ class FrmProEntriesController {
 				$atts['add_link'] = true;
 			}
 		}
+	}
 
-        if ( $atts['type'] == 'data' ) {
+	private static function get_dynamic_value_for_display( $field, $atts, &$value ) {
+		if ( ! is_numeric( $value ) ) {
+			if ( ! is_array( $value ) ) {
+				$value = explode( $atts['sep'], $value );
+			}
 
-            if ( ! is_numeric($value) ) {
-                if ( ! is_array($value) ) {
-                    $value = explode($atts['sep'], $value);
-                }
+			if ( is_array( $value ) ) {
+				$new_value = '';
+				foreach ( $value as $entry_id ) {
+					if ( ! empty( $new_value ) ) {
+						$new_value .= $atts['sep'];
+					}
 
-                if ( is_array($value) ) {
-                    $new_value = '';
-                    foreach ( $value as $entry_id ) {
-                        if ( ! empty( $new_value ) ) {
-                            $new_value .= $atts['sep'];
-                        }
+					if ( is_numeric( $entry_id ) ) {
+						$new_value .= FrmProFieldsHelper::get_data_value( $entry_id, $field, $atts );
+					} else {
+						$new_value .= $entry_id;
+					}
+				}
+				$value = $new_value;
+			}
+		} else {
+			//replace item id with specified field
+			$new_value = FrmProFieldsHelper::get_data_value( $value, $field, $atts );
 
-                        if ( is_numeric($entry_id) ) {
-                            $new_value .= FrmProFieldsHelper::get_data_value($entry_id, $field, $atts);
-                        } else {
-                            $new_value .= $entry_id;
-                        }
-                    }
-                    $value = $new_value;
-                }
-			} else {
-                //replace item id with specified field
-                $new_value = FrmProFieldsHelper::get_data_value($value, $field, $atts);
+			if ( FrmProField::is_list_field( $field ) ) {
+				$linked_field = FrmField::getOne( $field->field_options['form_select'] );
+				if ( $linked_field && $linked_field->type == 'file' ) {
+					$old_value = explode( ', ', $new_value );
+					$new_value = '';
+					foreach ( $old_value as $v ) {
+						$new_value .= '<img src="' . esc_url( $v ) . '" class="frm_image_from_url" alt="" />';
+						if ( $atts['show_filename'] ) {
+							$new_value .= '<br/>' . $v;
+						}
+						unset( $v );
+					}
+				} else {
+					$new_value = $value;
+				}
+			}
 
-				if ( FrmProField::is_list_field( $field ) ) {
-                    $linked_field = FrmField::getOne($field->field_options['form_select']);
-                    if ( $linked_field && $linked_field->type == 'file' ) {
-                        $old_value = explode(', ', $new_value);
-                        $new_value = '';
-                        foreach ( $old_value as $v ) {
-							$new_value .= '<img src="' . esc_url( $v ) . '" class="frm_image_from_url" alt="" />';
-                            if ( $atts['show_filename'] ) {
-								$new_value .= '<br/>' . $v;
-                            }
-                            unset($v);
-                        }
-                    } else {
-                        $new_value = $value;
-                    }
-                }
-
-                $value = $new_value;
-            }
-        } else {
-			$value = FrmFieldsHelper::get_unfiltered_display_value( compact( 'value', 'field', 'atts' ) );
-        }
-
-        if ( ! $atts['keepjs'] ) {
-			$value = FrmAppHelper::recursive_function_map( $value, 'wp_kses_post' );
-        }
-
-        $value = self::get_option_label_for_saved_value( $value, $field, $atts );
-
-        return $value;
-    }
+			$value = $new_value;
+		}
+	}
 
 	public static function route( $action ) {
         add_filter('frm_entry_stop_action_route', '__return_true');
@@ -1728,7 +1740,7 @@ class FrmProEntriesController {
 
 				if ( $col->type == 'number' ) {
 					$val = empty( $val ) ? '0' : $val;
-				} elseif ( ( $col->type == 'checkbox' || $col->type == 'select' ) && count( $col->options ) == 1 ) {
+				} elseif ( $col->type == 'checkbox' && count( $col->options ) == 1 ) {
 					// force boolean values
 					$val = empty( $val ) ? false : true;
 				} else if ( empty( $val ) ) {
