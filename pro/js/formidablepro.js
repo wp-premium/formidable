@@ -9,6 +9,7 @@ function frmProFormJS(){
 	var action = '';
 	var processesRunning = 0;
 	var lookupQueues = {};
+	var hiddenSubmitButtons = [];
 
 	function setNextPage(e){
 		/*jshint validthis:true */
@@ -98,6 +99,12 @@ function frmProFormJS(){
 
 		if ( dateFields[ opt_key ].options.defaultDate !== '' ) {
 			dateFields[ opt_key ].options.defaultDate = new Date( dateFields[ opt_key ].options.defaultDate );
+		}
+
+		if ( typeof dateFields[ opt_key ].options.onSelect === 'undefined' ) {
+			dateFields[ opt_key ].options.onSelect = function(dateText, inst) {
+				this.focus();
+			}
 		}
 
 		jQuery(this).datepicker( jQuery.extend(
@@ -1010,7 +1017,7 @@ function frmProFormJS(){
 		var onCurrentPage;
 
 		if ( depFieldArgs.fieldType === 'submit' ) {
-			onCurrentPage = isSubmitButtonOnPage( depFieldArgs );
+			onCurrentPage = isSubmitButtonOnPage( depFieldArgs.containerId );
 		}
 		else {
 			onCurrentPage = isFieldDivOnPage( depFieldArgs.containerId );
@@ -1040,8 +1047,8 @@ function frmProFormJS(){
 	 * @param depFieldArgs
 	 * @returns {boolean}
 	 */
-	function isSubmitButtonOnPage (depFieldArgs){
-		var submitButton = document.querySelector( '#' + depFieldArgs.containerId );
+	function isSubmitButtonOnPage( container ) {
+		var submitButton = document.querySelector( '#' + container );
 
 		return submitButton != null;
 	}
@@ -1121,6 +1128,19 @@ function frmProFormJS(){
 		} else {
 			showFieldContainer( depFieldArgs.containerId );
 		}
+
+		removeSubmitButtonFromHiddenList( depFieldArgs );
+	}
+
+	/**
+	 * Remove submit button from list of hidden submit buttons on page
+	 *
+	 * @param depFieldArgs
+	 */
+	function removeSubmitButtonFromHiddenList( depFieldArgs ) {
+		hiddenSubmitButtons = hiddenSubmitButtons.filter( function ( button ) {
+			return button !== depFieldArgs.formKey;
+		} );
 	}
 
 	/**
@@ -1283,11 +1303,32 @@ function frmProFormJS(){
 			depFieldArgs.containerId = getSubmitButtonContainerID( depFieldArgs );
 		}
 
+		addSubmitButtonToHiddenList( depFieldArgs );
+
 		if ( depFieldArgs.hideDisable && depFieldArgs.hideDisable == 'disable' ) {
 			disableButton( '#' + depFieldArgs.containerId );
 		} else {
 			hideFieldContainer( depFieldArgs.containerId );
 		}
+	}
+
+	/**
+	 * Add submit button to list of hidden submit buttons on page
+	 *
+	 * @param depFieldArgs
+	 */
+	function addSubmitButtonToHiddenList( depFieldArgs ) {
+		hiddenSubmitButtons.push( depFieldArgs.formKey );
+	}
+
+	/**
+	 * Checks if a particular submit button on the current page is hidden
+	 *
+	 * @param {string} form_key
+	 * @returns {boolean}
+	 */
+	function isOnPageSubmitButtonHidden( form_key ) {
+		return hiddenSubmitButtons.indexOf( form_key ) !== -1;
 	}
 
 	/**
@@ -1303,6 +1344,16 @@ function frmProFormJS(){
 		if ( depFieldArgs ) {
 			hideOrDisableSubmitButton( depFieldArgs );
 		}
+	}
+
+	/**
+	 * Get the form key (e.g. t3cq5) from the form element id (e.g. form_t3cq5)
+	 *
+	 * @param element_id
+	 * @returns {string} form key
+	 */
+	function getFormKeyFromFormElementID( element_id ){
+		return element_id.replace( 'form_', '' );
 	}
 
 	function hideFieldContainer( containerId ) {
@@ -3381,12 +3432,12 @@ function frmProFormJS(){
 			var formID = jQuery(object).find('input[name="form_id"]').val();
 			var prevPage = jQuery(object).find('input[name="frm_page_order_'+ formID +'"]');
 			if ( prevPage.length ) {
-				prevPage = prevPage.val();
+				prevPage = parseInt( prevPage.val() );
 			} else {
 				prevPage = 0;
 			}
 
-			if ( ! prevPage || ( nextPage.val() < prevPage ) ) {
+			if ( ! prevPage || ( parseInt( nextPage.val() ) < prevPage ) ) {
 				goingBack = true;
 			}
 		}
@@ -4013,7 +4064,7 @@ function frmProFormJS(){
 
 			if ( i === 12 ) {
 				for ( var c = 0; c < layoutClasses.length; c++ ) {
-				    if ( classList.includes( layoutClasses[ c ] ) ) {
+				    if ( classList.indexOf( layoutClasses[ c ] ) !== -1 ) {
 				        return true;
 				    }
 
@@ -4214,6 +4265,19 @@ function frmProFormJS(){
 				}
 			}
 		},
+
+		submitAllowed: function ( object ) {
+			var form_element_id = object.getAttribute('id');
+
+			if ( ! isSubmitButtonOnPage( form_element_id + ' .frm_final_submit' ) || goingToPrevPage( object ) ) {
+				return true;
+			}
+
+			var form_key = getFormKeyFromFormElementID( form_element_id );
+
+			return ! isOnPageSubmitButtonHidden( form_key );
+		},
+
 
 		checkDependentDynamicFields: function(ids){
 			var len = ids.length;

@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Formidable v2.05\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-04-13 21:33+0000\n"
-"PO-Revision-Date: 2018-04-13 21:37+0000\n"
+"POT-Creation-Date: 2018-06-13 20:02+0000\n"
+"PO-Revision-Date: 2018-06-13 20:26+0000\n"
 "Last-Translator: Formidable Community\n"
 "Language-Team: Portuguese (Brazil)\n"
 "Language: pt_BR\n"
@@ -108,7 +108,7 @@ msgstr ""
 
 #: classes/controllers/FrmProDisplaysController.php:34
 #: classes/controllers/FrmProDisplaysController.php:35
-#: classes/controllers/FrmProFormsController.php:611
+#: classes/controllers/FrmProFormsController.php:671
 #: classes/views/displays/submitbox_actions.php:2
 msgid "View"
 msgstr "Ver"
@@ -134,7 +134,7 @@ msgid "View all forms"
 msgstr "Ver todos os formulários"
 
 #: classes/controllers/FrmProDisplaysController.php:112
-#: classes/controllers/FrmProEntriesController.php:1441
+#: classes/controllers/FrmProEntriesController.php:1453
 #: classes/helpers/FrmProEntriesHelper.php:249
 #: classes/helpers/FrmProEntriesHelper.php:275
 msgid "Duplicate"
@@ -165,11 +165,11 @@ msgstr "Conteúdo Dinâmico"
 
 #: classes/controllers/FrmProDisplaysController.php:141
 msgid "Date"
-msgstr "Data"
+msgstr ""
 
 #: classes/controllers/FrmProDisplaysController.php:142
-#: classes/helpers/FrmProFieldsHelper.php:2554
-#: classes/helpers/FrmProFieldsHelper.php:2572
+#: classes/helpers/FrmProFieldsHelper.php:2606
+#: classes/helpers/FrmProFieldsHelper.php:2624
 #: classes/views/displays/mb_advanced.php:88
 msgid "Key"
 msgstr "Chave"
@@ -294,7 +294,7 @@ msgid "or"
 msgstr "ou"
 
 #: classes/controllers/FrmProEddController.php:210
-#: classes/controllers/FrmProEntriesController.php:2167
+#: classes/controllers/FrmProEntriesController.php:2179
 #: classes/views/frmpro-entries/sidebar-new.php:7
 #: classes/views/frmpro-entries/sidebar-new.php:7
 #: classes/views/frmpro-form-actions/_custom_field_row.php:31
@@ -350,108 +350,108 @@ msgstr "Copiado do Post"
 msgid "You are trying to access an entry that does not exist."
 msgstr ""
 
-#: classes/controllers/FrmProEntriesController.php:1424
+#: classes/controllers/FrmProEntriesController.php:1436
 msgid "Post"
 msgstr "Post"
 
-#: classes/controllers/FrmProEntriesController.php:1425
+#: classes/controllers/FrmProEntriesController.php:1437
 #: classes/views/displays/where_options.php:22
 msgid "Draft"
 msgstr "Rascunho"
 
-#: classes/controllers/FrmProEntriesController.php:1426
+#: classes/controllers/FrmProEntriesController.php:1438
 msgid "Parent Entry ID"
-msgstr ""
+msgstr "ID da entrada mãe"
 
-#: classes/controllers/FrmProEntriesController.php:1462
+#: classes/controllers/FrmProEntriesController.php:1474
 #: classes/helpers/FrmProDisplaysHelper.php:73
 msgid "No Entries Found"
 msgstr "Não foram encontradas entradas"
 
-#: classes/controllers/FrmProEntriesController.php:1463
-#: classes/controllers/FrmProEntriesController.php:1847
-#: classes/controllers/FrmProEntriesController.php:1921
-#: classes/controllers/FrmProEntriesController.php:2325
+#: classes/controllers/FrmProEntriesController.php:1475
+#: classes/controllers/FrmProEntriesController.php:1859
+#: classes/controllers/FrmProEntriesController.php:1933
+#: classes/controllers/FrmProEntriesController.php:2337
 msgid "Are you sure you want to delete that entry?"
 msgstr "Tem certeza que quer apagar esta entrada?"
 
-#: classes/controllers/FrmProEntriesController.php:1478
+#: classes/controllers/FrmProEntriesController.php:1490
 msgid ""
 "There are no matching fields. Please check your formresults shortcode to "
 "make sure you are using the correct form and field IDs."
 msgstr ""
 
-#: classes/controllers/FrmProEntriesController.php:1646
-#: classes/controllers/FrmProEntriesController.php:2166
+#: classes/controllers/FrmProEntriesController.php:1658
+#: classes/controllers/FrmProEntriesController.php:2178
 #: classes/helpers/FrmProAppHelper.php:257
 #: classes/helpers/FrmProEntriesHelper.php:290
 msgid "Edit"
 msgstr "Editar"
 
-#: classes/controllers/FrmProEntriesController.php:1660
-#: classes/controllers/FrmProEntriesController.php:1904
+#: classes/controllers/FrmProEntriesController.php:1672
+#: classes/controllers/FrmProEntriesController.php:1916
 msgid "Delete"
 msgstr "Excluir"
 
-#: classes/controllers/FrmProEntriesController.php:1798
-#: classes/controllers/FrmProFormsController.php:613
-#: classes/controllers/FrmProFormsController.php:682
+#: classes/controllers/FrmProEntriesController.php:1810
+#: classes/controllers/FrmProFormsController.php:673
+#: classes/controllers/FrmProFormsController.php:742
 #: classes/helpers/FrmProEntriesListHelper.php:70
 msgid "Search"
 msgstr "Pesquisa"
 
-#: classes/controllers/FrmProEntriesController.php:2268
-#: classes/controllers/FrmProEntriesController.php:2773
+#: classes/controllers/FrmProEntriesController.php:2280
+#: classes/controllers/FrmProEntriesController.php:2785
 #: classes/models/FrmProSettings.php:18
 msgid "Update"
 msgstr "Atualizar"
 
-#: classes/controllers/FrmProEntriesController.php:2276
+#: classes/controllers/FrmProEntriesController.php:2288
 msgid "You are missing options in your shortcode. A field_id is required."
 msgstr ""
 
-#: classes/controllers/FrmProEntriesController.php:2366
-#: classes/controllers/FrmProEntriesController.php:2627
+#: classes/controllers/FrmProEntriesController.php:2378
+#: classes/controllers/FrmProEntriesController.php:2639
 msgid "Your entry was successfully deleted"
 msgstr "Sua entrada foi apagada com sucesso"
 
-#: classes/controllers/FrmProEntriesController.php:2406
+#: classes/controllers/FrmProEntriesController.php:2418
 msgid "You are missing options in your shortcode. field_id is required."
 msgstr ""
 
-#: classes/controllers/FrmProEntriesController.php:2643
+#: classes/controllers/FrmProEntriesController.php:2655
 msgid "There was an error deleting that entry"
 msgstr "Houve um erro deletando essa entrada"
 
-#: classes/controllers/FrmProEntriesController.php:2657
+#: classes/controllers/FrmProEntriesController.php:2669
 #, php-format
 msgid "Resent to %s"
 msgstr ""
 
-#: classes/controllers/FrmProEntriesController.php:2662
+#: classes/controllers/FrmProEntriesController.php:2674
 msgid "Resent to No one! You do not have permission"
 msgstr ""
 
-#: classes/controllers/FrmProFieldsController.php:253
+#: classes/controllers/FrmProFieldsController.php:229
 msgid "Option Label"
 msgstr "Opções de Rótulo"
 
-#: classes/controllers/FrmProFieldsController.php:254
-#: classes/controllers/FrmProFormsController.php:528
+#: classes/controllers/FrmProFieldsController.php:230
+#: classes/controllers/FrmProFormsController.php:530
 msgid "Saved Value"
 msgstr "Valor Salvo"
 
-#: classes/controllers/FrmProFieldsController.php:422
+#: classes/controllers/FrmProFieldsController.php:398
 #: classes/views/frmpro-fields/options-form-before.php:32
 msgid "Select a taxonomy on the Form Actions tab of the Form Settings page"
 msgstr ""
 
-#: classes/controllers/FrmProFieldsController.php:873
-#: classes/controllers/FrmProFieldsController.php:879
+#: classes/controllers/FrmProFieldsController.php:849
+#: classes/controllers/FrmProFieldsController.php:855
 msgid "Show form uploads"
 msgstr ""
 
-#: classes/controllers/FrmProFieldsController.php:878
+#: classes/controllers/FrmProFieldsController.php:854
 msgid "Hide form uploads"
 msgstr ""
 
@@ -503,91 +503,91 @@ msgstr ""
 msgid "this action if"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:292
+#: classes/controllers/FrmProFormsController.php:294
 msgid "Current Date"
 msgstr "Data Atual"
 
-#: classes/controllers/FrmProFormsController.php:293
+#: classes/controllers/FrmProFormsController.php:295
 msgid "Current Time"
 msgstr "Hora Atual"
 
-#: classes/controllers/FrmProFormsController.php:294
-#: classes/controllers/FrmProFormsController.php:544
+#: classes/controllers/FrmProFormsController.php:296
+#: classes/controllers/FrmProFormsController.php:546
 msgid "Email"
 msgstr "E-mail"
 
-#: classes/controllers/FrmProFormsController.php:295
+#: classes/controllers/FrmProFormsController.php:297
 msgid "Login"
 msgstr "Login"
 
-#: classes/controllers/FrmProFormsController.php:296
-#: classes/controllers/FrmProFormsController.php:542
+#: classes/controllers/FrmProFormsController.php:298
+#: classes/controllers/FrmProFormsController.php:544
 msgid "Display Name"
 msgstr "Nome Exibido"
 
-#: classes/controllers/FrmProFormsController.php:297
-#: classes/controllers/FrmProFormsController.php:540
+#: classes/controllers/FrmProFormsController.php:299
+#: classes/controllers/FrmProFormsController.php:542
 msgid "First Name"
 msgstr "Nome"
 
-#: classes/controllers/FrmProFormsController.php:298
-#: classes/controllers/FrmProFormsController.php:541
+#: classes/controllers/FrmProFormsController.php:300
+#: classes/controllers/FrmProFormsController.php:543
 msgid "Last Name"
 msgstr "Sobrenome"
 
-#: classes/controllers/FrmProFormsController.php:299
-#: classes/controllers/FrmProFormsController.php:539
+#: classes/controllers/FrmProFormsController.php:301
+#: classes/controllers/FrmProFormsController.php:541
 #: classes/models/FrmProForm.php:276
 msgid "User ID"
-msgstr "ID do Usuário"
+msgstr "User ID"
 
-#: classes/controllers/FrmProFormsController.php:300
+#: classes/controllers/FrmProFormsController.php:302
 msgid "User Meta"
 msgstr "Usuário Meta"
 
-#: classes/controllers/FrmProFormsController.php:301
+#: classes/controllers/FrmProFormsController.php:303
 msgid "User Role"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:302
-#: classes/helpers/FrmProFieldsHelper.php:2533
+#: classes/controllers/FrmProFormsController.php:304
+#: classes/helpers/FrmProFieldsHelper.php:2585
 #: classes/views/displays/where_row.php:8
 #: classes/views/xml/map_csv_fields.php:50
 msgid "Post ID"
 msgstr "ID do Post"
 
-#: classes/controllers/FrmProFormsController.php:303
+#: classes/controllers/FrmProFormsController.php:305
 #: classes/views/frmpro-form-actions/post_options.php:57
 msgid "Post Title"
 msgstr "Título do Post"
 
-#: classes/controllers/FrmProFormsController.php:304
+#: classes/controllers/FrmProFormsController.php:306
 msgid "Author Email"
 msgstr "Autor do Email"
 
-#: classes/controllers/FrmProFormsController.php:305
+#: classes/controllers/FrmProFormsController.php:307
 msgid "Post Meta"
 msgstr "Meta do Post"
 
-#: classes/controllers/FrmProFormsController.php:306
+#: classes/controllers/FrmProFormsController.php:308
 #: classes/views/frmpro-forms/add_form_options.php:31
 #: classes/views/xml/map_csv_fields.php:55
 msgid "IP Address"
-msgstr "Endereço de IP"
+msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:307
+#: classes/controllers/FrmProFormsController.php:309
 msgid "Increment"
 msgstr "Incremento"
 
-#: classes/controllers/FrmProFormsController.php:309
+#: classes/controllers/FrmProFormsController.php:311
 msgid "GET/POST"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:310
+#: classes/controllers/FrmProFormsController.php:312
 msgid "A variable from the URL or value posted from previous page."
 msgstr "Uma variável da URL ou valor recebido da página anterior."
 
-#: classes/controllers/FrmProFormsController.php:310
+#: classes/controllers/FrmProFormsController.php:312
 msgid ""
 "Replace 'whatever' with the parameter name. In url.com?product=form, the "
 "variable is 'product'. You would use [get param=product] in your field."
@@ -595,78 +595,78 @@ msgstr ""
 "Troque 'qualquer coisa' com o parâmetro nome. Na url.com?product=form, a "
 "variável é 'product'. Você poderia usar [get param=product] no seu campo."
 
-#: classes/controllers/FrmProFormsController.php:313
+#: classes/controllers/FrmProFormsController.php:315
 msgid "SERVER"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:314
+#: classes/controllers/FrmProFormsController.php:316
 msgid "A variable from the PHP SERVER array."
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:314
+#: classes/controllers/FrmProFormsController.php:316
 msgid ""
 "Replace 'whatever' with the parameter name. To get the url of the current "
 "page, use [server param=\"REQUEST_URI\"] in your field."
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:451
-#: classes/helpers/FrmProFormsHelper.php:404
+#: classes/controllers/FrmProFormsController.php:453
+#: classes/helpers/FrmProFormsHelper.php:416
 msgid "Previous"
 msgstr "Anteriori"
 
-#: classes/controllers/FrmProFormsController.php:470
+#: classes/controllers/FrmProFormsController.php:472
 msgid "Save Draft"
 msgstr "Salvar Rascunho"
 
-#: classes/controllers/FrmProFormsController.php:501
+#: classes/controllers/FrmProFormsController.php:503
 msgid "Equals"
 msgstr "Igual a"
 
-#: classes/controllers/FrmProFormsController.php:502
+#: classes/controllers/FrmProFormsController.php:504
 msgid "Does Not Equal"
 msgstr "Não é igual a"
 
-#: classes/controllers/FrmProFormsController.php:503
+#: classes/controllers/FrmProFormsController.php:505
 msgid "Is Blank"
 msgstr "É vazio"
 
-#: classes/controllers/FrmProFormsController.php:504
+#: classes/controllers/FrmProFormsController.php:506
 msgid "Is Not Blank"
 msgstr "Não é vazio"
 
-#: classes/controllers/FrmProFormsController.php:505
+#: classes/controllers/FrmProFormsController.php:507
 msgid "Is Like"
 msgstr "Parecido com"
 
-#: classes/controllers/FrmProFormsController.php:506
+#: classes/controllers/FrmProFormsController.php:508
 msgid "Is Not Like"
 msgstr "Não é parecido com"
 
-#: classes/controllers/FrmProFormsController.php:507
+#: classes/controllers/FrmProFormsController.php:509
 msgid "Greater Than"
 msgstr "Maior que"
 
-#: classes/controllers/FrmProFormsController.php:508
+#: classes/controllers/FrmProFormsController.php:510
 msgid "Less Than"
 msgstr "Menor que"
 
-#: classes/controllers/FrmProFormsController.php:517
+#: classes/controllers/FrmProFormsController.php:519
 msgid "Clickable Links"
 msgstr "Links clicáveis"
 
-#: classes/controllers/FrmProFormsController.php:518
+#: classes/controllers/FrmProFormsController.php:520
 msgid "Remove Links"
 msgstr "Remover Links"
 
-#: classes/controllers/FrmProFormsController.php:518
+#: classes/controllers/FrmProFormsController.php:520
 msgid "Removes the automatic links to category pages"
 msgstr "Remove os links automáticos da página de categorias"
 
-#: classes/controllers/FrmProFormsController.php:519
+#: classes/controllers/FrmProFormsController.php:521
 msgid "Sanitize"
 msgstr "Sanitizar"
 
-#: classes/controllers/FrmProFormsController.php:519
+#: classes/controllers/FrmProFormsController.php:521
 msgid ""
 "Replaces spaces with dashes and lowercases all. Use if adding an HTML class "
 "or ID"
@@ -674,20 +674,20 @@ msgstr ""
 "Substitui espaços com traços e torna em minúsculas o texto. Utilize se "
 "adicionar uma classe HTML ou ID"
 
-#: classes/controllers/FrmProFormsController.php:521
+#: classes/controllers/FrmProFormsController.php:523
 msgid "Sanitize URL"
 msgstr "Sanitizar URL"
 
-#: classes/controllers/FrmProFormsController.php:522
+#: classes/controllers/FrmProFormsController.php:524
 msgid "Replaces all HTML entities with a URL safe string."
 msgstr ""
 "Substitui todas as entidades HTML por uma string segura para uso em URL."
 
-#: classes/controllers/FrmProFormsController.php:524
+#: classes/controllers/FrmProFormsController.php:526
 msgid "Truncate"
 msgstr "Truncar"
 
-#: classes/controllers/FrmProFormsController.php:524
+#: classes/controllers/FrmProFormsController.php:526
 msgid ""
 "Truncate text with a link to view more. If using Both (dynamic), the link "
 "goes to the detail page. Otherwise, it will show in-place."
@@ -696,40 +696,40 @@ msgstr ""
 "o link vai para a página de detalhes. Caso contrário, ele exibirá no próprio "
 "local."
 
-#: classes/controllers/FrmProFormsController.php:525
+#: classes/controllers/FrmProFormsController.php:527
 msgid "More Text"
 msgstr "Mais texto"
 
-#: classes/controllers/FrmProFormsController.php:526
+#: classes/controllers/FrmProFormsController.php:528
 msgid "Time Ago"
 msgstr "Tempo atrás"
 
-#: classes/controllers/FrmProFormsController.php:526
+#: classes/controllers/FrmProFormsController.php:528
 msgid "How long ago a date was in minutes, hours, days, months, or years."
 msgstr ""
 "Quanto tempo tempo atrás foi a data em minutos, horas, dias, meses ou anos."
 
-#: classes/controllers/FrmProFormsController.php:527
+#: classes/controllers/FrmProFormsController.php:529
 msgid "# Format"
 msgstr "# Formato"
 
-#: classes/controllers/FrmProFormsController.php:528
+#: classes/controllers/FrmProFormsController.php:530
 msgid "Show the saved value for fields with separate values."
 msgstr "Mostrar o valor salvo para os campos com valores separados"
 
-#: classes/controllers/FrmProFormsController.php:529
+#: classes/controllers/FrmProFormsController.php:531
 msgid "Remove HTML"
 msgstr "Remover HTML"
 
-#: classes/controllers/FrmProFormsController.php:529
+#: classes/controllers/FrmProFormsController.php:531
 msgid "Remove all HTML added into your form before display"
 msgstr "Remover todo adicionar no seu formulário antes de mostrar"
 
-#: classes/controllers/FrmProFormsController.php:530
+#: classes/controllers/FrmProFormsController.php:532
 msgid "Keep JS"
 msgstr "Manter JS"
 
-#: classes/controllers/FrmProFormsController.php:530
+#: classes/controllers/FrmProFormsController.php:532
 msgid ""
 "Javascript from your form entries are automatically removed. Add this option "
 "only if you trust those submitting entries."
@@ -737,362 +737,362 @@ msgstr ""
 "Javascript das entradas do seu formulário foram automaticamente removidas. "
 "Adicionar essa opção apenas se você confiar nas entradas submetidas."
 
-#: classes/controllers/FrmProFormsController.php:543
+#: classes/controllers/FrmProFormsController.php:545
 msgid "User Login"
 msgstr "Login de Usuário"
 
-#: classes/controllers/FrmProFormsController.php:545
+#: classes/controllers/FrmProFormsController.php:547
 msgid "Avatar"
 msgstr "Avatar"
 
-#: classes/controllers/FrmProFormsController.php:546
+#: classes/controllers/FrmProFormsController.php:548
 msgid "Author Link"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:611
+#: classes/controllers/FrmProFormsController.php:671
 msgid "Insert a View"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:612
+#: classes/controllers/FrmProFormsController.php:672
 msgid "Graph"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:612
+#: classes/controllers/FrmProFormsController.php:672
 msgid "Insert a Graph"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:613
+#: classes/controllers/FrmProFormsController.php:673
 msgid "Add a Search Form"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:614
+#: classes/controllers/FrmProFormsController.php:674
 msgid "Single Entry"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:614
+#: classes/controllers/FrmProFormsController.php:674
 msgid "Display a Single Entry"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:615
+#: classes/controllers/FrmProFormsController.php:675
 msgid "List of Entries"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:615
+#: classes/controllers/FrmProFormsController.php:675
 msgid "Display a List of Entries"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:636
+#: classes/controllers/FrmProFormsController.php:696
 msgid "Make read-only fields editable"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:644
+#: classes/controllers/FrmProFormsController.php:704
 msgid "Select a view:"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:654
+#: classes/controllers/FrmProFormsController.php:714
 msgid "Filter shortcodes within the view content"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:655
+#: classes/controllers/FrmProFormsController.php:715
 #: classes/views/displays/mb_advanced.php:6
 msgid "Limit"
 msgstr "Limite"
 
-#: classes/controllers/FrmProFormsController.php:656
+#: classes/controllers/FrmProFormsController.php:716
 msgid "Page size"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:658
+#: classes/controllers/FrmProFormsController.php:718
 msgid "Entry order"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:660
+#: classes/controllers/FrmProFormsController.php:720
 #: classes/views/frmpro-forms/add_form_button_options.php:27
 msgid "Default"
 msgstr "Padrão"
 
-#: classes/controllers/FrmProFormsController.php:661
+#: classes/controllers/FrmProFormsController.php:721
 #: classes/views/displays/order_row.php:15
 msgid "Ascending"
 msgstr "Crescente"
 
-#: classes/controllers/FrmProFormsController.php:662
+#: classes/controllers/FrmProFormsController.php:722
 #: classes/views/displays/order_row.php:16
 msgid "Descending"
 msgstr "Descendente"
 
-#: classes/controllers/FrmProFormsController.php:667
-#: classes/controllers/FrmProFormsController.php:833
+#: classes/controllers/FrmProFormsController.php:727
+#: classes/controllers/FrmProFormsController.php:893
 msgid "Include draft entries"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:670
+#: classes/controllers/FrmProFormsController.php:730
 msgid "No draft entries"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:671
+#: classes/controllers/FrmProFormsController.php:731
 msgid "Only draft entries"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:672
+#: classes/controllers/FrmProFormsController.php:732
 msgid "All entries"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:680
+#: classes/controllers/FrmProFormsController.php:740
 msgid "Use Formidable styling"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:683
+#: classes/controllers/FrmProFormsController.php:743
 msgid "Customize search button"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:688
+#: classes/controllers/FrmProFormsController.php:748
 msgid "The ID of the page with the search results"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:703
+#: classes/controllers/FrmProFormsController.php:763
 msgid "Select a form and field:"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:706
+#: classes/controllers/FrmProFormsController.php:766
 #: classes/views/frmpro-fields/options-form-before.php:19
 #: classes/views/lookup-fields/back-end/get-options-from.php:2
 msgid "Select Form"
 msgstr "Selecionar Formulário"
 
-#: classes/controllers/FrmProFormsController.php:708
+#: classes/controllers/FrmProFormsController.php:768
 msgid "(no title)"
 msgstr "(sem título)"
 
-#: classes/controllers/FrmProFormsController.php:719
+#: classes/controllers/FrmProFormsController.php:779
 msgid "Graph Type"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:721
+#: classes/controllers/FrmProFormsController.php:781
 msgid "Column"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:722
+#: classes/controllers/FrmProFormsController.php:782
 msgid "Horizontal Bar"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:723
+#: classes/controllers/FrmProFormsController.php:783
 msgid "Pie"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:724
+#: classes/controllers/FrmProFormsController.php:784
 msgid "Line"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:725
+#: classes/controllers/FrmProFormsController.php:785
 msgid "Area"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:726
+#: classes/controllers/FrmProFormsController.php:786
 msgid "Scatter"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:727
+#: classes/controllers/FrmProFormsController.php:787
 msgid "Histogram"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:728
+#: classes/controllers/FrmProFormsController.php:788
 msgid "Table"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:729
+#: classes/controllers/FrmProFormsController.php:789
 msgid "Stepped Area"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:730
+#: classes/controllers/FrmProFormsController.php:790
 msgid "Geographical Map"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:734
+#: classes/controllers/FrmProFormsController.php:794
 msgid "Data Type"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:736
+#: classes/controllers/FrmProFormsController.php:796
 msgid "The number of entries"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:737
+#: classes/controllers/FrmProFormsController.php:797
 msgid "Add the field values together"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:738
+#: classes/controllers/FrmProFormsController.php:798
 msgid "Average the totaled field values"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:741
+#: classes/controllers/FrmProFormsController.php:801
 msgid "Height"
 msgstr "Altura"
 
-#: classes/controllers/FrmProFormsController.php:742
+#: classes/controllers/FrmProFormsController.php:802
 msgid "Width"
 msgstr "Largura"
 
-#: classes/controllers/FrmProFormsController.php:743
-#: classes/controllers/FrmProFormsController.php:774
+#: classes/controllers/FrmProFormsController.php:803
+#: classes/controllers/FrmProFormsController.php:834
 msgid "Background color"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:744
+#: classes/controllers/FrmProFormsController.php:804
 msgid "Graph title"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:745
+#: classes/controllers/FrmProFormsController.php:805
 msgid "Title font size"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:746
+#: classes/controllers/FrmProFormsController.php:806
 msgid "Title font name"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:748
+#: classes/controllers/FrmProFormsController.php:808
 msgid "Turn your pie graph three-dimensional"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:751
+#: classes/controllers/FrmProFormsController.php:811
 msgid ""
 "When using dates for the x_axis parameter, you can include dates with a zero "
 "value."
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:752
+#: classes/controllers/FrmProFormsController.php:812
 msgid "Include a legend with the graph"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:759
+#: classes/controllers/FrmProFormsController.php:819
 msgid "Insert an entry ID/key:"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:766
+#: classes/controllers/FrmProFormsController.php:826
 msgid "Include user info like browser and IP"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:767
+#: classes/controllers/FrmProFormsController.php:827
 msgid "Include rows for blank fields"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:768
+#: classes/controllers/FrmProFormsController.php:828
 msgid "Do not include any HTML"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:769
+#: classes/controllers/FrmProFormsController.php:829
 msgid "Use RTL format"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:770
+#: classes/controllers/FrmProFormsController.php:830
 msgid "Font size"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:771
+#: classes/controllers/FrmProFormsController.php:831
 msgid "Text color"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:772
+#: classes/controllers/FrmProFormsController.php:832
 msgid "Border width"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:773
+#: classes/controllers/FrmProFormsController.php:833
 msgid "Border color"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:775
+#: classes/controllers/FrmProFormsController.php:835
 msgid "Alternate background color"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:784
+#: classes/controllers/FrmProFormsController.php:844
 msgid "Field ID/key for labels"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:787
+#: classes/controllers/FrmProFormsController.php:847
 msgid "Display format"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:789
-#: classes/helpers/FrmProFieldsHelper.php:2611
+#: classes/controllers/FrmProFormsController.php:849
+#: classes/helpers/FrmProFieldsHelper.php:2663
 msgid "List"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:790
+#: classes/controllers/FrmProFormsController.php:850
 msgid "Drop down"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:791
+#: classes/controllers/FrmProFormsController.php:851
 msgid "Expanding archive"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:796
+#: classes/controllers/FrmProFormsController.php:856
 msgid "Privacy"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:798
+#: classes/controllers/FrmProFormsController.php:858
 msgid "Only include the entries the current user created"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:799
+#: classes/controllers/FrmProFormsController.php:859
 msgid "Include all entries"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:802
+#: classes/controllers/FrmProFormsController.php:862
 msgid "The ID of the page to link to"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:805
+#: classes/controllers/FrmProFormsController.php:865
 msgid "Link action"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:807
+#: classes/controllers/FrmProFormsController.php:867
 msgid "Edit if allowed"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:808
+#: classes/controllers/FrmProFormsController.php:868
 msgid "View only"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:811
+#: classes/controllers/FrmProFormsController.php:871
 msgid "Delete link label"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:812
+#: classes/controllers/FrmProFormsController.php:872
 msgid "Delete confirmation message"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:815
+#: classes/controllers/FrmProFormsController.php:875
 msgid "Send users to"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:817
+#: classes/controllers/FrmProFormsController.php:877
 msgid "A page"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:818
+#: classes/controllers/FrmProFormsController.php:878
 msgid "An anchor on the page with id=\"[key]\""
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:819
+#: classes/controllers/FrmProFormsController.php:879
 msgid "The entry in the back-end"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:822
+#: classes/controllers/FrmProFormsController.php:882
 msgid "URL parameter (?entry=5)"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:825
+#: classes/controllers/FrmProFormsController.php:885
 msgid "Identify the entry by"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:827
+#: classes/controllers/FrmProFormsController.php:887
 #: classes/views/displays/where_row.php:7
 msgid "Entry key"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:828
+#: classes/controllers/FrmProFormsController.php:888
 #: classes/helpers/FrmProEntriesListHelper.php:63
 #: classes/helpers/FrmProEntriesListHelper.php:74
-#: classes/helpers/FrmProFieldsHelper.php:2531
+#: classes/helpers/FrmProFieldsHelper.php:2583
 #: classes/views/displays/order_row.php:3
 #: classes/views/displays/where_row.php:6
 #: classes/views/xml/map_csv_fields.php:57
@@ -1100,39 +1100,39 @@ msgstr ""
 msgid "Entry ID"
 msgstr "ID Entrada"
 
-#: classes/controllers/FrmProFormsController.php:831
+#: classes/controllers/FrmProFormsController.php:891
 msgid "Add HTML classes"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:832
+#: classes/controllers/FrmProFormsController.php:892
 msgid "Label on first option in the dropdown"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:847
+#: classes/controllers/FrmProFormsController.php:907
 msgid "Detail Link"
-msgstr ""
+msgstr "Link Detalhe"
 
-#: classes/controllers/FrmProFormsController.php:848
+#: classes/controllers/FrmProFormsController.php:908
 msgid "Edit Entry Link"
-msgstr ""
+msgstr "Editar Link de Entrada"
 
-#: classes/controllers/FrmProFormsController.php:849
+#: classes/controllers/FrmProFormsController.php:909
 msgid "Entry Count"
-msgstr ""
+msgstr "Contagem de Entradas"
 
-#: classes/controllers/FrmProFormsController.php:850
+#: classes/controllers/FrmProFormsController.php:910
 msgid "Entry Postion"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:851
+#: classes/controllers/FrmProFormsController.php:911
 msgid "Even/Odd"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:852
+#: classes/controllers/FrmProFormsController.php:912
 msgid "Draft status"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:853
+#: classes/controllers/FrmProFormsController.php:913
 msgid "Calendar Date"
 msgstr ""
 
@@ -1173,7 +1173,7 @@ msgstr "Campos"
 #: classes/controllers/FrmProGraphsController.php:1661
 #: classes/controllers/FrmProGraphsController.php:1693
 msgid "Creation Date"
-msgstr "Data de Criação"
+msgstr "Data de criação"
 
 #: classes/controllers/FrmProGraphsController.php:1663
 msgid "Updated At"
@@ -1208,18 +1208,18 @@ msgid "Monthly Entries"
 msgstr "Entradas Mensais"
 
 #: classes/controllers/FrmProLookupFieldsController.php:12
-#: classes/helpers/FrmProFieldsHelper.php:2608
+#: classes/helpers/FrmProFieldsHelper.php:2660
 msgid "Dropdown"
 msgstr "Menu Dropdown"
 
 #: classes/controllers/FrmProLookupFieldsController.php:13
-#: classes/helpers/FrmProFieldsHelper.php:2609
-#: classes/views/styles/_sample_form.php:14
+#: classes/helpers/FrmProFieldsHelper.php:2661
+#: classes/views/styles/_sample_form.php:13
 msgid "Radio Buttons"
 msgstr "Botões de Rádio"
 
 #: classes/controllers/FrmProLookupFieldsController.php:14
-#: classes/helpers/FrmProFieldsHelper.php:2610
+#: classes/helpers/FrmProFieldsHelper.php:2662
 msgid "Checkboxes"
 msgstr "Checkboxes"
 
@@ -1288,7 +1288,7 @@ msgstr ""
 
 #: classes/controllers/FrmProXMLController.php:65
 msgid "Styles"
-msgstr ""
+msgstr "Estilos"
 
 #: classes/controllers/FrmProXMLController.php:164
 msgid "All Fields are required"
@@ -1324,27 +1324,27 @@ msgstr "inválida"
 msgid "An update is available, but your license is %s."
 msgstr "Uma atualização está disponível, mas sua licença está %s."
 
-#: classes/controllers/FrmUpdatesController.php:329
+#: classes/controllers/FrmUpdatesController.php:328
 #, php-format
 msgid ""
 "You had an error communicating with the Formidable Forms API. %1$sClick "
 "here%2$s for more information."
 msgstr ""
 
-#: classes/controllers/FrmUpdatesController.php:335
+#: classes/controllers/FrmUpdatesController.php:334
 msgid "You had an HTTP error connecting to the Formidable Forms API"
 msgstr ""
 
-#: classes/controllers/FrmUpdatesController.php:345
+#: classes/controllers/FrmUpdatesController.php:344
 #, php-format
 msgid "There was a %1$s error: %2$s"
 msgstr ""
 
-#: classes/controllers/FrmUpdatesController.php:349
+#: classes/controllers/FrmUpdatesController.php:348
 msgid "Your License Key was invalid"
 msgstr "Sua Chave de Licença está inválida"
 
-#: classes/controllers/FrmUpdatesController.php:353
+#: classes/controllers/FrmUpdatesController.php:352
 msgid "A Formidable Forms update is available, but your license is invalid."
 msgstr ""
 
@@ -1359,38 +1359,47 @@ msgstr ""
 #: classes/helpers/FrmProDisplaysHelper.php:206
 #: classes/views/frmpro-fields/_logic_row.php:32
 #: classes/views/frmpro-forms/_logic_row.php:29
+#: classes/views/frmpro-forms/_submit_logic_row.php:34
 msgid "equal to"
 msgstr "igual a"
 
 #: classes/helpers/FrmProDisplaysHelper.php:207
 #: classes/views/frmpro-fields/_logic_row.php:33
 #: classes/views/frmpro-forms/_logic_row.php:30
+#: classes/views/frmpro-forms/_submit_logic_row.php:37
 msgid "NOT equal to"
 msgstr "NÃO é igual"
 
 #: classes/helpers/FrmProDisplaysHelper.php:208
 #: classes/views/frmpro-fields/_logic_row.php:34
 #: classes/views/frmpro-forms/_logic_row.php:31
+#: classes/views/frmpro-forms/_submit_logic_row.php:41
 msgid "greater than"
 msgstr "maior que"
 
 #: classes/helpers/FrmProDisplaysHelper.php:209
-#: classes/views/frmpro-fields/_logic_row.php:35
+#: classes/views/frmpro-fields/_logic_row.php:36
 #: classes/views/frmpro-forms/_logic_row.php:32
+#: classes/views/frmpro-forms/_submit_logic_row.php:47
 msgid "less than"
 msgstr "menor que"
 
 #: classes/helpers/FrmProDisplaysHelper.php:210
+#: classes/views/frmpro-fields/_logic_row.php:35
+#: classes/views/frmpro-forms/_submit_logic_row.php:44
 msgid "greater than or equal to"
 msgstr "maior que ou igual a"
 
 #: classes/helpers/FrmProDisplaysHelper.php:211
+#: classes/views/frmpro-fields/_logic_row.php:37
+#: classes/views/frmpro-forms/_submit_logic_row.php:50
 msgid "less than or equal to"
 msgstr "menor que ou igual a"
 
 #: classes/helpers/FrmProDisplaysHelper.php:212
-#: classes/views/frmpro-fields/_logic_row.php:36
+#: classes/views/frmpro-fields/_logic_row.php:38
 #: classes/views/frmpro-forms/_logic_row.php:33
+#: classes/views/frmpro-forms/_submit_logic_row.php:53
 msgid "like"
 msgstr "parecido com"
 
@@ -1445,7 +1454,7 @@ msgstr "Todos os Campos"
 
 #: classes/helpers/FrmProEntriesListHelper.php:62
 #: classes/helpers/FrmProEntriesListHelper.php:73
-#: classes/helpers/FrmProFieldsHelper.php:2535
+#: classes/helpers/FrmProFieldsHelper.php:2587
 #: classes/views/displays/_calendar_options.php:4
 #: classes/views/displays/_calendar_options.php:17
 #: classes/views/displays/order_row.php:4
@@ -1460,105 +1469,105 @@ msgstr "Ver todos os posts arquivados em %s"
 
 #: classes/helpers/FrmProFieldsHelper.php:753
 msgid "The entered values do not match"
-msgstr ""
+msgstr "Os valores digitados não correspondem"
 
-#: classes/helpers/FrmProFieldsHelper.php:1338
+#: classes/helpers/FrmProFieldsHelper.php:1390
 msgid "No Categories"
 msgstr "Sem Categorias"
 
-#: classes/helpers/FrmProFieldsHelper.php:2094
+#: classes/helpers/FrmProFieldsHelper.php:2146
 msgid "Confirm"
 msgstr ""
 
-#: classes/helpers/FrmProFieldsHelper.php:2274
+#: classes/helpers/FrmProFieldsHelper.php:2326
 msgid "Edit Uploaded File"
 msgstr "Editar Arquivo Carregado"
 
-#: classes/helpers/FrmProFieldsHelper.php:2529
+#: classes/helpers/FrmProFieldsHelper.php:2581
 #: classes/views/frmpro-fields/back-end/calculations.php:19
 msgid "Select a value to insert into the box below"
 msgstr "Selecione um valor para inserir na caixa abaixo"
 
-#: classes/helpers/FrmProFieldsHelper.php:2532
+#: classes/helpers/FrmProFieldsHelper.php:2584
 #: classes/views/xml/map_csv_fields.php:58
 #: classes/views/xml/map_csv_fields.php:58
 msgid "Entry Key"
 msgstr "Chave da Entrada"
 
-#: classes/helpers/FrmProFieldsHelper.php:2534
+#: classes/helpers/FrmProFieldsHelper.php:2586
 msgid "User IP"
 msgstr "IP do Usuário"
 
-#: classes/helpers/FrmProFieldsHelper.php:2536
+#: classes/helpers/FrmProFieldsHelper.php:2588
 #: classes/views/displays/_calendar_options.php:5
 #: classes/views/displays/_calendar_options.php:18
 #: classes/views/displays/order_row.php:5
 msgid "Entry update date"
 msgstr "Data de atualização da entrada"
 
-#: classes/helpers/FrmProFieldsHelper.php:2538
+#: classes/helpers/FrmProFieldsHelper.php:2590
 msgid "Form Fields"
 msgstr "Campos do formulário"
 
-#: classes/helpers/FrmProFieldsHelper.php:2553
-#: classes/helpers/FrmProFieldsHelper.php:2571
+#: classes/helpers/FrmProFieldsHelper.php:2605
+#: classes/helpers/FrmProFieldsHelper.php:2623
 #: classes/views/displays/mb_advanced.php:87
 #: classes/views/frmpro-entries/table.php:5
 msgid "ID"
 msgstr "ID"
 
-#: classes/helpers/FrmProFieldsHelper.php:2556
+#: classes/helpers/FrmProFieldsHelper.php:2608
 msgid "Thumbnail"
 msgstr "Miniatura"
 
-#: classes/helpers/FrmProFieldsHelper.php:2557
+#: classes/helpers/FrmProFieldsHelper.php:2609
 msgid "Medium"
 msgstr "Médio"
 
-#: classes/helpers/FrmProFieldsHelper.php:2558
+#: classes/helpers/FrmProFieldsHelper.php:2610
 msgid "Large"
 msgstr "Grande"
 
-#: classes/helpers/FrmProFieldsHelper.php:2559
+#: classes/helpers/FrmProFieldsHelper.php:2611
 msgid "Full Size"
 msgstr "Tamanho Máximo"
 
-#: classes/helpers/FrmProFieldsHelper.php:2584
+#: classes/helpers/FrmProFieldsHelper.php:2636
 msgid "Helpers"
 msgstr "Auxiliares"
 
-#: classes/helpers/FrmProFieldsHelper.php:2585
+#: classes/helpers/FrmProFieldsHelper.php:2637
 msgid "Admin link to edit the entry"
 msgstr "Admin link para editar a entrada"
 
-#: classes/helpers/FrmProFieldsHelper.php:2587
+#: classes/helpers/FrmProFieldsHelper.php:2639
 msgid "Link to view single page if showing dynamic entries"
 msgstr "Link para a exibição de página única, se mostrando entradas dinâmicas"
 
-#: classes/helpers/FrmProFieldsHelper.php:2593
+#: classes/helpers/FrmProFieldsHelper.php:2645
 msgid "Add a rotating 'even' or 'odd' class"
 msgstr "Adicionar uma classe de rotação 'impar' ou 'par'"
 
-#: classes/helpers/FrmProFieldsHelper.php:2595
+#: classes/helpers/FrmProFieldsHelper.php:2647
 msgid "Default Email Message"
 msgstr "Mensagem de Email Padrão"
 
-#: classes/helpers/FrmProFieldsHelper.php:2597
+#: classes/helpers/FrmProFieldsHelper.php:2649
 msgid "Site URL"
 msgstr "URL do site"
 
-#: classes/helpers/FrmProFieldsHelper.php:2598
+#: classes/helpers/FrmProFieldsHelper.php:2650
 msgid "Site Name"
 msgstr "Nome do Site"
 
-#: classes/helpers/FrmProFormsHelper.php:400
-#: classes/helpers/FrmProFormsHelper.php:643
+#: classes/helpers/FrmProFormsHelper.php:406
+#: classes/helpers/FrmProFormsHelper.php:665
 msgid "Your draft has been saved."
 msgstr "Seu rascunho foi salvo."
 
 #: classes/models/FrmProDb.php:559
 msgid "Formidable Style"
-msgstr ""
+msgstr "Estilo Formidable"
 
 #: classes/models/FrmProDisplay.php:248
 msgid "Name cannot be blank"
@@ -1605,8 +1614,8 @@ msgid ""
 "days."
 msgstr ""
 
-#: classes/models/FrmProFileField.php:42 classes/models/FrmProFileField.php:300
-#: classes/models/FrmProFileField.php:311
+#: classes/models/FrmProFileField.php:42 classes/models/FrmProFileField.php:319
+#: classes/models/FrmProFileField.php:330
 #, php-format
 msgid "That file is too big. It must be less than %sMB."
 msgstr "Esse arquivo é muito grande. Deve ter menos de %sMB"
@@ -1629,24 +1638,24 @@ msgstr ""
 msgid "Remove file"
 msgstr "Remover arquivo"
 
-#: classes/models/FrmProFileField.php:48 classes/models/FrmProFileField.php:341
+#: classes/models/FrmProFileField.php:48 classes/models/FrmProFileField.php:360
 #, php-format
 msgid "You have uploaded too many files. You may only include %d file(s)."
 msgstr "Você fez upload de muitos arquivos. Pode apenas incluir %d arquivo(s)."
 
-#: classes/models/FrmProFileField.php:408
+#: classes/models/FrmProFileField.php:427
 msgid "This field is invalid"
 msgstr "Esse campo é inválido"
 
-#: classes/models/FrmProFileField.php:409
+#: classes/models/FrmProFileField.php:428
 msgid "is invalid"
 msgstr "é inválido"
 
-#: classes/models/FrmProFileField.php:412
+#: classes/models/FrmProFileField.php:431
 msgid "Sorry, this file type is not permitted."
 msgstr ""
 
-#: classes/models/FrmProFileField.php:502
+#: classes/models/FrmProFileField.php:521
 msgid "File upload failed"
 msgstr ""
 
@@ -1668,7 +1677,7 @@ msgid "Status"
 msgstr "Status"
 
 #: classes/models/FrmProPageField.php:134
-#: classes/views/styles/_sample_form.php:90
+#: classes/views/styles/_sample_form.php:88
 #, php-format
 msgid "%s Complete"
 msgstr ""
@@ -1680,7 +1689,7 @@ msgid "Page %d"
 msgstr ""
 
 #: classes/models/FrmProPageField.php:186
-#: classes/views/styles/_sample_form.php:91
+#: classes/views/styles/_sample_form.php:89
 #, php-format
 msgid "%1$d of %2$d"
 msgstr ""
@@ -1772,18 +1781,34 @@ msgstr ""
 #: classes/models/fields/FrmProFieldEndDivider.php:49
 #: classes/views/displays/mb_advanced.php:33
 #: classes/views/displays/mb_advanced.php:53
-#: classes/views/styles/_sample_form.php:30
+#: classes/views/styles/_sample_form.php:29
 msgid "Add"
 msgstr "Adicionar"
 
 #: classes/models/fields/FrmProFieldEndDivider.php:50
-#: classes/views/styles/_sample_form.php:29
+#: classes/views/styles/_sample_form.php:28
 msgid "Remove"
 msgstr "Remover"
 
+#: classes/models/fields/FrmProFieldPassword.php:91
+msgid "Passwords require at least 8 characters"
+msgstr ""
+
+#: classes/models/fields/FrmProFieldPassword.php:93
+msgid "Passwords must include at least one number"
+msgstr ""
+
+#: classes/models/fields/FrmProFieldPassword.php:95
+msgid "Passwords must include at least one uppercase letter"
+msgstr ""
+
+#: classes/models/fields/FrmProFieldPassword.php:97
+msgid "Passwords must include at least one lowercase letter"
+msgstr ""
+
 #: classes/views/combo-fields/inplace-sub-label.php:2
 msgid "(Click to add description)"
-msgstr ""
+msgstr "(Clique para adicionar descrição)"
 
 #: classes/views/displays/_calendar_options.php:2
 msgid "Event Date"
@@ -2012,6 +2037,7 @@ msgid "Shortcodes"
 msgstr "Shortcodes"
 
 #: classes/views/displays/submitbox_actions.php:3
+#: classes/views/frmpro-forms/_submit_conditional.php:14
 #: classes/views/frmpro-fields/back-end/logic.php:11
 msgid "Show"
 msgstr "Mostrar"
@@ -2029,6 +2055,7 @@ msgid "Insert in a template"
 msgstr "Inserir num template"
 
 #: classes/views/displays/submitbox_actions.php:15
+#: classes/views/frmpro-forms/_submit_conditional.php:17
 #: classes/views/frmpro-fields/back-end/logic.php:12
 msgid "Hide"
 msgstr "Ocultar"
@@ -2064,6 +2091,7 @@ msgstr "IP"
 #: classes/views/displays/where_row.php:18
 #: classes/views/frmpro-fields/_logic_row.php:27
 #: classes/views/frmpro-forms/_logic_row.php:26
+#: classes/views/frmpro-forms/_submit_logic_row.php:25
 msgid "is"
 msgstr "é"
 
@@ -2107,6 +2135,8 @@ msgstr "Opa!"
 #, php-format
 msgid "You did not add any fields to your form. %1$sGo back%2$s and add some."
 msgstr ""
+"Você não adicionou nenhum campo ao seu formulário. %1$sVolte%2$s e adicione "
+"alguns."
 
 #: classes/views/frmpro-entries/show.php:2
 msgid "Comments/Notes"
@@ -2128,15 +2158,16 @@ msgstr "Enviar"
 msgid "Save"
 msgstr ""
 
-#: classes/views/frmpro-fields/_logic_row.php:37
+#: classes/views/frmpro-fields/_logic_row.php:39
 #: classes/views/frmpro-forms/_logic_row.php:34
+#: classes/views/frmpro-forms/_submit_logic_row.php:56
 msgid "not like"
 msgstr "não parece"
 
 #: classes/views/frmpro-fields/field-selection.php:14
 #: classes/views/lookup-fields/back-end/watch-row.php:14
 msgid "(no label)"
-msgstr ""
+msgstr "(sem rótulo)"
 
 #: classes/views/frmpro-fields/options-form-before.php:6
 msgid "Load Options From"
@@ -2182,6 +2213,7 @@ msgid "Value"
 msgstr ""
 
 #: classes/views/frmpro-form-actions/_form_action.php:3
+#: classes/views/frmpro-forms/_submit_conditional.php:3
 #: classes/views/frmpro-fields/back-end/logic.php:6
 msgid "Use Conditional Logic"
 msgstr "Usar Condicional Lógica"
@@ -2192,11 +2224,13 @@ msgid "Conditional Logic"
 msgstr "Condicional Lógica"
 
 #: classes/views/frmpro-form-actions/_form_action.php:16
+#: classes/views/frmpro-forms/_submit_conditional.php:30
 #: classes/views/frmpro-fields/back-end/logic.php:18
 msgid "any"
 msgstr "qualquer"
 
 #: classes/views/frmpro-form-actions/_form_action.php:17
+#: classes/views/frmpro-forms/_submit_conditional.php:33
 #: classes/views/styles/_section-fields.php:80
 #: classes/views/frmpro-fields/back-end/logic.php:19
 msgid "all"
@@ -2246,7 +2280,7 @@ msgstr ""
 
 #: classes/views/frmpro-form-actions/post_action.php:14
 msgid "Create Post"
-msgstr ""
+msgstr "Criar post"
 
 #: classes/views/frmpro-form-actions/post_options.php:4
 msgid "Post Type"
@@ -2373,6 +2407,19 @@ msgstr ""
 msgid "Name"
 msgstr "Nome"
 
+#: classes/views/frmpro-forms/_submit_conditional.php:20
+msgid "Enable"
+msgstr ""
+
+#: classes/views/frmpro-forms/_submit_conditional.php:23
+msgid "Disable"
+msgstr ""
+
+#: classes/views/frmpro-forms/_submit_conditional.php:37
+#, php-format
+msgid "the submit button if %s of the following match:"
+msgstr ""
+
 #: classes/views/frmpro-forms/add_form_ajax_options.php:5
 msgid "Submit this form with AJAX"
 msgstr "Enviar este formulário com AJAX"
@@ -2400,6 +2447,10 @@ msgstr ""
 #: classes/views/frmpro-forms/add_form_button_options.php:29
 #: classes/views/frmpro-fields/back-end/confirmation.php:8
 msgid "Inline"
+msgstr ""
+
+#: classes/views/frmpro-forms/add_form_button_options.php:37
+msgid "Submit Button Logic"
 msgstr ""
 
 #: classes/views/frmpro-forms/add_form_msg_options.php:3
@@ -2474,7 +2525,7 @@ msgstr ""
 
 #: classes/views/frmpro-forms/add_form_options.php:95
 msgid "Show Message"
-msgstr ""
+msgstr "Exibir mensagem"
 
 #: classes/views/frmpro-forms/add_form_options.php:96
 msgid "Redirect to URL"
@@ -2482,7 +2533,7 @@ msgstr "Redirecionar para URL"
 
 #: classes/views/frmpro-forms/add_form_options.php:97
 msgid "Show Page Content"
-msgstr ""
+msgstr "Exibir conteúdo da página"
 
 #: classes/views/frmpro-forms/add_form_options.php:105
 msgid "Use Content from Page"
@@ -2735,37 +2786,37 @@ msgstr ""
 msgid "Repeatable Section"
 msgstr ""
 
-#: classes/views/styles/_sample_form.php:8
+#: classes/views/styles/_sample_form.php:7
 msgid "Text Area"
-msgstr "Área de Texto"
+msgstr "Área de texto"
 
-#: classes/views/styles/_sample_form.php:10
+#: classes/views/styles/_sample_form.php:9
 msgid "Another field with a description"
 msgstr "Outro campo com uma descrição"
 
-#: classes/views/styles/_sample_form.php:16
-#: classes/views/styles/_sample_form.php:24
+#: classes/views/styles/_sample_form.php:15
+#: classes/views/styles/_sample_form.php:23
 msgid "Option 1"
 msgstr "Opção 1"
 
-#: classes/views/styles/_sample_form.php:17
-#: classes/views/styles/_sample_form.php:25
+#: classes/views/styles/_sample_form.php:16
+#: classes/views/styles/_sample_form.php:24
 msgid "Option 2"
 msgstr "Opção 2"
 
-#: classes/views/styles/_sample_form.php:22
+#: classes/views/styles/_sample_form.php:21
 msgid "Check Boxes"
-msgstr "Check Boxes"
+msgstr "Caixas de seleção"
 
-#: classes/views/styles/_sample_form.php:37
+#: classes/views/styles/_sample_form.php:35
 msgid "Collapsible Section"
 msgstr ""
 
-#: classes/views/styles/_sample_form.php:53
+#: classes/views/styles/_sample_form.php:51
 msgid "Toggle"
 msgstr ""
 
-#: classes/views/styles/_sample_form.php:67
+#: classes/views/styles/_sample_form.php:65
 msgid "Slider"
 msgstr ""
 
@@ -2788,11 +2839,11 @@ msgstr "Tamanho"
 
 #: classes/views/styles/_section-fields.php:37
 msgid "Padding"
-msgstr "Padding"
+msgstr "Preenchimento"
 
 #: classes/views/styles/_section-fields.php:42
 msgid "BG color"
-msgstr "Cor de Fundo"
+msgstr "Cor de fundo"
 
 #: classes/views/styles/_section-fields.php:47
 msgid "Top Margin"
@@ -2824,11 +2875,11 @@ msgstr "pontilhado"
 
 #: classes/views/styles/_section-fields.php:68
 msgid "dashed"
-msgstr "tracejada"
+msgstr "tracejado"
 
 #: classes/views/styles/_section-fields.php:69
 msgid "double"
-msgstr "dupla"
+msgstr "duplo"
 
 #: classes/views/styles/_section-fields.php:74
 msgid "Border Position"
@@ -2836,7 +2887,7 @@ msgstr ""
 
 #: classes/views/styles/_section-fields.php:76
 msgid "top"
-msgstr ""
+msgstr "superior"
 
 #: classes/views/styles/_section-fields.php:77
 msgid "bottom"
@@ -2885,7 +2936,7 @@ msgstr ""
 
 #: classes/views/styles/_style_switcher.php:18
 msgid "default"
-msgstr ""
+msgstr "padrão"
 
 #: classes/views/styles/_style_switcher.php:22
 msgid "Select"
@@ -2929,7 +2980,7 @@ msgstr ""
 
 #: classes/views/xml/import_csv.php:2 classes/views/xml/map_csv_fields.php:2
 msgid "Import/Export"
-msgstr ""
+msgstr "Importar/Exportar"
 
 #: classes/views/xml/import_csv.php:10
 msgid "Importing CSV"
@@ -2986,8 +3037,8 @@ msgstr "Importar"
 
 #: classes/views/xml/map_csv_fields.php:67
 msgid ""
-"Note: If you select a field for the Entry ID, the matching entry with that "
-"ID will be updated."
+"Note: If you select a field for the Entry ID or Entry Key, the matching "
+"entry with that ID or key will be updated."
 msgstr ""
 
 #: classes/views/combo-fields/addresses/back-end-field-opts.php:3
@@ -3043,11 +3094,11 @@ msgstr "Alinhamento"
 
 #: classes/views/frmpro-fields/back-end/alignment.php:4
 msgid "Multiple Rows"
-msgstr "Linhas Múltiplas"
+msgstr "Linhas múltiplas"
 
 #: classes/views/frmpro-fields/back-end/alignment.php:5
 msgid "Single Row"
-msgstr "Linha ùnica"
+msgstr "Linha única"
 
 #: classes/views/frmpro-fields/back-end/autopopulate-values.php:2
 msgid "Lookup value"
@@ -3206,7 +3257,7 @@ msgstr "Arraste um ficheiro para aqui ou clique para carregar"
 #: classes/views/frmpro-fields/front-end/file.php:69
 #, php-format
 msgid "Maximum upload size: %sMB"
-msgstr "Tamanho máximo do aruqivo: %sMB"
+msgstr "Tamanho máximo do arquivo: %sMB"
 
 #: classes/views/frmpro-fields/back-end/field-form.php:5
 msgid "Select a form to import below"
@@ -3347,6 +3398,20 @@ msgstr "ativar multi-seleção"
 msgid "enable autocomplete"
 msgstr "ativar autocompletar"
 
+#: classes/views/frmpro-fields/back-end/password-options.php:3
+msgid "Validate Password"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/password-options.php:4
+msgid ""
+"A strong password is at least 8 characters long and includes a an uppercase "
+"letter, a lowercase letter, a number, and a character."
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/password-options.php:9
+msgid "Require a strong password"
+msgstr ""
+
 #: classes/views/frmpro-fields/back-end/repeat-buttons.php:1
 msgid "Repeat Links"
 msgstr ""
@@ -3428,7 +3493,7 @@ msgstr ""
 
 #: classes/views/frmpro-fields/back-end/toggle-labels.php:8
 msgid "Show Labels"
-msgstr ""
+msgstr "Mostrar rótulos"
 
 #: classes/views/frmpro-fields/back-end/toggle-labels.php:15
 msgid "Active Label"

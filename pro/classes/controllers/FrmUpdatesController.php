@@ -318,7 +318,6 @@ class FrmUpdatesController {
         $arg_array = array(
             'body'      => $args,
             'timeout'   => $this->timeout,
-            'sslverify' => false,
 			'user-agent' => 'Formidable/' . FrmAppHelper::plugin_version() . '; ' . get_bloginfo( 'url' ),
         );
 

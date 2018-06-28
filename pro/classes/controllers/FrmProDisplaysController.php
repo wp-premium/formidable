@@ -1721,7 +1721,7 @@ class FrmProDisplaysController {
 	 * @param string|array $where_val
 	 */
 	private static function convert_current_user_val_to_current_user_id( &$where_val ) {
-		if ( $where_val == 'current_user' ) {
+		if ( $where_val == 'current_user' && is_user_logged_in() ) {
 			$where_val = get_current_user_id();
 		}
 	}
