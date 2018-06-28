@@ -91,19 +91,6 @@ class FrmProAppHelper {
 		$time = self::format_time( $time, 'H:i' );
 	}
 
-	private static function is_later_than_noon( $time, $parts ) {
-		return ( ( preg_match( '/PM/', $time ) && ( (int) $parts[0] != 12 ) ) || ( ( (int) $parts[0] == 12 ) && preg_match( '/AM/', $time ) ) );
-	}
-
-	public static function get_time_format_for_field( $field ) {
-		$time_format = isset( $field->field_options['clock'] ) ? $field->field_options['clock'] : 12;
-		return self::get_time_format_for_setting( $time_format );
-	}
-
-	public static function get_time_format_for_setting( $time_format ) {
-		return ( $time_format == 12 ) ? 'g:i A' : 'H:i';
-	}
-
     /**
      * Get a value from the current user profile
      *
@@ -638,6 +625,17 @@ class FrmProAppHelper {
 		_deprecated_function( __FUNCTION__, '2.02', 'FrmProFileField::upload_dir' );
         return FrmProFileField::upload_dir( $uploads );
     }
+
+	public static function get_time_format_for_field( $field ) {
+		_deprecated_function( __FUNCTION__, '3.02.01', 'FrmProFieldTime->get_time_format_for_field' );
+		$time_format = FrmField::get_option( $field, 'clock', 12 );
+		return self::get_time_format_for_setting( $time_format );
+	}
+
+	public static function get_time_format_for_setting( $time_format ) {
+		_deprecated_function( __FUNCTION__, '3.02.01', 'FrmProFieldTime->get_time_format_for_setting' );
+		return ( $time_format == 12 ) ? 'g:i A' : 'H:i';
+	}
 
 	public static function get_rand( $length ) {
         $all_g = 'ABCDEFGHIJKLMNOPQRSTWXZ';

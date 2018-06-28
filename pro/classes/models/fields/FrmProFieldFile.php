@@ -109,7 +109,8 @@ class FrmProFieldFile extends FrmFieldType {
 		if ( is_array( $value ) && ! $return_array ) {
 			$value = implode( $atts['sep'], $value );
 
-			if ( $showing_image ) {
+			$show_text_only = isset( $atts['show'] ) && 'id' === $atts['show'];
+			if ( $showing_image && ! $show_text_only ) {
 				$value = '<div class="frm_file_container">' . $value . '</div>';
 			}
 		}
