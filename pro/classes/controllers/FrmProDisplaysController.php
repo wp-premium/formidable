@@ -1116,9 +1116,11 @@ class FrmProDisplaysController {
 			$where['it.id'] = self::get_entry_ids_that_override_filters( $atts );
 		} else {
 			self::check_view_filters( $view, $atts, $where );
-			self::check_frm_search( $view, $where );
-			self::maybe_add_cat_query( $where );
-			self::check_unique_filters( $view, $where );
+			if ( self::entries_are_possible( $view ) ) {
+				self::check_frm_search( $view, $where );
+				self::maybe_add_cat_query( $where );
+				self::check_unique_filters( $view, $where );
+			}
 		}
 
 		return $where;
@@ -1183,7 +1185,10 @@ class FrmProDisplaysController {
 		} else {
 			self::maybe_get_detail_page_entry_id( $view, $atts, $where );
 			self::check_view_filters( $view, $atts, $where );
-			self::check_frm_search( $view, $where );
+
+			if ( self::entries_are_possible( $view ) ) {
+				self::check_frm_search( $view, $where );
+			}
 		}
 
 		return $where;
@@ -1217,6 +1222,10 @@ class FrmProDisplaysController {
 			return $where['it.id'];
 		}
 
+		if ( ! self::entries_are_possible( $view ) ) {
+			return array();
+		}
+
 		$query_args = array(
 			'order_by_array' => $view->frm_order_by,
 			'order_array' => $view->frm_order,
@@ -1232,6 +1241,28 @@ class FrmProDisplaysController {
 		}
 
 		return $entry_ids;
+	}
+
+	/**
+	 * Checks if it's possible that the View will have entries
+	 *
+	 * @param $view
+	 * @param $atts
+	 * @param $where
+	 *
+	 * @return bool
+	 */
+	private static function entries_are_possible( $view ) {
+		return $view->frm_limit !== 0;
+	}
+
+	/**
+	 * Adds indication in View object that no entries will be found
+	 *
+	 * @param $view
+	 */
+	private static function set_entries_as_impossible( &$view ) {
+		$view->frm_limit = 0;
 	}
 
 	/**
@@ -1365,12 +1396,13 @@ class FrmProDisplaysController {
 					continue;
 				}
 
-				// Prepare where val
 				if ( self::prepare_where_val( $i, $view ) === false ) {
+					if ( ! self::entries_are_possible( $view ) ) {
+						break;
+					}
 					continue;
 				}
 
-				// Prepare where is
 				self::prepare_where_is( $i, $view );
 
 				if ( is_numeric( $where_field ) ) {
@@ -1649,7 +1681,7 @@ class FrmProDisplaysController {
 	 * @since 2.0.23
 	 * @param int $i
 	 * @param object $view
-	 * @return bool
+	 * @return bool - True if there is a value to filter
 	 */
 	private static function prepare_where_val( $i, &$view ) {
 		if ( ! isset( $view->frm_where_val[ $i ] ) ) {
@@ -1670,6 +1702,12 @@ class FrmProDisplaysController {
 		}
 
 		self::convert_current_user_val_to_current_user_id( $view->frm_where_val[ $i ] );
+
+		if ( $view->frm_where_val[ $i ] === 'current_user' ) {
+			self::set_entries_as_impossible( $view );
+
+			return false;
+		}
 
 		self::do_shortcode_in_where_val( $view->frm_where_val[ $i ] );
 

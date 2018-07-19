@@ -62,18 +62,35 @@ class FrmProDisplaysHelper {
 
 	public static function get_default_opts() {
 
-        return array(
-            'name' => '', 'description' => '', 'display_key' => '',
-            'form_id' => 0, 'date_field_id' => '', 'edate_field_id' => '',
-			'repeat_event_field_id' => '', 'repeat_edate_field_id' => '', 'entry_id' => '',
-			'before_content' => '', 'content' => '',
-            'after_content' => '', 'dyncontent' => '', 'param' => 'entry',
-			'type' => '', 'show_count' => 'all', 'no_rt' => 0,
-            'order_by' => array(), 'order' => array(), 'limit' => '', 'page_size' => '',
-            'empty_msg' => __( 'No Entries Found', 'formidable-pro' ), 'copy' => 0,
-			'where' => array(), 'where_is' => array(), 'where_val' => array(),
-			'group_by' => array(),
-        );
+		return array(
+			'name'                  => '',
+			'description'           => '',
+			'display_key'           => '',
+			'form_id'               => 0,
+			'date_field_id'         => '',
+			'edate_field_id'        => '',
+			'repeat_event_field_id' => '',
+			'repeat_edate_field_id' => '',
+			'entry_id'              => '',
+			'before_content'        => '',
+			'content'               => '',
+			'after_content'         => '',
+			'dyncontent'            => '',
+			'param'                 => 'entry',
+			'type'                  => '',
+			'show_count'            => 'all',
+			'no_rt'                 => 0,
+			'order_by'              => array(),
+			'order'                 => array(),
+			'limit'                 => '',
+			'page_size'             => '',
+			'empty_msg'             => __( 'No Entries Found', 'formidable-pro' ),
+			'copy'                  => 0,
+			'where'                 => array(),
+			'where_is'              => array(),
+			'where_val'             => array(),
+			'group_by'              => array(),
+		);
     }
 
     public static function is_edit_view_page() {

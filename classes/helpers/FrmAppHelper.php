@@ -11,7 +11,7 @@ class FrmAppHelper {
 	/**
 	 * @since 2.0
 	 */
-	public static $plug_version = '3.02.02';
+	public static $plug_version = '3.03';
 
     /**
      * @since 1.07.02
@@ -475,7 +475,11 @@ class FrmAppHelper {
 			'h4'  => $allow_class,
 			'h5'  => $allow_class,
 			'h6'  => $allow_class,
-			'i'   => $allow_class,
+			'i'   => array(
+				'class' => array(),
+				'id'    => array(),
+				'icon'  => array(),
+			),
 			'img' => array(
 				'alt'    => array(),
 				'class'  => array(),
@@ -1645,6 +1649,7 @@ class FrmAppHelper {
 				'no_save_warning'   => __( 'Warning: There is no way to retrieve unsaved entries.', 'formidable' ),
 				'private'           => __( 'Private' ),
 				'jquery_ui_url'     => self::jquery_ui_base_url(),
+				'pro_url'           => is_callable( 'FrmProAppHelper::plugin_url' ) ? FrmProAppHelper::plugin_url() : '',
 				'no_licenses'       => __( 'No new licenses were found', 'formidable' ),
 				'unmatched_parens'  => __( 'This calculation has at least one unmatched ( ) { } [ ].', 'formidable' ),
 				'view_shortcodes'   => __( 'This calculation may have shortcodes that work in Views but not forms.', 'formidable' ),

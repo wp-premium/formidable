@@ -90,10 +90,57 @@
     display:inherit !important;
 }
 
+/* Datepicker */
+
 #ui-datepicker-div{
     display:none;
     z-index:999999 !important;
 }
+
+<?php $use_default_date = ( empty( $defaults['theme_css'] ) || 'ui-lightness' === $defaults['theme_css'] ); ?>
+
+.ui-datepicker .ui-datepicker-title select.ui-datepicker-month,
+.ui-datepicker .ui-datepicker-title select.ui-datepicker-year {
+    width: <?php echo esc_html( $use_default_date ? '33' : '45' ); ?>%;
+	background-color:#fff;
+	float:none;
+}
+
+.ui-datepicker select.ui-datepicker-month{
+	margin-right: 3px;
+}
+
+.ui-datepicker-month, .ui-datepicker-year{
+	max-width:100%;
+	max-height:2em;
+	padding:6px 10px;
+	-webkit-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	box-sizing:border-box;
+}
+
+<?php if ( $use_default_date ) { ?>
+.ui-datepicker .ui-widget-header,
+.ui-datepicker .ui-datepicker-header {
+    background: <?php echo esc_html( $defaults['date_head_bg_color'] ); ?> !important;
+	color: <?php echo esc_html( $defaults['date_head_color'] ); ?> !important;
+}
+
+.ui-datepicker td.ui-datepicker-today{
+	background: rgba(<?php echo esc_html( FrmStylesHelper::hex2rgb( $defaults['date_band_color'] ) . ',0.15)' ); ?> !important;
+}
+
+.ui-datepicker td.ui-datepicker-current-day,
+.ui-datepicker td .ui-state-hover,
+.ui-datepicker thead {
+    background: <?php echo esc_html( $defaults['date_band_color'] ); ?> !important;
+	color: <?php echo esc_html( $defaults['date_head_color'] ); ?> !important;
+}
+
+.ui-datepicker td.ui-datepicker-current-day .ui-state-default{
+	color: <?php echo esc_html( $defaults['date_head_color'] ); ?> !important;
+}
+<?php } ?>
 
 /* Radio Scale */
 
@@ -439,4 +486,44 @@ $text_color = '#ffffff' . $important;
 
 .with_frm_style input[type=range]::-ms-thumb {
 	<?php echo $thumb_size . $thumb; ?>
+}
+
+/**
+ * Password strength meter CSS
+ */
+
+@media screen and (max-width: 768px) {
+    .frm-pass-req, .frm-pass-verified {
+        width: 50% !important;
+        white-space: nowrap;
+    }
+}
+
+.frm-pass-req, .frm-pass-verified {
+    float: left;
+    width: 20%;
+    line-height: 20px;
+    font-size: 12px;
+    padding-top: 4px;
+    min-width: 175px;
+}
+
+.frm-pass-req:before, .frm-pass-verified:before {
+    padding-right: 4px;
+    font-size: 12px !important;
+    vertical-align: middle !important;
+}
+
+span.frm-pass-verified::before {
+    content: '\e606';
+    color: #33a03d;
+}
+
+span.frm-pass-req::before {
+    content: '\e608';
+    color: #e81313;
+}
+
+div.frm-password-strength {
+    width: 100%;
 }
