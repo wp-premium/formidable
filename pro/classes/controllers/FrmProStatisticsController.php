@@ -184,18 +184,29 @@ class FrmProStatisticsController {
 
 		$entry_ids = array();
 		foreach ( $entry_keys as $key ) {
-			if ( is_numeric( $key ) ) {
-				$entry_id = $key;
-			} else {
-				$entry_id = FrmEntry::get_id_by_key( $key );
-			}
-
+			$entry_id = self::maybe_convert_entry_key_to_id( $key );
 			if ( $entry_id ) {
 				$entry_ids[] = $entry_id;
 			}
 		}
 
 		return $entry_ids;
+	}
+
+
+	/**
+	 * Returns an entry id unchanged or converts an entry key to an entry id.
+	 *
+	 * @param $key
+	 *
+	 * @return int -- entry id
+	 */
+	private static function maybe_convert_entry_key_to_id( $key ) {
+		if ( is_numeric( $key ) ) {
+			return $key;
+		}
+
+		return FrmEntry::get_id_by_key( $key );
 	}
 
 	/**
@@ -678,11 +689,26 @@ class FrmProStatisticsController {
 	 * @param array $filter_args
 	 */
 	private static function get_equal_to_filter_args( $f, &$filter_args ) {
-		$filter_args['field'] = $f;
+		$filter_args['field'] = self::maybe_convert_field_name( $f );
 
 		if ( $filter_args['value'] === '' ) {
 			self::maybe_get_all_entry_ids_for_form( $filter_args );
 		}
+	}
+
+	/**
+	 * Convert param name to a field name usable in a SQL query
+	 *
+	 * @param $field_name
+	 *
+	 * @return string -- converted field name
+	 */
+	private static function maybe_convert_field_name( $field_name ) {
+		if ( 'parent_id' === $field_name ) {
+			return 'parent_item_id';
+		}
+
+		return $field_name;
 	}
 
 	/**
@@ -692,7 +718,7 @@ class FrmProStatisticsController {
 	 * @param array $filter_args
 	 */
 	private static function convert_filter_field_key_to_id( &$filter_args ) {
-		if ( ! is_numeric( $filter_args['field'] ) && ! in_array( $filter_args['field'], array( 'created_at', 'updated_at' ) ) ) {
+		if ( ! is_numeric( $filter_args['field'] ) && ! in_array( $filter_args['field'], array( 'created_at', 'updated_at', 'parent_item_id' ) ) ) {
 			$filter_args['field'] = FrmField::get_id_by_key( $filter_args['field'] );
 		}
 	}
@@ -801,7 +827,11 @@ class FrmProStatisticsController {
 	 * @return array
 	 */
 	private static function get_entry_ids_for_field_filter( $filter_args ) {
-		if ( in_array( $filter_args['field'], array( 'created_at', 'updated_at' ) ) ) {
+		if ( in_array( $filter_args['field'], array( 'created_at', 'updated_at', 'parent_item_id' ) ) ) {
+
+			if ( 'parent_item_id' === $filter_args['field'] ) {
+				$filter_args['value'] = self::maybe_convert_entry_key_to_id( $filter_args['value'] );
+			}
 
 			$where = array(
 				'form_id' => $filter_args['form_id'],

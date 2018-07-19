@@ -34,43 +34,113 @@ class FrmProStylesController extends FrmStylesController {
 		return self::view_folder() . '/' . $path[1];
 	}
 
-	public static function section_fields_file() {
-		_deprecated_function( __METHOD__, '3.01.01', 'FrmProStylesController::style_box_file' );
-		return self::view_folder() . '/_section-fields.php';
+	/**
+	 * @since 3.03
+	 */
+	public static function jquery_themes( $selected_style = 'none' ) {
+		$themes = self::get_date_themes( $selected_style );
+		return apply_filters( 'frm_jquery_themes', $themes );
 	}
 
-	public static function date_settings_file() {
-		_deprecated_function( __METHOD__, '3.01.01', 'FrmProStylesController::style_box_file' );
-		return self::view_folder() . '/_date-fields.php';
-	}
-
-	public static function progress_settings_file() {
-		_deprecated_function( __METHOD__, '3.01.01', 'FrmProStylesController::style_box_file' );
-		return self::view_folder() . '/_progress-bars.php';
-	}
-
-	public static function get_datepicker_names( $jquery_themes ) {
-		$alt_img_name = array(
-			'ui-lightness'  => 'ui_light',
-			'ui-darkness'   => 'ui_dark',
-			'start'         => 'start_menu',
-			'redmond'       => 'windoze',
-			'vader'         => 'black_matte',
-			'mint-choc'     => 'mint_choco',
-		);
-
-		$theme_names = array_keys( $jquery_themes );
-		$theme_names = array_combine( $theme_names, $theme_names );
-
-		foreach ( $theme_names as $k => $v ) {
-			$theme_names[ $k ] = str_replace( '-', '_', $v );
-			unset($k, $v);
+	/**
+	 * @since 3.03
+	 */
+	private static function get_date_themes( $selected_style = 'none' ) {
+		if ( self::use_default_style( $selected_style ) ) {
+			return array(
+				'ui-lightness' => 'Default',
+			);
 		}
 
-		$alt_img_name = array_merge( $theme_names, $alt_img_name );
-		$alt_img_name['-1'] = '';
+		$themes = array(
+			'ui-lightness'  => 'Default',
+			'ui-darkness'   => 'UI Darkness',
+			'smoothness'    => 'Smoothness',
+			'start'         => 'Start',
+			'redmond'       => 'Redmond',
+			'sunny'         => 'Sunny',
+			'overcast'      => 'Overcast',
+			'le-frog'       => 'Le Frog',
+			'flick'         => 'Flick',
+			'pepper-grinder' => 'Pepper Grinder',
+			'eggplant'      => 'Eggplant',
+			'dark-hive'     => 'Dark Hive',
+			'cupertino'     => 'Cupertino',
+			'south-street'  => 'South Street',
+			'blitzer'       => 'Blitzer',
+			'humanity'      => 'Humanity',
+			'hot-sneaks'    => 'Hot Sneaks',
+			'excite-bike'   => 'Excite Bike',
+			'vader'         => 'Vader',
+			'dot-luv'       => 'Dot Luv',
+			'mint-choc'     => 'Mint Choc',
+			'black-tie'     => 'Black Tie',
+			'trontastic'    => 'Trontastic',
+			'swanky-purse'  => 'Swanky Purse',
+			'-1'            => 'None',
+		);
 
-		return $alt_img_name;
+		return $themes;
+	}
+
+	/**
+	 * @since 3.03
+	 */
+	public static function jquery_css_url( $theme_css ) {
+		if ( $theme_css == -1 ) {
+			return;
+		}
+
+		if ( self::use_default_style( $theme_css ) ) {
+			$css_file = FrmProAppHelper::plugin_url() . '/css/ui-lightness/jquery-ui.css';
+		} elseif ( preg_match( '/^http.?:\/\/.*\..*$/', $theme_css ) ) {
+			$css_file = $theme_css;
+		} else {
+			$uploads = FrmStylesHelper::get_upload_base();
+			$file_path = '/formidable/css/' . $theme_css . '/jquery-ui.css';
+			if ( file_exists( $uploads['basedir'] . $file_path ) ) {
+				$css_file = $uploads['baseurl'] . $file_path;
+			} else {
+				$css_file = FrmAppHelper::jquery_ui_base_url() . '/themes/' . $theme_css . '/jquery-ui.min.css';
+			}
+		}
+
+		return $css_file;
+	}
+
+	/**
+	 * @since 3.03
+	 */
+	private static function use_default_style( $selected ) {
+		return empty( $selected ) || 'ui-lightness' === $selected;
+	}
+
+	/**
+	 * @since 3.03
+	 */
+	public static function enqueue_jquery_css() {
+		$form = self::get_form_for_page();
+		$theme_css = FrmStylesController::get_style_val( 'theme_css', $form );
+		if ( $theme_css != -1 ) {
+			wp_enqueue_style( 'jquery-theme', self::jquery_css_url( $theme_css ), array(), FrmAppHelper::plugin_version() );
+		}
+	}
+
+	/**
+	 * @since 3.03
+	 */
+	private static function get_form_for_page() {
+		global $frm_vars;
+		$form_id = 'default';
+		if ( ! empty( $frm_vars['forms_loaded'] ) ) {
+			foreach ( $frm_vars['forms_loaded'] as $form ) {
+				if ( is_object( $form ) ) {
+					$form_id = $form->id;
+					break;
+				}
+			}
+		}
+		return $form_id;
 	}
 
 	public static function append_style_form( $atts ) {
@@ -160,6 +230,7 @@ class FrmProStylesController extends FrmStylesController {
 	 */
 	public static function add_defaults( $settings ) {
 		self::set_toggle_slider_colors( $settings );
+		self::set_toggle_date_colors( $settings );
 
 		return $settings;
 	}
@@ -170,6 +241,10 @@ class FrmProStylesController extends FrmStylesController {
 	public static function override_defaults( $settings ) {
 		if ( ! isset( $settings['toggle_on_color'] ) && isset( $settings['progress_active_bg_color'] ) ) {
 			self::set_toggle_slider_colors( $settings );
+		}
+
+		if ( ! isset( $settings['date_head_bg_color'] ) && isset( $settings['progress_active_bg_color'] ) ) {
+			self::set_toggle_date_colors( $settings );
 		}
 
 		return $settings;
@@ -186,6 +261,15 @@ class FrmProStylesController extends FrmStylesController {
 		$settings['slider_font_size'] = $settings['field_font_size'];
 		$settings['slider_color']     = $settings['progress_active_bg_color'];
 		$settings['slider_bar_color'] = $settings['border_color'];
+	}
+
+	/**
+	 * @since 3.03
+	 */
+	private static function set_toggle_date_colors( &$settings ) {
+		$settings['date_head_bg_color'] = $settings['progress_active_bg_color'];
+		$settings['date_head_color']    = $settings['progress_active_color'];
+		$settings['date_band_color']    = FrmStylesHelper::adjust_brightness( $settings['progress_active_bg_color'], -50 );
 	}
 
 	/**
@@ -219,5 +303,31 @@ class FrmProStylesController extends FrmStylesController {
 
 	private static function is_important( $defaults ) {
 		return ( isset( $defaults['important_style'] ) && ! empty( $defaults['important_style'] ) ) ? ' !important' : '';
+	}
+
+	public static function section_fields_file() {
+		_deprecated_function( __METHOD__, '3.01.01', 'FrmProStylesController::style_box_file' );
+		return self::view_folder() . '/_section-fields.php';
+	}
+
+	public static function date_settings_file() {
+		_deprecated_function( __METHOD__, '3.01.01', 'FrmProStylesController::style_box_file' );
+		return self::view_folder() . '/_date-fields.php';
+	}
+
+	public static function progress_settings_file() {
+		_deprecated_function( __METHOD__, '3.01.01', 'FrmProStylesController::style_box_file' );
+		return self::view_folder() . '/_progress-bars.php';
+	}
+
+	public static function get_datepicker_names( $jquery_themes ) {
+		_deprecated_function( __METHOD__, '3.03' );
+		$alt_img_name = array();
+		$theme_names  = array_keys( $jquery_themes );
+		$theme_names  = array_combine( $theme_names, $theme_names );
+		$alt_img_name = array_merge( $theme_names, $alt_img_name );
+		$alt_img_name['-1'] = '';
+
+		return $alt_img_name;
 	}
 }
