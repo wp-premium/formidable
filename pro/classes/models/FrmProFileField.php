@@ -134,30 +134,39 @@ class FrmProFileField {
 	 * @param WP_Query $query
 	 */
 	public static function filter_media_library( $query ) {
-		if ( 'attachment' == $query->get('post_type') ) {
-			if ( current_user_can('frm_edit_entries') ) {
-				$show = FrmAppHelper::get_param( 'frm-attachment-filter', '', 'get', 'absint' );
-			} else {
-				$show = false;
-			}
-
-			$meta_query = $query->get('meta_query');
-			if ( ! is_array( $meta_query ) ) {
-				$meta_query = array();
-			}
-
-			$meta_query[] = array(
-				'key'     => '_frm_temporary',
-				'compare' => 'NOT EXISTS',
-			);
-
-			$meta_query[] = array(
-				'key'     => '_frm_file',
-				'compare' => $show ? 'EXISTS' : 'NOT EXISTS',
-			);
+		if ( 'attachment' == $query->get( 'post_type' ) ) {
+			$meta_query = $query->get( 'meta_query' );
+			self::query_to_exclude_files( $meta_query );
 
 			$query->set( 'meta_query', $meta_query );
 		}
+	}
+
+	private static function query_to_exclude_files( &$meta_query ) {
+		if ( current_user_can( 'frm_edit_entries' ) ) {
+			$show = FrmAppHelper::get_param( 'frm-attachment-filter', '', 'get', 'absint' );
+		} else {
+			$show = false;
+		}
+
+		if ( ! is_array( $meta_query ) ) {
+			$meta_query = array();
+		}
+
+		$meta_query[] = array(
+			'key'     => '_frm_temporary',
+			'compare' => 'NOT EXISTS',
+		);
+
+		$meta_query[] = array(
+			'key'     => '_frm_file',
+			'compare' => $show ? 'EXISTS' : 'NOT EXISTS',
+		);
+	}
+
+	public static function filter_api_attachments( $args ) {
+		add_action( 'pre_get_posts', 'FrmProFileField::filter_media_library', 99 );
+		return $args;
 	}
 
 	/**

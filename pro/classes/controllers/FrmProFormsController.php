@@ -41,7 +41,7 @@ class FrmProFormsController {
 			return;
 		}
 
-		wp_enqueue_style( $theme_css, FrmStylesHelper::jquery_css_url( $theme_css ) );
+		wp_enqueue_style( $theme_css, FrmProStylesController::jquery_css_url( $theme_css ) );
 	}
 
 	public static function enqueue_footer_js() {
@@ -78,7 +78,7 @@ class FrmProFormsController {
 
 			if ( ! empty( $frm_vars['datepicker_loaded'] ) ) {
 				wp_enqueue_script( 'jquery-ui-datepicker' );
-				FrmStylesHelper::enqueue_jquery_css();
+				FrmProStylesController::enqueue_jquery_css();
 			}
 		}
 

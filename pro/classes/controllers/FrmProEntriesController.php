@@ -2025,7 +2025,7 @@ class FrmProEntriesController {
     }
 
 	private static function entry_link_collapse( $entries, $atts, array &$content ) {
-        FrmStylesHelper::enqueue_jquery_css();
+		FrmProStylesController::enqueue_jquery_css();
         wp_enqueue_script('jquery-ui-core');
         wp_enqueue_script('formidable' );
 		wp_enqueue_script('formidablepro');

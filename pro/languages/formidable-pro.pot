@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Formidable v2.05\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-06-13 20:02+0000\n"
+"POT-Creation-Date: 2018-07-03 21:43+0000\n"
 "POT-Revision-Date: Tue Sep 26 2017 16:06:46 GMT-0600 (MDT)\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: \n"
@@ -369,7 +369,7 @@ msgid "Parent Entry ID"
 msgstr ""
 
 #: classes/controllers/FrmProEntriesController.php:1474
-#: classes/helpers/FrmProDisplaysHelper.php:73
+#: classes/helpers/FrmProDisplaysHelper.php:87
 msgid "No Entries Found"
 msgstr ""
 
@@ -388,7 +388,7 @@ msgstr ""
 
 #: classes/controllers/FrmProEntriesController.php:1658
 #: classes/controllers/FrmProEntriesController.php:2178
-#: classes/helpers/FrmProAppHelper.php:257
+#: classes/helpers/FrmProAppHelper.php:244
 #: classes/helpers/FrmProEntriesHelper.php:290
 msgid "Edit"
 msgstr ""
@@ -1208,7 +1208,7 @@ msgstr ""
 
 #: classes/controllers/FrmProLookupFieldsController.php:13
 #: classes/helpers/FrmProFieldsHelper.php:2661
-#: classes/views/styles/_sample_form.php:13
+#: classes/views/styles/_sample_form.php:14
 msgid "Radio Buttons"
 msgstr ""
 
@@ -1342,78 +1342,78 @@ msgstr ""
 msgid "A Formidable Forms update is available, but your license is invalid."
 msgstr ""
 
-#: classes/helpers/FrmProAppHelper.php:668
+#: classes/helpers/FrmProAppHelper.php:672
 msgid "Previous Page"
 msgstr ""
 
-#: classes/helpers/FrmProAppHelper.php:672
+#: classes/helpers/FrmProAppHelper.php:676
 msgid "Next Page"
 msgstr ""
 
-#: classes/helpers/FrmProDisplaysHelper.php:206
+#: classes/helpers/FrmProDisplaysHelper.php:223
 #: classes/views/frmpro-fields/_logic_row.php:32
 #: classes/views/frmpro-forms/_logic_row.php:29
 #: classes/views/frmpro-forms/_submit_logic_row.php:34
 msgid "equal to"
 msgstr ""
 
-#: classes/helpers/FrmProDisplaysHelper.php:207
+#: classes/helpers/FrmProDisplaysHelper.php:224
 #: classes/views/frmpro-fields/_logic_row.php:33
 #: classes/views/frmpro-forms/_logic_row.php:30
 #: classes/views/frmpro-forms/_submit_logic_row.php:37
 msgid "NOT equal to"
 msgstr ""
 
-#: classes/helpers/FrmProDisplaysHelper.php:208
+#: classes/helpers/FrmProDisplaysHelper.php:225
 #: classes/views/frmpro-fields/_logic_row.php:34
 #: classes/views/frmpro-forms/_logic_row.php:31
 #: classes/views/frmpro-forms/_submit_logic_row.php:41
 msgid "greater than"
 msgstr ""
 
-#: classes/helpers/FrmProDisplaysHelper.php:209
+#: classes/helpers/FrmProDisplaysHelper.php:226
 #: classes/views/frmpro-fields/_logic_row.php:36
 #: classes/views/frmpro-forms/_logic_row.php:32
 #: classes/views/frmpro-forms/_submit_logic_row.php:47
 msgid "less than"
 msgstr ""
 
-#: classes/helpers/FrmProDisplaysHelper.php:210
+#: classes/helpers/FrmProDisplaysHelper.php:227
 #: classes/views/frmpro-fields/_logic_row.php:35
 #: classes/views/frmpro-forms/_submit_logic_row.php:44
 msgid "greater than or equal to"
 msgstr ""
 
-#: classes/helpers/FrmProDisplaysHelper.php:211
+#: classes/helpers/FrmProDisplaysHelper.php:228
 #: classes/views/frmpro-fields/_logic_row.php:37
 #: classes/views/frmpro-forms/_submit_logic_row.php:50
 msgid "less than or equal to"
 msgstr ""
 
-#: classes/helpers/FrmProDisplaysHelper.php:212
+#: classes/helpers/FrmProDisplaysHelper.php:229
 #: classes/views/frmpro-fields/_logic_row.php:38
 #: classes/views/frmpro-forms/_logic_row.php:33
 #: classes/views/frmpro-forms/_submit_logic_row.php:53
 msgid "like"
 msgstr ""
 
-#: classes/helpers/FrmProDisplaysHelper.php:213
+#: classes/helpers/FrmProDisplaysHelper.php:230
 msgid "NOT like"
 msgstr ""
 
-#: classes/helpers/FrmProDisplaysHelper.php:214
+#: classes/helpers/FrmProDisplaysHelper.php:231
 msgid "starts with"
 msgstr ""
 
-#: classes/helpers/FrmProDisplaysHelper.php:215
+#: classes/helpers/FrmProDisplaysHelper.php:232
 msgid "ends with"
 msgstr ""
 
-#: classes/helpers/FrmProDisplaysHelper.php:216
+#: classes/helpers/FrmProDisplaysHelper.php:233
 msgid "unique (get oldest entries)"
 msgstr ""
 
-#: classes/helpers/FrmProDisplaysHelper.php:217
+#: classes/helpers/FrmProDisplaysHelper.php:234
 msgid "unique (get newest entries)"
 msgstr ""
 
@@ -1606,8 +1606,8 @@ msgid ""
 "days."
 msgstr ""
 
-#: classes/models/FrmProFileField.php:42 classes/models/FrmProFileField.php:319
-#: classes/models/FrmProFileField.php:330
+#: classes/models/FrmProFileField.php:42 classes/models/FrmProFileField.php:328
+#: classes/models/FrmProFileField.php:339
 #, php-format
 msgid "That file is too big. It must be less than %sMB."
 msgstr ""
@@ -1630,24 +1630,24 @@ msgstr ""
 msgid "Remove file"
 msgstr ""
 
-#: classes/models/FrmProFileField.php:48 classes/models/FrmProFileField.php:360
+#: classes/models/FrmProFileField.php:48 classes/models/FrmProFileField.php:369
 #, php-format
 msgid "You have uploaded too many files. You may only include %d file(s)."
 msgstr ""
 
-#: classes/models/FrmProFileField.php:427
+#: classes/models/FrmProFileField.php:436
 msgid "This field is invalid"
 msgstr ""
 
-#: classes/models/FrmProFileField.php:428
+#: classes/models/FrmProFileField.php:437
 msgid "is invalid"
 msgstr ""
 
-#: classes/models/FrmProFileField.php:431
+#: classes/models/FrmProFileField.php:440
 msgid "Sorry, this file type is not permitted."
 msgstr ""
 
-#: classes/models/FrmProFileField.php:521
+#: classes/models/FrmProFileField.php:530
 msgid "File upload failed"
 msgstr ""
 
@@ -1669,7 +1669,7 @@ msgid "Status"
 msgstr ""
 
 #: classes/models/FrmProPageField.php:134
-#: classes/views/styles/_sample_form.php:88
+#: classes/views/styles/_sample_form.php:90
 #, php-format
 msgid "%s Complete"
 msgstr ""
@@ -1681,7 +1681,7 @@ msgid "Page %d"
 msgstr ""
 
 #: classes/models/FrmProPageField.php:186
-#: classes/views/styles/_sample_form.php:89
+#: classes/views/styles/_sample_form.php:91
 #, php-format
 msgid "%1$d of %2$d"
 msgstr ""
@@ -1773,29 +1773,49 @@ msgstr ""
 #: classes/models/fields/FrmProFieldEndDivider.php:49
 #: classes/views/displays/mb_advanced.php:33
 #: classes/views/displays/mb_advanced.php:53
-#: classes/views/styles/_sample_form.php:29
+#: classes/views/styles/_sample_form.php:30
 msgid "Add"
 msgstr ""
 
 #: classes/models/fields/FrmProFieldEndDivider.php:50
-#: classes/views/styles/_sample_form.php:28
+#: classes/views/styles/_sample_form.php:29
 msgid "Remove"
 msgstr ""
 
-#: classes/models/fields/FrmProFieldPassword.php:91
+#: classes/models/fields/FrmProFieldPassword.php:144
+msgid "Eight characters minimum"
+msgstr ""
+
+#: classes/models/fields/FrmProFieldPassword.php:146
 msgid "Passwords require at least 8 characters"
 msgstr ""
 
-#: classes/models/fields/FrmProFieldPassword.php:93
-msgid "Passwords must include at least one number"
+#: classes/models/fields/FrmProFieldPassword.php:149
+msgid "One lowercase letter"
 msgstr ""
 
-#: classes/models/fields/FrmProFieldPassword.php:95
+#: classes/models/fields/FrmProFieldPassword.php:151
+msgid "Passwords must include at least one lowercase letter"
+msgstr ""
+
+#: classes/models/fields/FrmProFieldPassword.php:154
+msgid "One uppercase letter"
+msgstr ""
+
+#: classes/models/fields/FrmProFieldPassword.php:156
 msgid "Passwords must include at least one uppercase letter"
 msgstr ""
 
-#: classes/models/fields/FrmProFieldPassword.php:97
-msgid "Passwords must include at least one lowercase letter"
+#: classes/models/fields/FrmProFieldPassword.php:159
+msgid "One number"
+msgstr ""
+
+#: classes/models/fields/FrmProFieldPassword.php:161
+msgid "Passwords must include at least one number"
+msgstr ""
+
+#: classes/models/fields/FrmProFieldPassword.php:164
+msgid "One special character"
 msgstr ""
 
 #: classes/views/combo-fields/inplace-sub-label.php:2
@@ -2741,37 +2761,37 @@ msgstr ""
 msgid "Repeatable Section"
 msgstr ""
 
-#: classes/views/styles/_sample_form.php:7
+#: classes/views/styles/_sample_form.php:8
 msgid "Text Area"
 msgstr ""
 
-#: classes/views/styles/_sample_form.php:9
+#: classes/views/styles/_sample_form.php:10
 msgid "Another field with a description"
-msgstr ""
-
-#: classes/views/styles/_sample_form.php:15
-#: classes/views/styles/_sample_form.php:23
-msgid "Option 1"
 msgstr ""
 
 #: classes/views/styles/_sample_form.php:16
 #: classes/views/styles/_sample_form.php:24
+msgid "Option 1"
+msgstr ""
+
+#: classes/views/styles/_sample_form.php:17
+#: classes/views/styles/_sample_form.php:25
 msgid "Option 2"
 msgstr ""
 
-#: classes/views/styles/_sample_form.php:21
+#: classes/views/styles/_sample_form.php:22
 msgid "Check Boxes"
 msgstr ""
 
-#: classes/views/styles/_sample_form.php:35
+#: classes/views/styles/_sample_form.php:37
 msgid "Collapsible Section"
 msgstr ""
 
-#: classes/views/styles/_sample_form.php:51
+#: classes/views/styles/_sample_form.php:53
 msgid "Toggle"
 msgstr ""
 
-#: classes/views/styles/_sample_form.php:65
+#: classes/views/styles/_sample_form.php:67
 msgid "Slider"
 msgstr ""
 
@@ -3361,6 +3381,21 @@ msgstr ""
 
 #: classes/views/frmpro-fields/back-end/password-options.php:9
 msgid "Require a strong password"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/password-options.php:15
+msgid "Strength Meter"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/password-options.php:16
+msgid ""
+"Display a meter to the user showing the password requirements and strength "
+"of the typed password. This will only apply when the field is not within a "
+"Repeater."
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/password-options.php:21
+msgid "Show password strength meter"
 msgstr ""
 
 #: classes/views/frmpro-fields/back-end/repeat-buttons.php:1

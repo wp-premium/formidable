@@ -313,9 +313,15 @@ class FrmProAppHelper {
 
 	public static function filter_where( $entry_ids, $args ) {
         $defaults = array(
-            'where_opt' => false, 'where_is' => '=', 'where_val' => '',
-            'form_id' => false, 'form_posts' => array(), 'after_where' => false,
-            'display' => false, 'drafts' => 0, 'use_ids' => false,
+            'where_opt' => false,
+            'where_is' => '=',
+            'where_val' => '',
+            'form_id' => false,
+            'form_posts' => array(),
+            'after_where' => false,
+            'display' => false,
+            'drafts' => 0,
+            'use_ids' => false,
         );
 
         $args = wp_parse_args($args, $defaults);
