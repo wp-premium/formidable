@@ -58,6 +58,7 @@ class FrmProDisplaysController {
 			return;
 		}
 		$form_id = FrmAppHelper::simple_get( 'form', 'absint' );
+		// phpcs:ignore WordPress.Security.EscapeOutput
 		echo FrmFormsHelper::forms_dropdown( 'form', $form_id, array( 'blank' => __( 'View all forms', 'formidable-pro' ) ) );
 	}
 
@@ -66,6 +67,7 @@ class FrmProDisplaysController {
 			return $query;
 		}
 
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		if ( isset( $_REQUEST['form'] ) && is_numeric( $_REQUEST['form'] ) && isset( $query->query_vars['post_type'] ) && self::$post_type == $query->query_vars['post_type'] ) {
 			$query->query_vars['meta_key'] = 'frm_form_id';
 			$query->query_vars['meta_value'] = absint( $_REQUEST['form'] );
@@ -183,11 +185,11 @@ class FrmProDisplaysController {
 	public static function manage_custom_columns( $column_name, $id ) {
 		switch ( $column_name ) {
 			case 'id':
-				$val = $id;
+				$val = absint( $id );
 				break;
 			case 'old_id':
 				$old_id = get_post_meta( $id, 'frm_old_id', true );
-				$val = ( $old_id ) ? $old_id : __( 'N/A', 'formidable-pro' );
+				$val = ( $old_id ) ? absint( $old_id ) : esc_html__( 'N/A', 'formidable-pro' );
 				break;
 			case 'name':
 			case 'content':
@@ -199,7 +201,7 @@ class FrmProDisplaysController {
 				$val = FrmAppHelper::truncate( strip_tags( $post->post_excerpt ), 100 );
 				break;
 			case 'show_count':
-				$val = ucwords( get_post_meta( $id, 'frm_' . $column_name, true ) );
+				$val = esc_html( ucwords( get_post_meta( $id, 'frm_' . $column_name, true ) ) );
 				break;
 			case 'dyncontent':
 				$val = FrmAppHelper::truncate( strip_tags( get_post_meta( $id, 'frm_' . $column_name, true ) ), 100 );
@@ -214,11 +216,11 @@ class FrmProDisplaysController {
 				$val = '<input type="text" readonly="readonly" class="frm_select_box" value="' . esc_attr( $code ) . '" />';
 				break;
 			default:
-				$val = $column_name;
+				$val = esc_html( $column_name );
 				break;
 		}
 
-		echo $val;
+		echo $val; // phpcs:ignore WordPress.Security.EscapeOutput
 	}
 
 	public static function submitbox_actions() {

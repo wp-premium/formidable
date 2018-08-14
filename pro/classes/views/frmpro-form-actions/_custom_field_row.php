@@ -1,7 +1,7 @@
 <?php $sanitized_name = sanitize_title_with_dashes($custom_data['meta_name']); ?>
 
 <tr id="frm_postmeta_<?php echo esc_attr( $sanitized_name ) ?>" class="frm_postmeta_row alternate">
-    <td class="left"><label class="screen-reader-text" for='meta-256-key'><?php _e( 'Name') ?></label>
+	<td class="left"><label class="screen-reader-text" for='meta-256-key'><?php esc_html_e( 'Name' ); ?></label>
     <?php
     if ( isset($cf_keys) && $echo && $custom_data['meta_name'] != '' && ! in_array($custom_data['meta_name'], (array) $cf_keys) ) {
         $cf_keys[] = $custom_data['meta_name'];
@@ -12,7 +12,7 @@
 	<input type="text" value="<?php echo esc_attr( $echo ? $custom_data['meta_name'] : '' ) ?>" name="<?php echo esc_attr( $action_control->get_field_name( 'post_custom_fields' ) ) ?>[<?php echo esc_attr( $sanitized_name ) ?>][meta_name]" class="frm_enternew" />
     <?php } else { ?>
     <select name="<?php echo esc_attr( $action_control->get_field_name( 'post_custom_fields' ) ) ?>[<?php echo esc_attr( $sanitized_name ) ?>][meta_name]" class="frm_cancelnew">
-        <option value=""><?php _e( '&mdash; Select &mdash;' ); ?></option>
+		<option value=""><?php esc_html_e( '&mdash; Select &mdash;' ); ?></option>
 		<?php foreach ( $cf_keys as $cf_key ) { ?>
     	<option value="<?php echo esc_attr($cf_key) ?>"><?php echo esc_html($cf_key) ?></option>
     	<?php
@@ -27,15 +27,16 @@
     <div class="clear"></div>
     <div style="margin-left:8px;">
         <a href="javascript:void(0)" class="hide-if-no-js frm_toggle_cf_opts">
-            <span class="frm_cancelnew"><?php _e( 'Enter new'); ?></span>
-            <span class="frm_enternew frm_hidden"><?php _e( 'Cancel', 'formidable-pro' ); ?></span>
+			<span class="frm_cancelnew"><?php esc_html_e( 'Enter new' ); ?></span>
+			<span class="frm_enternew frm_hidden"><?php esc_html_e( 'Cancel', 'formidable-pro' ); ?></span>
         </a>
     </div>
     <?php } ?>
     </td>
-    <td><label class="screen-reader-text" for='meta-256-value'><?php _e( 'Value', 'formidable-pro' ) ?></label>
+	<td>
+		<label class="screen-reader-text" for='meta-256-value'><?php esc_html_e( 'Value', 'formidable-pro' ); ?></label>
     <select name="<?php echo esc_attr( $action_control->get_field_name( 'post_custom_fields' ) ) ?>[<?php echo esc_attr( $sanitized_name ) ?>][field_id]" class="frm_single_post_field">
-        <option value=""><?php _e( '&mdash; Select Field &mdash;', 'formidable-pro' ); ?></option>
+		<option value=""><?php esc_html_e( '&mdash; Select Field &mdash;', 'formidable-pro' ); ?></option>
         <?php
         if ( ! empty($values['fields']) ) {
             if ( ! isset($custom_data['field_id']) ) {

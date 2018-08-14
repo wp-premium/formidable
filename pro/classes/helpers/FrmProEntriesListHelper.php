@@ -58,24 +58,33 @@ class FrmProEntriesListHelper extends FrmEntriesListHelper {
 	if ( isset( $field_list ) && ! empty( $field_list ) ) {
 	?>
 	<select name="fid" class="hide-if-js">
-		<option value="">&mdash; <?php _e( 'All Fields', 'formidable-pro' ) ?> &mdash;</option>
-		<option value="created_at" <?php selected( $fid, 'created_at' ) ?>><?php _e( 'Entry creation date', 'formidable-pro' ) ?></option>
-		<option value="id" <?php selected( $fid, 'id' ) ?>><?php _e( 'Entry ID', 'formidable-pro' ) ?></option>
+		<option value="">&mdash; <?php esc_html_e( 'All Fields', 'formidable-pro' ); ?> &mdash;</option>
+		<option value="created_at" <?php selected( $fid, 'created_at' ); ?>>
+			<?php esc_html_e( 'Entry creation date', 'formidable-pro' ); ?>
+		</option>
+		<option value="id" <?php selected( $fid, 'id' ); ?>>
+			<?php esc_html_e( 'Entry ID', 'formidable-pro' ); ?>
+		</option>
 		<?php foreach ( $field_list as $f ) { ?>
 		<option value="<?php echo ( $f->type == 'user_id' ) ? 'user_id' : $f->id; ?>" <?php selected( $fid, $f->id ); ?>><?php echo FrmAppHelper::truncate( $f->name, 30 ); ?></option>
 		<?php } ?>
 	</select>
 
 	<div class="button dropdown hide-if-no-js">
-		<a href="#" id="frm-fid-search" class="frm-dropdown-toggle" data-toggle="dropdown"><?php _e( 'Search', 'formidable-pro' ) ?> <b class="caret"></b></a>
+		<a href="#" id="frm-fid-search" class="frm-dropdown-toggle" data-toggle="dropdown">
+			<?php esc_html_e( 'Search', 'formidable-pro' ); ?>
+			<b class="caret"></b>
+		</a>
 		<ul class="frm-dropdown-menu pull-right" id="frm-fid-search-menu" role="menu" aria-labelledby="frm-fid-search">
-			<li><a href="#" id="fid-">&mdash; <?php _e( 'All Fields', 'formidable-pro' ) ?> &mdash;</a></li>
-			<li><a href="#" id="fid-created_at"><?php _e( 'Entry creation date', 'formidable-pro' ) ?></a></li>
-			<li><a href="#" id="fid-id"><?php _e( 'Entry ID', 'formidable-pro' ) ?></a></li>
+			<li><a href="#" id="fid-">&mdash; <?php esc_html_e( 'All Fields', 'formidable-pro' ); ?> &mdash;</a></li>
+			<li><a href="#" id="fid-created_at"><?php esc_html_e( 'Entry creation date', 'formidable-pro' ); ?></a></li>
+			<li><a href="#" id="fid-id"><?php esc_html_e( 'Entry ID', 'formidable-pro' ); ?></a></li>
 			<?php
 			foreach ( $field_list as $f ) {
 			?>
-			<li><a href="#" id="fid-<?php echo ( $f->type == 'user_id' ) ? 'user_id' : $f->id ?>"><?php echo FrmAppHelper::truncate( $f->name, 30 ); ?></a></li>
+			<li><a href="#" id="fid-<?php echo esc_attr( $f->type == 'user_id' ? 'user_id' : $f->id ); ?>">
+				<?php echo FrmAppHelper::truncate( $f->name, 30 ); ?>
+			</a></li>
 			<?php
 				unset( $f );
 			}

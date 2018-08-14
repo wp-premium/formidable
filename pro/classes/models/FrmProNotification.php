@@ -72,7 +72,7 @@ class FrmProNotification {
 	 */
 	public static function entry_created( $entry_id, $form_id ) {
 	    $new_function = 'FrmFormActionsController::trigger_actions("create", ' . $form_id . ', ' . $entry_id . ', "email")';
-	    _deprecated_function( __FUNCTION__, '2.03.04', $new_function );
+	    _deprecated_function( __FUNCTION__, '2.03.04', esc_html( $new_function ) );
 	    FrmFormActionsController::trigger_actions( 'create', $form_id, $entry_id, 'email' );
     }
 }

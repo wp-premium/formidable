@@ -67,7 +67,7 @@ class FrmProMathController {
 	 */
 	private static function clear_expression_of_extra_characters( $expression, $atts ) {
 		if ( isset( $atts['clean'] ) && $atts['clean'] ) {
-			return preg_replace( '/[^\+\-\/\*0-9\.\(\)]/', '', $expression );
+			return preg_replace( '/[^\+\-\/\*0-9\.\(\)\%]/', '', $expression );
 		}
 
 		return preg_replace( '/[\s\,]/', '', $expression );
@@ -81,7 +81,7 @@ class FrmProMathController {
 	 * @return bool
 	 */
 	private static function expression_contains_non_math_characters( $expression ) {
-		$result = preg_match( '/[^\+\-\/\*0-9\.\s\(\)]/', $expression );
+		$result = preg_match( '/[^\+\-\/\*0-9\.\s\(\)\%]/', $expression );
 
 		return ( $result === 1 );
 	}
@@ -134,7 +134,7 @@ class FrmProMathController {
 	 * @return array|array[]|false|string|string[]
 	 */
 	private static function parse_math_string_into_array( $math_string ) {
-		$math_array = preg_split( '/([\+\-\*\/\(\)])/', $math_string, - 1, PREG_SPLIT_DELIM_CAPTURE );
+		$math_array = preg_split( '/([\+\-\*\/\(\)\%])/', $math_string, - 1, PREG_SPLIT_DELIM_CAPTURE );
 		$math_array = array_filter( $math_array, 'strlen' );
 		$math_array = array_values( $math_array );
 		$math_array = self::set_negative_numbers( $math_array );
@@ -157,7 +157,7 @@ class FrmProMathController {
 		}
 
 		foreach ( $negatives as $key => $negative ) {
-			if ( $key === 0 || ( preg_match( '/[\-\+\*\/\(]/', $math_array[ $key - 1 ] ) > 0 ) ) {
+			if ( $key === 0 || ( preg_match( '/[\-\+\*\/\(\%]/', $math_array[ $key - 1 ] ) > 0 ) ) {
 				$next = $key + 1;
 				if ( isset( $math_array[ $next ] ) && is_numeric( $math_array[ $next ] ) ) {
 					$math_array[ $next ] = - 1 * $math_array[ $next ];
@@ -232,6 +232,8 @@ class FrmProMathController {
 			case '*':
 				return 7;
 			case '/':
+				return 7;
+			case '%':
 				return 7;
 			default:
 				return 0;
@@ -365,6 +367,11 @@ class FrmProMathController {
 				break;
 			case '*':
 				$result = $operand1 * $operand2;
+				break;
+			case '%':
+				if ( $operand2 != 0 ) {
+					$result = $operand1 % $operand2;
+				}
 				break;
 			case '/':
 				if ( $operand2 != 0 ) {

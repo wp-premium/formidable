@@ -1,6 +1,6 @@
 <tr>
 	<td>
-		<label><?php _e( 'Display as', 'formidable-pro' ) ?></label>
+		<label><?php esc_html_e( 'Display as', 'formidable-pro' ); ?></label>
 	</td>
 	<td>
 		<select name="field_options[data_type_<?php echo absint( $field['id'] ) ?>]">

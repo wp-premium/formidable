@@ -1,7 +1,7 @@
 <tr>
 	<td>
 		<label for="radio_maxnum_<?php echo absint( $field['id'] ) ?>">
-			<?php _e( 'Maximum Rating', 'formidable-pro' ) ?>
+			<?php esc_html_e( 'Maximum Rating', 'formidable-pro' ); ?>
 		</label>
 	</td>
 	<td>

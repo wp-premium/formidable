@@ -3944,6 +3944,18 @@ function frmProFormJS(){
 		checkLookupFields();
 		triggerCalc();
 		loadDropzones();
+		checkPasswordFields();
+	}
+
+	function checkPasswordFields() {
+		var passwordFields = document.querySelectorAll( '.frm_strength_meter' );
+
+		var event = document.createEvent( 'HTMLEvents' );
+		event.initEvent( 'keyup', true, true );
+
+		for ( var i = 0; i < passwordFields.length; i++ ) {
+			passwordFields[i].dispatchEvent( event );
+		}
 	}
 
 	function checkPreviouslyHiddenFields() {

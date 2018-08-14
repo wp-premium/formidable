@@ -683,7 +683,7 @@ class FrmProEntriesController {
 		}
 
 		if ( ! FrmProFormsHelper::user_can_submit_form( $form ) ) {
-			$frmpro_settings = new FrmProSettings();
+			$frmpro_settings = FrmProAppHelper::get_settings();
 			echo do_shortcode( $frmpro_settings->already_submitted );
 			$continue = false;
 		}
@@ -794,7 +794,7 @@ class FrmProEntriesController {
 				if ( isset( $values['submit_value'] ) ) {
 					$submit_text = $values['submit_value'];
 				} else {
-					$frmpro_settings = new FrmProSettings();
+					$frmpro_settings = FrmProAppHelper::get_settings();
 					$submit_text = $frmpro_settings->submit_value;
 				}
 			} else {
@@ -802,7 +802,7 @@ class FrmProEntriesController {
 				if ( isset( $values['edit_value'] ) ) {
 					$submit_text = $values['edit_value'];
 				} else {
-					$frmpro_settings = new FrmProSettings();
+					$frmpro_settings = FrmProAppHelper::get_settings();
 					$submit_text = $frmpro_settings->update_value;
 				}
 			}
@@ -1153,7 +1153,7 @@ class FrmProEntriesController {
         $title = false;
         $form = apply_filters('frm_pre_display_form', $form);
         if ( ! $form ) {
-            wp_die( __( 'You are trying to access an entry that does not exist.', 'formidable-pro' ) );
+			wp_die( esc_html__( 'You are trying to access an entry that does not exist.', 'formidable-pro' ) );
             return;
         }
 
@@ -1181,7 +1181,7 @@ class FrmProEntriesController {
 
         $record = FrmEntry::getOne( $id, true );
         if ( ! $record ) {
-            wp_die( __( 'You are trying to access an entry that does not exist.', 'formidable-pro' ) );
+			wp_die( esc_html__( 'You are trying to access an entry that does not exist.', 'formidable-pro' ) );
             return;
         }
 
@@ -1193,7 +1193,7 @@ class FrmProEntriesController {
         $fields = FrmFieldsHelper::get_form_fields( $form->id, $errors );
         $values = FrmAppHelper::setup_edit_vars($record, 'entries', $fields);
 
-        $frmpro_settings = new FrmProSettings();
+		$frmpro_settings = FrmProAppHelper::get_settings();
 
 		if ( FrmProFormsHelper::is_final_page( $form->id ) ) {
 			$submit = ( $record->is_draft ) ? ( isset( $values['submit_value'] ) ? $values['submit_value'] : $frmpro_settings->submit_value ) : ( isset( $values['edit_value'] ) ? $values['edit_value'] : $frmpro_settings->update_value );
@@ -1301,7 +1301,9 @@ class FrmProEntriesController {
 	public static function filter_display_value( $value, $field, $atts = array() ) {
 		self::set_display_atts( $field, $atts );
 
-		if ( $atts['type'] == 'data' ) {
+		if ( $atts['type'] === 'return_raw' ) {
+			return $value;
+		} elseif ( $atts['type'] == 'data' ) {
 			self::get_dynamic_value_for_display( $field, $atts, $value );
 		} else {
 			$atts['return_array'] = true;
@@ -2423,38 +2425,51 @@ class FrmProEntriesController {
 			return $atts['default'];
 		}
 
-		$entry = self::get_frm_field_value_entry( $field, $atts );
+		$entries = self::get_frm_field_value_entry( $field, $atts );
 
-		if ( ! $entry ) {
+		if ( empty( $entries ) ) {
 			return $atts['default'];
 		}
 
-		$value = FrmProEntryMetaHelper::get_post_or_meta_value($entry, $field, $atts);
-		$atts['type'] = $field->type;
-		$atts['post_id'] = $entry->post_id;
+		$values = array();
+		foreach ( $entries as $entry ) {
+			$value = self::get_single_field_value( $entry, $field, $atts );
+			if ( $value != '' ) {
+				$values[] = $value;
+			}
+		}
+
+		$value = implode( ', ', $values );
+		if ( $value == '' ) {
+			$value = $atts['default'];
+		}
+
+		return $value;
+	}
+
+	private static function get_single_field_value( $entry, $field, $atts ) {
+		$value = FrmProEntryMetaHelper::get_post_or_meta_value( $entry, $field, $atts );
+		$atts['type']     = $field->type;
+		$atts['post_id']  = $entry->post_id;
 		$atts['entry_id'] = $entry->id;
 
 		self::add_frm_field_value_atts_for_file_upload_field( $field, $atts );
 
 		$tested_field_types = array( 'time', 'file' );
 
-		if ( in_array( $field->type, $tested_field_types ) || ! empty( $atts['format'] ) || ( isset($atts['show']) && ! empty($atts['show']) ) ) {
+		if ( in_array( $field->type, $tested_field_types ) || ! empty( $atts['format'] ) || ( isset( $atts['show'] ) && ! empty( $atts['show'] ) ) ) {
 
 			if ( empty( $atts['format'] ) ) {
 				unset( $atts['format'] );
 			}
 
-			$value = FrmFieldsHelper::get_display_value($value, $field, $atts);
+			$value = FrmFieldsHelper::get_display_value( $value, $field, $atts );
 		} else {
 			$value = FrmEntriesHelper::display_value( $value, $field, $atts);
 		}
 
-		if ( $value == '' ) {
-			$value = $atts['default'];
-		}
-
 		return $value;
-    }
+	}
 
 	/**
 	 * Add some default attributes for a file upload field in the frm-field-value shortcode
@@ -2497,10 +2512,12 @@ class FrmProEntriesController {
 	 * @since 2.0.13
 	 * @param object $field
 	 * @param array $atts
-	 * @return boolean|object $entry
+	 * @return array $entry
 	 */
 	private static function get_frm_field_value_entry( $field, &$atts ) {
 		$query = array( 'form_id' => $field->form_id );
+		$order = array( 'order_by' => 'created_at DESC' );
+
 		if ( $atts['user_id'] ) {
 			// make sure we are not getting entries for logged-out users
 			$query['user_id'] = (int) FrmAppHelper::get_user_id_param( $atts['user_id'] );
@@ -2513,7 +2530,7 @@ class FrmProEntriesController {
 			}
 
 			if ( empty( $atts['entry'] ) ) {
-				return false;
+				return array();
 			}
 
 			if ( is_numeric( $atts['entry'] ) ) {
@@ -2521,13 +2538,16 @@ class FrmProEntriesController {
 			} else {
 				$query[] = array( 'item_key' => $atts['entry'] );
 			}
+		} else {
+			// get the latest entry
+			$order['limit'] = 1;
 		}
 
 		if ( $atts['ip'] ) {
 			$query['ip'] = ( $atts['ip'] == true ) ? FrmAppHelper::get_ip_address() : $atts['ip'];
 		}
 
-		$entry = FrmDb::get_row( 'frm_items', $query, 'post_id, id', array( 'order_by' => 'created_at DESC' ) );
+		$entry = FrmDb::get_results( 'frm_items', $query, 'post_id, id', $order );
 
 		return $entry;
 	}
@@ -2666,12 +2686,12 @@ class FrmProEntriesController {
 			$entry_id = FrmAppHelper::get_param( 'entry_id', '', 'get', 'absint' );
 			$form_id = FrmAppHelper::get_param( 'form_id', '', 'get', 'absint' );
 
-            printf(__( 'Resent to %s', 'formidable-pro' ), '');
+			printf( esc_html__( 'Resent to %s', 'formidable-pro' ), '' );
 
             add_filter('frm_echo_emails', '__return_true');
             FrmFormActionsController::trigger_actions('create', $form_id, $entry_id, 'email');
 		} else {
-            _e( 'Resent to No one! You do not have permission', 'formidable-pro' );
+			esc_html_e( 'Resent to No one! You do not have permission', 'formidable-pro' );
         }
         wp_die();
     }
@@ -2789,7 +2809,7 @@ class FrmProEntriesController {
 			if ( $_POST && isset( $_POST['options']['edit_msg'] ) ) {
 				$values['edit_msg'] = wp_kses_post( $_POST['options']['edit_msg'] );
             } else {
-                $frmpro_settings = new FrmProSettings();
+				$frmpro_settings = FrmProAppHelper::get_settings();
                 $values['edit_msg'] = $frmpro_settings->edit_msg;
             }
         }

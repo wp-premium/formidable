@@ -1,4 +1,5 @@
-<tr><td><?php _e( 'Confirmation Field', 'formidable-pro' ) ?></td>
+<tr>
+	<td><?php esc_html_e( 'Confirmation Field', 'formidable-pro' ); ?></td>
 	<td>
 		<select name="field_options[conf_field_<?php echo absint( $field['id'] ) ?>]" class="conf_field" id="frm_conf_field_<?php echo absint( $field['id'] ) ?>">
 			<option value="" <?php selected( $field['conf_field'], '' ); ?>>

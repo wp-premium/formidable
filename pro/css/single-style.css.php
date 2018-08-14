@@ -253,3 +253,13 @@
     margin-top:8px;
 }
 /* End other */
+
+/* Start Password field */
+.<?php echo esc_html( $settings['style_class'] ); ?> span.frm-pass-verified::before {
+    color:<?php echo esc_html( $settings['success_text_color'] . $important ); ?>;
+}
+
+.<?php echo esc_html( $settings['style_class'] ); ?> span.frm-pass-req::before {
+    color:<?php echo esc_html( $settings['error_text'] . $important ); ?>;
+}
+/* End Password field */

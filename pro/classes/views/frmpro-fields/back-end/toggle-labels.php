@@ -1,6 +1,6 @@
 <tr>
 	<td>
-		<?php _e( 'Toggle Labels', 'formidable-pro' ) ?>
+		<?php esc_html_e( 'Toggle Labels', 'formidable-pro' ); ?>
 	</td>
 	<td>
 		<label>

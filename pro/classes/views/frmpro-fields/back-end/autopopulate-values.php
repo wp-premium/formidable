@@ -19,7 +19,7 @@
 	<td><label><?php esc_html_e( 'Watch Lookup fields', 'formidable-pro' ) ?></label></td>
 	<td>
 	    <a href="javascript:void(0)" id="frm_add_watch_lookup_link_<?php echo absint( $field['id'] ) ?>" class="frm_add_watch_lookup_row frm_add_watch_lookup_link frm_hidden">
-			<?php _e( 'Watch Lookup fields', 'formidable-pro' ) ?>
+			<?php esc_html_e( 'Watch Lookup fields', 'formidable-pro' ); ?>
 		</a>
 		<div id="frm_watch_lookup_block_<?php echo absint( $field['id'] ) ?>" class="frm_add_remove"><?php
 			if ( empty( $field['watch_lookup'] ) ) {
@@ -37,7 +37,7 @@
 	</td>
 </tr>
 <tr class="frm_autopopulate_value_section_<?php echo absint( $field['id'] ) . esc_attr( $field['autopopulate_value'] ? '' : ' frm_hidden' ); ?>">
-	<td><label><?php _e( 'Filter options', 'formidable-pro' ) ?></label></td>
+	<td><label><?php esc_html_e( 'Filter options', 'formidable-pro' ); ?></label></td>
 	<td>
 		<label for="get_most_recent_value_<?php echo absint( $field['id'] ) ?>">
 			<input type="checkbox" value="1" name="field_options[get_most_recent_value_<?php echo absint( $field['id'] ) ?>]" <?php checked($field['get_most_recent_value'], 1) ?> id="get_most_recent_value_<?php echo absint( $field['id'] ) ?>" />

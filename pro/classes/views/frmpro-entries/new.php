@@ -17,7 +17,7 @@
 
     <?php if ( empty( $values ) ) { ?>
 			<p class="frm_error_style frm_form_fields">
-				<strong><?php _e( 'Oops!', 'formidable-pro' ) ?></strong>
+				<strong><?php esc_html_e( 'Oops!', 'formidable-pro' ); ?></strong>
 				<?php printf( __( 'You did not add any fields to your form. %1$sGo back%2$s and add some.', 'formidable-pro' ), '<br/><a href="' . esc_url( admin_url('?page=formidable&frm_action=edit&id=' . $form->id ) ) . '">', '</a>') ?>
 			</p>
     <?php

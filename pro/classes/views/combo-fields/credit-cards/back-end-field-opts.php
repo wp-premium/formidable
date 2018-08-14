@@ -1,6 +1,8 @@
 <tr>
 	<td>
-		<label for="save_cc_<?php echo esc_attr( $field['id'] ) ?>"><?php _e( 'Credit Card Security', 'formidable-pro' ) ?></label>
+		<label for="save_cc_<?php echo esc_attr( $field['id'] ); ?>">
+			<?php esc_html_e( 'Credit Card Security', 'formidable-pro' ); ?>
+		</label>
 		<span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php esc_attr__( 'By default, only the last four digits of a credit card number will be saved. We recommend that you save as little credit card information on your site as possible.', 'formidable-pro' ) ?>" ></span>
 	</td>
     <td>
