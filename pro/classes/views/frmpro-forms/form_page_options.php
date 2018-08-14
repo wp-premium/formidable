@@ -1,5 +1,5 @@
 
-<h3><?php _e( 'Pagination', 'formidable-pro' ) ?></h3>
+<h3><?php esc_html_e( 'Pagination', 'formidable-pro' ); ?></h3>
 <table class="form-table">
 	<tr>
 		<td>

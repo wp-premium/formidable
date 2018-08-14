@@ -2,7 +2,7 @@
     <thead>
     <tr>
     <?php if ( in_array( 'id', $atts['fields']) ) { ?>
-    <th><?php _e( 'ID', 'formidable-pro' ); ?></th>
+		<th><?php esc_html_e( 'ID', 'formidable-pro' ); ?></th>
 	<?php
 	}
 

@@ -4,7 +4,9 @@
         <div class="submitbox">
         <div id="major-publishing-actions">
     	    <div id="delete-action">
-				<a href="javascript:void(0)" class="submitdelete deletion" onclick="history.back(-1)" title="<?php esc_attr_e( 'Cancel', 'formidable-pro' ) ?>"><?php _e( 'Cancel', 'formidable-pro' ) ?></a>
+				<a href="javascript:void(0)" class="submitdelete deletion" onclick="history.back(-1)" title="<?php esc_attr_e( 'Cancel', 'formidable-pro' ) ?>">
+					<?php esc_html_e( 'Cancel', 'formidable-pro' ); ?>
+				</a>
     	    </div>
     	    <div id="publishing-action">
 				<?php echo FrmProFormsHelper::get_draft_button( $form, 'button-secondary' ); ?>

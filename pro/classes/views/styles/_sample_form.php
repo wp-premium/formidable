@@ -1,40 +1,56 @@
 
 <div class="frm_form_field frm_section_heading form-field frm_half frm_first">
-    <h3 class="frm_pos_top frm_section_spacing"><?php _e( 'Repeatable Section', 'formidable-pro' ) ?></h3>
+	<h3 class="frm_pos_top frm_section_spacing"><?php esc_html_e( 'Repeatable Section', 'formidable-pro' ); ?></h3>
     <div>
         <div class="frm_repeat_sec">
 
 			<div class="frm_form_field form-field <?php echo esc_attr( $pos_class ) ?>">
-				<label class="frm_primary_label"><?php _e( 'Text Area', 'formidable-pro' ) ?></label>
+				<label class="frm_primary_label"><?php esc_html_e( 'Text Area', 'formidable-pro' ); ?></label>
 				<textarea></textarea>
-				<div class="frm_description"><?php _e( 'Another field with a description', 'formidable-pro' ) ?></div>
+				<div class="frm_description"><?php esc_html_e( 'Another field with a description', 'formidable-pro' ); ?></div>
 			</div>
 
 			<div class="frm_form_field form-field frm_half frm_first <?php echo esc_attr( $pos_class ) ?>">
-				<label class="frm_primary_label"><?php _e( 'Radio Buttons', 'formidable-pro' ) ?></label>
+				<label class="frm_primary_label"><?php esc_html_e( 'Radio Buttons', 'formidable-pro' ); ?></label>
 				<div class="frm_opt_container">
-					<div class="frm_radio"><label><input type="radio" /><?php _e( 'Option 1', 'formidable-pro' ) ?></label></div>
-					<div class="frm_radio"><label><input type="radio" /><?php _e( 'Option 2', 'formidable-pro' ) ?></label></div>
+					<div class="frm_radio">
+						<label><input type="radio" />
+						<?php esc_html_e( 'Option 1', 'formidable-pro' ); ?></label>
+					</div>
+					<div class="frm_radio">
+						<label><input type="radio" />
+						<?php esc_html_e( 'Option 2', 'formidable-pro' ); ?></label>
+					</div>
 				</div>
 			</div>
 
 			<div class="frm_form_field form-field frm_half <?php echo esc_attr( $pos_class ) ?>">
-				<label class="frm_primary_label"><?php _e( 'Check Boxes', 'formidable-pro' ) ?></label>
+				<label class="frm_primary_label"><?php esc_html_e( 'Check Boxes', 'formidable-pro' ); ?></label>
 				<div class="frm_opt_container">
-					<div class="frm_checkbox"><label><input type="checkbox" /><?php _e( 'Option 1', 'formidable-pro' ) ?></label></div>
-					<div class="frm_checkbox"><label><input type="checkbox" /><?php _e( 'Option 2', 'formidable-pro' ) ?></label></div>
+					<div class="frm_checkbox"><label><input type="checkbox" />
+						<?php esc_html_e( 'Option 1', 'formidable-pro' ); ?>
+					</label></div>
+					<div class="frm_checkbox"><label><input type="checkbox" />
+						<?php esc_html_e( 'Option 2', 'formidable-pro' ); ?>
+					</label></div>
 				</div>
 			</div>
             <div class="frm_form_field frm_hidden_container">
-                <a href="javascript:void(0)" class="frm_button"><i class="frm_icon_font frm_minus_icon"> </i> <?php _e( 'Remove', 'formidable-pro' ) ?></a>
-                <a href="javascript:void(0)" class="frm_button"><i class="frm_icon_font frm_plus_icon"> </i> <?php _e( 'Add', 'formidable-pro' ) ?></a>
+				<a href="javascript:void(0)" class="frm_button">
+					<i class="frm_icon_font frm_minus_icon"> </i>
+					<?php esc_html_e( 'Remove', 'formidable-pro' ); ?>
+				</a>
+				<a href="javascript:void(0)" class="frm_button">
+					<i class="frm_icon_font frm_plus_icon"> </i>
+					<?php esc_html_e( 'Add', 'formidable-pro' ); ?>
+				</a>
             </div>
         </div>
     </div>
 </div>
 
 <div class="frm_form_field frm_section_heading form-field frm_half">
-    <h3 class="frm_pos_top frm_trigger active frm_section_spacing"><i class="frm_icon_font frm_arrow_icon frm_before_collapse"></i><?php _e( 'Collapsible Section', 'formidable-pro' ) ?><i class="frm_icon_font frm_arrow_icon frm_after_collapse"></i></h3>
+	<h3 class="frm_pos_top frm_trigger active frm_section_spacing"><i class="frm_icon_font frm_arrow_icon frm_before_collapse"></i><?php esc_html_e( 'Collapsible Section', 'formidable-pro' ); ?><i class="frm_icon_font frm_arrow_icon frm_after_collapse"></i></h3>
     <div class="frm_toggle_container">
 
 		<div class="frm_form_field form-field">

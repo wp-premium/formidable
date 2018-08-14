@@ -81,7 +81,7 @@ class FrmProGraphsController {
 			$id_array = explode( ',', $atts['id'] );
 
 			if ( count( $id_array ) > 1 ) {
-				_e( 'Using multiple values in the id graph parameter has been removed as of version 2.02.04', 'formidable-pro' );
+				esc_html_e( 'Using multiple values in the id graph parameter has been removed as of version 2.02.04', 'formidable-pro' );
 			}
 
 			$id = reset( $id_array ) . ',';

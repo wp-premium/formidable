@@ -242,7 +242,7 @@ class FrmProContent {
 	 */
 	public static function get_pretty_url( $atts ) {
 		global $post;
-		$base_url = untrailingslashit( $post ? get_permalink( $post->ID ) : $_SERVER['REQUEST_URI'] );
+		$base_url = untrailingslashit( $post ? get_permalink( $post->ID ) : FrmAppHelper::get_server_value( 'REQUEST_URI' ) );
 		if ( ! is_front_page() && self::rewriting_on() ) {
 			$url = $base_url . '/' . $atts['param'] . '/' . $atts['param_value'];
 		} else {

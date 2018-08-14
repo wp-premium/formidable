@@ -26,9 +26,9 @@ if ( 'select' == $field['data_type'] ) {
 	// Checkbox and Radio Lookup Fields
 
 	if ( empty( $field['options'] ) ) {
-		?><span><?php _e( 'No options found', 'formidable-pro' ); ?></span><?php
+		?><span><?php esc_html_e( 'No options found', 'formidable-pro' ); ?></span><?php
 	} else if ( count( $field['options'] ) == 1 && reset( $field['options'] ) == '' ) {
-		?><span><?php _e( 'Options will populate dynamically in form', 'formidable-pro' ); ?></span><?php
+		?><span><?php esc_html_e( 'Options will populate dynamically in form', 'formidable-pro' ); ?></span><?php
 	} else {
 		?>
 		<ul id="frm_field_<?php echo esc_attr( $field['id'] ); ?>_opts"

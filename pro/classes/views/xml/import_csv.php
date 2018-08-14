@@ -1,5 +1,5 @@
 <div class="wrap">
-    <h2><?php _e( 'Import/Export', 'formidable-pro' ); ?></h2>
+	<h2><?php esc_html_e( 'Import/Export', 'formidable-pro' ); ?></h2>
 
 	<?php include( FrmAppHelper::plugin_path() . '/classes/views/shared/errors.php' ); ?>
     <div id="poststuff" class="metabox-holder">
@@ -7,7 +7,7 @@
     <div id="post-body-content">
 
     <div class="postbox ">
-    <h3 class="hndle"><span><?php _e( 'Importing CSV', 'formidable-pro' ) ?></span></h3>
+	<h3 class="hndle"><span><?php esc_html_e( 'Importing CSV', 'formidable-pro' ); ?></span></h3>
     <div class="inside">
         <div class="with_frm_style" id="frm_import_message">
 			<span class="frm_message" style="padding:7px;">

@@ -1,6 +1,6 @@
 <div id="frm_watch_lookup_<?php echo esc_attr( $field_id . '_' . $row_key ); ?>">
 	<select name="field_options[watch_lookup_<?php echo esc_attr( $field_id ) ?>][]">
-	    <option value=""><?php _e( '&mdash; Select Field &mdash;', 'formidable-pro' ) ?></option>
+		<option value=""><?php esc_html_e( '&mdash; Select Field &mdash;', 'formidable-pro' ); ?></option>
 		<?php
 		foreach ( $lookup_fields as $field_option ) {
 			if ( $field_option->id == $field_id ) {

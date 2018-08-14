@@ -516,14 +516,13 @@ $text_color = '#ffffff' . $important;
 
 span.frm-pass-verified::before {
     content: '\e606';
-    color: #33a03d;
 }
 
 span.frm-pass-req::before {
     content: '\e608';
-    color: #e81313;
 }
 
 div.frm-password-strength {
     width: 100%;
+    float: left;
 }
