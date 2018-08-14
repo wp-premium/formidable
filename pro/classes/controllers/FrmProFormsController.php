@@ -701,7 +701,7 @@ class FrmProFormsController {
 		$displays = FrmProDisplay::getAll( array(), 'title ASC' );
 
 ?>
-        <h4 for="frmsc_<?php echo esc_attr( $shortcode ) ?>_id" class="frm_left_label"><?php _e( 'Select a view:', 'formidable-pro' ) ?></h4>
+		<h4 for="frmsc_<?php echo esc_attr( $shortcode ) ?>_id" class="frm_left_label"><?php esc_html_e( 'Select a view:', 'formidable-pro' ) ?></h4>
         <select id="frmsc_<?php echo esc_attr( $shortcode ) ?>_id">
             <option value=""> </option>
             <?php foreach ( $displays as $display ) { ?>
@@ -760,12 +760,14 @@ class FrmProFormsController {
 		$form_list = FrmForm::getAll( $where, 'name' );
 
     ?>
-		<h4 class="frm_left_label"><?php _e( 'Select a form and field:', 'formidable-pro' ) ?></h4>
+		<h4 class="frm_left_label"><?php esc_html_e( 'Select a form and field:', 'formidable-pro' ); ?></h4>
 
 		<select class="frm_get_field_selection" id="<?php echo esc_attr( $shortcode ) ?>_form">
-			<option value="">&mdash; <?php _e( 'Select Form', 'formidable-pro' ) ?> &mdash;</option>
+			<option value="">&mdash; <?php esc_html_e( 'Select Form', 'formidable-pro' ); ?> &mdash;</option>
 			<?php foreach ( $form_list as $form_opts ) { ?>
-			<option value="<?php echo esc_attr( $form_opts->id ) ?>"><?php echo '' == $form_opts->name ? __( '(no title)', 'formidable-pro' ) : esc_html( FrmAppHelper::truncate($form_opts->name, 50) ) ?></option>
+			<option value="<?php echo esc_attr( $form_opts->id ) ?>">
+				<?php echo '' == $form_opts->name ? esc_html__( '(no title)', 'formidable-pro' ) : esc_html( FrmAppHelper::truncate($form_opts->name, 50) ) ?>
+			</option>
 			<?php } ?>
 		</select>
 
@@ -816,7 +818,7 @@ class FrmProFormsController {
 	private static function popup_opts_frm_show_entry( array &$opts, $shortcode ) {
 
 ?>
-    <h4 class="frm_left_label"><?php _e( 'Insert an entry ID/key:', 'formidable-pro' ) ?></h4>
+	<h4 class="frm_left_label"><?php esc_html_e( 'Insert an entry ID/key:', 'formidable-pro' ); ?></h4>
 
     <input type="text" value="" id="frmsc_<?php echo esc_attr( $shortcode ) ?>_id" />
 

@@ -1,6 +1,8 @@
 <tr>
 	<td>
-		<label for="address_type_<?php echo esc_attr( $field['id'] ) ?>"><?php _e( 'Address Type', 'formidable-pro' ) ?></label>
+		<label for="address_type_<?php echo esc_attr( $field['id'] ) ?>">
+			<?php esc_html_e( 'Address Type', 'formidable-pro' ); ?>
+		</label>
 	</td>
     <td>
 		<select name="field_options[address_type_<?php echo esc_attr( $field['id'] ) ?>]" id="address_type_<?php echo esc_attr( $field['id'] ) ?>">

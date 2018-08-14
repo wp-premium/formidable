@@ -290,7 +290,7 @@ class FrmProXMLHelper {
     private static function convert_timestamps( &$values ) {
         $offset = get_option('gmt_offset') * 60 * 60;
 
-        $frmpro_settings = new FrmProSettings();
+		$frmpro_settings = FrmProAppHelper::get_settings();
 		foreach ( array( 'created_at', 'updated_at' ) as $stamp ) {
             if ( ! isset( $values[ $stamp ] ) ) {
                 continue;

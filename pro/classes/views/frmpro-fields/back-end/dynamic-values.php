@@ -1,7 +1,7 @@
 <tr class="frm_options_heading">
 	<td colspan="2">
 		<div class="menu-settings">
-			<h3 class="frm_no_bg"><?php _e( 'Dynamic Values', 'formidable-pro' ) ?></h3>
+			<h3 class="frm_no_bg"><?php esc_html_e( 'Dynamic Values', 'formidable-pro' ); ?></h3>
 		</div>
 	</td>
 </tr><?php

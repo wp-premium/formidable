@@ -7,7 +7,7 @@ class FrmProDb {
 	/**
 	 * @since 3.0.02
 	 */
-	public static $plug_version = '3.03';
+	public static $plug_version = '3.03.01';
 
 	/**
 	 * @since 2.3
@@ -72,10 +72,11 @@ class FrmProDb {
 	public static function uninstall() {
 		if ( ! current_user_can( 'administrator' ) ) {
             $frm_settings = FrmAppHelper::get_settings();
-            wp_die($frm_settings->admin_permission);
+			wp_die( esc_html( $frm_settings->admin_permission ) );
         }
 
         global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange
 		$wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'frm_display' );
         delete_option('frmpro_options');
         delete_option('frmpro_db_version');
@@ -602,6 +603,7 @@ class FrmProDb {
 	 */
 	private static function migrate_to_25() {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange
         $wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'frm_display' );
 	}
 

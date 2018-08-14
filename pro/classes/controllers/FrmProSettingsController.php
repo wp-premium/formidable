@@ -26,7 +26,7 @@ class FrmProSettingsController {
 	}
 
 	public static function more_settings( $frm_settings ) {
-		$frmpro_settings = new FrmProSettings();
+		$frmpro_settings = FrmProAppHelper::get_settings();
 		require( FrmProAppHelper::plugin_path() . '/classes/views/settings/form.php' );
 	}
 

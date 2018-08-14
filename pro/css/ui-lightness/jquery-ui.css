@@ -375,6 +375,7 @@
     -webkit-box-shadow: 0 3px 6px rgba(0, 0, 0, 0.075);
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.075);
     min-width: 17em;
+	max-width: 40em;
     width: auto;
 	z-index: 1000 !important;
 }
@@ -477,6 +478,11 @@
 .ui-datepicker thead {
     color: #fff;
     font-weight: 600;
+}
+
+.ui-datepicker tbody tr,
+.ui-datepicker thead tr{
+	background:transparent !important;
 }
 
 .ui-datepicker th {

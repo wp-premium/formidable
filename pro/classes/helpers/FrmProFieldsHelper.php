@@ -1387,7 +1387,7 @@ class FrmProFieldsHelper {
         if ( ! $args['opt_key'] ) {
             $cat_atts['taxonomy'] = FrmProAppHelper::get_custom_taxonomy($post_type, $args['field']);
 			if ( ! $cat_atts['taxonomy'] ) {
-				echo '<p>' . __( 'No Categories', 'formidable-pro' ) . '</p>';
+				echo '<p>' . esc_html__( 'No Categories', 'formidable-pro' ) . '</p>';
                 return;
             }
 
@@ -2490,7 +2490,7 @@ class FrmProFieldsHelper {
 
 	public static function get_single_date( $date, $date_format ) {
 		if ( preg_match( '/^\d{1-2}\/\d{1-2}\/\d{4}$/', $date ) ) {
-            $frmpro_settings = new FrmProSettings();
+			$frmpro_settings = FrmProAppHelper::get_settings();
             $date = FrmProAppHelper::convert_date($date, $frmpro_settings->date_format, 'Y-m-d');
         }
 
@@ -2578,16 +2578,16 @@ class FrmProFieldsHelper {
         $linked_forms = array();
         ?>
         <select class="frm_shortcode_select frm_insert_val" data-target="<?php echo esc_attr( $target_id ) ?>">
-            <option value="">&mdash; <?php _e( 'Select a value to insert into the box below', 'formidable-pro' ) ?> &mdash;</option>
+			<option value="">&mdash; <?php esc_html_e( 'Select a value to insert into the box below', 'formidable-pro' ); ?> &mdash;</option>
             <?php if ( $type != 'field_opt' && $type != 'calc' ) { ?>
-            <option value="id"><?php _e( 'Entry ID', 'formidable-pro' ) ?></option>
-            <option value="key"><?php _e( 'Entry Key', 'formidable-pro' ) ?></option>
-            <option value="post_id"><?php _e( 'Post ID', 'formidable-pro' ) ?></option>
-            <option value="ip"><?php _e( 'User IP', 'formidable-pro' ) ?></option>
-            <option value="created-at"><?php _e( 'Entry creation date', 'formidable-pro' ) ?></option>
-            <option value="updated-at"><?php _e( 'Entry update date', 'formidable-pro' ) ?></option>
+				<option value="id"><?php esc_html_e( 'Entry ID', 'formidable-pro' ); ?></option>
+				<option value="key"><?php esc_html_e( 'Entry Key', 'formidable-pro' ); ?></option>
+				<option value="post_id"><?php esc_html_e( 'Post ID', 'formidable-pro' ); ?></option>
+				<option value="ip"><?php esc_html_e( 'User IP', 'formidable-pro' ); ?></option>
+				<option value="created-at"><?php esc_html_e( 'Entry creation date', 'formidable-pro' ); ?></option>
+				<option value="updated-at"><?php esc_html_e( 'Entry update date', 'formidable-pro' ); ?></option>
 
-			<optgroup label="<?php esc_attr_e( 'Form Fields', 'formidable-pro' ) ?>">
+				<optgroup label="<?php esc_attr_e( 'Form Fields', 'formidable-pro' ); ?>">
 			<?php
             }
 
@@ -2603,12 +2603,20 @@ class FrmProFieldsHelper {
 
             ?>
 				<option value="<?php echo esc_attr( $field->id ) ?>"><?php echo esc_html( $field_name = FrmAppHelper::truncate( $field->name, 60 ) ); ?> (<?php esc_html_e( 'ID', 'formidable-pro' ); ?>)</option>
-                <option value="<?php echo esc_attr( $field->field_key ) ?>"><?php echo esc_html( $field_name ) ?> (<?php _e( 'Key', 'formidable-pro' ) ?>)</option>
+				<option value="<?php echo esc_attr( $field->field_key ) ?>"><?php echo esc_html( $field_name ) ?> (<?php esc_html_e( 'Key', 'formidable-pro' ); ?>)</option>
                 <?php if ( $field->type == 'file' && $type != 'field_opt' && $type != 'calc' ) { ?>
-                    <option class="frm_subopt" value="<?php echo esc_attr( $field->field_key ) ?> size=thumbnail"><?php _e( 'Thumbnail', 'formidable-pro' ) ?></option>
-                    <option class="frm_subopt" value="<?php echo esc_attr( $field->field_key ) ?> size=medium"><?php _e( 'Medium', 'formidable-pro' ) ?></option>
-                    <option class="frm_subopt" value="<?php echo esc_attr( $field->field_key ) ?> size=large"><?php _e( 'Large', 'formidable-pro' ) ?></option>
-                    <option class="frm_subopt" value="<?php echo esc_attr( $field->field_key ) ?> size=full"><?php _e( 'Full Size', 'formidable-pro' ) ?></option>
+					<option class="frm_subopt" value="<?php echo esc_attr( $field->field_key ) ?> size=thumbnail">
+						<?php esc_html_e( 'Thumbnail', 'formidable-pro' ); ?>
+					</option>
+					<option class="frm_subopt" value="<?php echo esc_attr( $field->field_key ) ?> size=medium">
+						<?php esc_html_e( 'Medium', 'formidable-pro' ); ?>
+					</option>
+					<option class="frm_subopt" value="<?php echo esc_attr( $field->field_key ) ?> size=large">
+						<?php esc_html_e( 'Large', 'formidable-pro' ); ?>
+					</option>
+					<option class="frm_subopt" value="<?php echo esc_attr( $field->field_key ) ?> size=full">
+						<?php esc_html_e( 'Full Size', 'formidable-pro' ); ?>
+					</option>
 				<?php
                 } else if ( $field->type == 'data' && $type != 'calc' ) {
 					//get all fields from linked form
@@ -2634,20 +2642,26 @@ class FrmProFieldsHelper {
             ?>
             </optgroup>
 			<optgroup label="<?php esc_attr_e( 'Helpers', 'formidable-pro' ) ?>">
-                <option value="editlink"><?php _e( 'Admin link to edit the entry', 'formidable-pro' ) ?></option>
+				<option value="editlink"><?php esc_html_e( 'Admin link to edit the entry', 'formidable-pro' ); ?></option>
                 <?php if ( $target_id == 'content' ) { ?>
-                <option value="detaillink"><?php _e( 'Link to view single page if showing dynamic entries', 'formidable-pro' ) ?></option>
+				<option value="detaillink">
+					<?php esc_html_e( 'Link to view single page if showing dynamic entries', 'formidable-pro' ); ?>
+				</option>
 				<?php
                 }
 
 				if ( $type != 'email' ) {
                 ?>
-                <option value="evenodd"><?php _e( 'Add a rotating \'even\' or \'odd\' class', 'formidable-pro' ) ?></option>
+				<option value="evenodd">
+					<?php esc_html_e( 'Add a rotating \'even\' or \'odd\' class', 'formidable-pro' ); ?>
+				</option>
                 <?php } else if ( $target_id == 'email_message' ) { ?>
-                <option value="default-message"><?php _e( 'Default Email Message', 'formidable-pro' ) ?></option>
+				<option value="default-message">
+					<?php esc_html_e( 'Default Email Message', 'formidable-pro' ); ?>
+				</option>
                 <?php } ?>
-                <option value="siteurl"><?php _e( 'Site URL', 'formidable-pro' ) ?></option>
-                <option value="sitename"><?php _e( 'Site Name', 'formidable-pro' ) ?></option>
+                <option value="siteurl"><?php esc_html_e( 'Site URL', 'formidable-pro' ); ?></option>
+                <option value="sitename"><?php esc_html_e( 'Site Name', 'formidable-pro' ); ?></option>
             </optgroup>
             <?php } ?>
         </select>

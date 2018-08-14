@@ -287,7 +287,7 @@ class FrmProEntriesHelper {
 ?>
 		<div id="publishing-action">
 			<a href="<?php echo esc_url( add_query_arg( 'frm_action', 'edit' ) ) ?>" class="button-primary">
-				<?php _e( 'Edit', 'formidable-pro' ) ?>
+				<?php esc_html_e( 'Edit', 'formidable-pro' ); ?>
 			</a>
 		</div>
 <?php
@@ -318,7 +318,7 @@ class FrmProEntriesHelper {
 			?>
 			<div class="frm_uninstall alignleft actions">
 				<a href="?page=formidable-entries&amp;frm_action=destroy_all<?php echo esc_attr( $form_id ? '&form=' . absint( $form_id ) : '' ); ?>" class="button" data-frmverify="<?php esc_attr_e( 'Really permanently delete ALL entries in this form?', 'formidable-pro' ) ?>">
-					<?php _e( 'Delete ALL Entries', 'formidable-pro' ) ?>
+					<?php esc_html_e( 'Delete ALL Entries', 'formidable-pro' ); ?>
 				</a>
 			</div>
 <?php
@@ -349,7 +349,7 @@ class FrmProEntriesHelper {
 		?>
 		<div class="alignleft actions">
 			<a href="<?php echo esc_url( add_query_arg( $page_params, admin_url( 'admin-ajax.php' ) ) ) ?>" class="button">
-				<?php _e( 'Download CSV', 'formidable-pro' ); ?>
+				<?php esc_html_e( 'Download CSV', 'formidable-pro' ); ?>
 			</a>
 		</div>
 		<?php

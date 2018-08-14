@@ -11,9 +11,9 @@
 			<form method="get">
 				<input type="hidden" name="page" value="<?php echo esc_attr( FrmAppHelper::simple_get( 'page', 'sanitize_title' ) ) ?>"/>
 				<input type="hidden" name="frm_action" value="edit" />
-				<label class="selected-menu"><?php _e( 'Select a style to edit:', 'formidable-pro' ); ?></label>
+				<label class="selected-menu"><?php esc_html_e( 'Select a style to edit:', 'formidable-pro' ); ?></label>
 				<select name="id">
-					<option value=""><?php _e( '&mdash; Select &mdash;') ?></option>
+					<option value=""><?php esc_html_e( '&mdash; Select &mdash;' ); ?></option>
 					<?php foreach ( $styles as $s ) { ?>
 					<option value="<?php echo esc_attr( $s->ID ) ?>" <?php selected( $s->ID, $style->ID ); ?>><?php echo esc_html( $s->post_title . ( empty( $s->menu_order ) ? '' : ' (' . __( 'default', 'formidable-pro' ) . ')' ) ) ?></option>
 					<?php } ?>

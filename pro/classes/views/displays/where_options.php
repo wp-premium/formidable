@@ -18,9 +18,15 @@ if ( isset($field->field_options) && isset($field->field_options['post_field']) 
 } elseif ( $field_id == 'is_draft' ) {
 ?>
 		<select name="options[where_val][<?php echo esc_attr( $where_key ); ?>]">
-			<option value="both" <?php selected( $where_val, 'both' ) ?>><?php _e( 'Draft or complete entry', 'formidable-pro' ) ?></option>
-			<option value="1" <?php selected( $where_val, '1' ) ?>><?php _e( 'Draft', 'formidable-pro' ) ?></option>
-			<option value="0" <?php selected( $where_val, '0' ) ?>><?php _e( 'Complete entry', 'formidable-pro' ) ?></option>
+			<option value="both" <?php selected( $where_val, 'both' ); ?>>
+				<?php esc_html_e( 'Draft or complete entry', 'formidable-pro' ); ?>
+			</option>
+			<option value="1" <?php selected( $where_val, '1' ); ?>>
+				<?php esc_html_e( 'Draft', 'formidable-pro' ) ?>
+			</option>
+			<option value="0" <?php selected( $where_val, '0' ); ?>>
+				<?php esc_html_e( 'Complete entry', 'formidable-pro' ) ?>
+			</option>
 		</select>
 	<?php
 } else {

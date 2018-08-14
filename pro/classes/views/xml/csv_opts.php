@@ -1,9 +1,11 @@
 <div class="show_csv hide-if-js">
-    <p><label class="frm_left_label"><?php _e( 'CSV Delimiter', 'formidable-pro' ); ?></label>
+	<p>
+		<label class="frm_left_label"><?php esc_html_e( 'CSV Delimiter', 'formidable-pro' ); ?></label>
         <input type="text" name="csv_del" value="<?php echo esc_attr($csv_del) ?>" />
     </p>
 
-    <p><label class="frm_left_label"><?php _e( 'Import Into Form', 'formidable-pro' ); ?></label>
+	<p>
+		<label class="frm_left_label"><?php esc_html_e( 'Import Into Form', 'formidable-pro' ); ?></label>
         <select name="form_id">
 		<?php
 		foreach ( $forms as $form ) {
@@ -21,5 +23,5 @@
 			<?php esc_html_e( 'Import files. If you would like to import files from your CSV, check this box.', 'formidable-pro' ); ?>
 		</label>
 	</p>
-	<p class="howto"><?php _e( 'Note: Only entries can by imported via CSV.', 'formidable-pro' ) ?></p>
+	<p class="howto"><?php esc_html_e( 'Note: Only entries can by imported via CSV.', 'formidable-pro' ); ?></p>
 </div>

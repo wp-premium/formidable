@@ -104,7 +104,7 @@ class FrmProFieldDate extends FrmFieldType {
 		}
 
 		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) ) {
-			$frmpro_settings = new FrmProSettings();
+			$frmpro_settings = FrmProAppHelper::get_settings();
 			$formated_date = FrmProAppHelper::convert_date( $value, $frmpro_settings->date_format, 'Y-m-d' );
 
 			//check format before converting

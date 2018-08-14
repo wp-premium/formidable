@@ -601,7 +601,7 @@ class FrmProNestedFormsController {
 		$field_class = self::grid_field_class( $count, $format );
 		$section_classes = self::repeat_container_classes( $format, $args );
 
-		echo '<div id="frm_section_' . $args['parent_field']['id'] . '-' . $args['i'] . '" class="' . esc_attr( $section_classes ) . '">' . "\n";
+		echo '<div id="frm_section_' . esc_attr( $args['parent_field']['id'] . '-' . $args['i'] ) . '" class="' . esc_attr( $section_classes ) . '">' . "\n";
 
 		self::add_hidden_repeat_row_id( $args );
 		self::add_default_item_meta_field( $args );
@@ -748,7 +748,7 @@ class FrmProNestedFormsController {
 	 * @param array $args
 	 */
 	private static function add_default_item_meta_field( $args ) {
-		echo '<input type="hidden" name="item_meta[' . $args['parent_field']['id'] . '][' . $args['i'] . '][0]" value="" />';
+		echo '<input type="hidden" name="item_meta[' . esc_attr( $args['parent_field']['id'] ) . '][' . esc_attr( $args['i'] ) . '][0]" value="" />';
 	}
 
 	/**

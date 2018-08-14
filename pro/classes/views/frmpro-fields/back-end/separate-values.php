@@ -6,7 +6,7 @@
 	<td>
 		<label for="separate_value_<?php echo absint( $field['id'] ) ?>">
 			<input type="checkbox" name="field_options[separate_value_<?php echo absint( $field['id'] ) ?>]" id="separate_value_<?php echo absint( $field['id'] ) ?>" value="1" <?php checked( $field['separate_value'], 1 ) ?> class="frm_toggle_sep_values" />
-			<?php _e( 'Use separate values', 'formidable-pro' ); ?>
+			<?php esc_html_e( 'Use separate values', 'formidable-pro' ); ?>
 		</label>
 	</td>
 </tr>

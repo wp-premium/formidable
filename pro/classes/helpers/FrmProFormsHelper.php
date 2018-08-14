@@ -156,8 +156,8 @@ class FrmProFormsHelper {
 			} else if ( $date_field_id ) {
 				?>
 jQuery(document).ready(function($){
-$('<?php echo $trigger_id ?>').addClass('frm_custom_date');
-$(document).on('focusin','<?php echo $trigger_id ?>', function(){
+$('<?php echo esc_attr( $trigger_id ); ?>').addClass('frm_custom_date');
+$(document).on('focusin','<?php echo esc_attr( $trigger_id ); ?>', function(){
 $.datepicker.setDefaults($.datepicker.regional['']);
 $(this).datepicker($.extend($.datepicker.regional['<?php echo esc_js( $options['locale'] ) ?>'],{dateFormat:'<?php echo esc_js( $frmpro_settings->cal_date_format ) ?>',changeMonth:true,changeYear:true,yearRange:'<?php echo esc_js( $date_options['options']['yearRange'] ) ?>',defaultDate:'<?php echo esc_js( $date_options['options']['defaultDate'] ); ?>'<?php
 echo $custom_options;
@@ -274,7 +274,7 @@ echo $custom_options;
 
                 if ( $calc_field->type == 'date' ) {
                     if ( ! isset($frmpro_settings) ) {
-                        $frmpro_settings = new FrmProSettings();
+						$frmpro_settings = FrmProAppHelper::get_settings();
                     }
                     $calc_rules['date'] = $frmpro_settings->cal_date_format;
                 }
@@ -287,10 +287,9 @@ echo $custom_options;
 			$calc_rules['triggers'] = array_values( $triggers );
         }
 
-		$var_name = '__FRMCALC';
 		echo 'var frmcalcs=' . json_encode( $calc_rules ) . ";\n";
-		echo 'if(typeof ' . $var_name . ' == "undefined"){' . $var_name . '=frmcalcs;}';
-		echo 'else{' . $var_name . '=jQuery.extend(true,{},' . $var_name . ',frmcalcs);}';
+		echo 'if(typeof __FRMCALC == "undefined"){__FRMCALC=frmcalcs;}';
+		echo 'else{__FRMCALC=jQuery.extend(true,{},__FRMCALC,frmcalcs);}';
     }
 
 	public static function get_calc_rule_for_field( $atts ) {
@@ -391,7 +390,7 @@ echo $custom_options;
     }
 
 	public static function get_default_opts() {
-		$frmpro_settings = new FrmProSettings();
+		$frmpro_settings = FrmProAppHelper::get_settings();
 
 		return array(
 			'edit_value'           => $frmpro_settings->update_value,
@@ -459,7 +458,7 @@ echo $custom_options;
 
 		if ( isset( $form->options['single_entry'] ) && $form->options['single_entry'] ) {
 			if ( ! self::user_can_submit_form( $form ) ) {
-				$frmpro_settings = new FrmProSettings();
+				$frmpro_settings = FrmProAppHelper::get_settings();
 				$k = is_numeric( $form->options['single_entry_type'] ) ? 'field' . $form->options['single_entry_type'] : 'single_entry';
 				$errors[ $k ] = $frmpro_settings->already_submitted;
 				self::stop_form_submit();
@@ -476,7 +475,7 @@ echo $custom_options;
 			$meta = FrmDb::get_var( $wpdb->prefix . 'frm_items', array( 'user_id' => $user_ID, 'form_id' => $form->id ) );
 
 			if ( $meta ) {
-				$frmpro_settings = new FrmProSettings();
+				$frmpro_settings = FrmProAppHelper::get_settings();
 				$errors['single_entry'] = $frmpro_settings->already_submitted;
 				self::stop_form_submit();
 			}

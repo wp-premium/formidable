@@ -4,7 +4,7 @@
 		?>onchange="<?php echo $onchange ?>"<?php
 	}
 	?>>
-    <option value=""><?php _e( '&mdash; Select &mdash;' ) ?></option>
+	<option value=""><?php esc_html_e( '&mdash; Select &mdash;' ); ?></option>
     <?php
     foreach ( $form_fields as $ff ) {
         if ( is_array($ff) ) {
@@ -23,15 +23,27 @@
 		}
 		?>
 </select>
-<?php _e( 'is', 'formidable-pro' ); ?>
+<?php esc_html_e( 'is', 'formidable-pro' ); ?>
 
 <select name="<?php echo esc_attr( $names['hide_field_cond'] ) ?>">
-    <option value="==" <?php selected($condition['hide_field_cond'], '==') ?>><?php _e( 'equal to', 'formidable-pro' ) ?></option>
-    <option value="!=" <?php selected($condition['hide_field_cond'], '!=') ?>><?php _e( 'NOT equal to', 'formidable-pro' ) ?> &nbsp;</option>
-    <option value=">" <?php selected($condition['hide_field_cond'], '>') ?>><?php _e( 'greater than', 'formidable-pro' ) ?></option>
-    <option value="<" <?php selected($condition['hide_field_cond'], '<') ?>><?php _e( 'less than', 'formidable-pro' ) ?></option>
-    <option value="LIKE" <?php selected($condition['hide_field_cond'], 'LIKE') ?>><?php _e( 'like', 'formidable-pro' ) ?></option>
-    <option value="not LIKE" <?php selected($condition['hide_field_cond'], 'not LIKE') ?>><?php _e( 'not like', 'formidable-pro' ) ?> &nbsp;</option>
+	<option value="==" <?php selected( $condition['hide_field_cond'], '==' ); ?>>
+		<?php esc_html_e( 'equal to', 'formidable-pro' ) ?>
+	</option>
+	<option value="!=" <?php selected( $condition['hide_field_cond'], '!=' ); ?>>
+		<?php esc_html_e( 'NOT equal to', 'formidable-pro' ) ?> &nbsp;
+	</option>
+	<option value=">" <?php selected( $condition['hide_field_cond'], '>' ); ?>>
+		<?php esc_html_e( 'greater than', 'formidable-pro' ) ?>
+	</option>
+	<option value="<" <?php selected( $condition['hide_field_cond'], '<' ); ?>>
+		<?php esc_html_e( 'less than', 'formidable-pro' ) ?>
+	</option>
+	<option value="LIKE" <?php selected( $condition['hide_field_cond'], 'LIKE' ); ?>>
+		<?php esc_html_e( 'like', 'formidable-pro' ) ?>
+	</option>
+	<option value="not LIKE" <?php selected( $condition['hide_field_cond'], 'not LIKE' ); ?>>
+		<?php esc_html_e( 'not like', 'formidable-pro' ) ?> &nbsp;
+	</option>
 </select>
 
 <span id="frm_show_selected_values_<?php echo esc_attr( $key . '_' . $meta_name ) ?>">
