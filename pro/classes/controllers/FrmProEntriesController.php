@@ -470,9 +470,10 @@ class FrmProEntriesController {
 	 * @param boolean $continue
 	 */
 	private static function maybe_show_front_end_editable_entry_on_first_load( $args, &$continue ) {
-        global $wpdb;
+		global $wpdb, $frm_vars;
 
-		$entry_key = FrmAppHelper::get_param( 'entry', '', 'get', 'sanitize_title' );
+		$entry_id  = ( isset( $frm_vars['editing_entry'] ) && $frm_vars['editing_entry'] ) ? $frm_vars['editing_entry'] : '';
+		$entry_key = FrmAppHelper::get_param( 'entry', $entry_id, 'get', 'sanitize_title' );
 
         $query = array( 'it.form_id' => $args['form']->id );
 

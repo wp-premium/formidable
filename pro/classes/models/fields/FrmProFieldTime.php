@@ -55,9 +55,13 @@ class FrmProFieldTime extends FrmFieldType {
 
 	public function prepare_front_field( $values, $atts ) {
 		$values['options'] = $this->get_options( $values );
-		$values['value'] = $this->get_display_value( $values['value'], $atts );
+		$values['value'] = $this->prepare_field_value( $values['value'], $atts );
 
 		return $values;
+	}
+
+	public function prepare_field_value( $value, $atts ) {
+		return $this->get_display_value( $value, $atts );
 	}
 
 	public function get_options( $values ) {

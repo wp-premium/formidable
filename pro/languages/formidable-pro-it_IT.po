@@ -1,26 +1,19 @@
+# Translation of Formidable Forms in Italian
+# This file is distributed under the same license as the Formidable Forms package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Formidable v2.05\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-08-06 21:36+0000\n"
-"PO-Revision-Date: 2018-08-06 21:38+0000\n"
-"Last-Translator: Formidable Community\n"
-"Language-Team: Italian\n"
-"Language: it_IT\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"PO-Revision-Date: 2018-09-12 17:30+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-SourceCharset: UTF-8\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Loco https://localise.biz/\n"
-"X-Poedit-Basepath: .\n"
-"X-Poedit-SearchPath-0: ..\n"
-"X-Poedit-KeywordsList: _:1;gettext:1;dgettext:2;ngettext:1,2;dngettext:2,3;"
-"__:1;_e:1;_c:1;_n:1,2;_n_noop:1,2;_nc:1,2;__ngettext:1,2;__ngettext_noop:1,2;"
-"_x:1,2c;_ex:1,2c;_nx:1,2,4c;_nx_noop:1,2,3c;_n_js:1,2;_nx_js:1,2,3c;"
-"esc_attr__:1;esc_html__:1;esc_attr_e:1;esc_html_e:1;esc_attr_x:1,2c;"
-"esc_html_x:1,2c;comments_number_link:2,3;t:1;st:1;trans:1;transChoice:1,2\n"
-"X-Loco-Target-Locale: it_IT"
+"Language: it_IT\n"
+"Project-Id-Version: Formidable Forms\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-09-12 17:29+0000\n"
+"Last-Translator: Formidable Community\n"
+"Language-Team: Italian"
 
 #: formidable-pro.php:86
 msgid "Formidable Forms Pro requires Formidable Forms to be installed."
@@ -131,7 +124,7 @@ msgstr "Modifica visualizzazione"
 
 #: classes/controllers/FrmProDisplaysController.php:62
 msgid "View all forms"
-msgstr "Mostra tutti i moduli"
+msgstr "Visualizza tutti i moduli"
 
 #: classes/controllers/FrmProDisplaysController.php:114
 #: classes/controllers/FrmProEntriesController.php:1455
@@ -150,13 +143,13 @@ msgstr "Modulo"
 
 #: classes/controllers/FrmProDisplaysController.php:140
 msgid "Entry"
-msgstr "Voce"
+msgstr "Inserire"
 
 #: classes/controllers/FrmProDisplaysController.php:141
 #: classes/controllers/FrmProDisplaysController.php:287
 #: classes/views/displays/mb_dyncontent.php:27
 msgid "Content"
-msgstr "Contenuto"
+msgstr "Contenuti"
 
 #: classes/controllers/FrmProDisplaysController.php:142
 #: classes/views/displays/mb_dyncontent.php:60
@@ -299,7 +292,7 @@ msgstr "o"
 #: classes/views/frmpro-entries/sidebar-new.php:8
 #: classes/views/frmpro-form-actions/_custom_field_row.php:31
 msgid "Cancel"
-msgstr "Cancella"
+msgstr "Annulla"
 
 #: classes/controllers/FrmProEntriesController.php:106
 msgid "Draft was Successfully Created"
@@ -543,7 +536,7 @@ msgstr "Cognome"
 #: classes/controllers/FrmProFormsController.php:541
 #: classes/models/FrmProForm.php:276
 msgid "User ID"
-msgstr "ID utente"
+msgstr "ID Utente"
 
 #: classes/controllers/FrmProFormsController.php:302
 msgid "User Meta"
@@ -558,7 +551,7 @@ msgstr "Ruolo utente"
 #: classes/views/displays/where_row.php:17
 #: classes/views/xml/map_csv_fields.php:50
 msgid "Post ID"
-msgstr "ID articolo"
+msgstr "ID Articolo"
 
 #: classes/controllers/FrmProFormsController.php:305
 #: classes/views/frmpro-form-actions/post_options.php:57
@@ -622,7 +615,7 @@ msgstr "Precedente"
 
 #: classes/controllers/FrmProFormsController.php:472
 msgid "Save Draft"
-msgstr "Salva bozza"
+msgstr "Salva Bozza"
 
 #: classes/controllers/FrmProFormsController.php:503
 msgid "Equals"
@@ -817,12 +810,12 @@ msgid "Default"
 msgstr "Predefinito"
 
 #: classes/controllers/FrmProFormsController.php:721
-#: classes/views/displays/order_row.php:24
+#: classes/views/displays/order_row.php:27
 msgid "Ascending"
 msgstr "Ascendente"
 
 #: classes/controllers/FrmProFormsController.php:722
-#: classes/views/displays/order_row.php:27
+#: classes/views/displays/order_row.php:30
 msgid "Descending"
 msgstr "Discendente"
 
@@ -1103,7 +1096,7 @@ msgstr "Chiave voce"
 #: classes/views/xml/map_csv_fields.php:69
 #: classes/views/xml/map_csv_fields.php:70
 msgid "Entry ID"
-msgstr "ID voce"
+msgstr "Inserisci ID"
 
 #: classes/controllers/FrmProFormsController.php:893
 msgid "Add HTML classes"
@@ -1215,7 +1208,7 @@ msgstr "Voci mensili"
 #: classes/controllers/FrmProLookupFieldsController.php:12
 #: classes/helpers/FrmProFieldsHelper.php:2674
 msgid "Dropdown"
-msgstr "Campo a discesa"
+msgstr "Menu a discesa"
 
 #: classes/controllers/FrmProLookupFieldsController.php:13
 #: classes/helpers/FrmProFieldsHelper.php:2675
@@ -1226,7 +1219,7 @@ msgstr "Pulsanti radio"
 #: classes/controllers/FrmProLookupFieldsController.php:14
 #: classes/helpers/FrmProFieldsHelper.php:2676
 msgid "Checkboxes"
-msgstr "Check box"
+msgstr "Checkbox"
 
 #: classes/controllers/FrmProLookupFieldsController.php:15
 msgid "Single Line Text"
@@ -1350,11 +1343,11 @@ msgstr ""
 #: classes/controllers/FrmUpdatesController.php:344
 #, php-format
 msgid "There was a %1$s error: %2$s"
-msgstr "C'è stato un errore %1$s: %2$s"
+msgstr "C'è stato un %1$s errore: %2$s"
 
 #: classes/controllers/FrmUpdatesController.php:348
 msgid "Your License Key was invalid"
-msgstr "La tua chiave di licenza non era valida"
+msgstr "La tua chiave di licenza non è valida"
 
 #: classes/controllers/FrmUpdatesController.php:352
 msgid "A Formidable Forms update is available, but your license is invalid."
@@ -1437,7 +1430,7 @@ msgstr ""
 
 #: classes/helpers/FrmProEntriesHelper.php:235
 msgid "Add New"
-msgstr "Aggiungi nuovo"
+msgstr "Aggiungi Nuovo"
 
 #: classes/helpers/FrmProEntriesHelper.php:298
 msgid "Resend Email Notifications"
@@ -1469,10 +1462,10 @@ msgstr "Tutti i campi"
 #: classes/helpers/FrmProFieldsHelper.php:2587
 #: classes/views/displays/_calendar_options.php:5
 #: classes/views/displays/_calendar_options.php:22
-#: classes/views/displays/order_row.php:7
+#: classes/views/displays/order_row.php:10
 #: classes/views/displays/where_row.php:5
 msgid "Entry creation date"
-msgstr "Data creazione voci"
+msgstr "Data di creazione Voci"
 
 #: classes/helpers/FrmProEntryMetaHelper.php:169
 #, php-format
@@ -1501,21 +1494,22 @@ msgid "Select a value to insert into the box below"
 msgstr "Selezionare un valore da inserire nella casella qui sotto"
 
 #: classes/helpers/FrmProFieldsHelper.php:2584
+#: classes/views/displays/order_row.php:7
 #: classes/views/xml/map_csv_fields.php:72
 #: classes/views/xml/map_csv_fields.php:73
 msgid "Entry Key"
-msgstr "Chiave voce"
+msgstr "Inserisci chiave"
 
 #: classes/helpers/FrmProFieldsHelper.php:2586
 msgid "User IP"
-msgstr "IP utente"
+msgstr "IP Utente"
 
 #: classes/helpers/FrmProFieldsHelper.php:2588
 #: classes/views/displays/_calendar_options.php:8
 #: classes/views/displays/_calendar_options.php:25
-#: classes/views/displays/order_row.php:10
+#: classes/views/displays/order_row.php:13
 msgid "Entry update date"
-msgstr "Data aggiornamento voce"
+msgstr "Data Aggiornamento"
 
 #: classes/helpers/FrmProFieldsHelper.php:2590
 msgid "Form Fields"
@@ -1546,7 +1540,7 @@ msgstr "Dimensione piena"
 
 #: classes/helpers/FrmProFieldsHelper.php:2644
 msgid "Helpers"
-msgstr "Assistenti"
+msgstr "Aiuto"
 
 #: classes/helpers/FrmProFieldsHelper.php:2645
 msgid "Admin link to edit the entry"
@@ -1566,11 +1560,11 @@ msgstr "Messaggio e-mail predefinito"
 
 #: classes/helpers/FrmProFieldsHelper.php:2663
 msgid "Site URL"
-msgstr "URL sito"
+msgstr "URL Sito"
 
 #: classes/helpers/FrmProFieldsHelper.php:2664
 msgid "Site Name"
-msgstr "Nome sito"
+msgstr "Nome Sito"
 
 #: classes/helpers/FrmProFormsHelper.php:405
 #: classes/helpers/FrmProFormsHelper.php:664
@@ -1809,7 +1803,7 @@ msgstr ""
 
 #: classes/models/fields/FrmProFieldPassword.php:146
 msgid "Passwords require at least 8 characters"
-msgstr ""
+msgstr "Le password devono essere lunghe almeno 8 caratteri"
 
 #: classes/models/fields/FrmProFieldPassword.php:149
 msgid "One lowercase letter"
@@ -1817,7 +1811,7 @@ msgstr ""
 
 #: classes/models/fields/FrmProFieldPassword.php:151
 msgid "Passwords must include at least one lowercase letter"
-msgstr ""
+msgstr "Le password devono contenere almeno una lettera minuscola"
 
 #: classes/models/fields/FrmProFieldPassword.php:154
 msgid "One uppercase letter"
@@ -1825,7 +1819,7 @@ msgstr ""
 
 #: classes/models/fields/FrmProFieldPassword.php:156
 msgid "Passwords must include at least one uppercase letter"
-msgstr ""
+msgstr "Le password devono contenere almeno una lettera maiuscola"
 
 #: classes/models/fields/FrmProFieldPassword.php:159
 msgid "One number"
@@ -1833,7 +1827,7 @@ msgstr ""
 
 #: classes/models/fields/FrmProFieldPassword.php:161
 msgid "Passwords must include at least one number"
-msgstr ""
+msgstr "Le password devono contenere almeno un numero"
 
 #: classes/models/fields/FrmProFieldPassword.php:164
 msgid "One special character"
@@ -2072,7 +2066,7 @@ msgstr ""
 msgid "Calendar &mdash; insert entries into a calendar"
 msgstr "Calendario &mdash; inserisci voci in un calendario"
 
-#: classes/views/displays/order_row.php:13
+#: classes/views/displays/order_row.php:16
 msgid "Random"
 msgstr "Casuale"
 
@@ -2096,7 +2090,7 @@ msgstr "Salva per ottenere l'ID"
 
 #: classes/views/displays/submitbox_actions.php:18
 msgid "Insert in a template"
-msgstr "Inserisci in un modello"
+msgstr "Inserisci in un template"
 
 #: classes/views/displays/submitbox_actions.php:25
 #: classes/views/frmpro-forms/_submit_conditional.php:17
@@ -2179,7 +2173,7 @@ msgstr "Oops!"
 #, php-format
 msgid "You did not add any fields to your form. %1$sGo back%2$s and add some."
 msgstr ""
-"Non hai aggiunto nessun campo al tuo modulo. %1$sTorna indietro%2$s e "
+"Nessun campi sono stati aggiunti al modulo. %1$sTorna indietro%2$s e "
 "aggiungine qualcuno."
 
 #: classes/views/frmpro-entries/show.php:2
@@ -2325,7 +2319,7 @@ msgstr "Nessuna tassonomia disponibile"
 
 #: classes/views/frmpro-form-actions/post_action.php:14
 msgid "Create Post"
-msgstr "Creare un post"
+msgstr "Crea Articolo"
 
 #: classes/views/frmpro-form-actions/post_options.php:4
 msgid "Post Type"
@@ -2588,7 +2582,7 @@ msgstr "Mostra il contenuto della pagina"
 
 #: classes/views/frmpro-forms/add_form_options.php:122
 msgid "Use Content from Page"
-msgstr "Utilizza Contenuto da pagina"
+msgstr "Utilizzare Contenuto da pagina"
 
 #: classes/views/frmpro-forms/add_form_options.php:132
 msgid "Allow logged-in users to save drafts"
@@ -2743,7 +2737,7 @@ msgstr "Varie"
 
 #: classes/views/settings/form.php:35
 msgid "Date Format"
-msgstr "Formato data"
+msgstr "Formato Data"
 
 #: classes/views/settings/form.php:36
 msgid "Change the format of the date used in the date field."
@@ -2869,7 +2863,7 @@ msgstr "Opzione 2"
 
 #: classes/views/styles/_sample_form.php:28
 msgid "Check Boxes"
-msgstr "Check box"
+msgstr "Check Boxes"
 
 #: classes/views/styles/_sample_form.php:53
 msgid "Collapsible Section"
@@ -2894,7 +2888,7 @@ msgstr "Colore"
 
 #: classes/views/styles/_section-fields.php:23
 msgid "Weight"
-msgstr "Weight"
+msgstr "Peso"
 
 #: classes/views/styles/_section-fields.php:32
 msgid "Size"
@@ -3479,17 +3473,20 @@ msgstr "abilita autocompletamento"
 
 #: classes/views/frmpro-fields/back-end/password-options.php:3
 msgid "Validate Password"
-msgstr ""
+msgstr "Convalidare la password"
 
 #: classes/views/frmpro-fields/back-end/password-options.php:4
 msgid ""
 "A strong password is at least 8 characters long and includes a an uppercase "
 "letter, a lowercase letter, a number, and a character."
 msgstr ""
+"Una password sicura deve essere lunga almeno 8 caratteri e deve contenere "
+"una lettera maiuscola, una lettera minuscola, un numero e un carattere "
+"speciale"
 
 #: classes/views/frmpro-fields/back-end/password-options.php:9
 msgid "Require a strong password"
-msgstr ""
+msgstr "Richiedi una password sicura"
 
 #: classes/views/frmpro-fields/back-end/password-options.php:15
 msgid "Strength Meter"

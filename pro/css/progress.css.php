@@ -14,6 +14,7 @@ ul.frm_page_bar{
 	display: table<?php echo esc_html( $important ) ?>;
 	display: -webkit-flex<?php echo esc_html( $important ) ?>;
 	display: flex<?php echo esc_html( $important ) ?>;
+	flex-wrap: wrap<?php echo esc_html( $important ) ?>;
 	box-sizing: border-box<?php echo esc_html( $important ) ?>;
 	-moz-box-sizing: border-box<?php echo esc_html( $important ) ?>;
 	-webkit-box-sizing: border-box<?php echo esc_html( $important ) ?>;
@@ -84,13 +85,21 @@ ul.frm_page_bar li{
 	border-bottom: 1px solid <?php echo esc_html( $defaults['progress_border_color'] . $important ) ?>;
 	box-shadow: inset 0 10px 20px -15px #aaa;
 	margin: 5px 0<?php echo esc_html( $important ) ?>;
-	padding: 6px<?php echo esc_html( $important ) ?>;
+	padding: 6px 0<?php echo esc_html( $important ); ?>;
 	border-radius:0;
+	font-size:0<?php echo esc_html( $important ); ?>;
+	line-height:15px<?php echo esc_html( $important ); ?>;
 }
 
 .frm_forms .frm_progress_line.frm_show_lines input {
 	border-left: 1px solid <?php echo esc_html( $defaults['progress_color'] . $important ) ?>;
 	border-right: 1px solid <?php echo esc_html( $defaults['progress_color'] . $important ) ?>;
+}
+
+.frm_progress_line .frm_rootline_single {
+	display: flex<?php echo esc_html( $important ); ?>;
+	flex-direction: column<?php echo esc_html( $important ); ?>;
+	justify-content: flex-end<?php echo esc_html( $important ); ?>;
 }
 
 .frm_forms .frm_progress_line li:first-of-type input {
@@ -125,6 +134,39 @@ ul.frm_page_bar li{
 	border-left-color: <?php echo esc_html( $defaults['progress_active_bg_color'] . $important ) ?>;
 	border-right-color: <?php echo esc_html( $defaults['progress_color'] . $important ) ?>;
 }
+
+/* Start RTL */
+.frm_rtl.frm_forms .frm_progress_line li:first-of-type input {
+	border-top-right-radius: 15px<?php echo esc_html( $important ) ?>;
+	border-bottom-right-radius: 15px<?php echo esc_html( $important ) ?>;
+	border-top-left-radius:0px<?php echo esc_html( $important ); ?>;
+	border-bottom-left-radius:0px<?php echo esc_html( $important ); ?>;
+	border-right: 1px solid <?php echo esc_html( $defaults['progress_active_bg_color'] . $important ) ?>;
+}
+
+.frm_rtl.frm_forms .frm_progress_line li:last-of-type input	{
+	border-top-left-radius: 15px<?php echo esc_html( $important ) ?>;
+	border-bottom-left-radius: 15px<?php echo esc_html( $important ) ?>;
+	border-top-right-radius:0px<?php echo esc_html( $important ); ?>;
+	border-bottom-right-radius:0px<?php echo esc_html( $important ); ?>;
+	border-left: 1px solid <?php echo esc_html( $defaults['progress_active_bg_color'] . $important ) ?>;
+}
+
+.frm_rtl.frm_forms .frm_progress_line li:last-of-type input.frm_page_skip {
+	border-left: 1px solid <?php echo esc_html( $defaults['progress_border_color'] . $important ) ?>;
+	border-right:none;
+}
+
+.frm_rtl.frm_forms .frm_progress_line .frm_current_page input[type="button"] {
+	border-right: 1px solid <?php echo esc_html( $defaults['progress_border_color'] . $important ) ?>;
+	border-left:none;
+}
+
+.frm_rtl.frm_forms .frm_progress_line.frm_show_lines .frm_current_page input[type="button"] {
+	border-left: 1px solid <?php echo esc_html( $defaults['progress_color'] . $important ) ?>;
+	border-right:none;
+}
+/* End RTL */
 
 .frm_rootline.frm_show_lines:before {
     border-top-width: <?php echo esc_html( $defaults['progress_border_size'] ) ?>;
