@@ -3,6 +3,9 @@
 		<option value="id" <?php selected( $order_by, 'id' ); ?>>
 			<?php esc_html_e( 'Entry ID', 'formidable-pro' ); ?>
 		</option>
+		<option value="item_key" <?php selected( $order_by, 'item_key' ); ?>>
+			<?php esc_html_e( 'Entry Key', 'formidable-pro' ); ?>
+		</option>
 		<option value="created_at" <?php selected( $order_by, 'created_at' ); ?>>
 			<?php esc_html_e( 'Entry creation date', 'formidable-pro' ); ?>
 		</option>

@@ -373,7 +373,7 @@ function frmProFormJS(){
         if ( type === 'select-one' ) {
             select = true;
             var curOpt = this.options[this.selectedIndex];
-            if ( curOpt.className === 'frm_other_trigger' ) {
+            if ( typeof curOpt !== 'undefined' && curOpt.className === 'frm_other_trigger' ) {
                 other = true;
             }
         } else if ( type === 'select-multiple' ) {
@@ -1226,11 +1226,8 @@ function frmProFormJS(){
 		if ( inputs.length ) {
 
 			var prevInput;
-			var typeArray = ['checkbox','radio'];
 			for ( var i = 0; i < inputs.length; i++ ) {
-				// Don't loop through every input in a radio/checkbox field
-				// TODO: Improve this for checkboxes and address fields
-				if ( i > 0 && typeof prevInput !== 'undefined' && prevInput.name == inputs[i].name && typeArray.indexOf( prevInput.type ) > -1 ) {
+				if ( skipSetValue( i, prevInput, inputs ) ) {
 					continue;
 				}
 
@@ -1246,6 +1243,21 @@ function frmProFormJS(){
 				prevInput = inputs[i];
 			}
 		}
+	}
+
+	/**
+	 * Don't loop through every input in a radio/checkbox/other field
+	 * TODO: Improve this for checkboxes and address fields
+	 */
+	function skipSetValue( i, prevInput, inputs ) {
+		var typeArray = ['checkbox','radio'];
+
+		if ( i < 1 || typeof prevInput === 'undefined' ) {
+			return false;
+		}
+
+		var isOther = inputs[i].className.indexOf('frm_other_input') !== -1;
+		return isOther || ( prevInput.name == inputs[i].name && typeArray.indexOf( prevInput.type ) > -1 );
 	}
 
 	// Check if a field input inside of a section or embedded form is conditionally hidden
@@ -1551,6 +1563,9 @@ function frmProFormJS(){
 
 			if ( input.tagName == 'SELECT' ) {
 				maybeUpdateChosenOptions( input );
+				if ( input.value === '' ) {
+					setOtherSelectValue( input, defaultValue );
+				}
 			}
 
 			triggerChange( $input );
@@ -1559,10 +1574,16 @@ function frmProFormJS(){
 
 	function setCheckboxOrRadioDefaultValue( inputName, defaultValue ) {
 		// Get all checkbox/radio inputs for this field
-		var radioInputs = document.getElementsByName( inputName );
+		var radioInputs = document.getElementsByName( inputName ),
+			isSet = false,
+			firstInput = false;
 
 		// Loop through options and set the default value
 		for ( var i = 0, l = radioInputs.length; i < l; i++ ) {
+			if ( firstInput === false ) {
+				firstInput = radioInputs[i];
+			}
+
 			if ( radioInputs[i].type == 'hidden' ) {
 				// If field is read-only and there is a hidden input
 				if ( jQuery.isArray(defaultValue) && defaultValue[i] !== null ) {
@@ -1570,15 +1591,21 @@ function frmProFormJS(){
 				} else {
 					radioInputs[i].value = defaultValue;
 				}
+				isSet = true;
 			} else if (radioInputs[i].value == defaultValue ||
 				( jQuery.isArray(defaultValue) && defaultValue.indexOf( radioInputs[i].value ) > -1 ) ) {
 				// If input's value matches the default value, set checked to true
 
 				radioInputs[i].checked = true;
+				isSet = true;
 				if ( radioInputs[i].type == 'radio') {
 					break;
 				}
 			}
+		}
+
+		if ( ! isSet && firstInput !== false ) {
+			setOtherValueLimited( firstInput, defaultValue );
 		}
 	}
 
@@ -2945,12 +2972,14 @@ function frmProFormJS(){
 
 			thisFullCalc = trimNumericCalculation( thisFullCalc );
 
-			try {
-				total = parseFloat( eval( thisFullCalc ) );
-			}
+			if ( thisFullCalc !== '' ) {
+				try {
+					total = parseFloat( eval( thisFullCalc ) );
+				}
 
-			catch ( err ) {
-				maybeShowCalculationsErrorAlert( err, field_key, thisFullCalc );
+				catch ( err ) {
+					maybeShowCalculationsErrorAlert( err, field_key, thisFullCalc );
+				}
 			}
 
 			if ( typeof total === 'undefined' || isNaN(total) ) {
@@ -3408,7 +3437,54 @@ function frmProFormJS(){
 
 	/* Get value from Other text field in a visible dropdown field */
 	function getOtherSelectValue( currentOpt ) {
-		return jQuery(currentOpt).closest('.frm_other_container').find('.frm_other_input').val();
+		var fields = getOtherSelects( currentOpt );
+		return fields.val();
+	}
+
+	/**
+	 * Fill in the other text, and select the other option from a dropdown
+	 */
+	function setOtherSelectValue( thisField, value ) {
+		var i, fields = getOtherSelects( thisField );
+		if ( fields.length < 1 ) {
+			return;
+		}
+
+		fields.val( value );
+
+		for ( i = 0; i < thisField.options.length; i++ ) {
+			if ( thisField.options[i].className.indexOf('frm_other_trigger') !== -1 ) {
+		   		thisField.options[i].selected = true;
+			}
+		}
+	}
+
+	function getOtherSelects( currentOpt ) {
+		return jQuery( currentOpt ).closest( '.frm_other_container' ).find( '.frm_other_input' );
+	}
+
+	function setOtherValueLimited( thisField, value ) {
+		var otherText, baseId, parentInput,
+			i = 0,
+			idParts = thisField.id.split('-');
+		idParts.pop(); //remove the last id
+		baseId = idParts.join('-');
+
+		if ( typeof( document.querySelectorAll ) === 'function' ) {
+			otherText = document.querySelectorAll( '[id^='+baseId+'-other][id$=otext]' );
+
+			if ( otherText.length > 0 ) {
+				for ( i = 0; i < otherText.length; i++ ) {
+					if ( otherText[i].value === '' ) {
+						otherText[i].value = value;
+						parentInput = document.getElementById( otherText[i].id.replace( '-otext', '' ) );
+						if ( parentInput !== null ) {
+							parentInput.checked = true;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	function savingDraftEntry( object ) {

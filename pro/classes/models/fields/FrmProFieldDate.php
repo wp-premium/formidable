@@ -51,9 +51,16 @@ class FrmProFieldDate extends FrmFieldType {
 		parent::show_options( $field, $display, $values );
 	}
 
+	/**
+	 * @todo remove this function since it's the same as parent
+	 */
 	public function prepare_front_field( $values, $atts ) {
-		$values['value'] = FrmProAppHelper::maybe_convert_from_db_date( $values['value'] );
+		$values['value'] = $this->prepare_field_value( $values['value'], $atts );
 		return $values;
+	}
+
+	public function prepare_field_value( $value, $atts ) {
+		return FrmProAppHelper::maybe_convert_from_db_date( $value );
 	}
 
 	protected function html5_input_type() {
@@ -145,7 +152,7 @@ class FrmProFieldDate extends FrmFieldType {
 	private function maybe_convert_relative_year_to_int( $start_end ) {
 		$rel_year = FrmField::get_option( $this->field, $start_end );
 
-		if ( is_string( $rel_year ) && strlen( $rel_year ) > 0 && ( '0' === $rel_year || '+' == $rel_year[0] || '-' == $rel_year[0] ) ) {
+		if ( is_string( $rel_year ) && strlen( $rel_year ) > 0 && ( '0' === $rel_year || '+' == $rel_year[0] || '-' == $rel_year[0] || strlen( $rel_year ) < 4 ) ) {
 			$rel_year = date( 'Y', strtotime( $rel_year . ' year' ) );
 		}
 

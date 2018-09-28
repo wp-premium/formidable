@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Formidable Forms package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2018-08-06 21:37+0000\n"
+"PO-Revision-Date: 2018-09-12 17:30+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Language: es_ES\n"
 "Project-Id-Version: Formidable Forms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-08-06 21:36+0000\n"
+"POT-Creation-Date: 2018-09-12 17:29+0000\n"
 "Last-Translator: Formidable Community\n"
 "Language-Team: Spanish (Spain)"
 
@@ -193,11 +193,11 @@ msgstr "Personalización"
 
 #: classes/controllers/FrmProDisplaysController.php:751
 msgid "day"
-msgstr "día"
+msgstr "Día"
 
 #: classes/controllers/FrmProDisplaysController.php:751
 msgid "days"
-msgstr "días"
+msgstr "Días"
 
 #: classes/controllers/FrmProDisplaysController.php:751
 msgid "daily"
@@ -354,7 +354,7 @@ msgstr "Borrador"
 
 #: classes/controllers/FrmProEntriesController.php:1440
 msgid "Parent Entry ID"
-msgstr ""
+msgstr "ID del envío padre"
 
 #: classes/controllers/FrmProEntriesController.php:1476
 #: classes/helpers/FrmProDisplaysHelper.php:87
@@ -511,7 +511,7 @@ msgstr "Hora Actual"
 #: classes/controllers/FrmProFormsController.php:296
 #: classes/controllers/FrmProFormsController.php:546
 msgid "Email"
-msgstr "Correo electrónico"
+msgstr "Correo electronico"
 
 #: classes/controllers/FrmProFormsController.php:297
 msgid "Login"
@@ -536,7 +536,7 @@ msgstr "Apellido"
 #: classes/controllers/FrmProFormsController.php:541
 #: classes/models/FrmProForm.php:276
 msgid "User ID"
-msgstr "ID de usuario"
+msgstr "ID de Usuario"
 
 #: classes/controllers/FrmProFormsController.php:302
 msgid "User Meta"
@@ -810,12 +810,12 @@ msgid "Default"
 msgstr "Por defecto"
 
 #: classes/controllers/FrmProFormsController.php:721
-#: classes/views/displays/order_row.php:24
+#: classes/views/displays/order_row.php:27
 msgid "Ascending"
 msgstr "Ascendente"
 
 #: classes/controllers/FrmProFormsController.php:722
-#: classes/views/displays/order_row.php:27
+#: classes/views/displays/order_row.php:30
 msgid "Descending"
 msgstr "Descendente"
 
@@ -1297,7 +1297,7 @@ msgstr "Elegir un XML Formidable o cualquier archivo CSV"
 
 #: classes/controllers/FrmProXMLController.php:65
 msgid "Styles"
-msgstr ""
+msgstr "Estilos"
 
 #: classes/controllers/FrmProXMLController.php:164
 msgid "All Fields are required"
@@ -1438,7 +1438,7 @@ msgstr ""
 
 #: classes/helpers/FrmProEntriesHelper.php:235
 msgid "Add New"
-msgstr "Añadir Nuevo"
+msgstr "Añadir nuevo"
 
 #: classes/helpers/FrmProEntriesHelper.php:298
 msgid "Resend Email Notifications"
@@ -1470,7 +1470,7 @@ msgstr "Todos los Campos"
 #: classes/helpers/FrmProFieldsHelper.php:2587
 #: classes/views/displays/_calendar_options.php:5
 #: classes/views/displays/_calendar_options.php:22
-#: classes/views/displays/order_row.php:7
+#: classes/views/displays/order_row.php:10
 #: classes/views/displays/where_row.php:5
 msgid "Entry creation date"
 msgstr "Fecha de creación de la entrada"
@@ -1482,7 +1482,7 @@ msgstr "Visualizar todas las entradas bajo %s"
 
 #: classes/helpers/FrmProFieldsHelper.php:753
 msgid "The entered values do not match"
-msgstr ""
+msgstr "Los valores introducidos no coinciden"
 
 #: classes/helpers/FrmProFieldsHelper.php:1390
 msgid "No Categories"
@@ -1502,6 +1502,7 @@ msgid "Select a value to insert into the box below"
 msgstr "Seleccione un valor para insertar en el cuadro de abajo"
 
 #: classes/helpers/FrmProFieldsHelper.php:2584
+#: classes/views/displays/order_row.php:7
 #: classes/views/xml/map_csv_fields.php:72
 #: classes/views/xml/map_csv_fields.php:73
 msgid "Entry Key"
@@ -1514,7 +1515,7 @@ msgstr "IP del usuario"
 #: classes/helpers/FrmProFieldsHelper.php:2588
 #: classes/views/displays/_calendar_options.php:8
 #: classes/views/displays/_calendar_options.php:25
-#: classes/views/displays/order_row.php:10
+#: classes/views/displays/order_row.php:13
 msgid "Entry update date"
 msgstr "Fecha de actualización de la entrada"
 
@@ -1580,7 +1581,7 @@ msgstr "El borrador se ha guardado"
 
 #: classes/models/FrmProDb.php:560
 msgid "Formidable Style"
-msgstr "Estilo Formidable"
+msgstr "Estilos Formidable"
 
 #: classes/models/FrmProDisplay.php:248
 msgid "Name cannot be blank"
@@ -1842,7 +1843,7 @@ msgstr ""
 
 #: classes/views/combo-fields/inplace-sub-label.php:2
 msgid "(Click to add description)"
-msgstr "(Hacer clic para agregar descripción)"
+msgstr "(haz clic para añadir descripción)"
 
 #: classes/views/displays/_calendar_options.php:2
 msgid "Event Date"
@@ -2073,7 +2074,7 @@ msgstr ""
 msgid "Calendar &mdash; insert entries into a calendar"
 msgstr "Calendario &mdash; insertar entradas en un calendario"
 
-#: classes/views/displays/order_row.php:13
+#: classes/views/displays/order_row.php:16
 msgid "Random"
 msgstr "Aleatorio"
 
@@ -2324,7 +2325,7 @@ msgstr "No hay taxonomías disponibles"
 
 #: classes/views/frmpro-form-actions/post_action.php:14
 msgid "Create Post"
-msgstr "Crear Publicación"
+msgstr "Crear entrada"
 
 #: classes/views/frmpro-form-actions/post_options.php:4
 msgid "Post Type"
@@ -2580,11 +2581,11 @@ msgstr "Redireccionar a URL"
 
 #: classes/views/frmpro-forms/add_form_options.php:113
 msgid "Show Page Content"
-msgstr "Mostrar contenido de página"
+msgstr "Mostrar contenido de la página"
 
 #: classes/views/frmpro-forms/add_form_options.php:122
 msgid "Use Content from Page"
-msgstr "Usar Contenido de Página"
+msgstr "Usar contenido de la Página"
 
 #: classes/views/frmpro-forms/add_form_options.php:132
 msgid "Allow logged-in users to save drafts"
@@ -2743,7 +2744,7 @@ msgstr "Varios"
 
 #: classes/views/settings/form.php:35
 msgid "Date Format"
-msgstr "Formato de Fecha"
+msgstr "Formato de fecha"
 
 #: classes/views/settings/form.php:36
 msgid "Change the format of the date used in the date field."
@@ -2938,7 +2939,7 @@ msgstr "Sólido"
 
 #: classes/views/styles/_section-fields.php:70
 msgid "dotted"
-msgstr "punteado"
+msgstr "Punteado"
 
 #: classes/views/styles/_section-fields.php:73
 msgid "dashed"
@@ -2946,7 +2947,7 @@ msgstr "Con guiones"
 
 #: classes/views/styles/_section-fields.php:76
 msgid "double"
-msgstr "doble"
+msgstr "Doble"
 
 #: classes/views/styles/_section-fields.php:82
 msgid "Border Position"
@@ -2954,7 +2955,7 @@ msgstr "Posición de borde"
 
 #: classes/views/styles/_section-fields.php:85
 msgid "top"
-msgstr "superior"
+msgstr "Superior"
 
 #: classes/views/styles/_section-fields.php:88
 msgid "bottom"
@@ -3310,7 +3311,7 @@ msgstr "Mostrar como"
 
 #: classes/views/frmpro-fields/back-end/dynamic-field.php:17
 msgid "Entries"
-msgstr "Entradas"
+msgstr "Comentarios"
 
 #: classes/views/frmpro-fields/back-end/dynamic-field.php:21
 msgid ""
@@ -3337,7 +3338,7 @@ msgstr "No hay opciones"
 #: classes/views/frmpro-fields/back-end/field-file.php:4
 #: classes/views/frmpro-fields/front-end/file.php:66
 msgid "Drop a file here or click to upload"
-msgstr "Desliza un archivo hasta aquí o haz clic para cargar"
+msgstr "Arrastra un archivo aquí o haz clic para cargar"
 
 #: classes/views/frmpro-fields/back-end/field-file.php:6
 #: classes/views/frmpro-fields/front-end/file.php:69
