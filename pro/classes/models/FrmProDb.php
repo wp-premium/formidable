@@ -7,7 +7,7 @@ class FrmProDb {
 	/**
 	 * @since 3.0.02
 	 */
-	public static $plug_version = '3.03.01';
+	public static $plug_version = '3.03.03';
 
 	/**
 	 * @since 2.3

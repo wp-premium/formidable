@@ -414,7 +414,7 @@ class FrmProFieldFile extends FrmFieldType {
 
 			if ( ! is_numeric( $m ) ) {
 				//get the ID from the URL if on this site
-				$m = FrmDb::get_col( $wpdb->posts, array( 'guid' => $m ), 'ID' );
+				$m = FrmDb::get_var( $wpdb->posts, array( 'guid' => $m ), 'ID' );
 			}
 
 			if ( ! is_numeric( $m ) ) {

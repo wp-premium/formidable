@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Formidable v2.05\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-08-06 21:36+0000\n"
+"POT-Creation-Date: 2018-09-12 17:29+0000\n"
 "POT-Revision-Date: Tue Sep 26 2017 16:06:46 GMT-0600 (MDT)\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: \n"
@@ -806,12 +806,12 @@ msgid "Default"
 msgstr ""
 
 #: classes/controllers/FrmProFormsController.php:721
-#: classes/views/displays/order_row.php:24
+#: classes/views/displays/order_row.php:27
 msgid "Ascending"
 msgstr ""
 
 #: classes/controllers/FrmProFormsController.php:722
-#: classes/views/displays/order_row.php:27
+#: classes/views/displays/order_row.php:30
 msgid "Descending"
 msgstr ""
 
@@ -1451,7 +1451,7 @@ msgstr ""
 #: classes/helpers/FrmProFieldsHelper.php:2587
 #: classes/views/displays/_calendar_options.php:5
 #: classes/views/displays/_calendar_options.php:22
-#: classes/views/displays/order_row.php:7
+#: classes/views/displays/order_row.php:10
 #: classes/views/displays/where_row.php:5
 msgid "Entry creation date"
 msgstr ""
@@ -1483,6 +1483,7 @@ msgid "Select a value to insert into the box below"
 msgstr ""
 
 #: classes/helpers/FrmProFieldsHelper.php:2584
+#: classes/views/displays/order_row.php:7
 #: classes/views/xml/map_csv_fields.php:72
 #: classes/views/xml/map_csv_fields.php:73
 msgid "Entry Key"
@@ -1495,7 +1496,7 @@ msgstr ""
 #: classes/helpers/FrmProFieldsHelper.php:2588
 #: classes/views/displays/_calendar_options.php:8
 #: classes/views/displays/_calendar_options.php:25
-#: classes/views/displays/order_row.php:10
+#: classes/views/displays/order_row.php:13
 msgid "Entry update date"
 msgstr ""
 
@@ -2022,7 +2023,7 @@ msgstr ""
 msgid "Calendar &mdash; insert entries into a calendar"
 msgstr ""
 
-#: classes/views/displays/order_row.php:13
+#: classes/views/displays/order_row.php:16
 msgid "Random"
 msgstr ""
 

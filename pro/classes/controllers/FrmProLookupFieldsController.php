@@ -506,7 +506,9 @@ class FrmProLookupFieldsController {
 			return array();
 		}
 
-		$args = array();
+		$args = array(
+			'lookup_field' => $values,
+		);
 
 		if ( self::need_to_filter_values_for_current_user( $values['id'], $values ) ) {
 			$current_user = get_current_user_id();
@@ -531,23 +533,34 @@ class FrmProLookupFieldsController {
 	}
 
 	/**
-	 * Formats meta values for a lookup field associated to an address field.
+	 * Formats meta values for a lookup field.
 	 *
-	 * @since 3.01
+	 * @since 3.03.03
 	 * @param array  $metas
 	 * @param object $linked_field
 	 * @return array
 	 */
-	private static function format_address_metas_for_lookup_field( $metas, $linked_field ) {
-		if ( 'address' !== $linked_field->type ) {
+	private static function format_field_value_for_lookup( $metas, $linked_field, $args ) {
+
+		// don't mess with formats for select fields since existing fields won't be selected on edit
+		$lookup_type = isset( $args['lookup_field'] ) ? FrmField::get_option( $args['lookup_field'], 'data_type' ) : '';
+		$alter_lookup_value = empty( $lookup_type ) || 'text' === $lookup_type || 'address' === $linked_field->type;
+		if ( ! $alter_lookup_value ) {
 			return $metas;
 		}
 
-		$address_class = FrmFieldFactory::get_field_object( $linked_field );
+		$field_class = FrmFieldFactory::get_field_object( $linked_field );
+		if ( ! is_callable( array( $field_class, 'prepare_field_value' ) ) ) {
+			return $metas;
+		}
 
 		$result = array();
 		foreach ( $metas as $value ) {
-			$result[] = $address_class->format_address_for_display( $value, array( 'line_sep' => ' ' ) );
+			if ( 'address' === $linked_field->type ) {
+				$result[] = $field_class->format_address_for_display( $value, array( 'line_sep' => ' ' ) );
+			} else {
+				$result[] = $field_class->prepare_field_value( $value, array() );
+			}
 		}
 
 		return $result;
@@ -944,14 +957,30 @@ class FrmProLookupFieldsController {
 		if ( is_array( $parent_val ) ) {
 			$entry_ids = array( 'first' => true );
 			foreach ( $parent_val as $p_val ) {
+				self::get_save_value_from_display( $linked_field, $p_val );
 				$new_entry_ids = FrmProEntryMeta::get_entry_ids_for_field_and_value( $linked_field, $p_val, $args );
 				$entry_ids = self::filter_or_merge_entry_ids( $entry_ids, $new_entry_ids, $args['and_or'] );
 			}
 		} else {
+			self::get_save_value_from_display( $linked_field, $parent_val );
 			$entry_ids = FrmProEntryMeta::get_entry_ids_for_field_and_value( $linked_field, $parent_val, $args );
 		}
 
 		return $entry_ids;
+	}
+
+	/**
+	 * Get the value in the format saved to the database in order to
+	 * correctly compare with an SQL call
+	 *
+	 * @since 3.03.03
+	 * @param object $field
+	 * @param string $value
+	 * @return string
+	 */
+	private static function get_save_value_from_display( $field, &$value ) {
+		$field_obj = FrmFieldFactory::get_field_object( $field );
+		$value = $field_obj->set_value_before_save( $value );
 	}
 
 	/**
@@ -1009,7 +1038,8 @@ class FrmProLookupFieldsController {
 		}
 
 		$args = array(
-			'entry_ids' => $entry_ids,
+			'entry_ids'    => $entry_ids,
+			'lookup_field' => $child_field,
 		);
 
 		if ( FrmField::is_option_true_in_object( $child_field, 'get_most_recent_value' ) ) {
@@ -1030,7 +1060,7 @@ class FrmProLookupFieldsController {
 	 */
 	private static function get_filtered_lookup_options( $field, $args ) {
 		$options = FrmProEntryMeta::get_all_metas_for_field( $field, $args );
-		$options = self::format_address_metas_for_lookup_field( $options, $field );
+		$options = self::format_field_value_for_lookup( $options, $field, $args );
 		$options = self::flatten_and_unserialize_meta_values( $options );
 		self::get_unique_values( $options );
 

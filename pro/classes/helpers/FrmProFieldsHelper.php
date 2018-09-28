@@ -461,6 +461,11 @@ class FrmProFieldsHelper {
 
 			//If the default value does not match any options OR if data from entries field (never would have commas in values), explode to array
 			$value = explode(',', $value);
+
+			if ( is_array( $value ) ) {
+				// spaces prevent the value from being matched
+				$value = array_map( 'trim', $value );
+			}
 		}
     }
 

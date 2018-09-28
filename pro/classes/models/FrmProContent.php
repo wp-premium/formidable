@@ -578,7 +578,18 @@ class FrmProContent {
 					$replace_with = '';
 				}
 			}
-		} elseif ( ( $field && $field->type == 'user_id' ) || in_array( $tag, array( 'updated_by', 'created_by' ) ) ) {
+
+			// Get the linked field to properly evaluate conditions
+			if ( $replace_with !== '' && isset( $atts['show'] ) && ! empty( $atts['show'] ) ) {
+				$show_field = FrmField::getOne( $atts['show'] );
+				if ( $show_field && in_array( $show_field->type, array( 'time', 'date', 'user_id' ) ) ) {
+					$field = $show_field;
+					unset( $atts['show'] );
+				}
+			}
+		}
+
+		if ( ( $field && $field->type == 'user_id' ) || in_array( $tag, array( 'updated_by', 'created_by' ) ) ) {
 			// check if conditional is for current user
 			if ( isset( $atts['equals'] ) && $atts['equals'] == 'current' ) {
 				$atts['equals'] = get_current_user_id();

@@ -13,14 +13,7 @@ class FrmAppController {
     }
 
 	private static function get_menu_position() {
-		$count = count( get_post_types( array(
-			'show_ui'      => true,
-			'_builtin'     => false,
-			'show_in_menu' => true,
-		) ) );
-		$pos = $count ? '22.7' : '29.3';
-		$pos = apply_filters( 'frm_menu_position', $pos );
-		return $pos;
+		return apply_filters( 'frm_menu_position', '29.3' );
 	}
 
 	/**
@@ -108,11 +101,11 @@ class FrmAppController {
 			),
 		);
 
-		$nav_items = apply_filters( 'frm_form_nav_list', $nav_items, array(
+		$nav_args = array(
 			'form_id' => $id,
 			'form'    => $form,
-		) );
-		return $nav_items;
+		);
+		return apply_filters( 'frm_form_nav_list', $nav_items, $nav_args );
 	}
 
     // Adds a settings link to the plugins page
@@ -147,12 +140,16 @@ class FrmAppController {
         ?>
 <div class="error" class="frm_previous_install">
 		<?php
-		echo apply_filters( 'frm_pro_update_msg', // WPCS: XSS ok.
+		echo apply_filters( // WPCS: XSS ok.
+			'frm_pro_update_msg',
 			sprintf(
 				esc_html__( 'This site has been previously authorized to run Formidable Forms. %1$sInstall Formidable Pro%2$s or %3$sdeauthorize%4$s this site to continue running the free version and remove this message.', 'formidable' ),
-				'<br/><a href="' . esc_url( $inst_install_url ) . '" target="_blank">', '</a>',
-				'<a href="#" class="frm_deauthorize_link">', '</a>'
-			), esc_url( $inst_install_url )
+				'<br/><a href="' . esc_url( $inst_install_url ) . '" target="_blank">',
+				'</a>',
+				'<a href="#" class="frm_deauthorize_link">',
+				'</a>'
+			),
+			esc_url( $inst_install_url )
 		);
 		?>
 </div>
@@ -201,11 +198,13 @@ class FrmAppController {
 	 * @return boolean
 	 */
 	public static function needs_update() {
-		$needs_upgrade = self::compare_for_update( array(
-			'option'             => 'frm_db_version',
-			'new_db_version'     => FrmAppHelper::$db_version,
-			'new_plugin_version' => FrmAppHelper::plugin_version(),
-		) );
+		$needs_upgrade = self::compare_for_update(
+			array(
+				'option'             => 'frm_db_version',
+				'new_db_version'     => FrmAppHelper::$db_version,
+				'new_plugin_version' => FrmAppHelper::plugin_version(),
+			)
+		);
 
 		if ( ! $needs_upgrade ) {
 			$needs_upgrade = apply_filters( 'frm_db_needs_upgrade', $needs_upgrade );
@@ -374,10 +373,11 @@ class FrmAppController {
 	 * @since 3.0
 	 */
 	public static function create_rest_routes() {
-		register_rest_route( 'frm-admin/v1', '/install', array(
+		$args = array(
 			'methods'  => 'GET',
 			'callback' => 'FrmAppController::api_install',
-		) );
+		);
+		register_rest_route( 'frm-admin/v1', '/install', $args );
 	}
 
 	/**
