@@ -2227,6 +2227,7 @@ class FrmProGraphsController {
 	/**
 	 * Apply deprecated filters
 	 * @since 2.02.05
+	 * @codeCoverageIgnore
 	 */
 	private static function apply_deprecated_filters() {
 		$placeholder = array();

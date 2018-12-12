@@ -786,12 +786,45 @@ class FrmFormsController {
 		$settings_tab = FrmAppHelper::is_admin_page( 'formidable' ) ? true : false;
 
 		$cond_shortcodes = apply_filters( 'frm_conditional_shortcodes', array() );
-		$adv_shortcodes = self::get_advanced_shortcodes();
-		$user_fields = apply_filters( 'frm_user_shortcodes', array() );
 		$entry_shortcodes = self::get_shortcode_helpers( $settings_tab );
+
+		$advanced_helpers = self::advanced_helpers( compact( 'fields', 'form_id' ) );
 
 		include( FrmAppHelper::plugin_path() . '/classes/views/shared/mb_adv_info.php' );
     }
+
+	/**
+	 * @since 3.04.01
+	 */
+	private static function advanced_helpers( $atts ) {
+		$advanced_helpers = array(
+			'default' => array(
+				'heading' => __( 'Customize the field values with the following parameters. Click to see a sample.', 'formidable' ),
+				'codes'   => self::get_advanced_shortcodes(),
+			),
+		);
+
+		$user_fields = self::user_shortcodes();
+		if ( ! empty( $user_fields ) ) {
+			$user_helpers = array();
+			foreach ( $user_fields as $uk => $uf ) {
+				$user_helpers[ '|user_id| show="' . $uk . '"' ] = $uf;
+				unset( $uk, $uf );
+			}
+
+			$advanced_helpers['user_id'] = array(
+				'heading' => __( 'Insert user information', 'formidable' ),
+				'codes'   => $user_helpers,
+			);
+		}
+
+		/**
+		 * Add extra helper shortcodes on the Advanced tab in form settings and views
+		 * @since 3.04.01
+		 * @param array $atts - Includes fields and form_id
+		 */
+		return apply_filters( 'frm_advanced_helpers', $advanced_helpers, $atts );
+	}
 
 	/**
 	 * Get an array of the options to display in the advanced tab
@@ -800,13 +833,13 @@ class FrmFormsController {
 	 */
 	private static function get_advanced_shortcodes() {
 		$adv_shortcodes = array(
-			'sep=", "'       => array(
+			'x sep=", "'           => array(
 				'label' => __( 'Separator', 'formidable' ),
 				'title' => __( 'Use a different separator for checkbox fields', 'formidable' ),
 			),
-			'format="d-m-Y"' => __( 'Date Format', 'formidable' ),
-			'show="field_label"' => __( 'Field Label', 'formidable' ),
-			'wpautop=0'      => array(
+			'x format="d-m-Y"'     => __( 'Date Format', 'formidable' ),
+			'x show="field_label"' => __( 'Field Label', 'formidable' ),
+			'x wpautop=0'          => array(
 				'label' => __( 'No Auto P', 'formidable' ),
 				'title' => __( 'Do not automatically add any paragraphs or line breaks', 'formidable' ),
 			),
@@ -815,6 +848,23 @@ class FrmFormsController {
 		// __( 'Leave blank instead of defaulting to User Login', 'formidable' ) : blank=1
 
 		return $adv_shortcodes;
+	}
+
+	/**
+	 * @since 3.04.01
+	 */
+	private static function user_shortcodes() {
+		$options = array(
+			'ID'            => __( 'User ID', 'formidable' ),
+			'first_name'    => __( 'First Name', 'formidable' ),
+			'last_name'     => __( 'Last Name', 'formidable' ),
+			'display_name'  => __( 'Display Name', 'formidable' ),
+			'user_login'    => __( 'User Login', 'formidable' ),
+			'user_email'    => __( 'Email', 'formidable' ),
+			'avatar'        => __( 'Avatar', 'formidable' ),
+			'author_link'   => __( 'Author Link', 'formidable' ),
+		);
+		return apply_filters( 'frm_user_shortcodes', $options );
 	}
 
 	/**
@@ -955,7 +1005,7 @@ class FrmFormsController {
         }
 
         if ( isset( $message ) && ! empty( $message ) ) {
-			echo '<div id="message" class="updated frm_updated_message">' . FrmAppHelper::kses( $message, array( 'a' ) ) . '</div>'; // WPCS: XSS ok.
+			echo '<div id="message" class="frm_updated_message">' . FrmAppHelper::kses( $message, array( 'a' ) ) . '</div>'; // WPCS: XSS ok.
         }
 
         return $errors;

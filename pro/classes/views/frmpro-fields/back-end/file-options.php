@@ -113,3 +113,24 @@
 		</label>
 	</td>
 </tr>
+<tr>
+	<td>
+		<label for="drop_msg_<?php echo esc_attr( $field['id'] ) ?>">
+			<?php esc_html_e( 'Upload text', 'formidable-pro' ); ?>
+		</label>
+	</td>
+	<td>
+		<input type="text" id="drop_msg_<?php echo esc_attr( $field['id'] ) ?>" class="frm_long_input" name="field_options[drop_msg_<?php echo esc_attr( $field['id'] ) ?>]" value="<?php echo esc_attr( $field['drop_msg'] ); ?>" />
+	</td>
+</tr>
+<tr>
+	<td>
+		<label for="choose_msg_<?php echo esc_attr( $field['id'] ) ?>">
+			<?php esc_html_e( 'Compact upload text', 'formidable-pro' ); ?>
+			<span class="frm_help frm_icon_font frm_tooltip_icon" title="<?php echo esc_attr__( 'The label shown when the file upload field is compacted with the frm_compact CSS layout class.', 'formidable-pro' ); ?>"></span>
+		</label>
+	</td>
+	<td>
+		<input type="text" id="choose_msg_<?php echo esc_attr( $field['id'] ) ?>" class="frm_long_input" name="field_options[choose_msg_<?php echo esc_attr( $field['id'] ) ?>]" value="<?php echo esc_attr( $field['choose_msg'] ); ?>" />
+	</td>
+</tr>

@@ -25,6 +25,9 @@ class FrmProCreditCardsController extends FrmProComboFieldsController {
 		include( FrmProAppHelper::plugin_path() . '/classes/views/combo-fields/input.php' );
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function show_in_form_builder( $field, $name = '', $null = null ) {
 		_deprecated_function( __METHOD__, '3.0', 'FrmFieldType::show_on_form_builder' );
 		$field_type = FrmFieldFactory::get_field_type( 'address', $field );
@@ -71,6 +74,9 @@ class FrmProCreditCardsController extends FrmProComboFieldsController {
 		include( FrmProAppHelper::plugin_path() . '/classes/views/combo-fields/credit-cards/back-end-field-opts.php' );
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function display_value( $value ) {
 		_deprecated_function( __FUNCTION__, '3.0', 'FrmProFieldCreditCard->get_display_value' );
 		$field_obj = FrmFieldFactory::get_field_type( 'credit_card' );

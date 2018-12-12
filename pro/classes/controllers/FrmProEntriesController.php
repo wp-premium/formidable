@@ -447,8 +447,23 @@ class FrmProEntriesController {
             self::allow_front_create_entry($form, $continue);
         }
 
+		self::check_form_status_options( $form, $continue );
+
 		self::remove_opposite_continue_to_new_filter( $continue );
     }
+
+	/**
+	 * @since 3.04
+	 *
+	 * @param object $form
+	 */
+	private static function check_form_status_options( $form, &$continue ) {
+		if ( $continue && ! FrmProForm::is_open( $form ) ) {
+			$continue = false;
+			$message  = do_shortcode( $form->options['closed_msg'] );
+			echo wp_kses_post( $message );
+		}
+	}
 
 	private static function remove_opposite_continue_to_new_filter( $continue ) {
 		if ( $continue === true ) {
@@ -2871,41 +2886,65 @@ class FrmProEntriesController {
 		return $url;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function admin_js() {
 		_deprecated_function( __METHOD__, '3.0', 'FrmProFormsController::admin_js' );
 		FrmProFormsController::admin_js();
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function add_js() {
 		_deprecated_function( __METHOD__, '3.0', 'FrmProFormsController::add_js' );
 		FrmProFormsController::add_js();
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function print_ajax_scripts( $keep = '' ) {
 		_deprecated_function( __METHOD__, '3.0', 'FrmProFormsController::print_ajax_scripts' );
 		FrmProFormsController::print_ajax_scripts();
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
     public static function after_footer_loaded() {
 		_deprecated_function( __METHOD__, '3.0', 'FrmProFormsController::after_footer_loaded' );
 		FrmProFormsController::after_footer_loaded();
     }
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function enqueue_footer_js() {
 		_deprecated_function( __METHOD__, '3.0', 'FrmProFormsController::enqueue_footer_js' );
 		FrmProFormsController::enqueue_footer_js();
     }
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function footer_js() {
 		_deprecated_function( __METHOD__, '3.0', 'FrmProFormsController::footer_js' );
 		FrmProFormsController::footer_js();
     }
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function add_duplicate_link( $entry ) {
 		_deprecated_function( __METHOD__, '3.0' );
 		FrmProEntriesHelper::show_duplicate_link( $entry );
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function register_scripts() {
 		_deprecated_function( __METHOD__, '3.0', 'FrmProAppController::register_scripts' );
 		FrmProAppController::register_scripts();
@@ -2913,6 +2952,7 @@ class FrmProEntriesController {
 
 	/**
 	 * @deprecated 2.04
+	 * @codeCoverageIgnore
 	 */
 	public static function filter_value_in_single_entry_table( $value, $meta, $entry, $atts = array() ) {
 		_deprecated_function( __FUNCTION__, '2.04', 'FrmProEntriesController::get_option_label_for_saved_value');

@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Formidable Forms package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2018-08-06 21:39+0000\n"
+"PO-Revision-Date: 2018-10-15 19:40+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Language: sv_SE\n"
 "Project-Id-Version: Formidable Forms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-08-06 21:36+0000\n"
+"POT-Creation-Date: 2018-10-15 19:37+0000\n"
 "Last-Translator: Formidable Community\n"
 "Language-Team: Swedish"
 
@@ -19,44 +19,44 @@ msgstr ""
 msgid "Formidable Forms Pro requires Formidable Forms to be installed."
 msgstr ""
 
-#: classes/controllers/FrmProAddressesController.php:140
+#: classes/controllers/FrmProAddressesController.php:146
 msgid "Line 1"
 msgstr "Rad 1"
 
-#: classes/controllers/FrmProAddressesController.php:141
+#: classes/controllers/FrmProAddressesController.php:147
 msgid "Line 2"
 msgstr "Rad 2"
 
-#: classes/controllers/FrmProAddressesController.php:142
-#: classes/controllers/FrmProAddressesController.php:168
+#: classes/controllers/FrmProAddressesController.php:148
+#: classes/controllers/FrmProAddressesController.php:174
 #: classes/models/fields/FrmProFieldAddress.php:51
 msgid "Country"
 msgstr "Land"
 
-#: classes/controllers/FrmProAddressesController.php:165
+#: classes/controllers/FrmProAddressesController.php:171
 #: classes/models/fields/FrmProFieldAddress.php:48
 msgid "City"
 msgstr "Stad"
 
-#: classes/controllers/FrmProAddressesController.php:166
+#: classes/controllers/FrmProAddressesController.php:172
 #: classes/models/fields/FrmProFieldAddress.php:49
 msgid "State/Province"
 msgstr "Stat/Provins"
 
-#: classes/controllers/FrmProAddressesController.php:167
+#: classes/controllers/FrmProAddressesController.php:173
 #: classes/models/fields/FrmProFieldAddress.php:50
 msgid "Zip/Postal"
 msgstr "Postnummer"
 
-#: classes/controllers/FrmProAppController.php:22
+#: classes/controllers/FrmProAppController.php:23
 msgid "Formidable Tags"
 msgstr "Formidable-taggar"
 
-#: classes/controllers/FrmProAppController.php:23
+#: classes/controllers/FrmProAppController.php:24
 msgid "Formidable Tag"
 msgstr "Formidable-tagg"
 
-#: classes/controllers/FrmProAppController.php:182
+#: classes/controllers/FrmProAppController.php:183
 #: classes/controllers/FrmProDisplaysController.php:12
 #: classes/controllers/FrmProDisplaysController.php:33
 #: classes/controllers/FrmProDisplaysController.php:48
@@ -67,41 +67,41 @@ msgstr "Formidable-tagg"
 msgid "Views"
 msgstr "Vyer"
 
-#: classes/controllers/FrmProAppController.php:190
+#: classes/controllers/FrmProAppController.php:191
 #: classes/views/frmpro-statistics/select.php:2
 #: classes/views/frmpro-statistics/show.php:4
 msgid "Reports"
 msgstr "Rapporter"
 
-#: classes/controllers/FrmProCreditCardsController.php:50
+#: classes/controllers/FrmProCreditCardsController.php:53
 msgid "Month"
 msgstr "Månad"
 
-#: classes/controllers/FrmProCreditCardsController.php:55
+#: classes/controllers/FrmProCreditCardsController.php:58
 msgid "Year"
 msgstr "År"
 
-#: classes/controllers/FrmProCreditCardsController.php:84
+#: classes/controllers/FrmProCreditCardsController.php:90
 msgid "Expiration Month"
 msgstr "Utgångsmånad"
 
-#: classes/controllers/FrmProCreditCardsController.php:85
+#: classes/controllers/FrmProCreditCardsController.php:91
 msgid "Expiration Year"
 msgstr "Utgångsår"
 
-#: classes/controllers/FrmProCreditCardsController.php:108
+#: classes/controllers/FrmProCreditCardsController.php:114
 #: classes/models/fields/FrmProFieldCreditCard.php:44
 msgid "Card number"
 msgstr "Kortnummer"
 
-#: classes/controllers/FrmProCreditCardsController.php:109
+#: classes/controllers/FrmProCreditCardsController.php:115
 #: classes/models/fields/FrmProFieldCreditCard.php:45
 msgid "CVC"
 msgstr "CVC"
 
 #: classes/controllers/FrmProDisplaysController.php:34
 #: classes/controllers/FrmProDisplaysController.php:35
-#: classes/controllers/FrmProFormsController.php:671
+#: classes/controllers/FrmProFormsController.php:686
 #: classes/views/displays/submitbox_actions.php:4
 msgid "View"
 msgstr "Visa"
@@ -127,9 +127,9 @@ msgid "View all forms"
 msgstr "Visa alla formulär"
 
 #: classes/controllers/FrmProDisplaysController.php:114
-#: classes/controllers/FrmProEntriesController.php:1455
-#: classes/helpers/FrmProEntriesHelper.php:249
-#: classes/helpers/FrmProEntriesHelper.php:275
+#: classes/controllers/FrmProEntriesController.php:1471
+#: classes/helpers/FrmProEntriesHelper.php:256
+#: classes/helpers/FrmProEntriesHelper.php:282
 msgid "Duplicate"
 msgstr "Kopiera"
 
@@ -161,8 +161,8 @@ msgid "Date"
 msgstr "Datum"
 
 #: classes/controllers/FrmProDisplaysController.php:144
-#: classes/helpers/FrmProFieldsHelper.php:2606
-#: classes/helpers/FrmProFieldsHelper.php:2632
+#: classes/helpers/FrmProFieldsHelper.php:2614
+#: classes/helpers/FrmProFieldsHelper.php:2640
 #: classes/views/displays/mb_advanced.php:93
 msgid "Key"
 msgstr "Nyckel"
@@ -290,7 +290,7 @@ msgid "or"
 msgstr "eller"
 
 #: classes/controllers/FrmProEddController.php:210
-#: classes/controllers/FrmProEntriesController.php:2181
+#: classes/controllers/FrmProEntriesController.php:2197
 #: classes/views/frmpro-entries/sidebar-new.php:7
 #: classes/views/frmpro-entries/sidebar-new.php:8
 #: classes/views/frmpro-form-actions/_custom_field_row.php:31
@@ -333,45 +333,45 @@ msgstr "Inga poster har specificerats"
 msgid "No form was found"
 msgstr "Inget formulär hittades"
 
-#: classes/controllers/FrmProEntriesController.php:1067
+#: classes/controllers/FrmProEntriesController.php:1083
 msgid "Create Entry in Form"
 msgstr "Skapa post i formulär"
 
-#: classes/controllers/FrmProEntriesController.php:1110
+#: classes/controllers/FrmProEntriesController.php:1126
 msgid "Copied from Post"
 msgstr "Kopierat från inlägg"
 
-#: classes/controllers/FrmProEntriesController.php:1156
-#: classes/controllers/FrmProEntriesController.php:1184
+#: classes/controllers/FrmProEntriesController.php:1172
+#: classes/controllers/FrmProEntriesController.php:1200
 msgid "You are trying to access an entry that does not exist."
 msgstr "Du försöker komma åt en post som inte finns."
 
-#: classes/controllers/FrmProEntriesController.php:1438
+#: classes/controllers/FrmProEntriesController.php:1454
 msgid "Post"
 msgstr "Inlägg"
 
-#: classes/controllers/FrmProEntriesController.php:1439
+#: classes/controllers/FrmProEntriesController.php:1455
 #: classes/views/displays/where_options.php:25
 msgid "Draft"
 msgstr "Utkast"
 
-#: classes/controllers/FrmProEntriesController.php:1440
+#: classes/controllers/FrmProEntriesController.php:1456
 msgid "Parent Entry ID"
 msgstr "Överordnat post-ID"
 
-#: classes/controllers/FrmProEntriesController.php:1476
+#: classes/controllers/FrmProEntriesController.php:1492
 #: classes/helpers/FrmProDisplaysHelper.php:87
 msgid "No Entries Found"
 msgstr "Inga poster funna"
 
-#: classes/controllers/FrmProEntriesController.php:1477
-#: classes/controllers/FrmProEntriesController.php:1861
-#: classes/controllers/FrmProEntriesController.php:1935
-#: classes/controllers/FrmProEntriesController.php:2339
+#: classes/controllers/FrmProEntriesController.php:1493
+#: classes/controllers/FrmProEntriesController.php:1877
+#: classes/controllers/FrmProEntriesController.php:1951
+#: classes/controllers/FrmProEntriesController.php:2355
 msgid "Are you sure you want to delete that entry?"
 msgstr "Är du säker på att du vill radera denna post?"
 
-#: classes/controllers/FrmProEntriesController.php:1492
+#: classes/controllers/FrmProEntriesController.php:1508
 msgid ""
 "There are no matching fields. Please check your formresults shortcode to "
 "make sure you are using the correct form and field IDs."
@@ -379,54 +379,54 @@ msgstr ""
 "Det finns inga matchande fält. Vänligen kontrollera din snabbkods "
 "formulärresultat för att se till att du använder rätt formulär- och fält-ID."
 
-#: classes/controllers/FrmProEntriesController.php:1660
-#: classes/controllers/FrmProEntriesController.php:2180
+#: classes/controllers/FrmProEntriesController.php:1676
+#: classes/controllers/FrmProEntriesController.php:2196
 #: classes/helpers/FrmProAppHelper.php:244
-#: classes/helpers/FrmProEntriesHelper.php:290
+#: classes/helpers/FrmProEntriesHelper.php:297
 msgid "Edit"
 msgstr "Redigera"
 
-#: classes/controllers/FrmProEntriesController.php:1674
-#: classes/controllers/FrmProEntriesController.php:1918
+#: classes/controllers/FrmProEntriesController.php:1690
+#: classes/controllers/FrmProEntriesController.php:1934
 msgid "Delete"
 msgstr "Radera"
 
-#: classes/controllers/FrmProEntriesController.php:1812
-#: classes/controllers/FrmProFormsController.php:673
-#: classes/controllers/FrmProFormsController.php:742
+#: classes/controllers/FrmProEntriesController.php:1828
+#: classes/controllers/FrmProFormsController.php:688
+#: classes/controllers/FrmProFormsController.php:757
 #: classes/helpers/FrmProEntriesListHelper.php:75
 msgid "Search"
 msgstr "Sök"
 
-#: classes/controllers/FrmProEntriesController.php:2282
-#: classes/controllers/FrmProEntriesController.php:2805
+#: classes/controllers/FrmProEntriesController.php:2298
+#: classes/controllers/FrmProEntriesController.php:2821
 #: classes/models/FrmProSettings.php:18
 msgid "Update"
 msgstr "Uppdatera"
 
-#: classes/controllers/FrmProEntriesController.php:2290
+#: classes/controllers/FrmProEntriesController.php:2306
 msgid "You are missing options in your shortcode. A field_id is required."
 msgstr ""
 
-#: classes/controllers/FrmProEntriesController.php:2380
-#: classes/controllers/FrmProEntriesController.php:2659
+#: classes/controllers/FrmProEntriesController.php:2396
+#: classes/controllers/FrmProEntriesController.php:2675
 msgid "Your entry was successfully deleted"
 msgstr "Din post har tagits bort"
 
-#: classes/controllers/FrmProEntriesController.php:2420
+#: classes/controllers/FrmProEntriesController.php:2436
 msgid "You are missing options in your shortcode. field_id is required."
 msgstr "Du saknar värden i din snabbkod. field_id krävs."
 
-#: classes/controllers/FrmProEntriesController.php:2675
+#: classes/controllers/FrmProEntriesController.php:2691
 msgid "There was an error deleting that entry"
 msgstr "Ett fel uppstod när posten skulle raderas"
 
-#: classes/controllers/FrmProEntriesController.php:2689
+#: classes/controllers/FrmProEntriesController.php:2705
 #, php-format
 msgid "Resent to %s"
 msgstr "Skicka på nytt till %s"
 
-#: classes/controllers/FrmProEntriesController.php:2694
+#: classes/controllers/FrmProEntriesController.php:2710
 msgid "Resent to No one! You do not have permission"
 msgstr "Inte skickat till någon på nytt! Du har inte behörighet"
 
@@ -435,23 +435,23 @@ msgid "Option Label"
 msgstr "Valets etikett"
 
 #: classes/controllers/FrmProFieldsController.php:230
-#: classes/controllers/FrmProFormsController.php:530
+#: classes/controllers/FrmProFormsController.php:548
 msgid "Saved Value"
 msgstr "Sparat värde"
 
-#: classes/controllers/FrmProFieldsController.php:398
+#: classes/controllers/FrmProFieldsController.php:401
 #: classes/views/frmpro-fields/options-form-before.php:34
 msgid "Select a taxonomy on the Form Actions tab of the Form Settings page"
 msgstr ""
 "Välj en taxonomi under fliken formuläråtgärder på sidan med inställningar "
 "för formuläret"
 
-#: classes/controllers/FrmProFieldsController.php:849
-#: classes/controllers/FrmProFieldsController.php:855
+#: classes/controllers/FrmProFieldsController.php:856
+#: classes/controllers/FrmProFieldsController.php:862
 msgid "Show form uploads"
 msgstr "Visa formuläruppladdningar"
 
-#: classes/controllers/FrmProFieldsController.php:854
+#: classes/controllers/FrmProFieldsController.php:861
 msgid "Hide form uploads"
 msgstr "Dölj formuläruppladdningar"
 
@@ -503,92 +503,87 @@ msgstr "Utför inte"
 msgid "this action if"
 msgstr "denna åtgärd om"
 
-#: classes/controllers/FrmProFormsController.php:294
+#: classes/controllers/FrmProFormsController.php:309
 msgid "Current Date"
 msgstr "Aktuellt datum"
 
-#: classes/controllers/FrmProFormsController.php:295
+#: classes/controllers/FrmProFormsController.php:310
 msgid "Current Time"
 msgstr "Aktuellt klockslag"
 
-#: classes/controllers/FrmProFormsController.php:296
-#: classes/controllers/FrmProFormsController.php:546
+#: classes/controllers/FrmProFormsController.php:311
 msgid "Email"
 msgstr "E-post"
 
-#: classes/controllers/FrmProFormsController.php:297
+#: classes/controllers/FrmProFormsController.php:312
 msgid "Login"
 msgstr "Inloggning"
 
-#: classes/controllers/FrmProFormsController.php:298
-#: classes/controllers/FrmProFormsController.php:544
+#: classes/controllers/FrmProFormsController.php:313
 msgid "Display Name"
 msgstr "Visningsnamn"
 
-#: classes/controllers/FrmProFormsController.php:299
-#: classes/controllers/FrmProFormsController.php:542
+#: classes/controllers/FrmProFormsController.php:314
 msgid "First Name"
 msgstr "Förnamn"
 
-#: classes/controllers/FrmProFormsController.php:300
-#: classes/controllers/FrmProFormsController.php:543
+#: classes/controllers/FrmProFormsController.php:315
 msgid "Last Name"
 msgstr "Efternamn"
 
-#: classes/controllers/FrmProFormsController.php:301
-#: classes/controllers/FrmProFormsController.php:541
-#: classes/models/FrmProForm.php:276
+#: classes/controllers/FrmProFormsController.php:316
+#: classes/models/FrmProForm.php:323
 msgid "User ID"
 msgstr "Användar-ID"
 
-#: classes/controllers/FrmProFormsController.php:302
+#: classes/controllers/FrmProFormsController.php:317
 msgid "User Meta"
 msgstr "Användarmeta"
 
-#: classes/controllers/FrmProFormsController.php:303
+#: classes/controllers/FrmProFormsController.php:318
 msgid "User Role"
 msgstr "Användarroll"
 
-#: classes/controllers/FrmProFormsController.php:304
-#: classes/helpers/FrmProFieldsHelper.php:2585
+#: classes/controllers/FrmProFormsController.php:319
+#: classes/helpers/FrmProFieldsHelper.php:2593
 #: classes/views/displays/where_row.php:17
 #: classes/views/xml/map_csv_fields.php:50
 msgid "Post ID"
 msgstr "Inläggs-ID"
 
-#: classes/controllers/FrmProFormsController.php:305
+#: classes/controllers/FrmProFormsController.php:320
 #: classes/views/frmpro-form-actions/post_options.php:57
 msgid "Post Title"
 msgstr "Inläggstitel"
 
-#: classes/controllers/FrmProFormsController.php:306
+#: classes/controllers/FrmProFormsController.php:321
 msgid "Author Email"
 msgstr "Författarmail"
 
-#: classes/controllers/FrmProFormsController.php:307
+#: classes/controllers/FrmProFormsController.php:322
 msgid "Post Meta"
 msgstr "Inläggsmeta"
 
-#: classes/controllers/FrmProFormsController.php:308
+#: classes/controllers/FrmProFormsController.php:323
 #: classes/views/frmpro-forms/add_form_options.php:34
 #: classes/views/xml/map_csv_fields.php:64
 msgid "IP Address"
 msgstr "IP-adress"
 
-#: classes/controllers/FrmProFormsController.php:309
+#: classes/controllers/FrmProFormsController.php:324
 msgid "Increment"
 msgstr "Räknare"
 
-#: classes/controllers/FrmProFormsController.php:311
+#: classes/controllers/FrmProFormsController.php:326
 msgid "GET/POST"
 msgstr "GET/POST"
 
-#: classes/controllers/FrmProFormsController.php:312
+#: classes/controllers/FrmProFormsController.php:327
 msgid "A variable from the URL or value posted from previous page."
 msgstr ""
 "En variabel från webbadressen eller ett värde som postats på föregående sida."
 
-#: classes/controllers/FrmProFormsController.php:312
+#: classes/controllers/FrmProFormsController.php:327
 msgid ""
 "Replace 'whatever' with the parameter name. In url.com?product=form, the "
 "variable is 'product'. You would use [get param=product] in your field."
@@ -596,15 +591,15 @@ msgstr ""
 "Byt ut 'whatever' med parameternamnet. I url.com?produkt=form är variabeln "
 "\"produkt\". Då skulle du använda [get param=produkt] i ditt fält."
 
-#: classes/controllers/FrmProFormsController.php:315
+#: classes/controllers/FrmProFormsController.php:330
 msgid "SERVER"
 msgstr "SERVER"
 
-#: classes/controllers/FrmProFormsController.php:316
+#: classes/controllers/FrmProFormsController.php:331
 msgid "A variable from the PHP SERVER array."
 msgstr "En variabel från PHP SERVER array."
 
-#: classes/controllers/FrmProFormsController.php:316
+#: classes/controllers/FrmProFormsController.php:331
 msgid ""
 "Replace 'whatever' with the parameter name. To get the url of the current "
 "page, use [server param=\"REQUEST_URI\"] in your field."
@@ -612,64 +607,64 @@ msgstr ""
 "Byt ut 'whatever' med parameternamnet. För att få webbadressen till den "
 "aktuella sidan, använd [server param = \"REQUEST_URI\"] i ditt fält."
 
-#: classes/controllers/FrmProFormsController.php:453
+#: classes/controllers/FrmProFormsController.php:471
 #: classes/helpers/FrmProFormsHelper.php:415
 msgid "Previous"
 msgstr "Föregående"
 
-#: classes/controllers/FrmProFormsController.php:472
+#: classes/controllers/FrmProFormsController.php:490
 msgid "Save Draft"
 msgstr "Spara utkast"
 
-#: classes/controllers/FrmProFormsController.php:503
+#: classes/controllers/FrmProFormsController.php:521
 msgid "Equals"
 msgstr "Lika med"
 
-#: classes/controllers/FrmProFormsController.php:504
+#: classes/controllers/FrmProFormsController.php:522
 msgid "Does Not Equal"
 msgstr "Inte lika med"
 
-#: classes/controllers/FrmProFormsController.php:505
+#: classes/controllers/FrmProFormsController.php:523
 msgid "Is Blank"
 msgstr "Är tomt"
 
-#: classes/controllers/FrmProFormsController.php:506
+#: classes/controllers/FrmProFormsController.php:524
 msgid "Is Not Blank"
 msgstr "Är inte tomt"
 
-#: classes/controllers/FrmProFormsController.php:507
+#: classes/controllers/FrmProFormsController.php:525
 msgid "Is Like"
 msgstr "Är som"
 
-#: classes/controllers/FrmProFormsController.php:508
+#: classes/controllers/FrmProFormsController.php:526
 msgid "Is Not Like"
 msgstr "Är inte som"
 
-#: classes/controllers/FrmProFormsController.php:509
+#: classes/controllers/FrmProFormsController.php:527
 msgid "Greater Than"
 msgstr "Mer än"
 
-#: classes/controllers/FrmProFormsController.php:510
+#: classes/controllers/FrmProFormsController.php:528
 msgid "Less Than"
 msgstr "Mindre än"
 
-#: classes/controllers/FrmProFormsController.php:519
+#: classes/controllers/FrmProFormsController.php:537
 msgid "Clickable Links"
 msgstr "Klickbara länkar"
 
-#: classes/controllers/FrmProFormsController.php:520
+#: classes/controllers/FrmProFormsController.php:538
 msgid "Remove Links"
 msgstr "Ta bort länkar"
 
-#: classes/controllers/FrmProFormsController.php:520
+#: classes/controllers/FrmProFormsController.php:538
 msgid "Removes the automatic links to category pages"
 msgstr "Tar bort den automatiska länken till kategorisidor"
 
-#: classes/controllers/FrmProFormsController.php:521
+#: classes/controllers/FrmProFormsController.php:539
 msgid "Sanitize"
 msgstr "Sanera"
 
-#: classes/controllers/FrmProFormsController.php:521
+#: classes/controllers/FrmProFormsController.php:539
 msgid ""
 "Replaces spaces with dashes and lowercases all. Use if adding an HTML class "
 "or ID"
@@ -677,19 +672,19 @@ msgstr ""
 "Ersätter mellanslag med streck och alla gemener. Använd om du lägger till "
 "HTML-klass eller ID"
 
-#: classes/controllers/FrmProFormsController.php:523
+#: classes/controllers/FrmProFormsController.php:541
 msgid "Sanitize URL"
 msgstr "Sanera URL"
 
-#: classes/controllers/FrmProFormsController.php:524
+#: classes/controllers/FrmProFormsController.php:542
 msgid "Replaces all HTML entities with a URL safe string."
 msgstr "Ersätter alla HTML-entiteter med en URL-säker sträng."
 
-#: classes/controllers/FrmProFormsController.php:526
+#: classes/controllers/FrmProFormsController.php:544
 msgid "Truncate"
 msgstr "Avkorta"
 
-#: classes/controllers/FrmProFormsController.php:526
+#: classes/controllers/FrmProFormsController.php:544
 msgid ""
 "Truncate text with a link to view more. If using Both (dynamic), the link "
 "goes to the detail page. Otherwise, it will show in-place."
@@ -698,40 +693,40 @@ msgstr ""
 "(dynamiskt), då går länken till den detaljerade sidan. Annars kommer det "
 "visas på plats."
 
-#: classes/controllers/FrmProFormsController.php:527
+#: classes/controllers/FrmProFormsController.php:545
 msgid "More Text"
 msgstr "Mer text"
 
-#: classes/controllers/FrmProFormsController.php:528
+#: classes/controllers/FrmProFormsController.php:546
 msgid "Time Ago"
 msgstr "Tid sedan"
 
-#: classes/controllers/FrmProFormsController.php:528
+#: classes/controllers/FrmProFormsController.php:546
 msgid "How long ago a date was in minutes, hours, days, months, or years."
 msgstr ""
 "Hur länge sedan ett datum var i minuter, timmar, dagar, månader eller år."
 
-#: classes/controllers/FrmProFormsController.php:529
+#: classes/controllers/FrmProFormsController.php:547
 msgid "# Format"
 msgstr "# Format"
 
-#: classes/controllers/FrmProFormsController.php:530
+#: classes/controllers/FrmProFormsController.php:548
 msgid "Show the saved value for fields with separate values."
 msgstr "Visa det sparade värdet för detta fält med separerade värden."
 
-#: classes/controllers/FrmProFormsController.php:531
+#: classes/controllers/FrmProFormsController.php:549
 msgid "Remove HTML"
 msgstr "Ta bort HTML"
 
-#: classes/controllers/FrmProFormsController.php:531
+#: classes/controllers/FrmProFormsController.php:549
 msgid "Remove all HTML added into your form before display"
 msgstr "Ta bort all HTML tillagt i formuläret innan visning"
 
-#: classes/controllers/FrmProFormsController.php:532
+#: classes/controllers/FrmProFormsController.php:550
 msgid "Keep JS"
 msgstr "Behåll JS"
 
-#: classes/controllers/FrmProFormsController.php:532
+#: classes/controllers/FrmProFormsController.php:550
 msgid ""
 "Javascript from your form entries are automatically removed. Add this option "
 "only if you trust those submitting entries."
@@ -739,363 +734,351 @@ msgstr ""
 "Javascript från dina formulärposter tas automatiskt bort. Lägg till detta "
 "alternativ endast om du litar de som använder formuläret."
 
-#: classes/controllers/FrmProFormsController.php:545
-msgid "User Login"
-msgstr "Användarinloggning"
-
-#: classes/controllers/FrmProFormsController.php:547
-msgid "Avatar"
-msgstr "Profilbild"
-
-#: classes/controllers/FrmProFormsController.php:548
-msgid "Author Link"
-msgstr ""
-
-#: classes/controllers/FrmProFormsController.php:671
+#: classes/controllers/FrmProFormsController.php:686
 msgid "Insert a View"
 msgstr "Infoga en vy"
 
-#: classes/controllers/FrmProFormsController.php:672
+#: classes/controllers/FrmProFormsController.php:687
 msgid "Graph"
 msgstr "Diagram"
 
-#: classes/controllers/FrmProFormsController.php:672
+#: classes/controllers/FrmProFormsController.php:687
 msgid "Insert a Graph"
 msgstr "Infoga ett diagram"
 
-#: classes/controllers/FrmProFormsController.php:673
+#: classes/controllers/FrmProFormsController.php:688
 msgid "Add a Search Form"
 msgstr "Lägg till ett sökformulär"
 
-#: classes/controllers/FrmProFormsController.php:674
+#: classes/controllers/FrmProFormsController.php:689
 msgid "Single Entry"
 msgstr "Enskild post"
 
-#: classes/controllers/FrmProFormsController.php:674
+#: classes/controllers/FrmProFormsController.php:689
 msgid "Display a Single Entry"
 msgstr "Visa en enskild post"
 
-#: classes/controllers/FrmProFormsController.php:675
+#: classes/controllers/FrmProFormsController.php:690
 msgid "List of Entries"
 msgstr "Lista över poster"
 
-#: classes/controllers/FrmProFormsController.php:675
+#: classes/controllers/FrmProFormsController.php:690
 msgid "Display a List of Entries"
 msgstr "Visa en lista av poster"
 
-#: classes/controllers/FrmProFormsController.php:696
+#: classes/controllers/FrmProFormsController.php:711
 msgid "Make read-only fields editable"
 msgstr "Göra skrivskyddade fält redigerbara"
 
-#: classes/controllers/FrmProFormsController.php:704
+#: classes/controllers/FrmProFormsController.php:719
 msgid "Select a view:"
 msgstr "Välj en vy:"
 
-#: classes/controllers/FrmProFormsController.php:714
+#: classes/controllers/FrmProFormsController.php:729
 msgid "Filter shortcodes within the view content"
 msgstr "Filtrera snabbkoder inom vyinnehåll"
 
-#: classes/controllers/FrmProFormsController.php:715
+#: classes/controllers/FrmProFormsController.php:730
 #: classes/views/displays/mb_advanced.php:6
 msgid "Limit"
 msgstr "Gräns"
 
-#: classes/controllers/FrmProFormsController.php:716
+#: classes/controllers/FrmProFormsController.php:731
 msgid "Page size"
 msgstr "Sidstorlek"
 
-#: classes/controllers/FrmProFormsController.php:718
+#: classes/controllers/FrmProFormsController.php:733
 msgid "Entry order"
 msgstr "Postordning"
 
-#: classes/controllers/FrmProFormsController.php:720
+#: classes/controllers/FrmProFormsController.php:735
 #: classes/views/frmpro-forms/add_form_button_options.php:27
 msgid "Default"
 msgstr "Standard"
 
-#: classes/controllers/FrmProFormsController.php:721
-#: classes/views/displays/order_row.php:24
+#: classes/controllers/FrmProFormsController.php:736
+#: classes/views/displays/order_row.php:27
 msgid "Ascending"
 msgstr "Stigande"
 
-#: classes/controllers/FrmProFormsController.php:722
-#: classes/views/displays/order_row.php:27
+#: classes/controllers/FrmProFormsController.php:737
+#: classes/views/displays/order_row.php:30
 msgid "Descending"
 msgstr "Fallande"
 
-#: classes/controllers/FrmProFormsController.php:727
-#: classes/controllers/FrmProFormsController.php:895
+#: classes/controllers/FrmProFormsController.php:742
+#: classes/controllers/FrmProFormsController.php:910
 msgid "Include draft entries"
 msgstr "Inkludera postutkast"
 
-#: classes/controllers/FrmProFormsController.php:730
+#: classes/controllers/FrmProFormsController.php:745
 msgid "No draft entries"
 msgstr "Inga utkast"
 
-#: classes/controllers/FrmProFormsController.php:731
+#: classes/controllers/FrmProFormsController.php:746
 msgid "Only draft entries"
 msgstr "Endast utkast"
 
-#: classes/controllers/FrmProFormsController.php:732
+#: classes/controllers/FrmProFormsController.php:747
 msgid "All entries"
 msgstr "Alla inlägg"
 
-#: classes/controllers/FrmProFormsController.php:740
+#: classes/controllers/FrmProFormsController.php:755
 msgid "Use Formidable styling"
 msgstr "Använd Formidables stilmall"
 
-#: classes/controllers/FrmProFormsController.php:743
+#: classes/controllers/FrmProFormsController.php:758
 msgid "Customize search button"
 msgstr "Anpassa sökknappen"
 
-#: classes/controllers/FrmProFormsController.php:748
+#: classes/controllers/FrmProFormsController.php:763
 msgid "The ID of the page with the search results"
 msgstr "ID på sidan med sökresultat"
 
-#: classes/controllers/FrmProFormsController.php:763
+#: classes/controllers/FrmProFormsController.php:778
 msgid "Select a form and field:"
 msgstr "Välj ett formulär och fält:"
 
-#: classes/controllers/FrmProFormsController.php:766
+#: classes/controllers/FrmProFormsController.php:781
 #: classes/views/frmpro-fields/options-form-before.php:21
 #: classes/views/lookup-fields/back-end/get-options-from.php:2
 msgid "Select Form"
 msgstr "Välj formulär"
 
-#: classes/controllers/FrmProFormsController.php:769
+#: classes/controllers/FrmProFormsController.php:784
 msgid "(no title)"
 msgstr "(ingen titel)"
 
-#: classes/controllers/FrmProFormsController.php:781
+#: classes/controllers/FrmProFormsController.php:796
 msgid "Graph Type"
 msgstr "Diagramtyp"
 
-#: classes/controllers/FrmProFormsController.php:783
+#: classes/controllers/FrmProFormsController.php:798
 msgid "Column"
 msgstr "Kolumn"
 
-#: classes/controllers/FrmProFormsController.php:784
+#: classes/controllers/FrmProFormsController.php:799
 msgid "Horizontal Bar"
 msgstr "Stapeldiagram (Horisontell)"
 
-#: classes/controllers/FrmProFormsController.php:785
+#: classes/controllers/FrmProFormsController.php:800
 msgid "Pie"
 msgstr "Cirkeldiagram"
 
-#: classes/controllers/FrmProFormsController.php:786
+#: classes/controllers/FrmProFormsController.php:801
 msgid "Line"
 msgstr "Linje"
 
-#: classes/controllers/FrmProFormsController.php:787
+#: classes/controllers/FrmProFormsController.php:802
 msgid "Area"
 msgstr "Yta"
 
-#: classes/controllers/FrmProFormsController.php:788
+#: classes/controllers/FrmProFormsController.php:803
 msgid "Scatter"
 msgstr "Punktdiagram"
 
-#: classes/controllers/FrmProFormsController.php:789
+#: classes/controllers/FrmProFormsController.php:804
 msgid "Histogram"
 msgstr "Histogram"
 
-#: classes/controllers/FrmProFormsController.php:790
+#: classes/controllers/FrmProFormsController.php:805
 msgid "Table"
 msgstr "Tabell"
 
-#: classes/controllers/FrmProFormsController.php:791
+#: classes/controllers/FrmProFormsController.php:806
 msgid "Stepped Area"
 msgstr "Stegad yta"
 
-#: classes/controllers/FrmProFormsController.php:792
+#: classes/controllers/FrmProFormsController.php:807
 msgid "Geographical Map"
 msgstr "Kartogram"
 
-#: classes/controllers/FrmProFormsController.php:796
+#: classes/controllers/FrmProFormsController.php:811
 msgid "Data Type"
 msgstr "Datatyp"
 
-#: classes/controllers/FrmProFormsController.php:798
+#: classes/controllers/FrmProFormsController.php:813
 msgid "The number of entries"
 msgstr "Antal poster"
 
-#: classes/controllers/FrmProFormsController.php:799
+#: classes/controllers/FrmProFormsController.php:814
 msgid "Add the field values together"
 msgstr "Lägg till fältvärden tillsammans"
 
-#: classes/controllers/FrmProFormsController.php:800
+#: classes/controllers/FrmProFormsController.php:815
 msgid "Average the totaled field values"
 msgstr "Genomsnitt av totala fältvärden"
 
-#: classes/controllers/FrmProFormsController.php:803
+#: classes/controllers/FrmProFormsController.php:818
 msgid "Height"
 msgstr "Höjd"
 
-#: classes/controllers/FrmProFormsController.php:804
+#: classes/controllers/FrmProFormsController.php:819
 msgid "Width"
 msgstr "Bredd"
 
-#: classes/controllers/FrmProFormsController.php:805
-#: classes/controllers/FrmProFormsController.php:836
+#: classes/controllers/FrmProFormsController.php:820
+#: classes/controllers/FrmProFormsController.php:851
 msgid "Background color"
 msgstr "Bakgrundsfärg"
 
-#: classes/controllers/FrmProFormsController.php:806
+#: classes/controllers/FrmProFormsController.php:821
 msgid "Graph title"
 msgstr "Titel för diagram"
 
-#: classes/controllers/FrmProFormsController.php:807
+#: classes/controllers/FrmProFormsController.php:822
 msgid "Title font size"
 msgstr "Textstorlek för titel"
 
-#: classes/controllers/FrmProFormsController.php:808
+#: classes/controllers/FrmProFormsController.php:823
 msgid "Title font name"
 msgstr "Typsnitt för titel"
 
-#: classes/controllers/FrmProFormsController.php:810
+#: classes/controllers/FrmProFormsController.php:825
 msgid "Turn your pie graph three-dimensional"
 msgstr "Gör dina cirkeldiagram tredimensionella"
 
-#: classes/controllers/FrmProFormsController.php:813
+#: classes/controllers/FrmProFormsController.php:828
 msgid ""
 "When using dates for the x_axis parameter, you can include dates with a zero "
 "value."
 msgstr ""
 "Vid användning av datum för x-axeln kan du inkludera datum med ett nollvärde."
 
-#: classes/controllers/FrmProFormsController.php:814
+#: classes/controllers/FrmProFormsController.php:829
 msgid "Include a legend with the graph"
 msgstr "Inkludera en förklaring med diagramet."
 
-#: classes/controllers/FrmProFormsController.php:821
+#: classes/controllers/FrmProFormsController.php:836
 msgid "Insert an entry ID/key:"
 msgstr "Infoga ett post-ID/-nyckel:"
 
-#: classes/controllers/FrmProFormsController.php:828
+#: classes/controllers/FrmProFormsController.php:843
 msgid "Include user info like browser and IP"
 msgstr "Inkludera användarinfo så som webbläsare och IP"
 
-#: classes/controllers/FrmProFormsController.php:829
+#: classes/controllers/FrmProFormsController.php:844
 msgid "Include rows for blank fields"
 msgstr "Inkludera rader för tomma fält"
 
-#: classes/controllers/FrmProFormsController.php:830
+#: classes/controllers/FrmProFormsController.php:845
 msgid "Do not include any HTML"
 msgstr "Ta inte med någon HTML"
 
-#: classes/controllers/FrmProFormsController.php:831
+#: classes/controllers/FrmProFormsController.php:846
 msgid "Use RTL format"
 msgstr "Använd RTL-format"
 
-#: classes/controllers/FrmProFormsController.php:832
+#: classes/controllers/FrmProFormsController.php:847
 msgid "Font size"
 msgstr "﻿Teckenstorlek"
 
-#: classes/controllers/FrmProFormsController.php:833
+#: classes/controllers/FrmProFormsController.php:848
 msgid "Text color"
 msgstr "Textfärg"
 
-#: classes/controllers/FrmProFormsController.php:834
+#: classes/controllers/FrmProFormsController.php:849
 msgid "Border width"
 msgstr "Tjocklek på ram"
 
-#: classes/controllers/FrmProFormsController.php:835
+#: classes/controllers/FrmProFormsController.php:850
 msgid "Border color"
 msgstr "Ramfärg"
 
-#: classes/controllers/FrmProFormsController.php:837
+#: classes/controllers/FrmProFormsController.php:852
 msgid "Alternate background color"
 msgstr "Alternerande bakgrundsfärg"
 
-#: classes/controllers/FrmProFormsController.php:846
+#: classes/controllers/FrmProFormsController.php:861
 msgid "Field ID/key for labels"
 msgstr "Fält-ID/nyckel för etiketter"
 
-#: classes/controllers/FrmProFormsController.php:849
+#: classes/controllers/FrmProFormsController.php:864
 msgid "Display format"
 msgstr "Visningsformat"
 
-#: classes/controllers/FrmProFormsController.php:851
-#: classes/helpers/FrmProFieldsHelper.php:2677
+#: classes/controllers/FrmProFormsController.php:866
+#: classes/helpers/FrmProFieldsHelper.php:2685
 msgid "List"
 msgstr "Lista"
 
-#: classes/controllers/FrmProFormsController.php:852
+#: classes/controllers/FrmProFormsController.php:867
 msgid "Drop down"
 msgstr "Rullgardinsmeny"
 
-#: classes/controllers/FrmProFormsController.php:853
+#: classes/controllers/FrmProFormsController.php:868
 msgid "Expanding archive"
 msgstr "Expanderande arkiv"
 
-#: classes/controllers/FrmProFormsController.php:858
+#: classes/controllers/FrmProFormsController.php:873
 msgid "Privacy"
 msgstr "Sekretess"
 
-#: classes/controllers/FrmProFormsController.php:860
+#: classes/controllers/FrmProFormsController.php:875
 msgid "Only include the entries the current user created"
 msgstr "Omfattar endast de poster den aktuella användaren skapat"
 
-#: classes/controllers/FrmProFormsController.php:861
+#: classes/controllers/FrmProFormsController.php:876
 msgid "Include all entries"
 msgstr "Inkludera alla poster"
 
-#: classes/controllers/FrmProFormsController.php:864
+#: classes/controllers/FrmProFormsController.php:879
 msgid "The ID of the page to link to"
 msgstr "ID på sidan för att länka till"
 
-#: classes/controllers/FrmProFormsController.php:867
+#: classes/controllers/FrmProFormsController.php:882
 msgid "Link action"
 msgstr "Länkåtgärd"
 
-#: classes/controllers/FrmProFormsController.php:869
+#: classes/controllers/FrmProFormsController.php:884
 msgid "Edit if allowed"
 msgstr "Redigera om tillåtet"
 
-#: classes/controllers/FrmProFormsController.php:870
+#: classes/controllers/FrmProFormsController.php:885
 msgid "View only"
 msgstr "Visa endast"
 
-#: classes/controllers/FrmProFormsController.php:873
+#: classes/controllers/FrmProFormsController.php:888
 msgid "Delete link label"
 msgstr "Radera länketikett"
 
-#: classes/controllers/FrmProFormsController.php:874
+#: classes/controllers/FrmProFormsController.php:889
 msgid "Delete confirmation message"
 msgstr "Radera bekräftelsemeddelande"
 
-#: classes/controllers/FrmProFormsController.php:877
+#: classes/controllers/FrmProFormsController.php:892
 msgid "Send users to"
 msgstr "Skicka användare till"
 
-#: classes/controllers/FrmProFormsController.php:879
+#: classes/controllers/FrmProFormsController.php:894
 msgid "A page"
 msgstr "En sida"
 
-#: classes/controllers/FrmProFormsController.php:880
+#: classes/controllers/FrmProFormsController.php:895
 msgid "An anchor on the page with id=\"[key]\""
 msgstr "Ett ankare på sidan med id=\"[nyckel]\""
 
-#: classes/controllers/FrmProFormsController.php:881
+#: classes/controllers/FrmProFormsController.php:896
 msgid "The entry in the back-end"
 msgstr "Posten i adminpanelen"
 
-#: classes/controllers/FrmProFormsController.php:884
+#: classes/controllers/FrmProFormsController.php:899
 msgid "URL parameter (?entry=5)"
 msgstr "URL-parameter (?entry=5)"
 
-#: classes/controllers/FrmProFormsController.php:887
+#: classes/controllers/FrmProFormsController.php:902
 msgid "Identify the entry by"
 msgstr "Identifiera post med"
 
-#: classes/controllers/FrmProFormsController.php:889
+#: classes/controllers/FrmProFormsController.php:904
 #: classes/views/displays/where_row.php:14
 msgid "Entry key"
 msgstr "Postnyckel"
 
-#: classes/controllers/FrmProFormsController.php:890
+#: classes/controllers/FrmProFormsController.php:905
 #: classes/helpers/FrmProEntriesListHelper.php:66
 #: classes/helpers/FrmProEntriesListHelper.php:81
-#: classes/helpers/FrmProFieldsHelper.php:2583
+#: classes/helpers/FrmProFieldsHelper.php:2591
 #: classes/views/displays/order_row.php:4
 #: classes/views/displays/where_row.php:11
 #: classes/views/xml/map_csv_fields.php:69
@@ -1103,39 +1086,39 @@ msgstr "Postnyckel"
 msgid "Entry ID"
 msgstr "Post-ID"
 
-#: classes/controllers/FrmProFormsController.php:893
+#: classes/controllers/FrmProFormsController.php:908
 msgid "Add HTML classes"
 msgstr "Lägga HTML-klasser"
 
-#: classes/controllers/FrmProFormsController.php:894
+#: classes/controllers/FrmProFormsController.php:909
 msgid "Label on first option in the dropdown"
 msgstr "Etikett för första valet i rullgardinsmenyn"
 
-#: classes/controllers/FrmProFormsController.php:909
+#: classes/controllers/FrmProFormsController.php:924
 msgid "Detail Link"
 msgstr "Detaljlänk"
 
-#: classes/controllers/FrmProFormsController.php:910
+#: classes/controllers/FrmProFormsController.php:925
 msgid "Edit Entry Link"
 msgstr "Redigeringslänk"
 
-#: classes/controllers/FrmProFormsController.php:911
+#: classes/controllers/FrmProFormsController.php:926
 msgid "Entry Count"
 msgstr "Antal poster"
 
-#: classes/controllers/FrmProFormsController.php:912
+#: classes/controllers/FrmProFormsController.php:927
 msgid "Entry Postion"
 msgstr ""
 
-#: classes/controllers/FrmProFormsController.php:913
+#: classes/controllers/FrmProFormsController.php:928
 msgid "Even/Odd"
 msgstr "Jämn/udda"
 
-#: classes/controllers/FrmProFormsController.php:914
+#: classes/controllers/FrmProFormsController.php:929
 msgid "Draft status"
 msgstr "Utkast status"
 
-#: classes/controllers/FrmProFormsController.php:915
+#: classes/controllers/FrmProFormsController.php:930
 msgid "Calendar Date"
 msgstr ""
 
@@ -1177,6 +1160,7 @@ msgstr "Fält"
 
 #: classes/controllers/FrmProGraphsController.php:1661
 #: classes/controllers/FrmProGraphsController.php:1693
+#: classes/controllers/FrmProSettingsController.php:81
 msgid "Creation Date"
 msgstr "Datum skapat"
 
@@ -1213,18 +1197,18 @@ msgid "Monthly Entries"
 msgstr "Månatliga poster"
 
 #: classes/controllers/FrmProLookupFieldsController.php:12
-#: classes/helpers/FrmProFieldsHelper.php:2674
+#: classes/helpers/FrmProFieldsHelper.php:2682
 msgid "Dropdown"
 msgstr "Rullgardinsmeny"
 
 #: classes/controllers/FrmProLookupFieldsController.php:13
-#: classes/helpers/FrmProFieldsHelper.php:2675
+#: classes/helpers/FrmProFieldsHelper.php:2683
 #: classes/views/styles/_sample_form.php:14
 msgid "Radio Buttons"
 msgstr "Radioknappar"
 
 #: classes/controllers/FrmProLookupFieldsController.php:14
-#: classes/helpers/FrmProFieldsHelper.php:2676
+#: classes/helpers/FrmProFieldsHelper.php:2684
 msgid "Checkboxes"
 msgstr "Kryssrutor"
 
@@ -1232,25 +1216,53 @@ msgstr "Kryssrutor"
 msgid "Single Line Text"
 msgstr "Enkelrad text"
 
-#: classes/controllers/FrmProLookupFieldsController.php:140
+#: classes/controllers/FrmProLookupFieldsController.php:144
 msgid "Search values from"
 msgstr "Sök värden från"
 
-#: classes/controllers/FrmProLookupFieldsController.php:142
+#: classes/controllers/FrmProLookupFieldsController.php:146
 msgid "Get options from"
 msgstr "Få alternativ från"
 
-#: classes/controllers/FrmProLookupFieldsController.php:297
+#: classes/controllers/FrmProLookupFieldsController.php:301
 #: classes/views/frmpro-fields/field-selection.php:2
 #: classes/views/frmpro-form-actions/_custom_field_row.php:39
 #: classes/views/lookup-fields/back-end/watch-row.php:3
 msgid "&mdash; Select Field &mdash;"
 msgstr "&mdash; Välj fält &mdash;"
 
-#: classes/controllers/FrmProLookupFieldsController.php:416
+#: classes/controllers/FrmProLookupFieldsController.php:420
 msgid "No options available: please check this field's options"
 msgstr ""
 "Inga alternativ tillgängliga: Vänligen kontrollera detta fälts alternativ."
+
+#: classes/controllers/FrmProSettingsController.php:70
+msgid "Repeating field options"
+msgstr ""
+
+#: classes/controllers/FrmProSettingsController.php:72
+msgid "For Each"
+msgstr ""
+
+#: classes/controllers/FrmProSettingsController.php:79
+msgid "Dynamic field options"
+msgstr ""
+
+#: classes/controllers/FrmProSettingsController.php:82
+msgid "Field From Entry"
+msgstr ""
+
+#: classes/controllers/FrmProSettingsController.php:88
+msgid "Show image"
+msgstr ""
+
+#: classes/controllers/FrmProSettingsController.php:89
+msgid "Image ID"
+msgstr ""
+
+#: classes/controllers/FrmProSettingsController.php:90
+msgid "Image Name"
+msgstr ""
 
 #: classes/controllers/FrmProStatisticsController.php:19
 msgid "You must include a valid field id or key in your stats shortcode."
@@ -1312,29 +1324,29 @@ msgstr "CSV-filen laddades inte upp. Är CSV-filer tillåtna på din webbplats?"
 msgid "CSV cannot be opened."
 msgstr "CSV kan inte öppnas."
 
-#: classes/controllers/FrmUpdatesController.php:27
+#: classes/controllers/FrmUpdatesController.php:32
 msgid "Your Formidable Pro License was Invalid"
 msgstr "Din licens för Formidable Pro var ogiltig"
 
-#: classes/controllers/FrmUpdatesController.php:88
-#: classes/controllers/FrmUpdatesController.php:120
+#: classes/controllers/FrmUpdatesController.php:93
+#: classes/controllers/FrmUpdatesController.php:125
 msgid "Please enter a license number"
 msgstr "Vänligen ange ett licensnummer"
 
-#: classes/controllers/FrmUpdatesController.php:223
+#: classes/controllers/FrmUpdatesController.php:228
 msgid "expired"
 msgstr "utgången"
 
-#: classes/controllers/FrmUpdatesController.php:223
+#: classes/controllers/FrmUpdatesController.php:228
 msgid "invalid"
 msgstr "ogiltig"
 
-#: classes/controllers/FrmUpdatesController.php:224
+#: classes/controllers/FrmUpdatesController.php:229
 #, php-format
 msgid "An update is available, but your license is %s."
 msgstr "En uppdatering finns tillgänglig, men din licens är %s."
 
-#: classes/controllers/FrmUpdatesController.php:328
+#: classes/controllers/FrmUpdatesController.php:333
 #, php-format
 msgid ""
 "You had an error communicating with the Formidable Forms API. %1$sClick "
@@ -1343,30 +1355,30 @@ msgstr ""
 "Det uppstod ett fel vid försök att kommunicerar med Formidable Forms' API. "
 "%1$sKlicka här%2$s för mer information."
 
-#: classes/controllers/FrmUpdatesController.php:334
+#: classes/controllers/FrmUpdatesController.php:339
 msgid "You had an HTTP error connecting to the Formidable Forms API"
 msgstr "Ett HTTP-fel uppstod vid anslutning till Formidable Forms' API"
 
-#: classes/controllers/FrmUpdatesController.php:344
+#: classes/controllers/FrmUpdatesController.php:349
 #, php-format
 msgid "There was a %1$s error: %2$s"
 msgstr "Det uppstod ett %1$s-fel: %2$s"
 
-#: classes/controllers/FrmUpdatesController.php:348
+#: classes/controllers/FrmUpdatesController.php:353
 msgid "Your License Key was invalid"
 msgstr "Din licensnyckel var ogiltig"
 
-#: classes/controllers/FrmUpdatesController.php:352
+#: classes/controllers/FrmUpdatesController.php:357
 msgid "A Formidable Forms update is available, but your license is invalid."
 msgstr ""
 "En uppdatering av Formidable Forms finns tillgänglig, men din licens är "
 "ogiltig."
 
-#: classes/helpers/FrmProAppHelper.php:672
+#: classes/helpers/FrmProAppHelper.php:681
 msgid "Previous Page"
 msgstr "Föregående sida"
 
-#: classes/helpers/FrmProAppHelper.php:676
+#: classes/helpers/FrmProAppHelper.php:685
 msgid "Next Page"
 msgstr "Nästa Sida"
 
@@ -1437,23 +1449,23 @@ msgstr ""
 msgid "unique (get newest entries)"
 msgstr ""
 
-#: classes/helpers/FrmProEntriesHelper.php:235
+#: classes/helpers/FrmProEntriesHelper.php:236
 msgid "Add New"
 msgstr "Lägg till nytt"
 
-#: classes/helpers/FrmProEntriesHelper.php:298
+#: classes/helpers/FrmProEntriesHelper.php:305
 msgid "Resend Email Notifications"
 msgstr "Skicka e-postnotifikation på nytt"
 
-#: classes/helpers/FrmProEntriesHelper.php:320
+#: classes/helpers/FrmProEntriesHelper.php:327
 msgid "Really permanently delete ALL entries in this form?"
 msgstr "Vill du verkligen PERMANENT RADERA ALLA inlägg i detta formulär?"
 
-#: classes/helpers/FrmProEntriesHelper.php:321
+#: classes/helpers/FrmProEntriesHelper.php:328
 msgid "Delete ALL Entries"
 msgstr "Radera ALLA poster"
 
-#: classes/helpers/FrmProEntriesHelper.php:352
+#: classes/helpers/FrmProEntriesHelper.php:359
 msgid "Download CSV"
 msgstr "Ladda ned CSV"
 
@@ -1468,10 +1480,10 @@ msgstr "Alla fält"
 
 #: classes/helpers/FrmProEntriesListHelper.php:63
 #: classes/helpers/FrmProEntriesListHelper.php:80
-#: classes/helpers/FrmProFieldsHelper.php:2587
+#: classes/helpers/FrmProFieldsHelper.php:2595
 #: classes/views/displays/_calendar_options.php:5
 #: classes/views/displays/_calendar_options.php:22
-#: classes/views/displays/order_row.php:7
+#: classes/views/displays/order_row.php:10
 #: classes/views/displays/where_row.php:5
 msgid "Entry creation date"
 msgstr "Datum för skapande av post"
@@ -1481,103 +1493,108 @@ msgstr "Datum för skapande av post"
 msgid "View all posts filed under %s"
 msgstr "Visa alla inlägg under %s"
 
-#: classes/helpers/FrmProFieldsHelper.php:753
+#: classes/helpers/FrmProFieldsHelper.php:758
 msgid "The entered values do not match"
 msgstr "De angivna värdena matchar inte"
 
-#: classes/helpers/FrmProFieldsHelper.php:1390
+#: classes/helpers/FrmProFieldsHelper.php:1395
 msgid "No Categories"
 msgstr "Inga kategorier"
 
-#: classes/helpers/FrmProFieldsHelper.php:2146
+#: classes/helpers/FrmProFieldsHelper.php:2151
 msgid "Confirm"
 msgstr "Bekräfta"
 
-#: classes/helpers/FrmProFieldsHelper.php:2326
+#: classes/helpers/FrmProFieldsHelper.php:2331
 msgid "Edit Uploaded File"
 msgstr "Redigera uppladdad fil"
 
-#: classes/helpers/FrmProFieldsHelper.php:2581
+#: classes/helpers/FrmProFieldsHelper.php:2589
 #: classes/views/frmpro-fields/back-end/calculations.php:19
 msgid "Select a value to insert into the box below"
 msgstr "Välj ett värde att infoga i rutan nedan"
 
-#: classes/helpers/FrmProFieldsHelper.php:2584
+#: classes/helpers/FrmProFieldsHelper.php:2592
+#: classes/views/displays/order_row.php:7
 #: classes/views/xml/map_csv_fields.php:72
 #: classes/views/xml/map_csv_fields.php:73
 msgid "Entry Key"
 msgstr "Postnyckel"
 
-#: classes/helpers/FrmProFieldsHelper.php:2586
+#: classes/helpers/FrmProFieldsHelper.php:2594
 msgid "User IP"
 msgstr "Användar-IP"
 
-#: classes/helpers/FrmProFieldsHelper.php:2588
+#: classes/helpers/FrmProFieldsHelper.php:2596
 #: classes/views/displays/_calendar_options.php:8
 #: classes/views/displays/_calendar_options.php:25
-#: classes/views/displays/order_row.php:10
+#: classes/views/displays/order_row.php:13
 msgid "Entry update date"
 msgstr "Datum för uppdatering av post"
 
-#: classes/helpers/FrmProFieldsHelper.php:2590
+#: classes/helpers/FrmProFieldsHelper.php:2598
 msgid "Form Fields"
 msgstr "Formulärfält"
 
-#: classes/helpers/FrmProFieldsHelper.php:2605
-#: classes/helpers/FrmProFieldsHelper.php:2631
+#: classes/helpers/FrmProFieldsHelper.php:2613
+#: classes/helpers/FrmProFieldsHelper.php:2639
 #: classes/views/displays/mb_advanced.php:90
 #: classes/views/frmpro-entries/table.php:5
 msgid "ID"
 msgstr "ID"
 
-#: classes/helpers/FrmProFieldsHelper.php:2609
+#: classes/helpers/FrmProFieldsHelper.php:2617
 msgid "Thumbnail"
 msgstr "Miniatyr"
 
-#: classes/helpers/FrmProFieldsHelper.php:2612
+#: classes/helpers/FrmProFieldsHelper.php:2620
 msgid "Medium"
 msgstr "Medium"
 
-#: classes/helpers/FrmProFieldsHelper.php:2615
+#: classes/helpers/FrmProFieldsHelper.php:2623
 msgid "Large"
 msgstr "Stor"
 
-#: classes/helpers/FrmProFieldsHelper.php:2618
+#: classes/helpers/FrmProFieldsHelper.php:2626
 msgid "Full Size"
 msgstr "Full storlek"
 
-#: classes/helpers/FrmProFieldsHelper.php:2644
+#: classes/helpers/FrmProFieldsHelper.php:2652
 msgid "Helpers"
 msgstr "Stödåtgärder"
 
-#: classes/helpers/FrmProFieldsHelper.php:2645
+#: classes/helpers/FrmProFieldsHelper.php:2653
 msgid "Admin link to edit the entry"
 msgstr "Adminlänk för att redigera post"
 
-#: classes/helpers/FrmProFieldsHelper.php:2648
+#: classes/helpers/FrmProFieldsHelper.php:2656
 msgid "Link to view single page if showing dynamic entries"
 msgstr "Länk till visning av enskild sida för dynamiska poster"
 
-#: classes/helpers/FrmProFieldsHelper.php:2656
+#: classes/helpers/FrmProFieldsHelper.php:2664
 msgid "Add a rotating 'even' or 'odd' class"
 msgstr "Lägg till en roterande klass för 'even' eller 'odd'"
 
-#: classes/helpers/FrmProFieldsHelper.php:2660
+#: classes/helpers/FrmProFieldsHelper.php:2668
 msgid "Default Email Message"
 msgstr "E-postmeddelande standard"
 
-#: classes/helpers/FrmProFieldsHelper.php:2663
+#: classes/helpers/FrmProFieldsHelper.php:2671
 msgid "Site URL"
 msgstr "Webbplatsadress"
 
-#: classes/helpers/FrmProFieldsHelper.php:2664
+#: classes/helpers/FrmProFieldsHelper.php:2672
 msgid "Site Name"
 msgstr "Webbplatsnamn"
 
 #: classes/helpers/FrmProFormsHelper.php:405
-#: classes/helpers/FrmProFormsHelper.php:664
+#: classes/helpers/FrmProFormsHelper.php:723
 msgid "Your draft has been saved."
 msgstr "Ditt utkast har sparats."
+
+#: classes/helpers/FrmProFormsHelper.php:425
+msgid "This form is currently closed for submissions."
+msgstr ""
 
 #: classes/models/FrmProDb.php:560
 msgid "Formidable Style"
@@ -1648,13 +1665,13 @@ msgid "Are you sure you want to cancel this upload?"
 msgstr "Är du säker på att du vill avbryta uppladdningen?"
 
 #: classes/models/FrmProFileField.php:47
-#: classes/views/frmpro-fields/front-end/file.php:54
+#: classes/views/frmpro-fields/front-end/file.php:53
 msgid "Remove file"
 msgstr "Ta bort fil"
 
 #: classes/models/FrmProFileField.php:48 classes/models/FrmProFileField.php:400
 #, php-format
-msgid "You have uploaded too many files. You may only include %d file(s)."
+msgid "You have uploaded more than %d file(s)."
 msgstr "Du har laddat upp för många filer. Du kan endast ladda upp %d filer."
 
 #: classes/models/FrmProFileField.php:467
@@ -1803,6 +1820,14 @@ msgstr "Lägg till"
 #: classes/views/styles/_sample_form.php:41
 msgid "Remove"
 msgstr "Ta bort"
+
+#: classes/models/fields/FrmProFieldFile.php:40
+msgid "Drop a file here or click to upload"
+msgstr "Släpp en fil här eller klicka för att ladda upp."
+
+#: classes/models/fields/FrmProFieldFile.php:41
+msgid "Choose File"
+msgstr "Välj fil"
 
 #: classes/models/fields/FrmProFieldPassword.php:144
 msgid "Eight characters minimum"
@@ -2079,7 +2104,7 @@ msgstr ""
 msgid "Calendar &mdash; insert entries into a calendar"
 msgstr "Kalender &mdash; infoga poster i en kalender"
 
-#: classes/views/displays/order_row.php:13
+#: classes/views/displays/order_row.php:16
 msgid "Random"
 msgstr "Slumpvis"
 
@@ -2608,6 +2633,30 @@ msgstr "Skydda alla filer som laddas upp i detta formulär."
 msgid "Copy this form to other blogs when Formidable Forms is activated"
 msgstr ""
 "Kopiera det här formuläret till andra bloggar när Formidable Forms aktiveras"
+
+#: classes/views/frmpro-forms/add_form_status_options.php:2
+msgid "Form Scheduling"
+msgstr ""
+
+#: classes/views/frmpro-forms/add_form_status_options.php:3
+msgid ""
+"Prevent the form from showing when submissions should not be accepted. Close "
+"it now, or schedule the form to open and/or close later."
+msgstr ""
+
+#: classes/views/frmpro-forms/add_form_status_options.php:56
+msgid "Close the form after a specific number of entries have been received."
+msgstr ""
+
+#. %1$s: a text input box
+#: classes/views/frmpro-forms/add_form_status_options.php:63
+#, php-format
+msgid "Close this form after %1$s entries"
+msgstr ""
+
+#: classes/views/frmpro-forms/add_form_status_options.php:74
+msgid "This message is shown when a form is closed for new entries."
+msgstr ""
 
 #: classes/views/frmpro-forms/form_page_options.php:2
 msgid "Pagination"
@@ -3337,11 +3386,6 @@ msgstr "Denna data är dynamisk vid förändring"
 msgid "There are no options"
 msgstr "Det finns inga val"
 
-#: classes/views/frmpro-fields/back-end/field-file.php:4
-#: classes/views/frmpro-fields/front-end/file.php:66
-msgid "Drop a file here or click to upload"
-msgstr "Släpp en fil här eller klicka för att ladda upp."
-
 #: classes/views/frmpro-fields/back-end/field-file.php:6
 #: classes/views/frmpro-fields/front-end/file.php:69
 #, php-format
@@ -3451,6 +3495,20 @@ msgstr ""
 
 #: classes/views/frmpro-fields/back-end/file-options.php:110
 msgid "high"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/file-options.php:119
+msgid "Upload text"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/file-options.php:129
+msgid "Compact upload text"
+msgstr ""
+
+#: classes/views/frmpro-fields/back-end/file-options.php:130
+msgid ""
+"The label shown when the file upload field is compacted with the frm_compact "
+"CSS layout class."
 msgstr ""
 
 #: classes/views/frmpro-fields/back-end/insert-form.php:1
@@ -3635,10 +3693,6 @@ msgstr "Alla"
 #: classes/views/frmpro-fields/back-end/visibility.php:22
 msgid "Logged-out Users"
 msgstr "Utloggade användare"
-
-#: classes/views/frmpro-fields/front-end/file.php:67
-msgid "Choose File"
-msgstr "Välj fil"
 
 #: classes/views/lookup-fields/back-end/filter.php:6
 msgid "Limit options to those created by the current user"

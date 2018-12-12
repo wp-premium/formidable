@@ -45,7 +45,7 @@ class FrmProFileField {
 				'cancel'           => __( 'Cancel upload', 'formidable-pro' ),
 				'cancelConfirm'    => __( 'Are you sure you want to cancel this upload?', 'formidable-pro' ),
 				'remove'           => __( 'Remove file', 'formidable-pro' ),
-				'maxFilesExceeded' => sprintf( __( 'You have uploaded too many files. You may only include %d file(s).', 'formidable-pro' ), $max ),
+				'maxFilesExceeded' => sprintf( __( 'You have uploaded more than %d file(s).', 'formidable-pro' ), $max ),
 				'resizeHeight'     => null,
 				'resizeWidth'      => null,
 				'timeout'          => self::get_timeout(),
@@ -397,7 +397,7 @@ class FrmProFileField {
 
 		$total_upload_count = self::get_new_and_old_file_count( $field, $args, $values );
 		if ( $total_upload_count > $file_count_limit ) {
-			$errors[ 'field' . $field->temp_id ] = sprintf( __( 'You have uploaded too many files. You may only include %d file(s).', 'formidable-pro' ), $file_count_limit );
+			$errors[ 'field' . $field->temp_id ] = sprintf( __( 'You have uploaded more than %d file(s).', 'formidable-pro' ), $file_count_limit );
 		}
 	}
 

@@ -15,11 +15,26 @@
 	color: <?php echo esc_html( $settings['text_color'] . $important ); ?>;
 }
 
+.<?php echo esc_html( $settings['style_class'] ); ?> .frm_compact .frm_dropzone .frm_upload_icon:before {
+	color: <?php echo esc_html( $settings['submit_text_color'] . $important ) ?>;
+}
+
 .<?php echo esc_html( $settings['style_class'] ); ?> .frm_blank_field .frm_dropzone{
 	border-color:<?php echo esc_html( $settings['border_color_error'] . $important ); ?>;
 	color:<?php echo esc_html( $settings['text_color_error'] . $important ); ?>;
 	background-color:<?php echo esc_html( $settings['bg_color_error'] . $important ); ?>;
 }
+
+<?php if ( isset( $settings['progress_bg_color'] ) ) { ?>
+.<?php echo esc_html( $settings['style_class'] ); ?> .frm_dropzone .dz-preview .dz-progress {
+	background: <?php echo esc_html( $settings['progress_bg_color'] . $important ) ?>;
+}
+
+.<?php echo esc_html( $settings['style_class'] ); ?> .frm_dropzone .dz-preview .dz-progress .dz-upload,
+.<?php echo esc_html( $settings['style_class'] ); ?> .frm_dropzone .dz-preview.dz-complete .dz-progress {
+    background: <?php echo esc_html( $settings['progress_active_bg_color'] . $important ) ?>;
+}
+<?php } ?>
 
 /* File Upload */
 

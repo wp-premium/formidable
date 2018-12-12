@@ -22,7 +22,7 @@ msgid "Remove file"
 msgstr "移除檔案"
 
 #: classes/models/FrmProFileField.php:48 classes/models/FrmProFileField.php:360
-msgid "You have uploaded too many files. You may only include %d file(s)."
+msgid "You have uploaded more than %d file(s)."
 msgstr "您上傳太多檔案。目前只允許 %d 個檔案。"
 
 #: classes/models/FrmProFileField.php:431

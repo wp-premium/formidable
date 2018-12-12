@@ -11,7 +11,7 @@ class FrmAppHelper {
 	/**
 	 * @since 2.0
 	 */
-	public static $plug_version = '3.03.03';
+	public static $plug_version = '3.04.02';
 
     /**
      * @since 1.07.02
@@ -69,6 +69,23 @@ class FrmAppHelper {
 
 	public static function get_affiliate() {
 		return absint( apply_filters( 'frm_affiliate_id', 0 ) );
+	}
+
+	/**
+	 * @since 3.04.02
+	 */
+	public static function admin_upgrade_link( $medium, $page = '' ) {
+		if ( empty( $page ) ) {
+			$page = 'https://formidableforms.com/pricing-lite/';
+		} else {
+			$page = 'https://formidableforms.com/' . $page;
+		}
+		$query_args = array(
+			'utm_source'   => 'WordPress',
+			'utm_medium'   => $medium,
+			'utm_campaign' => 'liteplugin',
+		);
+		return add_query_arg( $query_args, $page );
 	}
 
     /**
@@ -1682,6 +1699,9 @@ class FrmAppHelper {
 				'view_shortcodes'   => __( 'This calculation may have shortcodes that work in Views but not forms.', 'formidable' ),
 				'text_shortcodes'   => __( 'This calculation may have shortcodes that work in text calculations but not numeric calculations.', 'formidable' ),
 				'repeat_limit_min'  => __( 'Please enter a Repeat Limit that is greater than 1.', 'formidable' ),
+				'installing'        => __( 'Installing', 'formidable' ),
+				'install'           => __( 'Install', 'formidable' ),
+				'active'            => __( 'Active', 'formidable' ),
 			);
 			wp_localize_script( 'formidable_admin', 'frm_admin_js', $admin_script_strings );
 		}
