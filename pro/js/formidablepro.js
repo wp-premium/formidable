@@ -152,7 +152,7 @@ function frmProFormJS(){
 
 		field.dropzone({
 			url:frm_js.ajax_url,
-			addRemoveLinks: true,
+			addRemoveLinks: false,
 			paramName: field.attr('id').replace('_dropzone', ''),
 			maxFilesize: uploadFields[i].maxFilesize,
 			maxFiles: max,
@@ -171,7 +171,10 @@ function frmProFormJS(){
 			resizeMethod: 'contain',
 			resizeWidth: uploadFields[i].resizeWidth,
 			resizeHeight: uploadFields[i].resizeHeight,
+			thumbnailWidth: 60,
+			thumbnailHeight: 60,
 			timeout: uploadFields[i].timeout,
+			previewTemplate: filePreviewHTML( uploadFields[i] ),
 			fallback: function() {
 				// Force ajax submit to turn off
 				jQuery(this.element).closest('form').removeClass('frm_ajax_submit');
@@ -266,6 +269,35 @@ function frmProFormJS(){
 		});
 	}
 
+	function filePreviewHTML( field ) {
+		return "<div class=\"dz-preview dz-file-preview frm_clearfix\">\n" +
+		"<div class=\"dz-image\"><img data-dz-thumbnail /></div>\n" +
+		"<div class=\"dz-column\">\n" +
+		"<div class=\"dz-details\">\n" +
+		"<div class=\"dz-filename\"><span data-dz-name></span></div>\n" +
+		"<div class=\"dz-size\"><span data-dz-size></span></div>\n" +
+		'<a class="dz-remove frm_icon_font frm_cancel1_icon" href="javascript:undefined;" data-dz-remove title="' + field.remove + '"></a>' +
+		"</div>\n" +
+		"<div class=\"dz-progress\"><span class=\"dz-upload\" data-dz-uploadprogress></span></div>\n" +
+		"<div class=\"dz-error-message\"><span data-dz-errormessage></span></div>\n" +
+		"</div>\n" +
+		"</div>";
+	}
+
+	function getHiddenUploadHTML( field, mediaID, fieldName ) {
+		return '<input name="'+ fieldName +'[]" type="hidden" value="'+ mediaID +'" data-frmfile="'+ field.fieldID +'" />';
+	}
+
+	function removeFile(){
+		/*jshint validthis:true */
+		var fieldName = jQuery(this).data('frm-remove');
+		fadeOut(jQuery(this).closest('.dz-preview'));
+		var singleField = jQuery('input[name="'+ fieldName +'"]');
+		if ( singleField.length ) {
+			singleField.val('');
+		}
+	}
+
 	function isSpam( formID ) {
 		if ( isHoneypotSpam( formID ) || isHeadless() ) {
 			return true;
@@ -342,20 +374,6 @@ function frmProFormJS(){
 			}
 
 			return fieldsComplete;
-		}
-	}
-
-	function getHiddenUploadHTML( field, mediaID, fieldName ) {
-		return '<input name="'+ fieldName +'[]" type="hidden" value="'+ mediaID +'" data-frmfile="'+ field.fieldID +'" />';
-	}
-
-	function removeFile(){
-		/*jshint validthis:true */
-		var fieldName = jQuery(this).data('frm-remove');
-		fadeOut(jQuery(this).parent('.dz-preview'));
-		var singleField = jQuery('input[name="'+ fieldName +'"]');
-		if ( singleField.length ) {
-			singleField.val('');
 		}
 	}
 
@@ -2591,6 +2609,10 @@ function frmProFormJS(){
 			inputId += '-' + depFieldArgs.repeatRow;
 		}
 		var listInput = document.getElementById(inputId);
+
+		if ( listInput === null ) {
+			return;
+		}
 
 		// Set the new value
 		listInput.value = newValue;

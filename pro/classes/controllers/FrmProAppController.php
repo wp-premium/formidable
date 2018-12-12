@@ -9,6 +9,7 @@ class FrmProAppController {
 	/**
 	 * Use in-plugin translations instead of WP.org
 	 * @since 2.2.8
+	 * @codeCoverageIgnore
 	 */
 	public static function load_translation( $mo_file, $domain ) {
 		_deprecated_function( __FUNCTION__, '3.0' );
@@ -82,7 +83,7 @@ class FrmProAppController {
 			'dropzone' => array(
 				'file'     => '/js/dropzone.min.js',
 				'requires' => array( 'jquery' ),
-				'version'  => '4.3.0',
+				'version'  => '5.5.0',
 			),
 			'jquery-chosen' => array(
 				'file'     => '/js/chosen.jquery.min.js',
@@ -312,6 +313,17 @@ class FrmProAppController {
 			$content = do_shortcode( $content );
 
 			return $content;
+		}
+	}
+
+	/**
+	 * @since 3.04.02
+	 */
+	public static function remove_upsells() {
+		if ( is_callable( 'FrmAppController::remove_upsells' ) ) {
+			FrmAppController::remove_upsells();
+		} else {
+			remove_action( 'frm_before_settings', 'FrmSettingsController::license_box' );
 		}
 	}
 }

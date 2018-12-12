@@ -168,13 +168,15 @@ class FrmFieldsController {
 
 		$copy_field = FrmField::getOne( $field_id );
         if ( ! $copy_field ) {
-            wp_die();
+			wp_die();
         }
 
 		do_action( 'frm_duplicate_field', $copy_field, $form_id );
 		do_action( 'frm_duplicate_field_' . $copy_field->type, $copy_field, $form_id );
 
-		$values = array();
+		$values = array(
+			'id' => $copy_field->id,
+		);
 		FrmFieldsHelper::fill_field( $values, $copy_field, $copy_field->form_id );
 		$values = apply_filters( 'frm_prepare_single_field_for_duplication', $values );
 

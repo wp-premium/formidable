@@ -146,37 +146,35 @@ class FrmProEddController extends FrmAddon {
 		$config_license = $this->get_defined_license();
 
 ?>
-<div id="frm_license_top" class="<?php echo esc_attr( $frm_vars['pro_is_authorized'] ? 'frm_hidden' : '' ) ?>">
+<div id="frm_license_bottom" class="<?php echo esc_attr( $frm_vars['pro_is_authorized'] ? '' : 'frm_hidden' ) ?>">
+<div class="frm_pro_installed">
+<div>
+	<p>
+		<strong>
+			<?php esc_html_e( 'Formidable Pro is Installed', 'formidable-pro' ); ?>
+		</strong>
+		<?php if ( ! $config_license ) { ?>
+			<a href="#" id="frm_deauthorize_link" class="alignright" data-plugin="<?php echo esc_attr( $this->plugin_slug ) ?>">
+				<?php esc_html_e( 'Deauthorize this site', 'formidable-pro' ) ?>
+			</a>
+		<?php } ?>
+		<div class="spinner"></div>
+	</p>
+</div>
+</div>
+</div>
+
+<div id="frm_license_top">
 	<?php
 	$this->display_form();
 
 	if ( ! $frm_vars['pro_is_authorized'] ) {
 		?>
-    <p>Already signed up? <a href="https://formidableforms.com/account/licenses/" target="_blank"><?php esc_html_e( 'Click here', 'formidable-pro' ) ?></a> to get your license number.</p>
+    <p>Already signed up? <a href="https://formidableforms.com/account/licenses/?utm_source=WordPress&utm_medium=settings-license&utm_campaign=proplugin" target="_blank"><?php esc_html_e( 'Get your license number', 'formidable-pro' ) ?></a>.</p>
     <?php } ?>
 </div>
 
-<div id="frm_license_bottom" class="<?php echo esc_attr( $frm_vars['pro_is_authorized'] ? '' : 'frm_hidden' ) ?>">
-<div class="frm_pro_installed">
-<div>
-	<strong class="alignleft" style="margin-right:10px;">
-		<?php esc_html_e( 'Formidable Pro is Installed', 'formidable-pro' ) ?>
-	</strong>
-	<?php if ( ! $config_license ) { ?>
-	<a href="javascript:void(0)" class="frm_show_auth_form button-secondary alignleft">
-		<?php esc_html_e( 'Enter new license', 'formidable-pro' ) ?>
-	</a>
-	<a href="#" id="frm_deauthorize_link" class="button-secondary alignright" data-plugin="<?php echo esc_attr( $this->plugin_slug ) ?>">
-		<?php esc_html_e( 'Deauthorize this site', 'formidable-pro' ) ?>
-	</a>
-	<?php } ?>
-    <div class="spinner"></div>
-</div>
-<div class="clear"></div>
-</div>
-<p class="frm_aff_link"><a href="https://formidableforms.com/account/licenses/" target="_blank"><?php esc_html_e( 'Account', 'formidable-pro' ) ?></a></p>
-</div>
-<p class="frm_pro_license_msg"></p>
+<div class="frm_pro_license_msg frm_hidden"></div>
 <div class="clear"></div>
 
 <?php
@@ -186,29 +184,33 @@ class FrmProEddController extends FrmAddon {
 	 * this is the view for the license form
 	 */
 	function display_form() {
-        global $frm_vars;
+		global $frm_vars;
 
-        ?>
+		if ( $frm_vars['pro_is_authorized'] ) {
+			$placeholder = __( 'Verify a different license key', 'formidable-pro' );
+			$value = '•••••••••••••••••••';
+		} else {
+			$placeholder = __( 'Enter your license key here', 'formidable-pro' );
+			$value = '';
+		}
+		?>
 <div id="pro_cred_form">
 
-    <p><input type="text" name="proplug-license" value="" class="frm_98_width" placeholder="<?php esc_attr_e( 'Enter your license number here', 'formidable-pro' ) ?>" id="edd_<?php echo esc_attr( $this->plugin_slug ) ?>_license_key" />
+	<input type="text" name="proplug-license" value="<?php echo esc_attr( $value ); ?>" class="frm_full" placeholder="<?php echo esc_attr( $placeholder ); ?>" id="edd_<?php echo esc_attr( $this->plugin_slug ); ?>_license_key" />
 
 	<?php
 	if ( is_multisite() ) {
 		$creds = $this->get_pro_cred_form_vals();
 		?>
-        <br/><label for="proplug-wpmu"><input type="checkbox" value="1" name="proplug-wpmu" id="proplug-wpmu" <?php checked( $creds['wpmu'], 1 ) ?> />
-        <?php esc_html_e( 'Use this license to enable Formidable Pro site-wide', 'formidable-pro' ); ?></label>
-    <?php } ?>
-    </p>
-
-	<input class="button-secondary frm_authorize_link" type="button" data-plugin="<?php echo esc_attr( $this->plugin_slug ) ?>" value="<?php esc_attr_e( 'Save License', 'formidable-pro' ); ?>" />
-	<?php
-	if ( $frm_vars['pro_is_authorized'] ) {
-        esc_html_e( 'or', 'formidable-pro' );
-    ?>
-        <a href="javascript:void(0)" class="frm_show_auth_form button-secondary"><?php esc_html_e( 'Cancel', 'formidable-pro' ); ?></a>
-    <?php } ?>
+		<br/>
+		<label for="proplug-wpmu">
+			<input type="checkbox" value="1" name="proplug-wpmu" id="proplug-wpmu" <?php checked( $creds['wpmu'], 1 ); ?> />
+			<?php esc_html_e( 'Use this license to enable Formidable Pro site-wide', 'formidable-pro' ); ?>
+		</label>
+	<?php } ?>
+	<p>
+		<input class="button-secondary frm_authorize_link" type="button" data-plugin="<?php echo esc_attr( $this->plugin_slug ); ?>" value="<?php esc_attr_e( 'Save License', 'formidable-pro' ); ?>" />
+	</p>
 </div>
 <?php
     }

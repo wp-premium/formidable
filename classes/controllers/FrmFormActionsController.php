@@ -45,7 +45,7 @@ class FrmFormActionsController {
             //'aweber'    => 'FrmDefAweberAction',
             'mailchimp' => 'FrmDefMlcmpAction',
             'twilio'    => 'FrmDefTwilioAction',
-            'highrise'  => 'FrmDefHrsAction',
+            'payment'   => 'FrmDefHrsAction',
         );
 		$action_classes = apply_filters( 'frm_registered_form_actions', $action_classes );
 
@@ -112,7 +112,10 @@ class FrmFormActionsController {
 		 */
 		do_action( 'frm_before_list_actions', $form );
 
-		$form_actions = FrmFormAction::get_action_for_form( $form->id );
+		$filters = array(
+			'post_status' => 'all',
+		);
+		$form_actions = FrmFormAction::get_action_for_form( $form->id, 'all', $filters );
 
         $action_controls = self::get_form_actions();
 
@@ -300,7 +303,7 @@ class FrmFormActionsController {
 				continue;
 			}
 
-			$child_entry = ( ( $form && is_numeric( $form->parent_form_id ) && $form->parent_form_id ) || ( $entry && ( $entry->form_id != $form->id || $entry->parent_item_id ) ) || ( isset( $args['is_child'] ) && $args['is_child'] ) );
+			$child_entry = ( ( is_object( $form ) && is_numeric( $form->parent_form_id ) && $form->parent_form_id ) || ( $entry && ( $entry->form_id != $form->id || $entry->parent_item_id ) ) || ( isset( $args['is_child'] ) && $args['is_child'] ) );
 
 			if ( $child_entry ) {
 				// maybe trigger actions for sub forms

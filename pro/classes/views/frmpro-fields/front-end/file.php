@@ -35,27 +35,27 @@ if ( FrmField::is_read_only( $field ) ) {
 ?>
 <input type="hidden" name="<?php echo esc_attr( $input_name ) ?>" value="<?php echo esc_attr( $hidden_value ) ?>" data-frmfile="<?php echo esc_attr( $field['id'] ) ?>" />
 
-<div class="frm_dropzone frm_<?php echo esc_attr( $file_settings['maxFiles'] == 1 ? 'single' : 'multi' ) ?>_upload" id="<?php echo esc_attr( $file_name ) ?>_dropzone">
+<div class="frm_dropzone frm_<?php echo esc_attr( $file_settings['maxFiles'] == 1 ? 'single' : 'multi' ) ?>_upload frm_clearfix" id="<?php echo esc_attr( $file_name ) ?>_dropzone">
 	<div class="fallback">
 		<input type="file" name="<?php echo esc_attr( $file_name . ( $is_multiple ? '[]' : '' ) ) ?>" id="<?php echo esc_attr( $html_id ) ?>" <?php echo $extra_atts; do_action( 'frm_field_input_html', $field ) ?> />
 		<?php foreach ( $file_settings['mockFiles'] as $file ) { ?>
-			<div class="dz-preview dz-complete dz-image-preview">
+			<div class="dz-preview dz-complete dz-image-preview frm_clearfix">
 				<div class="dz-image">
 					<img src="<?php echo esc_attr( $file['url'] ) ?>" alt="<?php echo esc_attr( $file['name'] ) ?>" />
 				</div>
-				<div class="dz-details">
-					<div class="dz-filename">
-						<span data-dz-name="">
-							<a href="<?php echo esc_attr( $file['file_url'] ) ?>" target="_blank" rel="noopener"><?php echo esc_html( $file['name'] ) ?></a>
-						</span>
+				<div class="dz-column">
+					<div class="dz-details">
+						<div class="dz-filename">
+							<span data-dz-name="">
+								<a href="<?php echo esc_attr( $file['file_url'] ) ?>" target="_blank" rel="noopener"><?php echo esc_html( $file['name'] ) ?></a>
+							</span>
+						</div>
+						<a class="dz-remove frm_remove_link frm_icon_font frm_cancel1_icon" href="javascript:undefined;" data-frm-remove="<?php echo esc_attr( $field_name ) ?>" title="<?php esc_attr_e( 'Remove file', 'formidable-pro' ) ?>"></a>
+						<?php if ( $is_multiple ) { ?>
+							<input type="hidden" name="<?php echo esc_attr( $field_name ); ?>[]" value="<?php echo esc_attr( $file['id'] ) ?>" />
+						<?php } ?>
 					</div>
 				</div>
-				<a class="dz-remove frm_remove_link" href="javascript:undefined;" data-frm-remove="<?php echo esc_attr( $field_name ) ?>">
-					<?php esc_html_e( 'Remove file', 'formidable-pro' ) ?>
-				</a>
-				<?php if ( $is_multiple ) { ?>
-				<input type="hidden" name="<?php echo esc_attr( $field_name ); ?>[]" value="<?php echo esc_attr( $file['id'] ) ?>" />
-				<?php } ?>
 			</div>
 		<?php } ?>
 		<div class="frm_clearfix <?php echo is_admin() ? 'clear' : ''; ?>"></div>
@@ -63,8 +63,8 @@ if ( FrmField::is_read_only( $field ) ) {
 	</div>
 	<div class="dz-message needsclick">
 		<span class="frm_icon_font frm_upload_icon"></span>
-		<span class="frm_upload_text"><?php esc_html_e( 'Drop a file here or click to upload', 'formidable-pro' ) ?></span>
-		<span class="frm_compact_text"><?php esc_html_e( 'Choose File', 'formidable-pro' ); ?></span>
+		<span class="frm_upload_text"><?php echo esc_html( $field['drop_msg'] ); ?></span>
+		<span class="frm_compact_text"><?php echo esc_html( $field['choose_msg'] ); ?></span>
 		<div class="frm_small_text">
 			<?php echo esc_html( sprintf( __( 'Maximum upload size: %sMB', 'formidable-pro' ), $file_settings['maxFilesize'] ) ) ?>
 		</div>

@@ -14,6 +14,8 @@ class FrmProHooksController {
 			add_action('frm_before_settings', 'FrmProSettingsController::license_box', 1);
 		}
 
+		add_action( 'admin_head', 'FrmProAppController::remove_upsells' );
+
 		global $frm_vars;
 		if ( ! $frm_vars['pro_is_authorized'] ) {
 			return;
@@ -162,7 +164,6 @@ class FrmProHooksController {
 		add_action( 'frm_pre_get_form', 'FrmProFormsController::add_submit_conditions_to_frm_vars', 10 );
         add_filter('frm_replace_content_shortcodes', 'FrmProFormsController::replace_content_shortcodes', 10, 3);
         add_filter('frm_conditional_shortcodes', 'FrmProFormsController::conditional_options');
-        add_filter('frm_user_shortcodes', 'FrmProFormsController::user_options');
         add_filter( 'frm_helper_shortcodes', 'FrmProFormsController::add_pro_field_helpers', 10, 2 );
 
 		add_filter( 'frm_validate_entry', 'FrmProFormsHelper::can_submit_form_now', 15, 2 );
@@ -302,6 +303,7 @@ class FrmProHooksController {
             add_action('frm_add_form_ajax_options', 'FrmProFormsController::add_form_ajax_options');
             add_action('frm_add_form_button_options', 'FrmProFormsController::add_form_button_options');
             add_action('frm_add_form_msg_options', 'FrmProFormsController::add_form_msg_options');
+			add_action( 'frm_add_form_perm_options', 'FrmProFormsController::add_form_status_options', 110 );
         }
 
 		add_action( 'admin_init', 'FrmProFormsController::admin_js', 1 );
@@ -332,6 +334,7 @@ class FrmProHooksController {
         add_action('frm_settings_form', 'FrmProSettingsController::more_settings', 1);
 		add_action( 'frm_update_settings', 'FrmProSettingsController::update' );
         add_action('frm_store_settings', 'FrmProSettingsController::store');
+		add_filter( 'frm_advanced_helpers', 'FrmProSettingsController::advanced_helpers', 10, 2 );
 
 		// Styles Controller
 		add_filter( 'frm_style_switcher', 'FrmProStylesController::style_switcher', 10, 2 );

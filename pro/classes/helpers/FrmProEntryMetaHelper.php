@@ -411,6 +411,7 @@ class FrmProEntryMetaHelper {
 	}
 
 	/**
+	 * @codeCoverageIgnore
 	 * @deprecated 2.04
 	 */
 	public static function email_value( $value ) {
