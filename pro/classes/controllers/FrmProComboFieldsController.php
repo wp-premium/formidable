@@ -106,6 +106,9 @@ class FrmProComboFieldsController {
 		}
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function add_default_options( $options ) {
 		_deprecated_function( __METHOD__, '3.0', 'FrmProField{type} Modals' );
 		return $options;

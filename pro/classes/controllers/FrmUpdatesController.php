@@ -1,6 +1,8 @@
 <?php
 // Contains all the functions necessary to provide an update mechanism for FormidableForms!
-
+/**
+ * @codeCoverageIgnore
+ */
 class FrmUpdatesController {
 
     // Where all the vitals are defined for this plugin
@@ -21,6 +23,9 @@ class FrmUpdatesController {
     var $pro_error_message_str;
     var $license        = '';
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	function __construct() {
 		_deprecated_function( __FUNCTION__, '2.3' );
 

@@ -35,8 +35,10 @@ class FrmProFieldFile extends FrmFieldType {
 			'delete' => false,
 			'restrict' => 0,
 			'resize'     => false,
-			'new_size'  => '600',
+			'new_size'   => '600',
 			'resize_dir' => 'width',
+			'drop_msg'   => __( 'Drop a file here or click to upload', 'formidable-pro' ),
+			'choose_msg' => __( 'Choose File', 'formidable-pro' ),
 		);
 	}
 

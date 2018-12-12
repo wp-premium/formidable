@@ -20,6 +20,8 @@ class FrmProLookupFieldsController {
 	/**
 	 * Get the data types for Lookup fields, formatted for Insert Field tab
 	 * @deprecated 3.0
+	 * @codeCoverageIgnore
+	 *
 	 * @return array $lookup_display_options
 	 */
 	public static function get_lookup_options_for_insert_fields_tab() {
@@ -33,6 +35,7 @@ class FrmProLookupFieldsController {
 	 *
 	 * @since 2.01.0
 	 * @deprecated 3.0
+	 * @codeCoverageIgnore
 	 * @param array $values
 	 * @param object $field
 	 * @param array $opts
@@ -119,6 +122,7 @@ class FrmProLookupFieldsController {
 	 * Add some of the standard field options to Lookup fields
 	 *
 	 * @since 2.01.0
+	 * @codeCoverageIgnore
 	 * @return array $add_options
 	 */
 	public static function add_standard_field_options() {

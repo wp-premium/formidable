@@ -265,6 +265,53 @@ class FrmProForm {
 		return $ajax;
 	}
 
+	/**
+	 * @since 3.04
+	 *
+	 * @param object $form
+	 * @return bool
+	 */
+	public static function is_open( $form ) {
+		$options = $form->options;
+
+		if ( ! isset( $options['open_status'] ) || empty( $options['open_status'] ) ) {
+			return true;
+		}
+
+		if ( $options['open_status'] === 'closed' ) {
+			return false;
+		}
+
+		if ( strpos( $options['open_status'], 'schedule' ) !== false ) {
+			$is_started = self::has_time_passed( $options['open_date'], true );
+			$is_ended   = self::has_time_passed( $options['close_date'], false );
+			$is_open    = $is_started && ! $is_ended;
+
+			if ( ! $is_open ) {
+				return false;
+			}
+		}
+
+		if ( strpos( $options['open_status'], 'limit' ) !== false && ! empty( $options['max_entries'] ) ) {
+			$count = FrmEntry::getRecordCount( $form->id );
+			return ( (int) $count < (int) $options['max_entries'] );
+		}
+
+		return true;
+	}
+
+
+	/**
+	 * @since 3.04
+	 *
+	 * @param string $time
+	 * @param bool $if_blank - If no time is set, should it default to passed?
+	 * @return bool
+	 */
+	private static function has_time_passed( $time, $if_blank ) {
+		return empty( $time ) ? $if_blank : ( current_time( 'timestamp' ) > strtotime( $time ) );
+	}
+
 	public static function validate( $errors, $values ) {
         // add a user id field if the form requires one
         if ( isset( $values['logged_in'] ) || isset( $values['editable'] ) || ( isset( $values['single_entry'] ) && isset( $values['options']['single_entry_type'] ) && $values['options']['single_entry_type'] == 'user' ) || ( isset( $values['options']['save_draft'] ) && $values['options']['save_draft'] == 1 ) ) {

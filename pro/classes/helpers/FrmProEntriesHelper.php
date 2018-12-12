@@ -238,11 +238,17 @@ class FrmProEntriesHelper {
         return $link;
     }
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function show_duplicate_link( $entry ) {
 		_deprecated_function( __METHOD__, '3.0' );
         echo self::duplicate_link($entry);
     }
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function duplicate_link( $entry ) {
 		if ( current_user_can('frm_create_entries') ) {
 			_deprecated_function( __METHOD__, '3.0' );

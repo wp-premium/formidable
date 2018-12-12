@@ -305,21 +305,33 @@ class FrmProStylesController extends FrmStylesController {
 		return ( isset( $defaults['important_style'] ) && ! empty( $defaults['important_style'] ) ) ? ' !important' : '';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function section_fields_file() {
 		_deprecated_function( __METHOD__, '3.01.01', 'FrmProStylesController::style_box_file' );
 		return self::view_folder() . '/_section-fields.php';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function date_settings_file() {
 		_deprecated_function( __METHOD__, '3.01.01', 'FrmProStylesController::style_box_file' );
 		return self::view_folder() . '/_date-fields.php';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function progress_settings_file() {
 		_deprecated_function( __METHOD__, '3.01.01', 'FrmProStylesController::style_box_file' );
 		return self::view_folder() . '/_progress-bars.php';
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 */
 	public static function get_datepicker_names( $jquery_themes ) {
 		_deprecated_function( __METHOD__, '3.03' );
 		$alt_img_name = array();

@@ -2,7 +2,7 @@
 <?php
 if ( isset( $message ) && '' !== $message ) {
 	if ( FrmAppHelper::is_admin() ) {
-		echo '<div id="message" class="updated frm_updated_message">';
+		echo '<div id="message" class="frm_updated_message">';
 		echo FrmAppHelper::kses( $message, 'all' ); // WPCS: XSS ok.
 		echo '</div>';
 	} else {
@@ -12,7 +12,7 @@ if ( isset( $message ) && '' !== $message ) {
 
 if ( isset( $errors ) && is_array( $errors ) && count( $errors ) > 0 ) {
 ?>
-	<div class="error">
+	<div class="error" role="alert">
 		<ul id="frm_errors">
 			<?php
 			foreach ( $errors as $error ) {
