@@ -121,35 +121,6 @@ td.column-title .frm_actions_dropdown{
 	float:left;
 }
 
-.post-type-frm_display .wrap .add-new-h2,
-.frm_wrap .add-new-h2{
-	font-size:12px;
-	border: 1px solid #f37656;
-	color: #f37656;
-	line-height: 1.4;
-	font-weight: 600;
-	margin: 1px 0 0 10px;
-	padding: 1px 4px;
-	vertical-align: top;
-	-webkit-border-radius: 10px;
-	border-radius: 2px;
-	text-transform:lowercase;
-	position:initial;
-	vertical-align: middle;
-	background:transparent;
-}
-
-.post-type-frm_display .wrap .add-new-h2:hover,
-.post-type-frm_display .wrap .add-new-h2:active,
-.post-type-frm_display .wrap .add-new-h2:focus,
-.frm_wrap .add-new-h2:hover,
-.frm_wrap .add-new-h2:active,
-.frm_wrap .add-new-h2:focus{
-	color: #fff;
-	background:#f37656;
-	border: 1px solid #f37656;
-}
-
 ul.frm_form_nav {
 	margin:0;
 	float:left;
@@ -408,22 +379,136 @@ ul.frm_form_nav > li{
 	margin-left: 5px;
 }
 
-#frm_upgrade_modal .button,
-.frm-white-body .frm_wrap .button,
-.frm-white-body .frm_wrap button{
-	text-shadow:none;
-	box-shadow:none;
-	border-radius:2px;
-	border-color:#e5e5e5;
-	font-size: 1.1em;
+/* Buttons */
+
+.frm_orange_button,
+.frm_reverse_button,
+.post-type-frm_display .wrap .add-new-h2,
+.frm_wrap .add-new-h2{
+	font-size:12px;
+	border: 1px solid #f37656;
+	color: #f37656;
+	line-height: 1.4;
+	font-weight: 600;
+	padding: 1px 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+	background:transparent;
 }
 
+.post-type-frm_display .wrap .add-new-h2,
+.frm_wrap .add-new-h2{
+	margin: 1px 0 0 10px;
+	vertical-align: top;
+	text-transform:lowercase;
+	position:initial;
+	vertical-align: middle;
+}
+
+.frm_reverse_button:hover,
+.frm_reverse_button:active,
+.frm_reverse_button:focus,
+.post-type-frm_display .wrap .add-new-h2:hover,
+.post-type-frm_display .wrap .add-new-h2:active,
+.post-type-frm_display .wrap .add-new-h2:focus,
+.frm_wrap .add-new-h2:hover,
+.frm_wrap .add-new-h2:active,
+.frm_wrap .add-new-h2:focus{
+	color: #fff;
+	background:#f37656;
+	border: 1px solid #f37656;
+}
+
+.frm_reverse_button{
+	font-size: 1.1em;
+	transition: all .2s ease;
+}
+
+.frm_orange_button,
+.wrap .frm_pricing a.button-primary,
+.toplevel_page_formidable #frm_upgrade_modal .button-primary,
+#frm_upgrade_modal .button,
+#form_global_settings .button-primary,
+#form_global_settings .button-secondary,
+.wp-core-ui.frm-white-body .button-primary,
+.wp-core-ui.frm-white-body .button-secondary,
+.wp-core-ui.frm-white-body .button,
+.wp-core-ui.frm-white-body button,
+.frm-white-body .button-primary,
+.frm-white-body .button-secondary,
+.frm-white-body .button,
+.frm-white-body button{
+	text-shadow:none;
+	box-shadow:none;
+	border-radius:4px;
+	border-color:#e5e5e5;
+	font-size: 1.1em;
+	transition: all .2s ease;
+}
+
+#frm-addons-page .button-primary,
+.frm_single_entry_page .button-primary,
+#form_global_settings .button-primary,
+#frm_upgrade_modal .button,
+.frm_wrap .preview > .button{
+	border-color: rgba(53,97,150,0.5) !important;
+	background: rgb(53,97,150);
+	color: #fff;
+}
+
+.frm_orange_button,
 .wrap .frm_pricing a.button-primary,
 .toplevel_page_formidable #frm_upgrade_modal .button-primary,
 .toplevel_page_formidable .frm_wrap button.button-primary{
-	border-color: #da791d;
+	border-color: #da791d !important;
 	background: #f37656;
 	color:#fff;
+}
+
+#frm-addons-page .button-primary:hover,
+#frm-addons-page .button-primary:focus,
+#form_global_settings .button-primary:hover,
+#form_global_settings .button-primary:focus,
+#frm_upgrade_modal .button:hover,
+#frm_upgrade_modal .button:focus,
+.frm_wrap .preview > .button:hover,
+.frm_wrap .preview > .button:focus{
+	border-color: rgba(130, 168, 203,0.5) !important;
+	background: rgb(130, 168, 203);
+	color: #fff;
+	box-shadow:none;
+}
+
+#frm-addons-page .button-primary:focus,
+#form_global_settings .button-primary:focus,
+#frm_upgrade_modal .button:focus,
+.frm_wrap .preview > .button:focus {
+	border-color: rgba(53,97,150,0.5) !important;
+	outline:none;
+}
+
+.frm_orange_button:hover,
+.frm_orange_button:focus,
+.wrap .frm_pricing a.button-primary:hover,
+.wrap .frm_pricing a.button-primary:focus,
+.toplevel_page_formidable #frm_upgrade_modal .button-primary:hover,
+.toplevel_page_formidable #frm_upgrade_modal .button-primary:focus,
+.toplevel_page_formidable .frm_wrap button.button-primary:hover,
+.toplevel_page_formidable .frm_wrap button.button-primary:focus{
+	box-shadow:none;
+	opacity:0.8;
+}
+
+.frm_orange_button:hover,
+.frm_orange_button:focus{
+	border-color: #f37656 !important;
+	background: transparent;
+	color:#f37656;
+	opacity:1;
+}
+
+.preview .button .caret {
+	border-top-color: #fff;
 }
 
 #frm-preview-action{
@@ -447,6 +532,55 @@ input.frm_insert_in_template{
     font-size:10px;
     width:98%;
     font-weight:normal
+}
+
+/* Review request */
+.frm-review-notice.notice{
+	border:1px solid #ddd;
+	text-align:center;
+}
+
+.frm-review-notice.notice form,
+.frm-review-notice.notice p {
+	font-size:15px;
+	max-width:600px;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+.frm-review-notice a{
+	margin:5px;
+}
+
+.frm-review-notice > div{
+	padding-bottom:20px;
+}
+
+.frm-review-notice .frm_reverse_button,
+.frm-review-notice .frm_orange_button{
+	min-width:100px;
+	display:inline-block;
+	text-align:center;
+	padding:2px 10px;
+}
+
+.frm-review-notice p > span{
+	font-size:14px;
+	opacity:0.75;
+}
+
+#frmapi-feedback{
+	margin-top:30px;
+}
+
+.frm-review-notice .frm_error,
+.frm-review-notice label{
+	color:#444;
+	text-align:left;
+}
+
+.frm-review-notice label{
+	font-size:14px;
 }
 
 /* Generic Classes */
@@ -654,20 +788,48 @@ form .form-field.frm_field_loading{
 	padding: 5px 12px;
 }
 
+.frm_message,
+.frm_wrap .wrap .frm_updated_message,
 div.frm_updated_message{
-	border-radius:2px;
+	border-radius:4px;
     border: 1px solid #D6E9C6;
     background-color: #DFF0D8;
     color: #468847;
 	padding: 10px 15px;
 	font-size:14px;
-	margin:5px 15px 10px;
+	margin:5px 0 10px;
 }
 
-.frm_license_box .frm_error_style{
-	margin-left:0;
-	margin-right:0;
+.frm_message,
+.frm_wrap div.frm_updated_message{
+	margin-left:25px;
+	margin-right:25px;
 }
+
+.frm_ribbon {
+	-webkit-transform: rotate(45deg);
+	   -moz-transform: rotate(45deg);
+	    -ms-transform: rotate(45deg);
+		 -o-transform: rotate(45deg);
+		    transform: rotate(45deg);
+	border: 25px solid transparent;
+	border-bottom: 25px solid #f37656;
+	position: absolute;
+	top: 3px;
+	right: -39px;
+	padding: 0 10px;
+	width: 65px;
+	color: white;
+	font-family: sans-serif;
+	size: 11px;
+}
+
+.frm_ribbon span {
+	position: absolute;
+	top: 2px;
+	left: 25px;
+	font-size: 17px;
+}​
 
 .update-nag.frm-update-to-pro{
 	border:none;
@@ -737,10 +899,22 @@ div.frm_updated_message{
 	width: 31.3%;
 	margin:0 3% 30px 0;
 	clear:none;
+	border-radius: 10px;
+	border-color: rgb( 235, 235, 235 );
+	border-width: 2px;
 }
 
 .frm-addons .plugin-card-top{
-	height:200px;
+	height:175px;
+}
+
+.frm-addons .plugin-card-top h2 {
+    margin-top: 10px;
+    font-weight: 400;
+}
+
+.frm-addons .plugin-card-top p {
+	opacity:0.8;
 }
 
 .frm-addons .plugin-card:nth-child(3n+3) {
@@ -752,8 +926,10 @@ div.frm_updated_message{
 }
 
 .frm-addons .plugin-card-bottom {
-	padding:20px;
+	padding: 5px 20px 20px;
 	text-align:center;
+	background: transparent;
+	border-top: none;
 }
 
 .frm-addons .plugin-card-bottom,
@@ -767,6 +943,7 @@ div.frm_updated_message{
 
 .frm-addons .addon-status {
 	float:left;
+	padding-top: 4px;
 }
 
 .frm-addon-active .button {
@@ -938,7 +1115,7 @@ div.frm_updated_message{
 }
 
 a.frm-option-icon:before{
-	color: #0073aa;
+	color: rgb(53,97,150);
     font-size: 22px;
     width: 22px;
     height: 22px;
@@ -2752,11 +2929,11 @@ ul .frm_col_two{float:right;}
 	border: 1px solid #5b9dd9;
 	color:#1c94c4;
 	display:block;
-	border-radius: 2px;
+	border-radius: 4px;
 }
 
 .frm_code_list.frm_grid_container a:hover{
-	background-color:#0073aa;
+	background-color:rgb(53,97,150);
 	color:#fbfdff;
 }
 
@@ -2879,6 +3056,8 @@ li.frm_noallow.button.frm_show_upgrade {
 #frm_upgrade_modal .dismiss {
 	padding: 5px;
 	color: #c4c4c4;
+	z-index: 100;
+	position: relative;
 }
 
 #frm_upgrade_modal .dashicons-lock{

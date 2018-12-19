@@ -138,7 +138,7 @@
 				<label><?php esc_html_e( 'Post Password', 'formidable-pro' ); ?></label>
 			</td>
             <td><select name="<?php echo esc_attr( $this->get_field_name('post_password') ) ?>" class="frm_single_post_field">
-				<option value=""><?php echo esc_html_e( 'None', 'formidable-pro' ); ?></option>
+				<option value=""><?php esc_html_e( 'None', 'formidable-pro' ); ?></option>
 				<?php
 				$post_key = 'post_password';
 				include( dirname( __FILE__ ) . '/_post_field_options.php' );
@@ -175,7 +175,7 @@
         <tr>
 			<td><label><?php esc_html_e( 'Post Status', 'formidable-pro' ); ?></label></td>
             <td><select name="<?php echo esc_attr( $this->get_field_name('post_status') ) ?>" class="frm_single_post_field">
-				<option value=""><?php echo esc_html_e( 'Create Draft', 'formidable-pro' ); ?></option>
+				<option value=""><?php esc_html_e( 'Create Draft', 'formidable-pro' ); ?></option>
 				<option value="pending" <?php selected( $form_action->post_content['post_status'], 'pending' ) ?>>
 					<?php esc_html_e( 'Pending', 'formidable-pro' ); ?>
 				</option>
@@ -183,7 +183,7 @@
 					<?php esc_html_e( 'Automatically Publish', 'formidable-pro' ); ?>
 				</option>
 				<option value="dropdown">
-					<?php echo esc_html_e( 'Create New Dropdown Field', 'formidable-pro' ); ?>
+					<?php esc_html_e( 'Create New Dropdown Field', 'formidable-pro' ); ?>
 				</option>
                 <?php
 				$post_key = 'post_status';

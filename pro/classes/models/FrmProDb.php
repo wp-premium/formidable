@@ -2,12 +2,12 @@
 
 class FrmProDb {
 
-	public static $db_version = 64;
+	public static $db_version = 65;
 
 	/**
 	 * @since 3.0.02
 	 */
-	public static $plug_version = '3.04.02';
+	public static $plug_version = '3.04.03';
 
 	/**
 	 * @since 2.3
@@ -49,7 +49,7 @@ class FrmProDb {
 		}
 
 		if ( $old_db_version && is_numeric( $old_db_version ) ) {
-			$migrations = array( 16, 17, 25, 27, 28, 29, 30, 31, 32, 34, 36, 37, 39, 43, 44, 50, 62 );
+			$migrations = array( 16, 17, 25, 27, 28, 29, 30, 31, 32, 34, 36, 37, 39, 43, 44, 50, 62, 65 );
 			foreach ( $migrations as $migration ) {
 				if ( $db_version >= $migration && $old_db_version < $migration ) {
 					call_user_func( array( __CLASS__, 'migrate_to_' . $migration ) );
@@ -101,6 +101,43 @@ class FrmProDb {
 	 */
 	public static function before_free_version_db_upgrade() {
 		FrmProContent::add_rewrite_endpoint();
+	}
+
+	/**
+	 * Make another attempt to move Pro if still nested.
+	 * Before running the move, check if migration 50 be triggered anyway.
+	 *
+	 * @since 3.04.03
+	 */
+	public static function migrate_to_65() {
+		$pro_folder = substr( untrailingslashit( FrmProAppHelper::plugin_path() ), -4 );
+
+		if ( '/pro' !== $pro_folder || ! is_callable( 'FrmAddonsController::get_pro_download_url' ) ) {
+			// not nested
+			return;
+		}
+
+		$new_plugin = WP_PLUGIN_DIR . '/formidable-pro/';
+		if ( file_exists( $new_plugin ) ) {
+			return;
+		}
+
+		require_once( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
+
+		$download_url = esc_url_raw( FrmAddonsController::get_pro_download_url() );
+
+		// Create the plugin upgrader with our custom skin.
+		$installer = new Plugin_Upgrader( new FrmInstallerSkin() );
+		$installer->install( $download_url );
+
+		// Flush the cache and get the newly installed plugin basename.
+		wp_cache_flush();
+		$installed = $installer->plugin_info();
+		if ( ! $installed ) {
+			return;
+		}
+
+		activate_plugin( $installed );
 	}
 
 	/**

@@ -510,7 +510,7 @@ echo $custom_options;
 		$user_limited_entry = $user_ID && $form->editable && isset( $form->options['single_entry'] ) && $form->options['single_entry'] && $form->options['single_entry_type'] == 'user' && ! FrmAppHelper::is_admin();
 		if ( $user_limited_entry ) {
 			$entry_id = FrmDb::get_var(
-				$wpdb->prefix . 'frm_items',
+				'frm_items',
 				array(
 					'user_id' => $user_ID,
 					'form_id' => $form->id,

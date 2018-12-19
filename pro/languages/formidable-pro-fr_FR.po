@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Formidable v2.05\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-15 19:37+0000\n"
-"PO-Revision-Date: 2018-10-15 19:40+0000\n"
+"POT-Creation-Date: 2018-11-29 17:47+0000\n"
+"PO-Revision-Date: 2018-11-29 17:52+0000\n"
 "Last-Translator: Formidable Community\n"
 "Language-Team: French (France)\n"
 "Language: fr_FR\n"
@@ -250,58 +250,31 @@ msgstr "annuel"
 msgid "There are no views with that ID"
 msgstr "Il n'y a pas de vues avec cet ID"
 
-#: classes/controllers/FrmProEddController.php:119
-#, php-format
-msgid ""
-"Your %1$s license key is missing. Please add it on the %2$sGlobal Settings "
-"page%3$s."
-msgstr ""
-
-#: classes/controllers/FrmProEddController.php:155
-msgid "Click here"
-msgstr "Cliquez ici"
-
-#: classes/controllers/FrmProEddController.php:163
+#: classes/controllers/FrmProEddController.php:149
 msgid "Formidable Pro is Installed"
 msgstr "'Formidable Pro' est installé"
 
-#: classes/controllers/FrmProEddController.php:167
-msgid "Enter new license"
-msgstr "Entrer une nouvelle licence"
-
-#: classes/controllers/FrmProEddController.php:170
+#: classes/controllers/FrmProEddController.php:153
 msgid "Deauthorize this site"
 msgstr "Retirer l'autorisation de ce site"
 
-#: classes/controllers/FrmProEddController.php:177
-msgid "Account"
-msgstr "Compte"
+#: classes/controllers/FrmProEddController.php:168
+msgid "Already signed up?"
+msgstr ""
 
-#: classes/controllers/FrmProEddController.php:194
-msgid "Enter your license number here"
-msgstr "Entrer votre numéro de licence ici"
+#: classes/controllers/FrmProEddController.php:188
+msgid "Enter your license key here"
+msgstr ""
 
-#: classes/controllers/FrmProEddController.php:201
+#: classes/controllers/FrmProEddController.php:202
 msgid "Use this license to enable Formidable Pro site-wide"
 msgstr ""
 "Utiliser cette licence pour l'utilisation de 'Formidable Pro' sur l'ensemble "
 "du site"
 
-#: classes/controllers/FrmProEddController.php:205
+#: classes/controllers/FrmProEddController.php:206
 msgid "Save License"
 msgstr "Sauvegarder la licence"
-
-#: classes/controllers/FrmProEddController.php:208
-msgid "or"
-msgstr "ou"
-
-#: classes/controllers/FrmProEddController.php:210
-#: classes/controllers/FrmProEntriesController.php:2197
-#: classes/views/frmpro-entries/sidebar-new.php:7
-#: classes/views/frmpro-entries/sidebar-new.php:8
-#: classes/views/frmpro-form-actions/_custom_field_row.php:31
-msgid "Cancel"
-msgstr "Annuler"
 
 #: classes/controllers/FrmProEntriesController.php:106
 msgid "Draft was Successfully Created"
@@ -385,7 +358,7 @@ msgstr ""
 
 #: classes/controllers/FrmProEntriesController.php:1676
 #: classes/controllers/FrmProEntriesController.php:2196
-#: classes/helpers/FrmProAppHelper.php:244
+#: classes/helpers/FrmProAppHelper.php:257
 #: classes/helpers/FrmProEntriesHelper.php:297
 msgid "Edit"
 msgstr "Modifier"
@@ -401,6 +374,13 @@ msgstr "Supprimer"
 #: classes/helpers/FrmProEntriesListHelper.php:75
 msgid "Search"
 msgstr "Recherche"
+
+#: classes/controllers/FrmProEntriesController.php:2197
+#: classes/views/frmpro-entries/sidebar-new.php:7
+#: classes/views/frmpro-entries/sidebar-new.php:8
+#: classes/views/frmpro-form-actions/_custom_field_row.php:31
+msgid "Cancel"
+msgstr "Annuler"
 
 #: classes/controllers/FrmProEntriesController.php:2298
 #: classes/controllers/FrmProEntriesController.php:2821
@@ -1163,7 +1143,7 @@ msgstr "Champs"
 
 #: classes/controllers/FrmProGraphsController.php:1661
 #: classes/controllers/FrmProGraphsController.php:1693
-#: classes/controllers/FrmProSettingsController.php:81
+#: classes/controllers/FrmProSettingsController.php:86
 msgid "Creation Date"
 msgstr "Date de création"
 
@@ -1238,31 +1218,31 @@ msgstr "&mdash; Sélectionner un champ &mdash;"
 msgid "No options available: please check this field's options"
 msgstr "Aucune option disponible : veuillez vérifier les options de ce champ"
 
-#: classes/controllers/FrmProSettingsController.php:70
+#: classes/controllers/FrmProSettingsController.php:75
 msgid "Repeating field options"
 msgstr ""
 
-#: classes/controllers/FrmProSettingsController.php:72
+#: classes/controllers/FrmProSettingsController.php:77
 msgid "For Each"
 msgstr ""
 
-#: classes/controllers/FrmProSettingsController.php:79
+#: classes/controllers/FrmProSettingsController.php:84
 msgid "Dynamic field options"
 msgstr ""
 
-#: classes/controllers/FrmProSettingsController.php:82
+#: classes/controllers/FrmProSettingsController.php:87
 msgid "Field From Entry"
 msgstr ""
 
-#: classes/controllers/FrmProSettingsController.php:88
+#: classes/controllers/FrmProSettingsController.php:93
 msgid "Show image"
 msgstr ""
 
-#: classes/controllers/FrmProSettingsController.php:89
+#: classes/controllers/FrmProSettingsController.php:94
 msgid "Image ID"
 msgstr ""
 
-#: classes/controllers/FrmProSettingsController.php:90
+#: classes/controllers/FrmProSettingsController.php:95
 msgid "Image Name"
 msgstr ""
 
@@ -1381,11 +1361,11 @@ msgstr ""
 "Un mise à jour des formulaires Formidable Pro est disponible, mais votre "
 "licence n'est pas valide."
 
-#: classes/helpers/FrmProAppHelper.php:681
+#: classes/helpers/FrmProAppHelper.php:694
 msgid "Previous Page"
 msgstr "Page précédente"
 
-#: classes/helpers/FrmProAppHelper.php:685
+#: classes/helpers/FrmProAppHelper.php:698
 msgid "Next Page"
 msgstr "Page suivante"
 
@@ -1547,6 +1527,7 @@ msgstr "Champs de formulaire"
 #: classes/helpers/FrmProFieldsHelper.php:2639
 #: classes/views/displays/mb_advanced.php:90
 #: classes/views/frmpro-entries/table.php:5
+#: classes/views/frmpro-entries/table.php:84
 msgid "ID"
 msgstr "ID"
 
@@ -2874,10 +2855,6 @@ msgid ""
 msgstr ""
 "Si vous avez créé manuellement un formulaire en accordéon, n'oubliez pas "
 "d'inclure le script java."
-
-#: classes/views/settings/license_box.php:5
-msgid "Formidable Forms License"
-msgstr "Licence Formulaire Formidables Pro"
 
 #: classes/views/styles/_date-fields.php:10
 msgid "Make changes to the date colors in the default style."
