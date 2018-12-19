@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Formidable Forms package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2018-10-15 19:40+0000\n"
+"PO-Revision-Date: 2018-11-29 17:54+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Language: sv_SE\n"
 "Project-Id-Version: Formidable Forms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-15 19:37+0000\n"
+"POT-Creation-Date: 2018-11-29 17:47+0000\n"
 "Last-Translator: Formidable Community\n"
 "Language-Team: Swedish"
 
@@ -149,7 +149,7 @@ msgstr "Post"
 #: classes/controllers/FrmProDisplaysController.php:287
 #: classes/views/displays/mb_dyncontent.php:27
 msgid "Content"
-msgstr "Innehåll"
+msgstr "Inneh&aring;ll"
 
 #: classes/controllers/FrmProDisplaysController.php:142
 #: classes/views/displays/mb_dyncontent.php:60
@@ -243,59 +243,30 @@ msgstr "årsvis"
 msgid "There are no views with that ID"
 msgstr "Det finns inga vyer med detta ID"
 
-#: classes/controllers/FrmProEddController.php:119
-#, php-format
-msgid ""
-"Your %1$s license key is missing. Please add it on the %2$sGlobal Settings "
-"page%3$s."
-msgstr ""
-"Din %1$s licensnyckel saknas. Var vänlig och lägg till den på sidan "
-"%2$sGlobala inställningar%3$s."
-
-#: classes/controllers/FrmProEddController.php:155
-msgid "Click here"
-msgstr "Klicka här"
-
-#: classes/controllers/FrmProEddController.php:163
+#: classes/controllers/FrmProEddController.php:149
 msgid "Formidable Pro is Installed"
 msgstr "Formidable Pro är installerat"
 
-#: classes/controllers/FrmProEddController.php:167
-msgid "Enter new license"
-msgstr "Ange ny licens"
-
-#: classes/controllers/FrmProEddController.php:170
+#: classes/controllers/FrmProEddController.php:153
 msgid "Deauthorize this site"
 msgstr "Avauktorisera denna webbplats"
 
-#: classes/controllers/FrmProEddController.php:177
-msgid "Account"
-msgstr "Konto"
+#: classes/controllers/FrmProEddController.php:168
+msgid "Already signed up?"
+msgstr ""
 
-#: classes/controllers/FrmProEddController.php:194
-msgid "Enter your license number here"
-msgstr "Ange ditt licensnummer här"
+#: classes/controllers/FrmProEddController.php:188
+msgid "Enter your license key here"
+msgstr ""
 
-#: classes/controllers/FrmProEddController.php:201
+#: classes/controllers/FrmProEddController.php:202
 msgid "Use this license to enable Formidable Pro site-wide"
 msgstr ""
 "Använda denna licens för att aktivera Formidable Pro för hela webbplatsen"
 
-#: classes/controllers/FrmProEddController.php:205
+#: classes/controllers/FrmProEddController.php:206
 msgid "Save License"
 msgstr "Spara license"
-
-#: classes/controllers/FrmProEddController.php:208
-msgid "or"
-msgstr "eller"
-
-#: classes/controllers/FrmProEddController.php:210
-#: classes/controllers/FrmProEntriesController.php:2197
-#: classes/views/frmpro-entries/sidebar-new.php:7
-#: classes/views/frmpro-entries/sidebar-new.php:8
-#: classes/views/frmpro-form-actions/_custom_field_row.php:31
-msgid "Cancel"
-msgstr "Avbryt"
 
 #: classes/controllers/FrmProEntriesController.php:106
 msgid "Draft was Successfully Created"
@@ -381,7 +352,7 @@ msgstr ""
 
 #: classes/controllers/FrmProEntriesController.php:1676
 #: classes/controllers/FrmProEntriesController.php:2196
-#: classes/helpers/FrmProAppHelper.php:244
+#: classes/helpers/FrmProAppHelper.php:257
 #: classes/helpers/FrmProEntriesHelper.php:297
 msgid "Edit"
 msgstr "Redigera"
@@ -397,6 +368,13 @@ msgstr "Radera"
 #: classes/helpers/FrmProEntriesListHelper.php:75
 msgid "Search"
 msgstr "Sök"
+
+#: classes/controllers/FrmProEntriesController.php:2197
+#: classes/views/frmpro-entries/sidebar-new.php:7
+#: classes/views/frmpro-entries/sidebar-new.php:8
+#: classes/views/frmpro-form-actions/_custom_field_row.php:31
+msgid "Cancel"
+msgstr "Avbryt"
 
 #: classes/controllers/FrmProEntriesController.php:2298
 #: classes/controllers/FrmProEntriesController.php:2821
@@ -534,7 +512,7 @@ msgstr "Efternamn"
 #: classes/controllers/FrmProFormsController.php:316
 #: classes/models/FrmProForm.php:323
 msgid "User ID"
-msgstr "Användar-ID"
+msgstr "Användar ID"
 
 #: classes/controllers/FrmProFormsController.php:317
 msgid "User Meta"
@@ -1160,7 +1138,7 @@ msgstr "Fält"
 
 #: classes/controllers/FrmProGraphsController.php:1661
 #: classes/controllers/FrmProGraphsController.php:1693
-#: classes/controllers/FrmProSettingsController.php:81
+#: classes/controllers/FrmProSettingsController.php:86
 msgid "Creation Date"
 msgstr "Datum skapat"
 
@@ -1236,33 +1214,33 @@ msgid "No options available: please check this field's options"
 msgstr ""
 "Inga alternativ tillgängliga: Vänligen kontrollera detta fälts alternativ."
 
-#: classes/controllers/FrmProSettingsController.php:70
+#: classes/controllers/FrmProSettingsController.php:75
 msgid "Repeating field options"
-msgstr ""
+msgstr "Upprepande fältval"
 
-#: classes/controllers/FrmProSettingsController.php:72
+#: classes/controllers/FrmProSettingsController.php:77
 msgid "For Each"
-msgstr ""
+msgstr "För varje"
 
-#: classes/controllers/FrmProSettingsController.php:79
+#: classes/controllers/FrmProSettingsController.php:84
 msgid "Dynamic field options"
-msgstr ""
+msgstr "Dynamiska fältalternativ"
 
-#: classes/controllers/FrmProSettingsController.php:82
+#: classes/controllers/FrmProSettingsController.php:87
 msgid "Field From Entry"
-msgstr ""
+msgstr "Fält från post"
 
-#: classes/controllers/FrmProSettingsController.php:88
+#: classes/controllers/FrmProSettingsController.php:93
 msgid "Show image"
-msgstr ""
+msgstr "Visa bild"
 
-#: classes/controllers/FrmProSettingsController.php:89
+#: classes/controllers/FrmProSettingsController.php:94
 msgid "Image ID"
-msgstr ""
+msgstr "Bild-ID"
 
-#: classes/controllers/FrmProSettingsController.php:90
+#: classes/controllers/FrmProSettingsController.php:95
 msgid "Image Name"
-msgstr ""
+msgstr "Bildnamn"
 
 #: classes/controllers/FrmProStatisticsController.php:19
 msgid "You must include a valid field id or key in your stats shortcode."
@@ -1374,11 +1352,11 @@ msgstr ""
 "En uppdatering av Formidable Forms finns tillgänglig, men din licens är "
 "ogiltig."
 
-#: classes/helpers/FrmProAppHelper.php:681
+#: classes/helpers/FrmProAppHelper.php:694
 msgid "Previous Page"
 msgstr "Föregående sida"
 
-#: classes/helpers/FrmProAppHelper.php:685
+#: classes/helpers/FrmProAppHelper.php:698
 msgid "Next Page"
 msgstr "Nästa Sida"
 
@@ -1540,6 +1518,7 @@ msgstr "Formulärfält"
 #: classes/helpers/FrmProFieldsHelper.php:2639
 #: classes/views/displays/mb_advanced.php:90
 #: classes/views/frmpro-entries/table.php:5
+#: classes/views/frmpro-entries/table.php:84
 msgid "ID"
 msgstr "ID"
 
@@ -1672,7 +1651,7 @@ msgstr "Ta bort fil"
 #: classes/models/FrmProFileField.php:48 classes/models/FrmProFileField.php:400
 #, php-format
 msgid "You have uploaded more than %d file(s)."
-msgstr "Du har laddat upp för många filer. Du kan endast ladda upp %d filer."
+msgstr "Du har laddat upp fler än %d fil(er)"
 
 #: classes/models/FrmProFileField.php:467
 msgid "This field is invalid"
@@ -1831,7 +1810,7 @@ msgstr "Välj fil"
 
 #: classes/models/fields/FrmProFieldPassword.php:144
 msgid "Eight characters minimum"
-msgstr ""
+msgstr "Minst 8 tecken"
 
 #: classes/models/fields/FrmProFieldPassword.php:146
 msgid "Passwords require at least 8 characters"
@@ -2420,7 +2399,7 @@ msgstr "Utdrag"
 #: classes/views/frmpro-form-actions/post_options.php:141
 #: classes/views/frmpro-fields/back-end/confirmation.php:6
 msgid "None"
-msgstr "Inget"
+msgstr "Ingen"
 
 #: classes/views/frmpro-form-actions/post_options.php:138
 msgid "Post Password"
@@ -2853,10 +2832,6 @@ msgstr ""
 "Om du manuellt har skapat ett dragspelsformulär, se till att inkludera "
 "javascript för det."
 
-#: classes/views/settings/license_box.php:5
-msgid "Formidable Forms License"
-msgstr "Licens för Formidable Forms"
-
 #: classes/views/styles/_date-fields.php:10
 msgid "Make changes to the date colors in the default style."
 msgstr ""
@@ -3163,8 +3138,6 @@ msgid ""
 "Note: If you select a field for the Entry ID or Entry Key, the matching "
 "entry with that ID or key will be updated."
 msgstr ""
-"Notera: Om du väljer ett fält för post-ID, kommer matchande post med detta "
-"ID uppdateras."
 
 #: classes/views/combo-fields/addresses/back-end-field-opts.php:4
 msgid "Address Type"

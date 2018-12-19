@@ -1,18 +1,23 @@
 <?php
+
+$e_args = array( 'textarea_name' => $field_name );
+if ( $field['default_value'] !== '' ) {
+	$e_args['editor_class'] = 'frm_has_default';
+}
+
 if ( FrmAppHelper::is_admin() ) { ?>
 	<div id="<?php echo user_can_richedit() ? 'postdivrich' : 'postdiv'; ?>" class="postarea frm_full_rte">
 		<?php
-		wp_editor( str_replace( '&quot;', '"', $field['value'] ), $html_id,
-		array( 'dfw' => true, 'textarea_name' => $field_name )
-	);
-	?>
-</div>
+		$e_args['dfw'] = true;
+		wp_editor( str_replace( '&quot;', '"', $field['value'] ), $html_id, $e_args );
+		?>
+	</div>
 <?php
 // Rich text for front-end, including Preview page
 } elseif ( $field['type'] == 'rte' ) {
 
 	if ( ! isset( $frm_vars['skip_rte'] ) || ! $frm_vars['skip_rte'] ) {
-		$e_args = array( 'media_buttons' => false, 'textarea_name' => $field_name );
+		$e_args['media_buttons'] = false;
 		if ( $field['max'] ) {
 			$e_args['textarea_rows'] = $field['max'];
 		}
@@ -41,4 +46,10 @@ if ( FrmAppHelper::is_admin() ) { ?>
 		?>><?php echo FrmAppHelper::esc_textarea( $field['value'] ) ?></textarea>
 		<?php
 	}
+}
+
+if ( $field['default_value'] !== '' ) {
+	?>
+	<input type="hidden" id="<?php echo esc_attr( $html_id ); ?>-frmval" value="<?php echo esc_attr( $field['default_value'] ); ?>"/>
+	<?php
 }

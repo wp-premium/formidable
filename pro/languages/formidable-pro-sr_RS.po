@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Formidable v2.05\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-15 19:37+0000\n"
-"PO-Revision-Date: 2018-10-15 19:42+0000\n"
+"POT-Creation-Date: 2018-11-29 17:47+0000\n"
+"PO-Revision-Date: 2018-11-29 17:54+0000\n"
 "Last-Translator: Formidable Community\n"
 "Language-Team: Serbian\n"
 "Language: sr_RS\n"
@@ -251,56 +251,29 @@ msgstr ""
 msgid "There are no views with that ID"
 msgstr "Nema pregleda sa ovim IDem"
 
-#: classes/controllers/FrmProEddController.php:119
-#, php-format
-msgid ""
-"Your %1$s license key is missing. Please add it on the %2$sGlobal Settings "
-"page%3$s."
-msgstr ""
-
-#: classes/controllers/FrmProEddController.php:155
-msgid "Click here"
-msgstr "Klik ovde"
-
-#: classes/controllers/FrmProEddController.php:163
+#: classes/controllers/FrmProEddController.php:149
 msgid "Formidable Pro is Installed"
 msgstr "Formidable Pro je instaliran"
 
-#: classes/controllers/FrmProEddController.php:167
-msgid "Enter new license"
-msgstr "Uneti novu licencu"
-
-#: classes/controllers/FrmProEddController.php:170
+#: classes/controllers/FrmProEddController.php:153
 msgid "Deauthorize this site"
 msgstr "Deautorizovati ovaj sajt"
 
-#: classes/controllers/FrmProEddController.php:177
-msgid "Account"
-msgstr "Nalog"
+#: classes/controllers/FrmProEddController.php:168
+msgid "Already signed up?"
+msgstr ""
 
-#: classes/controllers/FrmProEddController.php:194
-msgid "Enter your license number here"
-msgstr "Unesite vaš broj licence ovde"
+#: classes/controllers/FrmProEddController.php:188
+msgid "Enter your license key here"
+msgstr ""
 
-#: classes/controllers/FrmProEddController.php:201
+#: classes/controllers/FrmProEddController.php:202
 msgid "Use this license to enable Formidable Pro site-wide"
 msgstr "Koistite ovu licencu da biste omogućili Formidable Pro  širom sajta"
 
-#: classes/controllers/FrmProEddController.php:205
+#: classes/controllers/FrmProEddController.php:206
 msgid "Save License"
 msgstr "Sačuvati licencu"
-
-#: classes/controllers/FrmProEddController.php:208
-msgid "or"
-msgstr "ili"
-
-#: classes/controllers/FrmProEddController.php:210
-#: classes/controllers/FrmProEntriesController.php:2197
-#: classes/views/frmpro-entries/sidebar-new.php:7
-#: classes/views/frmpro-entries/sidebar-new.php:8
-#: classes/views/frmpro-form-actions/_custom_field_row.php:31
-msgid "Cancel"
-msgstr "Ukinuti"
 
 #: classes/controllers/FrmProEntriesController.php:106
 msgid "Draft was Successfully Created"
@@ -384,7 +357,7 @@ msgstr ""
 
 #: classes/controllers/FrmProEntriesController.php:1676
 #: classes/controllers/FrmProEntriesController.php:2196
-#: classes/helpers/FrmProAppHelper.php:244
+#: classes/helpers/FrmProAppHelper.php:257
 #: classes/helpers/FrmProEntriesHelper.php:297
 msgid "Edit"
 msgstr "Editoveti"
@@ -400,6 +373,13 @@ msgstr "Obrisati"
 #: classes/helpers/FrmProEntriesListHelper.php:75
 msgid "Search"
 msgstr "Pretraga"
+
+#: classes/controllers/FrmProEntriesController.php:2197
+#: classes/views/frmpro-entries/sidebar-new.php:7
+#: classes/views/frmpro-entries/sidebar-new.php:8
+#: classes/views/frmpro-form-actions/_custom_field_row.php:31
+msgid "Cancel"
+msgstr "Ukinuti"
 
 #: classes/controllers/FrmProEntriesController.php:2298
 #: classes/controllers/FrmProEntriesController.php:2821
@@ -1156,7 +1136,7 @@ msgstr "Polja"
 
 #: classes/controllers/FrmProGraphsController.php:1661
 #: classes/controllers/FrmProGraphsController.php:1693
-#: classes/controllers/FrmProSettingsController.php:81
+#: classes/controllers/FrmProSettingsController.php:86
 msgid "Creation Date"
 msgstr "Datum stvaranja"
 
@@ -1231,31 +1211,31 @@ msgstr ""
 msgid "No options available: please check this field's options"
 msgstr ""
 
-#: classes/controllers/FrmProSettingsController.php:70
+#: classes/controllers/FrmProSettingsController.php:75
 msgid "Repeating field options"
 msgstr ""
 
-#: classes/controllers/FrmProSettingsController.php:72
+#: classes/controllers/FrmProSettingsController.php:77
 msgid "For Each"
 msgstr ""
 
-#: classes/controllers/FrmProSettingsController.php:79
+#: classes/controllers/FrmProSettingsController.php:84
 msgid "Dynamic field options"
 msgstr ""
 
-#: classes/controllers/FrmProSettingsController.php:82
+#: classes/controllers/FrmProSettingsController.php:87
 msgid "Field From Entry"
 msgstr "Polja od unosa"
 
-#: classes/controllers/FrmProSettingsController.php:88
+#: classes/controllers/FrmProSettingsController.php:93
 msgid "Show image"
 msgstr "Prikazivanje slike"
 
-#: classes/controllers/FrmProSettingsController.php:89
+#: classes/controllers/FrmProSettingsController.php:94
 msgid "Image ID"
 msgstr "ID slike"
 
-#: classes/controllers/FrmProSettingsController.php:90
+#: classes/controllers/FrmProSettingsController.php:95
 msgid "Image Name"
 msgstr "Ime slike"
 
@@ -1361,11 +1341,11 @@ msgstr "Vaš ključ licence ne postoji"
 msgid "A Formidable Forms update is available, but your license is invalid."
 msgstr ""
 
-#: classes/helpers/FrmProAppHelper.php:681
+#: classes/helpers/FrmProAppHelper.php:694
 msgid "Previous Page"
 msgstr ""
 
-#: classes/helpers/FrmProAppHelper.php:685
+#: classes/helpers/FrmProAppHelper.php:698
 msgid "Next Page"
 msgstr ""
 
@@ -1527,6 +1507,7 @@ msgstr "Polja forme"
 #: classes/helpers/FrmProFieldsHelper.php:2639
 #: classes/views/displays/mb_advanced.php:90
 #: classes/views/frmpro-entries/table.php:5
+#: classes/views/frmpro-entries/table.php:84
 msgid "ID"
 msgstr "ID"
 
@@ -2819,10 +2800,6 @@ msgid ""
 msgstr ""
 "Ako ste ručno kreirali formu , budite sigurni da uključite JavaScript za "
 "njega ."
-
-#: classes/views/settings/license_box.php:5
-msgid "Formidable Forms License"
-msgstr ""
 
 #: classes/views/styles/_date-fields.php:10
 msgid "Make changes to the date colors in the default style."

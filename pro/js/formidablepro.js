@@ -1552,6 +1552,15 @@ function frmProFormJS(){
 		var $input = jQuery( input );
 		var defaultValue = $input.data('frmval');
 
+		if ( typeof defaultValue === 'undefined' && input.classList.contains( 'wp-editor-area' ) ) {
+			// set value in rich text
+			var defaultField = document.getElementById( input.id +'-frmval' );
+			if ( defaultField !== null ) {
+				defaultValue = defaultField.value;
+				tinymce.get(input.id).setContent(defaultValue);
+			}
+		}
+
 		if ( typeof defaultValue !== 'undefined' ) {
 			var numericKey = new RegExp( /\[\d*\]$/i );
 
@@ -3009,7 +3018,7 @@ function frmProFormJS(){
 			}
 
 			// Set decimal points
-			if ( isNumeric( dec ) ) {
+			if ( isNumeric( dec ) && total !== '' ) {
 				total = total.toFixed( dec );
 			}
 		}

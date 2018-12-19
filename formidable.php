@@ -2,7 +2,7 @@
 /*
 Plugin Name: Formidable Forms
 Description: Quickly and easily create drag-and-drop forms
-Version: 3.04.02
+Version: 3.04.03
 Plugin URI: https://formidableforms.com/
 Author URI: https://formidableforms.com/
 Author: Strategy11
@@ -65,18 +65,24 @@ function frm_forms_autoloader( $class_name ) {
  * @since 3.0
  */
 function frm_class_autoloader( $class_name, $filepath ) {
-	$filepath .= '/classes';
+	$deprecated    = array( 'FrmEntryFormat', 'FrmPointers', 'FrmEDD_SL_Plugin_Updater' );
+	$is_deprecated = in_array( $class_name, $deprecated ) || preg_match( '/^.+Deprecate/', $class_name );
 
-	if ( preg_match( '/^.+Helper$/', $class_name ) ) {
-		$filepath .= '/helpers/';
-	} else if ( preg_match( '/^.+Controller$/', $class_name ) ) {
-		$filepath .= '/controllers/';
-	} else if ( preg_match( '/^.+Factory$/', $class_name ) ) {
-		$filepath .= '/factories/';
+	if ( $is_deprecated ) {
+		$filepath .= '/deprecated/';
 	} else {
-		$filepath .= '/models/';
-		if ( strpos( $class_name, 'Field' ) && ! file_exists( $filepath . $class_name . '.php' ) ) {
-			$filepath .= 'fields/';
+		$filepath .= '/classes/';
+		if ( preg_match( '/^.+Helper$/', $class_name ) ) {
+			$filepath .= 'helpers/';
+		} else if ( preg_match( '/^.+Controller$/', $class_name ) ) {
+			$filepath .= 'controllers/';
+		} else if ( preg_match( '/^.+Factory$/', $class_name ) ) {
+			$filepath .= 'factories/';
+		} else {
+			$filepath .= 'models/';
+			if ( strpos( $class_name, 'Field' ) && ! file_exists( $filepath . $class_name . '.php' ) ) {
+				$filepath .= 'fields/';
+			}
 		}
 	}
 

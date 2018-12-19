@@ -34,6 +34,19 @@ class FrmProAppHelper {
         return $frmpro_settings;
     }
 
+	/**
+	 * Only load the Pro updater once on a page
+	 *
+	 * @since 3.04.03
+	 */
+	public static function get_updater() {
+		global $frmpro_updater;
+		if ( empty( $frmpro_updater ) ) {
+			$frmpro_updater = new FrmProEddController();
+		}
+		return $frmpro_updater;
+	}
+
     /**
      * Get the current date in the display format
      * Used by [date] shortcode
