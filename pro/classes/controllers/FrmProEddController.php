@@ -23,6 +23,10 @@ class FrmProEddController extends FrmAddon {
 		$frm_vars['pro_is_authorized'] = $this->pro_is_authorized();
 
 		parent::__construct();
+
+		if ( is_admin() ) {
+			add_action( 'frm_license_error', array( &$this, 'maybe_clear_license' ) );
+		}
 	}
 
 	public static function load_hooks() {
@@ -113,15 +117,6 @@ class FrmProEddController extends FrmAddon {
 		return compact('license', 'wpmu');
 	}
 
-	public function show_license_message( $file, $plugin ) {
-		$wp_list_table = _get_list_table( 'WP_Plugins_List_Table' );
-		echo '<tr class="plugin-update-tr active"><td colspan="' . esc_attr( $wp_list_table->get_column_count() ) . '" class="plugin-update colspanchange"><div class="update-message">';
-		echo sprintf( esc_html__( 'Your %1$s license key is missing. Please add it on the %2$sGlobal Settings page%3$s.', 'formidable-pro' ), esc_html( $this->plugin_name ), '<a href="' . esc_url( admin_url('admin.php?page=formidable-settings' ) ) . '">', '</a>' );
-		$id = sanitize_title( $plugin['Name'] );
-		echo '<script type="text/javascript">var d = document.getElementById("' . esc_attr( $id ) . '");if ( d !== null ){ d.className = d.className + " update"; }</script>';
-		echo '</div></td></tr>';
-	}
-
 	function pro_is_authorized() {
 		$license = $this->get_license();
 		if ( empty( $license ) ) {
@@ -170,7 +165,7 @@ class FrmProEddController extends FrmAddon {
 
 	if ( ! $frm_vars['pro_is_authorized'] ) {
 		?>
-    <p>Already signed up? <a href="https://formidableforms.com/account/licenses/?utm_source=WordPress&utm_medium=settings-license&utm_campaign=proplugin" target="_blank"><?php esc_html_e( 'Get your license number', 'formidable-pro' ) ?></a>.</p>
+		<p><a href="https://formidableforms.com/account/licenses/?utm_source=WordPress&utm_medium=settings-license&utm_campaign=proplugin" target="_blank"><?php esc_html_e( 'Already signed up?', 'formidable-pro' ) ?></a></p>
     <?php } ?>
 </div>
 

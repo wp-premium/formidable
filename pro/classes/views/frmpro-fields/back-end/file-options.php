@@ -104,10 +104,10 @@
 			<span class="frm_screen_reader"><?php esc_html_e( 'Resize the image by width or height', 'formidable-pro' ); ?></span>
 			<select name="field_options[resize_dir_<?php echo esc_attr( $field['id'] ) ?>]">
 				<option value="width" <?php selected( $field['resize_dir'], 'width' ) ?>>
-					<?php echo esc_html_e( 'wide', 'formidable-pro' ); ?>
+					<?php esc_html_e( 'wide', 'formidable-pro' ); ?>
 				</option>
 				<option value="height" <?php selected( $field['resize_dir'], 'height' ) ?>>
-					<?php echo esc_html_e( 'high', 'formidable-pro' ); ?>
+					<?php esc_html_e( 'high', 'formidable-pro' ); ?>
 				</option>
 			</select>
 		</label>

@@ -6,7 +6,7 @@ class FrmProHooksController {
 	 * @since 3.0
 	 */
 	public static function load_pro() {
-		$frmedd_update = new FrmProEddController();
+		$frmedd_update = FrmProAppHelper::get_updater();
 
 		// load the license form
 		add_action( 'frm_upgrade_page', 'FrmProSettingsController::standalone_license_box' );

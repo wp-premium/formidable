@@ -3,14 +3,20 @@
 class FrmProSettingsController {
 
 	public static function license_box() {
-		$edd_update = new FrmProEddController();
+		$edd_update = FrmProAppHelper::get_updater();
 		$a = FrmAppHelper::simple_get( 't', 'sanitize_title', 'general_settings' );
 		$show_creds_form = self::show_license_form();
+		$errors = array();
+
+		if ( ! empty( $edd_update->license ) && is_callable( 'FrmAddonsController::error_for_license' ) ) {
+			$errors = FrmAddonsController::error_for_license( $edd_update->license );
+		}
+
 		include( FrmProAppHelper::plugin_path() . '/classes/views/settings/license_box.php' );
 	}
 
 	public static function standalone_license_box() {
-		$edd_update = new FrmProEddController();
+		$edd_update = FrmProAppHelper::get_updater();
 		if ( self::show_license_form() ) {
 			include( FrmProAppHelper::plugin_path() . '/classes/views/settings/standalone_license_box.php' );
 		}
