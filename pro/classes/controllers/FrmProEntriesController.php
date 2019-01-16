@@ -258,6 +258,7 @@ class FrmProEntriesController {
 
 		/**
 		 * Do something when a draft entry is officially saved
+		 *
 		 * @since 3.0.08
 		 */
 		do_action( 'frm_after_complete_entry_processed', array(
@@ -690,9 +691,9 @@ class FrmProEntriesController {
 		return $message;
 	}
 
-    /**
-     * check to see if user is allowed to create another entry
-     */
+	/**
+	 * Check to see if user is allowed to create another entry
+	 */
 	private static function allow_front_create_entry( $form, &$continue ) {
 		if ( ! isset( $form->options['single_entry'] ) || ! $form->options['single_entry'] ) {
 			return;
@@ -1303,6 +1304,7 @@ class FrmProEntriesController {
 
 	/**
 	 * Trigger from the frm_display_value_atts hook
+	 *
 	 * @since 2.0
 	 */
 	public static function display_value_atts( $atts, $field ) {
@@ -2574,6 +2576,7 @@ class FrmProEntriesController {
 
 	/**
      * Alternate Row Color for Default HTML
+	 *
      * @return string
      */
 	public static function change_row_color() {

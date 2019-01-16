@@ -9,11 +9,25 @@ class FrmAppController {
         }
 
 		$menu_name = FrmAppHelper::get_menu_name();
-		add_menu_page( 'Formidable', $menu_name, 'frm_view_forms', 'formidable', 'FrmFormsController::route', '', self::get_menu_position() );
+		add_menu_page( 'Formidable', $menu_name, 'frm_view_forms', 'formidable', 'FrmFormsController::route', self::menu_icon(), self::get_menu_position() );
     }
 
 	private static function get_menu_position() {
 		return apply_filters( 'frm_menu_position', '29.3' );
+	}
+
+	/**
+	 * @since 3.05
+	 */
+	private static function menu_icon() {
+		$icon = FrmAppHelper::svg_logo(
+			array(
+				'fill'   => '#a0a5aa',
+				'orange' => '#a0a5aa',
+			)
+		);
+		$icon = 'data:image/svg+xml;base64,' . base64_encode( $icon );
+		return apply_filters( 'frm_icon', $icon );
 	}
 
 	/**
@@ -224,6 +238,22 @@ class FrmAppController {
 	public static function remove_upsells() {
 		remove_action( 'frm_before_settings', 'FrmSettingsController::license_box' );
 		remove_action( 'frm_after_settings', 'FrmSettingsController::settings_cta' );
+	}
+
+	/**
+	 * Don't nag people to install WPForms
+	 *
+	 * @since 3.05
+	 */
+	public static function remove_wpforms_nag( $upsell ) {
+		if ( is_array( $upsell ) ) {
+			foreach ( $upsell as $k => $plugin ) {
+				if ( strpos( $plugin['slug'], 'wpforms' ) !== false ) {
+					unset( $upsell[ $k ] );
+				}
+			}
+		}
+		return $upsell;
 	}
 
 	/**

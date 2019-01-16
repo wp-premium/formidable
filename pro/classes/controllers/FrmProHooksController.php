@@ -200,11 +200,16 @@ class FrmProHooksController {
 		// XML Controller
 		add_filter( 'frm_default_templates_files', 'FrmProXMLController::import_default_templates' );
 		add_filter( 'frm_importing_xml', 'FrmProXMLController::importing_xml', 10, 2 );
+
+		// Simple Blocks Controller
+		add_action( 'init', 'FrmProSimpleBlocksController::register_simple_view_block', 20 );
     }
 
     public static function load_admin_hooks() {
         add_action('frm_after_uninstall', 'FrmProDb::uninstall');
 		add_filter( 'frm_form_nav_list', 'FrmProAppController::form_nav', 10, 2 );
+		add_filter( 'frm_icon', 'FrmProAppController::whitelabel_icon' );
+		add_filter( 'frm_media_icon', 'FrmProAppController::whitelabel_media_icon' );
 
         // Displays Controller
         add_action('admin_menu', 'FrmProDisplaysController::menu', 13);

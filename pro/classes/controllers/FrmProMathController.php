@@ -260,7 +260,9 @@ class FrmProMathController {
 					// replace last top operator in operator stack; it was only removed for testing
 					array_push( $operators, $top_operator );
 				}
-			} while ( count( $operators ) > 0 && $current_element_precedence <= $top_operator_precedence );
+
+				$operators_count = count( $operators );
+			} while ( $operators_count > 0 && $current_element_precedence <= $top_operator_precedence );
 		}
 		array_push( $operators, $operator );
 	}
@@ -299,12 +301,15 @@ class FrmProMathController {
 	 * @return bool
 	 */
 	private static function move_remaining_operators_to_stack( &$output, &$operators ) {
-		while ( count( $operators ) > 0 ) {
+		$operators_count = count( $operators );
+		while ( $operators_count > 0 ) {
 			$next_operator = array_pop( $operators );
 			if ( $next_operator === '(' ) {
 				return false;
 			}
 			array_push( $output, $next_operator );
+
+			$operators_count = count( $operators );
 		}
 
 		return true;

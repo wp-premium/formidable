@@ -216,10 +216,11 @@ class FrmProEntry {
 	    }
     }
 
-    /**
-     * After an entry is duplicated, also duplicate the sub entries
-     * @since 2.0
-     */
+	/**
+	 * After an entry is duplicated, also duplicate the sub entries
+	 *
+	 * @since 2.0
+	 */
     public static function duplicate_sub_entries( $entry_id, $form_id, $args ) {
         $form_fields = FrmProFormsHelper::has_field('form', $form_id, false);
         $section_fields = FrmProFormsHelper::has_repeat_field($form_id, false);
@@ -264,10 +265,11 @@ class FrmProEntry {
         }
     }
 
-    /**
-     * After the sub entry and parent entry are created, we can update the parent id field
-     * @since 2.0
-     */
+	/**
+	 * After the sub entry and parent entry are created, we can update the parent id field
+	 *
+	 * @since 2.0
+	 */
 	public static function update_parent_id( $entry_id, $form_id ) {
         $form_fields = FrmProFormsHelper::has_field('form', $form_id, false);
         $section_fields = FrmProFormsHelper::has_repeat_field($form_id, false);

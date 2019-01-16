@@ -172,9 +172,8 @@ class FrmProEntryMeta {
 
                     unset($k, $values);
                 }
-            } else {
-                // TODO: do something if nothing was submitted
             }
+			// TODO: do something if nothing was submitted
         }
     }
 
@@ -828,7 +827,6 @@ class FrmProEntryMeta {
 	 * @param int $field_id
 	 * @param int $entry_id
 	 * @return array|string $meta_value
-	 *
 	 */
 	public static function prepare_data_before_db( $meta_value, $field_id, $entry_id, $atts ) {
 		_deprecated_function( __FUNCTION__, '3.0', 'FrmFieldType::get_value_to_save' );
@@ -898,7 +896,6 @@ class FrmProEntryMeta {
     *
     * @since 2.0
 	* @deprecated 2.02
-    *
     */
     public static function get_file_name( $field_id, &$file_name, &$parent_field, &$key_pointer, &$repeating ) {
         _deprecated_function( __FUNCTION__, '2.02' );

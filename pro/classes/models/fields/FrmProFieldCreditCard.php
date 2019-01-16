@@ -266,11 +266,9 @@ class FrmProFieldCreditCard extends FrmFieldType {
 	private function remove_extra_cc_digits( &$value ) {
 		$save_digits = FrmField::get_option( $this->field, 'save_cc' );
 
-		if ( $save_digits == 16 ) {
-			// do nothing
-		} elseif ( $save_digits == 0 ) {
+		if ( $save_digits == 0 ) {
 			$value['cc'] = '';
-		} elseif ( ! empty( $value['cc'] ) ) {
+		} elseif ( ! empty( $value['cc'] ) && $save_digits != 16 ) {
 			$length = max( strlen( $value['cc'] ) - 4, 0 );
 			$value['cc'] = str_repeat( 'x', $length ) . substr( $value['cc'], -4 );
 		}

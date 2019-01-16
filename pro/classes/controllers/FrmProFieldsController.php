@@ -847,6 +847,7 @@ class FrmProFieldsController {
 	/**
 	 * Add an option at the top of the media library page
 	 * to show the unattached Formidable files based on user role.
+	 *
 	 * @since 2.02
 	 */
 	public static function filter_media_library_link() {
@@ -867,6 +868,7 @@ class FrmProFieldsController {
 	/**
 	 * If this file is a Formidable file,
 	 * temp redirect to the home page
+	 *
 	 * @since 2.02
 	 */
 	public static function redirect_attachment() {

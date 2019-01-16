@@ -307,6 +307,7 @@ class FrmProEntryMetaHelper {
 
 		/**
 		 * Set the user id(s) for the limited dynamic field options
+		 *
 		 * @since 2.2.8
 		 * @return array|int
 		 */

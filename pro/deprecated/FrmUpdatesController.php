@@ -6,27 +6,27 @@
 class FrmUpdatesController {
 
     // Where all the vitals are defined for this plugin
-    var $plugin_nicename        = 'formidable';
-    var $plugin_name            = 'formidable/formidable.php';
-    var $plugin_url             = 'https://formidableforms.com/';
-    var $pro_mothership         = 'http://api.strategy11.com/plugin-updates/';
-    var $pro_cred_store         = 'frmpro-credentials';
-    var $pro_auth_store         = 'frmpro-authorized';
-    var $pro_wpmu_store         = 'frmpro-wpmu-sitewide';
-    var $pro_last_checked_store = 'frm_autoupdate';
-    var $pro_check_interval     = 0; // Don't check. Pro updates will force over free updates
-    var $timeout                = 10;
-	var $update_to;
+    public $plugin_nicename        = 'formidable';
+    public $plugin_name            = 'formidable/formidable.php';
+    public $plugin_url             = 'https://formidableforms.com/';
+    public $pro_mothership         = 'http://api.strategy11.com/plugin-updates/';
+    public $pro_cred_store         = 'frmpro-credentials';
+    public $pro_auth_store         = 'frmpro-authorized';
+    public $pro_wpmu_store         = 'frmpro-wpmu-sitewide';
+    public $pro_last_checked_store = 'frm_autoupdate';
+    public $pro_check_interval     = 0; // Don't check. Pro updates will force over free updates
+    public $timeout                = 10;
+	public $update_to;
 
-    var $pro_wpmu = false;
+    public $pro_wpmu = false;
 
-    var $pro_error_message_str;
-    var $license        = '';
+    public $pro_error_message_str;
+    public $license        = '';
 
 	/**
 	 * @codeCoverageIgnore
 	 */
-	function __construct() {
+	public function __construct() {
 		_deprecated_function( __FUNCTION__, '2.3' );
 
         $this->pro_error_message_str = __( 'Your Formidable Pro License was Invalid', 'formidable-pro' );

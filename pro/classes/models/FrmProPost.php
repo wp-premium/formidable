@@ -128,6 +128,7 @@ class FrmProPost {
 
 	/**
 	 * Insert all post variables into the post array
+	 *
 	 * @return array
 	 */
 	public static function setup_post( $action, $entry, $form ) {
@@ -454,7 +455,7 @@ class FrmProPost {
 	}
 
 	/**
-	 * save post_id with the entry
+	 * Save post_id with the entry
 	 * If entry was updated, get updated entry object
 	 */
 	private static function save_post_id_to_entry( $post_ID, &$entry, $editing ) {
@@ -473,7 +474,7 @@ class FrmProPost {
 	}
 
 	/**
-	 * update dynamic content after all post fields are updated
+	 * Update dynamic content after all post fields are updated
 	 */
 	private static function save_dynamic_content( $post, $post_ID, $dyn_content, $form, $entry ) {
 		if ( $dyn_content == '' ) {

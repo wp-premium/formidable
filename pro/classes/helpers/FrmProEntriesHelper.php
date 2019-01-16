@@ -60,6 +60,7 @@ class FrmProEntriesHelper {
 
 	/**
 	 * Check if the current user already has an entry
+	 *
 	 * @since 2.0
 	 * @return array|false
 	 */
@@ -173,10 +174,11 @@ class FrmProEntriesHelper {
         return FrmEntry::getAll( $where, ' ORDER BY created_at DESC', 1, true);
     }
 
-    /**
-     * check if this user can edit entry from another user
-     * @return boolean True if user can edit
-     */
+	/**
+	 * Check if this user can edit entry from another user
+	 *
+	 * @return boolean True if user can edit
+	 */
     public static function user_can_edit_others( $form ) {
         if ( ! $form->editable || ! isset($form->options['open_editable_role']) || ! FrmAppHelper::user_has_permission($form->options['open_editable_role']) ) {
             return false;
@@ -185,10 +187,11 @@ class FrmProEntriesHelper {
         return ( ! isset($form->options['open_editable']) || $form->options['open_editable'] );
     }
 
-    /**
-     * only allow editing of drafts
-     * @return boolean
-     */
+	/**
+	 * Only allow editing of drafts
+	 *
+	 * @return boolean
+	 */
 	public static function user_can_only_edit_draft( $form ) {
         if ( ! $form->editable || empty($form->options['editable_role']) || FrmAppHelper::user_has_permission($form->options['editable_role']) ) {
             return false;
@@ -560,6 +563,7 @@ class FrmProEntriesHelper {
 
 	/**
 	 * Search connected posts when a general search is submitted
+	 *
 	 * @param $form_id
 	 * @param $search_param
 	 * @param $where

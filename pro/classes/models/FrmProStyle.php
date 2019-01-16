@@ -1,6 +1,6 @@
 <?php
 class FrmProStyle extends FrmStyle {
-    function duplicate( $id ) {
+	public function duplicate( $id ) {
         $this->id = $id;
         $default_style = $this->get_one();
         $style = $this->get_new();

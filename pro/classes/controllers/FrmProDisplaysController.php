@@ -2202,6 +2202,7 @@ class FrmProDisplaysController {
 
 	/**
 	 * Get the entry IDs for a unique filter
+	 *
 	 * @param $results
 	 * @param $entry_ids
 	 * @return array
@@ -2770,6 +2771,7 @@ class FrmProDisplaysController {
 	/**
 	 * Get fields with specified field value 'frm_cat' = field key/id,
 	 * 'frm_cat_id' = order position of selected option
+	 *
 	 * @since 2.0.6
 	 */
 	private static function maybe_add_cat_query( &$where ) {

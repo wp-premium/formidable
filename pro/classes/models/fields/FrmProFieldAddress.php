@@ -145,6 +145,7 @@ class FrmProFieldAddress extends FrmFieldType {
 
 		/**
 		 * Change the format of a displayed address
+		 *
 		 * @since 3.0.06
 		 */
 		return apply_filters( 'frm_address_format', $address_format, array( 'field' => $this->field ) );

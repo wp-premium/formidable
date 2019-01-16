@@ -488,11 +488,12 @@ class FrmProFieldsHelper {
         return $new_value;
     }
 
-    /**
-     * Get the input name and id
-     * Called when loading a dynamic DFE field
-     * @since 2.0
-     */
+	/**
+	 * Get the input name and id
+	 * Called when loading a dynamic DFE field
+	 *
+	 * @since 2.0
+	 */
 	public static function get_html_id_from_container( &$field_name, &$html_id, $field, $hidden_field_id ) {
         $id_parts = explode('-', str_replace('_container', '', $hidden_field_id));
         $plus = ( count($id_parts) == 3 ) ? '-' . end($id_parts) : ''; // this is in a sub field
@@ -1682,6 +1683,7 @@ class FrmProFieldsHelper {
 
 	/**
 	 * If using -100, +10, or maybe just 10 for the start or end year
+	 *
 	 * @since 2.0.12
 	 */
 	public static function convert_to_static_year( $year ) {
@@ -3064,10 +3066,11 @@ class FrmProFieldsHelper {
 		return $visible;
 	}
 
-    /**
-     * Loop through value in hidden field and display arrays in separate fields
-     * @since 2.0
-     */
+	/**
+	 * Loop through value in hidden field and display arrays in separate fields
+	 *
+	 * @since 2.0
+	 */
 	public static function insert_hidden_fields( $field, $field_name, $checked, $opt_key = false ) {
 		if ( FrmProNestedFormsController::is_hidden_nested_form_field( $field ) ) {
 			FrmProNestedFormsController::insert_hidden_nested_form( $field, $field_name, $checked );
@@ -3183,11 +3186,12 @@ class FrmProFieldsHelper {
 		}
 	}
 
-    /**
-     * Check if the field is in a child form and return the parent form id
-     * @since 2.0
-     * @return int The ID of the form or parent form
-     */
+	/**
+	 * Check if the field is in a child form and return the parent form id
+	 *
+	 * @since 2.0
+	 * @return int The ID of the form or parent form
+	 */
 	public static function get_parent_form_id( $field ) {
         $form = FrmForm::getOne($field->form_id);
 

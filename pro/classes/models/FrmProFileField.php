@@ -174,6 +174,7 @@ class FrmProFileField {
 	/**
 	 * If a query uses OR, adding to it will return unexpected results
 	 * Move the OR query into a subquery
+	 *
 	 * @return boolean true to continue adding the extra query
 	 */
 	private static function nest_attachment_query( &$meta_query ) {
@@ -482,7 +483,6 @@ class FrmProFileField {
      * @param int $field_id
      * @param int $entry_id
      * @return array|string $meta_value
-     *
      */
 	public static function prepare_data_before_db( $meta_value, $field_id, $entry_id, $atts ) {
 		_deprecated_function( __FUNCTION__, '3.0', 'FrmFieldType::get_value_to_save' );
@@ -568,6 +568,7 @@ class FrmProFileField {
 
     /**
      * Let WordPress process the uploads
+	 *
      * @param int $field_id
      * @param bool $sideload
      */
@@ -725,6 +726,7 @@ class FrmProFileField {
 	/**
 	 * Automatically delete files when an entry is deleted.
 	 * If the "Delete all entries" button is used, entries will not be deleted
+	 *
 	 * @since 2.0.22
 	 */
 	public static function delete_files_with_entry( $entry_id, $entry = false ) {

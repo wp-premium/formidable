@@ -8,6 +8,7 @@ class FrmProAppController {
 
 	/**
 	 * Use in-plugin translations instead of WP.org
+	 *
 	 * @since 2.2.8
 	 * @codeCoverageIgnore
 	 */
@@ -30,6 +31,7 @@ class FrmProAppController {
 
 	/**
 	 * Set the location for the combo js
+	 *
 	 * @since 3.01
 	 */
 	public static function pro_js_location( $location ) {
@@ -200,6 +202,40 @@ class FrmProAppController {
 		}
 
 		return $nav;
+	}
+
+	/**
+	 * Change the icon on the menu if set
+	 *
+	 * @since 3.05
+	 */
+	public static function whitelabel_icon( $icon ) {
+		$class = self::get_icon_class();
+		if ( ! empty( $class ) ) {
+			$icon = str_replace( 'dashicons ', '', $class );
+		}
+		return $icon;
+	}
+
+	/**
+	 * Change the icon on the editor button if set
+	 *
+	 * @since 3.05
+	 */
+	public static function whitelabel_media_icon( $icon ) {
+		$class = self::get_icon_class();
+		if ( ! empty( $class ) ) {
+			$icon = '<span class="' . esc_attr( $class ) . ' wp-media-buttons-icon"></span>';
+		}
+		return $icon;
+	}
+
+	/**
+	 * @since 3.05
+	 */
+	private static function get_icon_class() {
+		$settings = FrmProAppHelper::get_settings();
+		return $settings->menu_icon;
 	}
 
 	public static function drop_tables( $tables ) {
