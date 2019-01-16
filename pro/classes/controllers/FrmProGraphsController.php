@@ -840,7 +840,6 @@ class FrmProGraphsController {
 		// y axis labels size
 		self::convert_shortcode_att_to_google_att( 'y_labels_size', 'fontSize', $atts, $y_axis['textStyle'] );
 
-
 		return $y_axis;
 	}
 
@@ -2226,6 +2225,7 @@ class FrmProGraphsController {
 
 	/**
 	 * Apply deprecated filters
+	 *
 	 * @since 2.02.05
 	 * @codeCoverageIgnore
 	 */

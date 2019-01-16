@@ -2,12 +2,12 @@
 
 class FrmListEntries extends WP_Widget {
 
-	function __construct() {
+	public function __construct() {
 		$widget_ops = array( 'description' => __( 'Display a list of Formidable entries', 'formidable-pro' ) );
 		parent::__construct( 'frm_list_items', __( 'Formidable Entries List', 'formidable-pro' ), $widget_ops );
 	}
 
-	function widget( $args, $instance ) {
+	public function widget( $args, $instance ) {
         global $wpdb;
 
         $display = FrmProDisplay::getOne($instance['display_id'], false, true);
@@ -187,11 +187,11 @@ class FrmListEntries extends WP_Widget {
 		  echo $args['after_widget'];
 	  }
 
-	  function update( $new_instance, $old_instance ) {
+	  public function update( $new_instance, $old_instance ) {
 		  return $new_instance;
 	  }
 
-	  function form( $instance ) {
+	  public function form( $instance ) {
 		  $pages = get_posts( array( 'post_type' => 'page', 'post_status' => 'publish', 'numberposts' => 999, 'order_by' => 'post_title', 'order' => 'ASC' ) );
 
 		  $displays = FrmProDisplay::getAll( array( 'meta_key' => 'frm_show_count', 'meta_value' => 'dynamic' ) );

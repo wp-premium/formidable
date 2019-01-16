@@ -89,7 +89,7 @@ class FrmProFieldPassword extends FrmFieldType {
 		return $errors;
 	}
 
-	function front_field_input( $args, $shortcode_atts ) {
+	public function front_field_input( $args, $shortcode_atts ) {
 		$input_html = parent::front_field_input( $args, $shortcode_atts );
 
 		$strength_meter_option = FrmField::get_option( $this->field, 'strength_meter' );

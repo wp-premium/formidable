@@ -8,25 +8,27 @@ class FrmProSettings extends FrmSettings {
     public $already_submitted;
     public $cal_date_format;
     public $date_format;
+	public $menu_icon;
 
     /**
      * @return array
      */
-	function default_options() {
+	public function default_options() {
         return array(
             'edit_msg'          => __( 'Your submission was successfully saved.', 'formidable-pro' ),
             'update_value'      => __( 'Update', 'formidable-pro' ),
             'already_submitted' => __( 'You have already submitted that form', 'formidable-pro' ),
 			'date_format'       => 'm/d/Y',
 			'cal_date_format'   => $this->get_cal_date(),
+			'menu_icon'         => '',
         );
     }
 
-    function set_default_options() {
-        $this->fill_with_defaults();
-    }
+	public function set_default_options() {
+		$this->fill_with_defaults();
+	}
 
-	function update( $params ) {
+	public function update( $params ) {
         $this->date_format = $params['frm_date_format'];
         $this->get_cal_date();
 
@@ -39,7 +41,7 @@ class FrmProSettings extends FrmSettings {
 	 *
 	 * @since 2.0.2
 	 */
-	function get_cal_date() {
+	public function get_cal_date() {
 		$formats = FrmProAppHelper::display_to_datepicker_format();
 		if ( isset( $formats[ $this->date_format ] ) ) {
 			$this->cal_date_format = $formats[ $this->date_format ];
@@ -48,7 +50,7 @@ class FrmProSettings extends FrmSettings {
 		}
 	}
 
-	function store() {
+	public function store() {
         // Save the posted value in the database
 		update_option( $this->option_name, $this, 'no' );
 

@@ -55,3 +55,19 @@
 		</label>
 	<?php } ?>
 </p>
+
+<p class="frm_insert_form">
+	<label class="frm_left_label"><?php esc_html_e( 'Admin menu icon', 'formidable-pro' ); ?></label>
+	<?php foreach ( array( '', 'dashicons dashicons-feedback' ) as $icon ) { ?>
+		<label style="margin-right:15px;">
+			<input type="radio" name="frm_menu_icon" value="<?php echo esc_attr( $icon ); ?>" <?php checked( $frmpro_settings->menu_icon, $icon ); ?> />
+			<?php
+			if ( empty( $icon ) ) {
+				echo FrmAppHelper::svg_logo();
+			} else {
+				?>
+				<i class="<?php echo esc_attr( $icon ); ?>"></i>
+			<?php } ?>
+		</label>
+	<?php } ?>
+</p>

@@ -4,6 +4,7 @@ class FrmProFormsController {
 
 	/**
 	 * Stars need the formidablepro.js
+	 *
 	 * @since 3.0
 	 */
 	public static function load_builder_scripts() {
@@ -41,7 +42,7 @@ class FrmProFormsController {
 			return;
 		}
 
-		wp_enqueue_style( $theme_css, FrmProStylesController::jquery_css_url( $theme_css ) );
+		wp_enqueue_style( $theme_css, FrmProStylesController::jquery_css_url( $theme_css ), array(), FrmAppHelper::plugin_version() );
 	}
 
 	public static function enqueue_footer_js() {
@@ -103,7 +104,7 @@ class FrmProFormsController {
 		}
 
 		if ( isset( $frm_vars['google_graphs'] ) && ! empty( $frm_vars['google_graphs'] ) ) {
-			wp_enqueue_script( 'google_jsapi', 'https://www.google.com/jsapi' );
+			wp_enqueue_script( 'google_jsapi', 'https://www.google.com/jsapi', array(), FrmAppHelper::plugin_version() );
 		}
 	}
 
@@ -119,9 +120,10 @@ class FrmProFormsController {
 		include( FrmProAppHelper::plugin_path() . '/classes/views/frmpro-entries/footer_js.php' );
 
 		/**
-		* Add custom scripts after the form scripts are done loading
-		* @since 2.0.6
-		*/
+		 * Add custom scripts after the form scripts are done loading
+		 *
+		 * @since 2.0.6
+		 */
 		do_action( 'frm_footer_scripts', $frm_vars['forms_loaded'] );
 	}
 
@@ -227,6 +229,7 @@ class FrmProFormsController {
 
 	/**
 	 * Used for hiding the form on page load
+	 *
 	 * @since 2.3
 	 */
 	public static function head() {
@@ -262,6 +265,7 @@ class FrmProFormsController {
 
     /**
      * Remove the noallow class on pro fields
+	 *
      * @return string
      */
     public static function noallow_class() {
@@ -570,6 +574,7 @@ class FrmProFormsController {
 
 	/**
 	 * Add submit conditions to $frm_vars for inclusion in Conditional Logic processing
+	 *
 	 * @param $atts
 	 * @param $form
 	 */

@@ -36,6 +36,7 @@ class FrmProEddController extends FrmAddon {
 	/**
 	 * This isn't really beta, but we need to serve two different downloads
 	 * "beta" is the nested version with formidable/pro that we will be phasing out
+	 *
 	 * @since 3.0
 	 */
 	private function set_download() {
@@ -117,7 +118,7 @@ class FrmProEddController extends FrmAddon {
 		return compact('license', 'wpmu');
 	}
 
-	function pro_is_authorized() {
+	public function pro_is_authorized() {
 		$license = $this->get_license();
 		if ( empty( $license ) ) {
 			return false;
@@ -132,7 +133,7 @@ class FrmProEddController extends FrmAddon {
 		return $authorized;
 	}
 
-	function pro_is_installed_and_authorized() {
+	public function pro_is_installed_and_authorized() {
 		return $this->pro_is_authorized();
 	}
 
@@ -176,9 +177,9 @@ class FrmProEddController extends FrmAddon {
     }
 
 	/**
-	 * this is the view for the license form
+	 * This is the view for the license form
 	 */
-	function display_form() {
+	public function display_form() {
 		global $frm_vars;
 
 		if ( $frm_vars['pro_is_authorized'] ) {

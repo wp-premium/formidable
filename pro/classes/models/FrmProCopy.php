@@ -135,7 +135,7 @@ class FrmProCopy {
 	}
 
 	/**
-	 * get all forms to be copied from global table
+	 * Get all forms to be copied from global table
 	 *
 	 * @since 2.02.10
 	 */

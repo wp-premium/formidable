@@ -302,7 +302,7 @@ class FrmAddonsController {
 	 */
 	public static function check_update( $transient ) {
 		if ( ! is_object( $transient ) ) {
-			$transient = new stdClass;
+			$transient = new stdClass();
 		}
 
 		$installed_addons = apply_filters( 'frm_installed_addons', array() );
@@ -328,6 +328,11 @@ class FrmAddonsController {
 				continue;
 			}
 
+			if ( ! self::is_installed( $folder ) ) {
+				// don't show an update if the plugin isn't installed
+				continue;
+			}
+
 			$wp_plugin  = isset( $wp_plugins[ $folder ] ) ? $wp_plugins[ $folder ] : array();
 			$wp_version = isset( $wp_plugin['Version'] ) ? $wp_plugin['Version'] : '1.0';
 
@@ -342,6 +347,22 @@ class FrmAddonsController {
 		}
 
 		return $transient;
+	}
+
+	/**
+	 * Check if a plugin is installed before showing an update for it
+	 *
+	 * @since 3.05
+	 * @param string $plugin - the folder/filename.php for a plugin
+	 * @return bool - True if installed
+	 */
+	private static function is_installed( $plugin ) {
+		if ( ! function_exists( 'get_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
+		$all_plugins = get_plugins();
+		return isset( $all_plugins[ $plugin ] );
 	}
 
 	/**
@@ -405,7 +426,7 @@ class FrmAddonsController {
 	public static function get_addon_for_license( $addons, $license ) {
 		$download_id = $license->download_id;
 		$plugin = array();
-		if ( empty( $download_id ) ) {
+		if ( empty( $download_id ) && ! empty( $addons ) ) {
 			foreach ( $addons as $addon ) {
 				if ( strtolower( $license->plugin_name ) == strtolower( $addon['title'] ) ) {
 					return $addon;
@@ -439,7 +460,7 @@ class FrmAddonsController {
 				$file_name = $base_file . '/' . $base_file . '.php';
 			}
 
-			$addon['installed']    = file_exists( WP_PLUGIN_DIR . '/' . $file_name );
+			$addon['installed']    = self::is_installed( $file_name );
 			$addon['activate_url'] = '';
 
 			if ( $addon['installed'] && ! empty( $activate_url ) && ! is_plugin_active( $file_name ) ) {

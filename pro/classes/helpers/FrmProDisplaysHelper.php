@@ -177,7 +177,8 @@ class FrmProDisplaysHelper {
 	}
 
 	/**
-	 * make sure the backtrack limit is as least at the default
+	 * Make sure the backtrack limit is as least at the default
+	 *
 	 * @since 3.0
 	 */
 	private static function maybe_increase_regex_limit() {
@@ -233,5 +234,58 @@ class FrmProDisplaysHelper {
 			'group_by'        => __( 'unique (get oldest entries)', 'formidable-pro' ),
 			'group_by_newest' => __( 'unique (get newest entries)', 'formidable-pro' ),
 		);
+	}
+
+	/**
+	 * Get the View type (show_count) for each View, e.g. calendar, dynamic
+	 *
+	 * @return array|object|void|null
+	 */
+	public static function get_show_counts() {
+		$show_counts = self::get_meta_values( 'frm_show_count', 'frm_display' );
+
+		return $show_counts;
+	}
+
+	/**
+	 * Get the options for the site's Views
+	 *
+	 * @return array|object|void|null
+	 */
+	public static function get_frm_options_for_views() {
+
+		$views_options = self::get_meta_values( 'frm_options', 'frm_display' );
+
+		foreach ( $views_options as $key => $value ) {
+			$views_options[ $key ]->meta_value = unserialize( $value->meta_value );
+		}
+
+		return $views_options;
+	}
+
+	/**
+	 * Get the specified meta value for the specified post type
+	 *
+	 * @param string $key
+	 * @param string $post_type
+	 *
+	 * @return array|object|void|null
+	 */
+	public static function get_meta_values( $key = '', $post_type = 'frm_display' ) {
+
+		global $wpdb;
+
+		if ( empty( $key ) ) {
+			return;
+		}
+
+		$table                = $wpdb->postmeta . ' pm LEFT JOIN ' . $wpdb->posts . ' p ON p.ID = pm.post_id';
+		$field                = 'pm.post_id, pm.meta_value, pm.meta_key';
+		$where['pm.meta_key'] = $key;
+		$where['p.post_type'] = $post_type;
+
+		$results = FrmDb::get_var( $table, $where, $field, [], '', 'associative_results' );
+
+		return $results;
 	}
 }

@@ -2,7 +2,7 @@
 
 class FrmProPostAction extends FrmFormAction {
 
-	function __construct() {
+	public function __construct() {
 		$action_ops = array(
 		    'classes'   => 'ab-icon frm_dashicon_font dashicons-before',
             'limit'     => 1,
@@ -14,7 +14,7 @@ class FrmProPostAction extends FrmFormAction {
 		parent::__construct( 'wppost', __( 'Create Post', 'formidable-pro' ), $action_ops );
 	}
 
-	function form( $form_action, $args = array() ) {
+	public function form( $form_action, $args = array() ) {
 	    global $wpdb;
 
 	    extract($args);
@@ -76,7 +76,7 @@ class FrmProPostAction extends FrmFormAction {
 		include( dirname(__FILE__) . '/post_options.php' );
 	}
 
-	function get_defaults() {
+	public function get_defaults() {
 	    return array(
             'post_type'     => 'post',
             'post_category' => array(),
@@ -92,7 +92,7 @@ class FrmProPostAction extends FrmFormAction {
         );
 	}
 
-	function get_switch_fields() {
+	public function get_switch_fields() {
 		return array(
 			'post_category' => array( 'field_id' ),
 			'post_custom_fields' => array( 'field_id' ),
