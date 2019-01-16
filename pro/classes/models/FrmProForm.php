@@ -38,6 +38,7 @@ class FrmProForm {
 
 	/**
 	 * Create or remove the htaccess for this form folder
+	 *
 	 * @since 2.02
 	 */
 	private static function setup_file_protection( $atts ) {

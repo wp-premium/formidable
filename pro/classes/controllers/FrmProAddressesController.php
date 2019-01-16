@@ -138,6 +138,7 @@ class FrmProAddressesController extends FrmProComboFieldsController {
 
 	/**
 	 * Get the label for the CSV
+	 *
 	 * @since 2.0.23
 	 */
 	private static function get_field_label( $field, $field_name ) {

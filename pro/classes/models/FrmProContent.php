@@ -271,6 +271,7 @@ class FrmProContent {
 	/**
 	 * This is a workaround for a bug in WordPress Core
 	 * https://core.trac.wordpress.org/ticket/23867
+	 *
 	 * @since 2.2.10
 	 */
 	public static function fix_home_page_query( $query ) {
@@ -751,9 +752,7 @@ class FrmProContent {
 	}
 
 	private static function eval_less_than_condition( $atts, &$field_value ) {
-		if ( $field_value < $atts['less_than'] ) {
-			// Condition is true
-		} else {
+		if ( $field_value >= $atts['less_than'] ) {
 			// Condition is false
 			$field_value = '';
 		}
@@ -767,9 +766,7 @@ class FrmProContent {
 	}
 
 	private static function eval_greater_than_condition( $atts, &$field_value ) {
-		if ( $field_value > $atts['greater_than'] ) {
-			// Condition is true
-		} else {
+		if ( $field_value <= $atts['greater_than'] ) {
 			// Condition is false
 			$field_value = '';
 		}

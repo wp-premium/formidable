@@ -2,8 +2,10 @@
 
 class FrmProEntriesListHelper extends FrmEntriesListHelper {
 
-	function get_bulk_actions() {
-		$actions = array( 'bulk_delete' => __( 'Delete' ) );
+	public function get_bulk_actions() {
+		$actions = array(
+			'bulk_delete' => __( 'Delete', 'formidable-pro' ),
+		);
 
         if ( ! current_user_can('frm_delete_entries') ) {
             unset($actions['bulk_delete']);

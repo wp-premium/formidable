@@ -19,6 +19,7 @@ class FrmProLookupFieldsController {
 
 	/**
 	 * Get the data types for Lookup fields, formatted for Insert Field tab
+	 *
 	 * @deprecated 3.0
 	 * @codeCoverageIgnore
 	 *

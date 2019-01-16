@@ -83,6 +83,7 @@ class FrmProAppHelper {
 
 	/**
 	 * Format the time field values
+	 *
 	 * @since 2.0.14
 	 */
 	public static function format_time( $time, $format = 'H:i' ) {
@@ -524,7 +525,7 @@ class FrmProAppHelper {
 	}
 
     /**
-     * if there are posts linked to entries for this form
+     * If there are posts linked to entries for this form
      */
     private static function prepare_post_filter( $args, $where_field, &$new_ids ) {
         if ( empty($args['form_posts']) ) {

@@ -7,7 +7,7 @@ class FrmProDb {
 	/**
 	 * @since 3.0.02
 	 */
-	public static $plug_version = '3.04.03';
+	public static $plug_version = '3.05';
 
 	/**
 	 * @since 2.3
@@ -142,6 +142,7 @@ class FrmProDb {
 
 	/**
 	 * Switch end year from 2020 to +10
+	 *
 	 * @since 3.01
 	 */
 	public static function migrate_to_62() {
@@ -164,6 +165,7 @@ class FrmProDb {
 
 	/**
 	 * Attempt to move formidable/pro to formidable-pro and activate
+	 *
 	 * @since 3.0
 	 */
 	public static function migrate_to_50() {
@@ -212,6 +214,7 @@ class FrmProDb {
 
 	/**
 	 * Separate star from scale field
+	 *
 	 * @since 3.0
 	 */
 	public static function migrate_to_44() {
@@ -231,6 +234,7 @@ class FrmProDb {
 
 	/**
 	 * Switch image field to url
+	 *
 	 * @since 3.0
 	 */
 	public static function migrate_to_43() {
@@ -252,6 +256,7 @@ class FrmProDb {
 
 	/**
 	 * Change saved time formats
+	 *
 	 * @since 2.3
 	 */
 	public static function migrate_to_39() {
@@ -345,9 +350,7 @@ class FrmProDb {
 			}
 
 			foreach ( $all_child_ids as $child_id ) {
-				if ( in_array( $child_id, $keep_child_ids ) ) {
-					// Do nothing
-				} else {
+				if ( ! in_array( $child_id, $keep_child_ids ) ) {
 					FrmEntry::destroy( $child_id );
 				}
 			}

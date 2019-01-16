@@ -11,7 +11,7 @@ class FrmAppHelper {
 	/**
 	 * @since 2.0
 	 */
-	public static $plug_version = '3.04.03';
+	public static $plug_version = '3.05';
 
     /**
      * @since 1.07.02
@@ -105,8 +105,28 @@ class FrmAppHelper {
 	}
 
 	public static function get_menu_name() {
-		$frm_settings = FrmAppHelper::get_settings();
+		$frm_settings = self::get_settings();
 		return $frm_settings->menu;
+	}
+
+	/**
+	 * @since 3.05
+	 */
+	public static function svg_logo( $atts = array() ) {
+		$defaults = array(
+			'height' => 18,
+			'width'  => 18,
+			'fill'   => '#4d4d4d',
+			'orange' => '#f05a24',
+		);
+		$atts = array_merge( $defaults, $atts );
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 599.68 601.37" width="' . esc_attr( $atts['width'] ) . '" height="' . esc_attr( $atts['height'] ) . '">
+				<defs />
+				<rect fill="' . esc_attr( $atts['orange'] ) . '" x="289.64" y="383.96" width="140" height="76" />
+				<path fill="' . esc_attr( $atts['fill'] ) . '" d="M400.21,147H200.12c-17,0-30.48,12.2-30.48,29.31V218h260V147Z" />
+				<path fill="' . esc_attr( $atts['fill'] ) . '" d="M397.86,264H169.64V460h75V340H397.86A32.22,32.22,0,0,0,428,318.56a24.29,24.29,0,0,0,1.66-8.69V264Z" />
+				<path fill="' . esc_attr( $atts['fill'] ) . '" d="M299.84,601.37A300.26,300.26,0,0,1,0,300.68,299.84,299.84,0,1,1,511.85,513.3,297.44,297.44,0,0,1,299.84,601.37Zm0-563A261.94,261.94,0,0,0,38.26,300.68,261.58,261.58,0,1,0,484.8,115.2,259.47,259.47,0,0,0,299.84,38.37Z" />
+			</svg>';
 	}
 
 	/**
@@ -165,7 +185,7 @@ class FrmAppHelper {
      */
     public static function is_preview_page() {
         global $pagenow;
-		$action = FrmAppHelper::simple_get( 'action', 'sanitize_title' );
+		$action = self::simple_get( 'action', 'sanitize_title' );
 		return $pagenow && $pagenow == 'admin-ajax.php' && $action == 'frm_forms_preview';
     }
 
@@ -187,6 +207,7 @@ class FrmAppHelper {
 
 	/**
 	 * Use the WP 4.7 wp_doing_ajax function
+	 *
 	 * @since 2.05.07
 	 */
 	public static function wp_doing_ajax() {
@@ -392,7 +413,7 @@ class FrmAppHelper {
 			if ( is_array( $value ) ) {
 				$temp_values = $value;
 				foreach ( $temp_values as $k => $v ) {
-					FrmAppHelper::sanitize_value( $sanitize, $value[ $k ] );
+					self::sanitize_value( $sanitize, $value[ $k ] );
 				}
 			} else {
 				$value = call_user_func( $sanitize, $value );
@@ -411,6 +432,7 @@ class FrmAppHelper {
 
 	/**
 	 * Sanitize the value, and allow some HTML
+	 *
 	 * @since 2.0
 	 * @param string $value
 	 * @param array|string $allowed 'all' for everything included as defaults
@@ -444,42 +466,43 @@ class FrmAppHelper {
 	 */
 	private static function safe_html() {
 		$allow_class = array(
-			'class' => array(),
-			'id'    => array(),
+			'class' => true,
+			'id'    => true,
 		);
 
 		return array(
 			'a' => array(
-				'class' => array(),
-				'href'  => array(),
-				'id'    => array(),
-				'rel'   => array(),
-				'target' => array(),
-				'title' => array(),
+				'class'  => true,
+				'href'   => true,
+				'id'     => true,
+				'rel'    => true,
+				'target' => true,
+				'title'  => true,
 			),
 			'abbr' => array(
-				'title' => array(),
+				'title' => true,
 			),
 			'aside' => $allow_class,
 			'b' => array(),
 			'blockquote' => array(
-				'cite'  => array(),
+				'cite'  => true,
 			),
 			'br'   => array(),
 			'cite' => array(
-				'title' => array(),
+				'title' => true,
 			),
 			'code' => array(),
+			'defs' => array(),
 			'del'  => array(
-				'datetime' => array(),
-				'title' => array(),
+				'datetime' => true,
+				'title'    => true,
 			),
 			'dd'  => array(),
 			'div' => array(
-				'class' => array(),
-				'id'    => array(),
-				'title' => array(),
-				'style' => array(),
+				'class' => true,
+				'id'    => true,
+				'title' => true,
+				'style' => true,
 			),
 			'dl'  => array(),
 			'dt'  => array(),
@@ -491,41 +514,60 @@ class FrmAppHelper {
 			'h5'  => $allow_class,
 			'h6'  => $allow_class,
 			'i'   => array(
-				'class' => array(),
-				'id'    => array(),
-				'icon'  => array(),
+				'class' => true,
+				'id'    => true,
+				'icon'  => true,
 			),
 			'img' => array(
-				'alt'    => array(),
-				'class'  => array(),
-				'height' => array(),
-				'id'     => array(),
-				'src'    => array(),
-				'width'  => array(),
+				'alt'    => true,
+				'class'  => true,
+				'height' => true,
+				'id'     => true,
+				'src'    => true,
+				'width'  => true,
 			),
 			'li'  => $allow_class,
 			'ol'  => $allow_class,
 			'p'   => $allow_class,
+			'path' => array(
+				'd'    => true,
+				'fill' => true,
+			),
 			'pre' => array(),
 			'q'   => array(
-				'cite' => array(),
-				'title' => array(),
+				'cite'  => true,
+				'title' => true,
+			),
+			'rect' => array(
+				'class'  => true,
+				'fill'   => true,
+				'height' => true,
+				'width'  => true,
+				'x'      => true,
+				'y'      => true,
 			),
 			'section' => $allow_class,
 			'span' => array(
-				'class' => array(),
-				'id'    => array(),
-				'title' => array(),
-				'style' => array(),
+				'class' => true,
+				'id'    => true,
+				'title' => true,
+				'style' => true,
 			),
 			'strike' => array(),
 			'strong' => array(),
+			'svg'    => array(
+				'xmlns'   => true,
+				'viewbox' => true,
+				'width'   => true,
+				'height'  => true,
+			),
 			'ul' => $allow_class,
 		);
 	}
 
     /**
      * Used when switching the action for a bulk action
+	 *
      * @since 2.0
      */
 	public static function remove_get_action() {
@@ -535,7 +577,7 @@ class FrmAppHelper {
 
         $new_action = isset( $_GET['action'] ) ? sanitize_text_field( $_GET['action'] ) : ( isset( $_GET['action2'] ) ? sanitize_text_field( $_GET['action2'] ) : '' );
         if ( ! empty( $new_action ) ) {
-			$_SERVER['REQUEST_URI'] = str_replace( '&action=' . $new_action, '', FrmAppHelper::get_server_value( 'REQUEST_URI' ) );
+			$_SERVER['REQUEST_URI'] = str_replace( '&action=' . $new_action, '', self::get_server_value( 'REQUEST_URI' ) );
         }
     }
 
@@ -599,14 +641,14 @@ class FrmAppHelper {
 			'frm_js_location',
 			array(
 				'file_name' => 'frm.min.js',
-				'new_file_path' => FrmAppHelper::plugin_path() . '/js',
+				'new_file_path' => self::plugin_path() . '/js',
 			)
 		);
 		$new_file = new FrmCreateFile( $file_atts );
 
 		$files = array(
-			FrmAppHelper::plugin_path() . '/js/jquery/jquery.placeholder.min.js',
-			FrmAppHelper::plugin_path() . '/js/formidable.min.js',
+			self::plugin_path() . '/js/jquery/jquery.placeholder.min.js',
+			self::plugin_path() . '/js/formidable.min.js',
 		);
 		$files = apply_filters( 'frm_combined_js_files', $files );
 		$new_file->combine_files( $files );
@@ -753,6 +795,7 @@ class FrmAppHelper {
 
 	/**
 	 * Make sure admins have permission to see the menu items
+	 *
 	 * @since 2.0.6
 	 */
 	public static function force_capability( $cap = 'frm_change_settings' ) {
@@ -768,6 +811,7 @@ class FrmAppHelper {
     /**
      * Check if the user has permision for action.
      * Return permission message and stop the action if no permission
+	 *
      * @since 2.0
      * @param string $permission
      */
@@ -783,6 +827,7 @@ class FrmAppHelper {
 
     /**
      * Check user permission and nonce
+	 *
      * @since 2.0
      * @param string $permission
      * @return false|string The permission message or false if allowed
@@ -878,6 +923,7 @@ class FrmAppHelper {
 
     /**
      * Add auto paragraphs to text areas
+	 *
      * @since 2.0
      */
 	public static function use_wpautop( $content ) {
@@ -1021,6 +1067,7 @@ class FrmAppHelper {
 
     /**
      * Editing a Form or Entry
+	 *
      * @param string $table
      * @return bool|array
      */
@@ -1199,7 +1246,7 @@ class FrmAppHelper {
 		if ( ! empty( $post_values ) && isset( $post_values['options']['custom_style'] ) ) {
 			$custom_style = absint( $post_values['options']['custom_style'] );
 		} else {
-			$frm_settings = FrmAppHelper::get_settings();
+			$frm_settings = self::get_settings();
 			$custom_style = ( $frm_settings->load_style != 'none' );
 		}
 		return $custom_style;
@@ -1244,14 +1291,14 @@ class FrmAppHelper {
 		foreach ( $words as $word ) {
 			$part = ( ( $sub != '' ) ? ' ' : '' ) . $word;
 			$total_len = self::mb_function( array( 'mb_strlen', 'strlen' ), array( $sub . $part ) );
-			if ( $total_len > $length && str_word_count( $sub ) ) {
+			if ( $total_len > $length && substr_count( $sub, ' ' ) ) {
                 break;
             }
 
             $sub .= $part;
 			$len += self::mb_function( array( 'mb_strlen', 'strlen' ), array( $part ) );
 
-			if ( str_word_count( $sub ) > $minword && $total_len >= $length ) {
+			if ( substr_count( $sub, ' ' ) > $minword && $total_len >= $length ) {
                 break;
             }
 
@@ -1325,7 +1372,7 @@ class FrmAppHelper {
 	 */
 	public static function human_time_diff( $from, $to = '', $levels = 1 ) {
 		if ( empty( $to ) ) {
-			$now = new DateTime;
+			$now = new DateTime();
 		} else {
 			$now = new DateTime( '@' . $to );
 		}
@@ -1496,7 +1543,7 @@ class FrmAppHelper {
 			return;
 		}
 
-		$frm_action = FrmAppHelper::simple_get( 'frm_action', 'sanitize_title' );
+		$frm_action = self::simple_get( 'frm_action', 'sanitize_title' );
 		if ( empty( $action ) || ( ! empty( $frm_action ) && in_array( $frm_action, $action ) ) ) {
 			echo ' class="current_page"';
 		}
@@ -1592,16 +1639,17 @@ class FrmAppHelper {
 
     /**
      * Load the JS file on non-Formidable pages in the admin area
+	 *
      * @since 2.0
      */
 	public static function load_admin_wide_js( $load = true ) {
-        $version = FrmAppHelper::plugin_version();
-		wp_register_script( 'formidable_admin_global', FrmAppHelper::plugin_url() . '/js/formidable_admin_global.js', array( 'jquery' ), $version );
+		$version = self::plugin_version();
+		wp_register_script( 'formidable_admin_global', self::plugin_url() . '/js/formidable_admin_global.js', array( 'jquery' ), $version );
 
 		$global_strings = array(
 			'updating_msg' => __( 'Please wait while your site updates.', 'formidable' ),
             'deauthorize'  => __( 'Are you sure you want to deauthorize Formidable Forms on this site?', 'formidable' ),
-			'url'          => FrmAppHelper::plugin_url(),
+			'url'          => self::plugin_url(),
 			'loading'      => __( 'Loading&hellip;' ),
 			'nonce'        => wp_create_nonce( 'frm_ajax' ),
 		);
@@ -1688,7 +1736,8 @@ class FrmAppHelper {
 	}
 
     /**
-	 * echo the message on the plugins listing page
+	 * Echo the message on the plugins listing page
+	 *
      * @since 1.07.10
      *
      * @param float $min_version The version the add-on requires
